@@ -812,29 +812,33 @@
     </div>
   </div>
 
-  <!-- MODAL DE BOAS-VINDAS / CRIAÇÃO DE PERFIL INDIVIDUAL (1ª VEZ OU APÓS RESET) -->
-  <div id="welcome-profile-modal" style="display:none; position:fixed; inset:0; z-index:285; background:rgba(2,6,23,0.95); align-items:center; justify-content:center; padding:16px;">
-    <div style="width:100%; max-width:340px; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #facc15; border-radius:14px; padding:16px; text-align:center; color:#f8fafc; box-shadow:0 0 40px rgba(250,204,21,0.35);">
-      <div style="font-size:15px; font-weight:900; color:#fde047; margin-bottom:4px;">👤 CRIAR PERFIL INDIVIDUAL</div>
-      <div style="font-size:10px; color:#cbd5e1; margin-bottom:12px;">Cada jogador possui seu próprio perfil, ID único, pontos da Liga (iniciando em 1000 pts) e histórico de duelos do zero.</div>
+  <!-- MODAL DE BOAS-VINDAS / IDENTIFICAÇÃO DO TREINADOR (1ª VEZ OU APÓS RESET) -->
+  <div id="welcome-profile-modal" style="display:none; position:fixed; inset:0; z-index:285; background:rgba(2,6,23,0.96); align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px);">
+    <div style="width:100%; max-width:345px; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #facc15; border-radius:14px; padding:16px; text-align:center; color:#f8fafc; box-shadow:0 0 45px rgba(250,204,21,0.38);">
+      <div style="font-size:15px; font-weight:900; color:#fde047; margin-bottom:4px;">👤 ENTRAR OU CRIAR TREINADOR</div>
+      <div style="font-size:10px; color:#cbd5e1; margin-bottom:12px; line-height:1.4;">
+        Digite seu nome de usuário. Se o nome já existir, é obrigatório digitar a senha correspondente ou escolher outro nome.
+      </div>
+
+      <div style="text-align:left; margin-bottom:9px;">
+        <label style="font-size:9.5px; font-weight:800; color:#7dd3fc;">Nome de Usuário / Apelido:</label>
+        <input id="welcome-nick-inp" type="text" maxlength="20" placeholder="Ex: wisper" oninput="onWelcomeUserInput(this.value)" style="width:100%; margin-top:3px; padding:8px 10px; border-radius:7px; border:1.5px solid #38bdf8; background:#050912; color:#ffffff; font-size:12px; font-weight:900;">
+        <div id="welcome-user-status" style="font-size:8.5px; font-weight:800; color:#93c5fd; min-height:13px; margin-top:3px;"></div>
+      </div>
+
       <div style="text-align:left; margin-bottom:10px;">
-        <label style="font-size:9.5px; font-weight:800; color:#7dd3fc;">Escolha seu Nome de Treinador:</label>
-        <input id="welcome-nick-inp" type="text" maxlength="16" placeholder="Digite seu apelido..." style="width:100%; margin-top:4px; padding:8px 10px; border-radius:7px; border:1.5px solid #38bdf8; background:#050912; color:#ffffff; font-size:12px; font-weight:900;">
+        <label id="welcome-pass-lbl" style="font-size:9.5px; font-weight:800; color:#7dd3fc;">Senha da Conta:</label>
+        <div style="display:flex; gap:4px; margin-top:3px;">
+          <input id="welcome-pass-inp" type="password" maxlength="32" placeholder="Digite sua senha..." style="flex:1; padding:8px 10px; border-radius:7px; border:1.5px solid #38bdf8; background:#050912; color:#ffffff; font-size:12px; font-weight:900;">
+          <button type="button" class="btn secondary" style="padding:0 9px; font-size:11px;" onclick="toggleCloudPasswordVisibility('welcome-pass-inp')" title="Ver Senha">👁️</button>
+        </div>
       </div>
-      <button onclick="completeWelcomeProfileSetup()" class="btn gold" style="width:100%; padding:9px; font-size:12px; font-weight:900;">🚀 Iniciar Minha Jornada (0 Duelos · 1000 Pts)</button>
-      
-      <!-- Opção de Login na Nuvem para quem já tem conta -->
-      <div style="margin:14px 0 10px; display:flex; align-items:center; gap:8px;">
-        <div style="flex:1; height:1px; background:rgba(56,189,248,0.35);"></div>
-        <span style="font-size:8.5px; font-weight:900; color:#94a3b8; letter-spacing:0.5px;">OU JÁ TEM UMA CONTA SALVA?</span>
-        <div style="flex:1; height:1px; background:rgba(56,189,248,0.35);"></div>
-      </div>
-      <button onclick="openCloudLoginFromWelcome()" class="btn green" style="width:100%; padding:9px; font-size:11.5px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 3px 8px rgba(34,197,94,0.3);">
-        <span>☁️</span> Entrar com Login e Senha na Nuvem
+
+      <div id="welcome-feedback-msg" style="font-size:9px; font-weight:800; color:#f87171; min-height:15px; margin-bottom:8px; line-height:1.35;"></div>
+
+      <button id="welcome-submit-btn" onclick="handleWelcomeAuthSubmit()" class="btn gold" style="width:100%; padding:10px; font-size:12px; font-weight:900; box-shadow:0 3px 10px rgba(250,204,21,0.3);">
+        🚀 Continuar
       </button>
-      <div style="font-size:8.5px; color:#94a3b8; margin-top:6px; line-height:1.35;">
-        Restaura instantaneamente seu nome, decks, gemas e troféus salvos.
-      </div>
     </div>
   </div>
 
@@ -8953,7 +8957,23 @@ savePlayerProfileSettings = function() {
   const sel = document.getElementById("prof-centerpiece-select");
 
   if (inp && inp.value.trim()) {
-    p.nickname = inp.value.trim().slice(0, 16);
+    const rawNew = inp.value.trim().slice(0, 16);
+    try {
+      const activeSession = typeof getSavedCloudSession === "function" ? getSavedCloudSession() : null;
+      const curNick = (p.nickname || "").trim().toLowerCase();
+      const newNick = rawNew.trim().toLowerCase();
+      if (newNick !== curNick && typeof getLocalAccountsVault === "function") {
+        const vault = getLocalAccountsVault();
+        const targetUserHash = sha256HexSync(utf8ToAsciiBytes("pokeduel_user_v560:" + newNick));
+        const activeUserHash = activeSession ? activeSession.userHash : "";
+        if (vault && vault[targetUserHash] && targetUserHash !== activeUserHash) {
+          playSfx("hit");
+          alert(`⚠️ O usuário "${rawNew}" já possui uma conta registrada com senha!\nPara acessar este perfil, use o botão "Gerenciar Conta" e faça login com sua senha.`);
+          return;
+        }
+      }
+    } catch (e) {}
+    p.nickname = rawNew;
     p.isSetupDone = true;
   }
   if (tSel && tSel.value) p.titleBadge = tSel.value;
@@ -13986,6 +14006,215 @@ function openCloudLoginFromWelcome() {
   const wm = document.getElementById("welcome-profile-modal");
   if (wm) wm.style.display = "none";
   openCloudAccountModal();
+}
+
+// --- 21.8: USERNAME RESERVATION & AUTHENTICATION ENFORCEMENT ---
+async function checkUsernameExistence(rawUsername) {
+  const username = String(rawUsername || "").trim().toLowerCase();
+  if (!username) return { exists: false };
+
+  // 1. Check local accounts vault
+  try {
+    const vault = getLocalAccountsVault();
+    const userHash = sha256HexSync(utf8ToAsciiBytes("pokeduel_user_v560:" + username));
+    if (vault && vault[userHash]) {
+      return { exists: true, source: "local", verifier: vault[userHash].verifier };
+    }
+  } catch (e) {}
+
+  // 2. Check ntfy cloud user broadcast
+  try {
+    const userHash = sha256HexSync(utf8ToAsciiBytes("pokeduel_user_v560:" + username));
+    const ntfyUserTopic = "pokeduel_usr_" + userHash.slice(0, 34);
+    const resp = await fetch(`https://ntfy.sh/${ntfyUserTopic}/json?poll=1`, { cache: "no-store" });
+    if (resp.ok) {
+      const text = await resp.text();
+      const lines = text.trim().split("\n").filter(Boolean);
+      for (let i = lines.length - 1; i >= 0; i--) {
+        try {
+          const msg = JSON.parse(lines[i]);
+          if (msg && msg.event === "message" && msg.message) {
+            const parsed = JSON.parse(msg.message);
+            if (parsed && (parsed.v || parsed.u)) {
+              return { exists: true, source: "cloud", verifier: parsed.v };
+            }
+          }
+        } catch (e) {}
+      }
+    }
+  } catch (e) {}
+
+  return { exists: false };
+}
+
+let _welcomeInputDebounce = null;
+async function onWelcomeUserInput(val) {
+  const statusEl = document.getElementById("welcome-user-status");
+  const btn = document.getElementById("welcome-submit-btn");
+  const nick = String(val || "").trim().toLowerCase();
+
+  if (!nick || nick.length < 3) {
+    if (statusEl) statusEl.textContent = "";
+    if (btn) btn.textContent = "🚀 Continuar";
+    return;
+  }
+
+  if (statusEl) {
+    statusEl.style.color = "#93c5fd";
+    statusEl.textContent = "🔍 Verificando se o usuário já existe...";
+  }
+
+  if (_welcomeInputDebounce) clearTimeout(_welcomeInputDebounce);
+  _welcomeInputDebounce = setTimeout(async () => {
+    const res = await checkUsernameExistence(nick);
+    if (res.exists) {
+      if (statusEl) {
+        statusEl.style.color = "#facc15";
+        statusEl.textContent = `⚠️ Nome "@${nick}" já registrado! Digite a senha para entrar ou escolha outro nome.`;
+      }
+      if (btn) btn.textContent = `🔑 Entrar como @${nick}`;
+    } else {
+      if (statusEl) {
+        statusEl.style.color = "#4ade80";
+        statusEl.textContent = `✨ Nome "@${nick}" disponível! Crie uma senha para protegê-lo.`;
+      }
+      if (btn) btn.textContent = `🚀 Criar @${nick} e Iniciar`;
+    }
+  }, 350);
+}
+
+async function handleWelcomeAuthSubmit() {
+  const userInp = document.getElementById("welcome-nick-inp");
+  const passInp = document.getElementById("welcome-pass-inp");
+  const feedbackEl = document.getElementById("welcome-feedback-msg");
+  const btn = document.getElementById("welcome-submit-btn");
+
+  const rawUser = userInp ? userInp.value.trim() : "";
+  const rawPass = passInp ? passInp.value : "";
+
+  const setMsg = (text, isError = true) => {
+    if (feedbackEl) {
+      feedbackEl.style.color = isError ? "#f87171" : "#4ade80";
+      feedbackEl.textContent = text;
+    }
+  };
+
+  if (!rawUser || rawUser.length < 3) {
+    playSfx("hit");
+    setMsg("⚠️ O nome de usuário deve ter pelo menos 3 caracteres.");
+    if (userInp) userInp.focus();
+    return;
+  }
+
+  if (!rawPass || rawPass.length < 4) {
+    playSfx("hit");
+    setMsg("⚠️ Digite uma senha com pelo menos 4 caracteres.");
+    if (passInp) passInp.focus();
+    return;
+  }
+
+  const originalBtnText = btn ? btn.textContent : "🚀 Continuar";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⏳ Verificando credenciais...";
+  }
+
+  try {
+    const creds = deriveCloudCredentials(rawUser, rawPass);
+    const vault = getLocalAccountsVault();
+    const localEntry = vault[creds.userHash];
+
+    // Check online ntfy and GitHub
+    const [ghRes, ntfyRes] = await Promise.all([
+      fetchEnvelopeFromGitHubVault(creds).catch(() => ({ status: "not_found" })),
+      fetchEnvelopeFromNtfyCloud(creds).catch(() => ({ status: "not_found" }))
+    ]);
+
+    const userExists = !!localEntry || ghRes.status !== "not_found" || ntfyRes.status !== "not_found";
+
+    if (userExists) {
+      // 1. USER ALREADY EXISTS: MUST VERIFY PASSWORD!
+      let passWrong = false;
+      if (localEntry && localEntry.verifier && localEntry.verifier !== creds.verifier) {
+        passWrong = true;
+      }
+      if (ghRes.status === "wrong_password" || ntfyRes.status === "wrong_password") {
+        passWrong = true;
+      }
+
+      if (passWrong) {
+        playSfx("hit");
+        setMsg(`❌ Senha incorreta! O usuário "@${rawUser}" já existe. Digite a senha correta ou crie outro usuário.`);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = `🔑 Entrar como @${rawUser}`;
+        }
+        return;
+      }
+
+      // Password matches! Restore candidate save
+      const candidates = [];
+      if (ghRes.status === "ok" && ghRes.envelope) candidates.push({ src: "GitHub Cloud", env: ghRes.envelope });
+      if (ntfyRes.status === "ok" && ntfyRes.envelope) candidates.push({ src: "Nuvem PokeDuel", env: ntfyRes.envelope });
+      if (localEntry && localEntry.envelope) candidates.push({ src: "Cofre Local", env: localEntry.envelope });
+
+      if (candidates.length > 0) {
+        candidates.sort((a, b) => (b.env.updatedAt || 0) - (a.env.updatedAt || 0));
+        const best = candidates[0];
+        const decrypted = decryptCloudPayload(best.env, creds.cipherKey, creds.verifier);
+        restoreStorageFromPayloadObject(decrypted);
+
+        const timeStr = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        saveCloudSession({
+          username: creds.username,
+          password: rawPass,
+          userHash: creds.userHash,
+          lastSync: timeStr,
+          autoSync: true
+        });
+
+        playSfx("portal");
+        setMsg(`✅ Senha correta! Carregando save de @${creds.username}...`, false);
+        setTimeout(() => location.reload(), 600);
+        return;
+      }
+    }
+
+    // 2. USER DOES NOT EXIST: REGISTER AS NEW USER WITH THIS PASSWORD!
+    window.trainerProfileData.nickname = rawUser.slice(0, 16);
+    window.trainerProfileData.isSetupDone = true;
+    saveIndividualProfile();
+    syncIndividualProfileUI();
+
+    const timeStr = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    saveCloudSession({
+      username: creds.username,
+      password: rawPass,
+      userHash: creds.userHash,
+      lastSync: timeStr,
+      autoSync: true
+    });
+
+    await cloudAuthSaveNow(true).catch(() => {});
+
+    playSfx("portal");
+    setMsg(`🎉 Conta criada com sucesso para @${creds.username}!`, false);
+    const wm = document.getElementById("welcome-profile-modal");
+    if (wm) wm.style.display = "none";
+    setTimeout(() => {
+      startInteractiveTutorialMatch();
+    }, 250);
+
+  } catch (err) {
+    console.error("handleWelcomeAuthSubmit error:", err);
+    if (err && err.message === "WRONG_PASSWORD") {
+      playSfx("hit");
+      setMsg(`❌ Senha incorreta! O usuário "@${rawUser}" já existe. Digite a senha correta ou crie outro usuário.`);
+    } else {
+      setMsg("❌ Ocorreu um erro ao verificar a conta. Tente novamente.");
+    }
+    if (btn) { btn.disabled = false; btn.textContent = originalBtnText; }
+  }
 }
 
 (function injectCloudSaveAndGitHubPagesCards() {
