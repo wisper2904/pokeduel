@@ -897,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.0 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.1 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,6 +906,12 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
+        <!-- Feature 0: Músicas Oficiais BGM Ativadas (v5.7.1) -->
+        <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">🎵 Trilha Sonora Oficial BGM Ativada (OST Pokémon Duel)</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">1) <strong>Músicas autênticas ativadas por padrão</strong> com síntese pura em Web Audio API sem lags ou arquivos pesados!<br>2) <strong>Carmonte Island Lounge</strong>: tema relaxante e elegante tocando no Hub, Loja de Boosters, Editor de Decks e Menus.<br>3) <strong>League Match Battle</strong>: tema rítmico e enérgico durante os duelos de tabuleiro.<br>4) <strong>Pinch Alert Theme</strong>: alarme dinâmico e acelerado quando o Goal entra em perigo imediato (&le; 2 passos)!<br>5) <strong>Fanfarras de Vitória, Derrota e Abertura de Caixas</strong>: jingles festivos de vitória e celebração nos boosters! Controle liga/desliga no Menu.</div>
+        </div>
+
         <!-- Feature 0: Correção do P.C. da IA & Remoção do Botão Rewind (v5.7.0) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🛡️ Regras Oficiais do P.C. & Interface sem Rewind</div>
@@ -1036,7 +1042,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.0</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.1</span>
           </div>
         </div>
 
@@ -1450,7 +1456,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.0 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.1 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -1464,7 +1470,7 @@
       <div class="card" style="margin-bottom:8px; padding:10px;">
         <strong style="color:#38bdf8; font-size:11.5px; display:block; margin-bottom:6px;">🔊 ÁUDIO, VISUAL & ARENA DE BATALHA</strong>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
-          <button class="btn secondary" id="menu-bgm-btn" style="font-size:9.5px; padding:6px;" onclick="toggleWebAudioBgm()">🔊 Música (BGM): OFF</button>
+          <button class="btn gold" id="menu-bgm-btn" style="font-size:9.5px; padding:6px;" onclick="toggleWebAudioBgm()">🎵 Música (BGM): ON</button>
           <button class="btn secondary" id="pixel-mode-btn" style="font-size:9.5px; padding:6px;" onclick="cyclePixelArtMode()">✨ Gráficos: 3D HD</button>
         </div>
 
@@ -1741,12 +1747,24 @@ function nextDeterministicRandom() {
 // 2. SOUND EFFECTS SYNTHESIZER
 // ============================================================================
 let sfxCtx = null;
+let audioCtx = null;
 function ensureAudio() {
   if (!sfxCtx) {
     const AC = window.AudioContext || window.webkitAudioContext;
-    if (AC) sfxCtx = new AC();
+    if (AC) {
+      sfxCtx = new AC();
+      audioCtx = sfxCtx;
+    }
   }
-  if (sfxCtx && sfxCtx.state === "suspended") sfxCtx.resume();
+  if (sfxCtx && sfxCtx.state === "suspended") {
+    sfxCtx.resume().then(() => {
+      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
+        BgmEngine.start();
+      }
+    }).catch(() => {});
+  } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying && sfxCtx && sfxCtx.state === "running") {
+    BgmEngine.start();
+  }
 }
 function playSfx(type) {
   try {
@@ -3410,6 +3428,9 @@ function showWinResultScreen(winner) {
   if (t) {
     t.textContent = didWin ? "WIN" : "LOSE";
     t.style.color = didWin ? "#facc15" : "#f87171";
+  }
+  if (typeof BgmEngine !== "undefined") {
+    BgmEngine.playFanfare(didWin ? "victory" : "defeat");
   }
   // Section 1.2: Dynamic ELO Calculation (K=32) & Trainer Profile Stats Update
   if (window.trainerProfileData) {
@@ -5274,6 +5295,9 @@ function openFusionForDetailedFig() {
 }
 
 function showBoosterUnboxModal(title, pulledFigs, bonusText) {
+  if (typeof BgmEngine !== "undefined") {
+    BgmEngine.playFanfare("booster");
+  }
   const modal = document.getElementById("booster-unbox-modal");
   const tEl = document.getElementById("unbox-title");
   const gEl = document.getElementById("unbox-cards-grid");
@@ -6879,40 +6903,428 @@ function startBracketRound(roundNum) {
   startVideoAuthenticMatch();
 }
 
+// ============================================================================
+// OFFICIAL POKÉMON DUEL BGM & SOUNDTRACK ENGINE (Shota Kageyama OST)
+// Tracks: Carmonte Island Lounge, League Match Duel, Pinch Alert, Fanfares
+// ============================================================================
 let bgmTimer = null;
-let bgmEnabled = false;
-let bgmStep = 0;
-const CARMONTE_NOTES = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 293.66, 349.23, 440.00, 587.33, 440.00, 349.23];
-const BATTLE_NOTES   = [220.00, 261.63, 329.63, 440.00, 329.63, 246.94, 293.66, 392.00, 493.88, 392.00, 329.63, 261.63];
+let bgmEnabled = true;
+
+function checkPinchDanger() {
+  try {
+    if (typeof state === "undefined" || !state || !state.units || !Array.isArray(state.units)) return false;
+    if (typeof NODE_BFS_DIST === "undefined" || !NODE_BFS_DIST) return false;
+    for (const u of state.units) {
+      if (!u || u.location !== "board" || typeof u.nodeId !== "number" || !NODE_BFS_DIST[u.nodeId]) continue;
+      // P1 Goal is Node 10, P2 Goal is Node 3
+      if (u.owner === "p2" && NODE_BFS_DIST[u.nodeId][10] <= 2) return true;
+      if (u.owner === "p1" && NODE_BFS_DIST[u.nodeId][3] <= 2) return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+const BgmEngine = {
+  enabled: true,
+  isPlaying: false,
+  currentTrack: "lobby", // "lobby", "battle", "pinch"
+  step: 0,
+  stepTimer: null,
+  masterGain: null,
+  filterNode: null,
+  fanfareActiveUntil: 0,
+
+  N: {
+    C2: 65.41, D2: 73.42, E2: 82.41, F2: 87.31, G2: 98.00, A2: 110.00, Bb2: 116.54, B2: 123.47,
+    C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, Bb3: 233.08, B3: 246.94,
+    C4: 261.63, Cs4: 277.18, D4: 293.66, Eb4: 311.13, E4: 329.63, F4: 349.23, Fs4: 369.99, G4: 392.00, Gs4: 415.30, A4: 440.00, Bb4: 466.16, B4: 493.88,
+    C5: 523.25, Cs5: 554.37, D5: 587.33, Eb5: 622.25, E5: 659.25, F5: 698.46, Fs5: 739.99, G5: 783.99, Gs5: 830.61, A5: 880.00, Bb5: 932.33, B5: 987.77,
+    C6: 1046.50, D6: 1174.66, E6: 1318.51, G6: 1567.98,
+    _: 0
+  },
+
+  initNodes() {
+    if (!sfxCtx) ensureAudio();
+    if (!sfxCtx) return;
+    audioCtx = sfxCtx;
+    if (!this.masterGain) {
+      try {
+        this.masterGain = sfxCtx.createGain();
+        this.masterGain.gain.setValueAtTime(0.075, sfxCtx.currentTime);
+        this.filterNode = sfxCtx.createBiquadFilter();
+        this.filterNode.type = "lowpass";
+        this.filterNode.frequency.setValueAtTime(3600, sfxCtx.currentTime);
+        this.filterNode.Q.setValueAtTime(1.0, sfxCtx.currentTime);
+        this.masterGain.connect(this.filterNode);
+        this.filterNode.connect(sfxCtx.destination);
+      } catch (e) {}
+    }
+  },
+
+  // Carmonte Island Hub Theme (112 BPM lounge groove)
+  getLobbyPattern() {
+    const N = this.N;
+    return [
+      { l: N.F4,  b: N.F2,  c: [N.A3, N.C4, N.E4], r: "kick" },
+      { l: N.A4,  b: N._,   c: null,               r: "hihat" },
+      { l: N.C5,  b: N.F2,  c: null,               r: "snare" },
+      { l: N.E5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.D5,  b: N.C3,  c: [N.A3, N.C4],       r: "kick" },
+      { l: N.C5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.A4,  b: N.E3,  c: null,               r: "snare" },
+      { l: N.G4,  b: N._,   c: null,               r: "hihat" },
+      { l: N.A4,  b: N.A2,  c: [N.C4, N.E4, N.G4], r: "kick" },
+      { l: N.C5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.D5,  b: N.A2,  c: null,               r: "snare" },
+      { l: N.C5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.F5,  b: N.E3,  c: [N.C4, N.E4],       r: "kick" },
+      { l: N.E5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.D5,  b: N.G3,  c: null,               r: "snare" },
+      { l: N.C5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.Bb4, b: N.Bb2, c: [N.D4, N.F4, N.A4], r: "kick" },
+      { l: N.D5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.F5,  b: N.Bb2, c: null,               r: "snare" },
+      { l: N.G5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.F5,  b: N.F3,  c: [N.D4, N.F4],       r: "kick" },
+      { l: N.D5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.C5,  b: N.A3,  c: null,               r: "snare" },
+      { l: N.Bb4, b: N._,   c: null,               r: "hihat" },
+      { l: N.C5,  b: N.C3,  c: [N.E4, N.G4, N.Bb4],r: "kick" },
+      { l: N.E5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.G5,  b: N.C3,  c: null,               r: "snare" },
+      { l: N.Bb5, b: N._,   c: null,               r: "hihat" },
+      { l: N.A5,  b: N.G3,  c: [N.E4, N.G4],       r: "kick" },
+      { l: N.G5,  b: N._,   c: null,               r: "hihat" },
+      { l: N.F5,  b: N.Bb3, c: null,               r: "snare" },
+      { l: N.E5,  b: N._,   c: null,               r: "hihat" }
+    ];
+  },
+
+  // League Match Duel Theme (134 BPM energetic tournament battle)
+  getBattlePattern() {
+    const N = this.N;
+    return [
+      { l: N.D4,  b: N.D2,  c: [N.F3, N.A3], r: "kick" },
+      { l: N.F4,  b: N.D2,  c: null,         r: "hihat" },
+      { l: N.A4,  b: N.D2,  c: null,         r: "snare" },
+      { l: N.D5,  b: N.F2,  c: null,         r: "hihat" },
+      { l: N.A4,  b: N.D2,  c: [N.F3, N.A3], r: "kick" },
+      { l: N.F4,  b: N.D2,  c: null,         r: "hihat" },
+      { l: N.G4,  b: N.G2,  c: null,         r: "snare" },
+      { l: N.A4,  b: N.A2,  c: null,         r: "hihat" },
+      { l: N.F4,  b: N.D2,  c: [N.F3, N.A3], r: "kick" },
+      { l: N.D4,  b: N.D2,  c: null,         r: "hihat" },
+      { l: N.E4,  b: N.D2,  c: null,         r: "snare" },
+      { l: N.F4,  b: N.F2,  c: null,         r: "hihat" },
+      { l: N.D4,  b: N.D2,  c: [N.D3, N.F3], r: "kick" },
+      { l: N.C4,  b: N.A2,  c: null,         r: "hihat" },
+      { l: N.D4,  b: N.D2,  c: null,         r: "snare" },
+      { l: N._,   b: N.D2,  c: null,         r: "hihat" },
+      { l: N.Bb4, b: N.Bb2, c: [N.D4, N.F4], r: "kick" },
+      { l: N.D5,  b: N.Bb2, c: null,         r: "hihat" },
+      { l: N.F5,  b: N.Bb2, c: null,         r: "snare" },
+      { l: N.Bb5, b: N.D3,  c: null,         r: "hihat" },
+      { l: N.A5,  b: N.C3,  c: [N.E4, N.G4], r: "kick" },
+      { l: N.F5,  b: N.C3,  c: null,         r: "hihat" },
+      { l: N.G5,  b: N.C3,  c: null,         r: "snare" },
+      { l: N.A5,  b: N.E3,  c: null,         r: "hihat" },
+      { l: N.G5,  b: N.D2,  c: [N.F3, N.A3], r: "kick" },
+      { l: N.E5,  b: N.D2,  c: null,         r: "hihat" },
+      { l: N.F5,  b: N.D2,  c: null,         r: "snare" },
+      { l: N.D5,  b: N.F2,  c: null,         r: "hihat" },
+      { l: N.E5,  b: N.A2,  c: [N.E3, N.A3], r: "kick" },
+      { l: N.Cs5, b: N.A2,  c: null,         r: "hihat" },
+      { l: N.D5,  b: N.D2,  c: [N.D3, N.F3], r: "snare" },
+      { l: N._,   b: N.D2,  c: null,         r: "hihat" }
+    ];
+  },
+
+  // Pinch Battle Theme (156 BPM goal under threat alarm)
+  getPinchPattern() {
+    const N = this.N;
+    return [
+      { l: N.E5,  b: N.E2,  c: [N.G3, N.B3], r: "kick" },
+      { l: N.Gs5, b: N._,   c: null,         r: "hihat" },
+      { l: N.A5,  b: N.E2,  c: null,         r: "snare" },
+      { l: N.Gs5, b: N._,   c: null,         r: "hihat" },
+      { l: N.A5,  b: N.F2,  c: [N.A3, N.C4], r: "kick" },
+      { l: N.B5,  b: N._,   c: null,         r: "hihat" },
+      { l: N.C6,  b: N.Fs2, c: null,         r: "snare" },
+      { l: N.B5,  b: N._,   c: null,         r: "hihat" },
+      { l: N.A5,  b: N.E2,  c: [N.G3, N.B3], r: "kick" },
+      { l: N.Gs5, b: N._,   c: null,         r: "hihat" },
+      { l: N.F5,  b: N.D2,  c: null,         r: "snare" },
+      { l: N.D5,  b: N._,   c: null,         r: "hihat" },
+      { l: N.E5,  b: N.E2,  c: [N.Gs3, N.B3],r: "kick" },
+      { l: N.Fs5, b: N._,   c: null,         r: "hihat" },
+      { l: N.Gs5, b: N.E2,  c: null,         r: "snare" },
+      { l: N.A5,  b: N._,   c: null,         r: "hihat" }
+    ];
+  },
+
+  playStep() {
+    if (!this.enabled || !sfxCtx) return;
+    if (Date.now() < this.fanfareActiveUntil) {
+      if (this.stepTimer) clearTimeout(this.stepTimer);
+      this.stepTimer = setTimeout(() => this.playStep(), 250);
+      return;
+    }
+
+    this.initNodes();
+    const now = sfxCtx.currentTime;
+    const drawerModal = document.getElementById("drawer-modal");
+    const isLobby = drawerModal && drawerModal.classList.contains("show");
+
+    let pattern, intervalMs, isPinch = false;
+    if (isLobby) {
+      pattern = this.getLobbyPattern();
+      intervalMs = 135;
+      this.currentTrack = "lobby";
+    } else {
+      isPinch = checkPinchDanger();
+      if (isPinch) {
+        pattern = this.getPinchPattern();
+        intervalMs = 96;
+        this.currentTrack = "pinch";
+      } else {
+        pattern = this.getBattlePattern();
+        intervalMs = 112;
+        this.currentTrack = "battle";
+      }
+    }
+
+    const cur = pattern[this.step % pattern.length];
+    this.step++;
+
+    try {
+      if (cur.l && cur.l > 0) {
+        const osc = sfxCtx.createOscillator();
+        const g = sfxCtx.createGain();
+        osc.type = isLobby ? "triangle" : (isPinch ? "sawtooth" : "square");
+        osc.frequency.setValueAtTime(cur.l, now);
+        const leadVol = isLobby ? 0.055 : (isPinch ? 0.07 : 0.05);
+        g.gain.setValueAtTime(leadVol, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + (intervalMs * 0.001 * 0.95));
+        osc.connect(g);
+        g.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + (intervalMs * 0.001));
+      }
+
+      if (cur.b && cur.b > 0) {
+        const bOsc = sfxCtx.createOscillator();
+        const bG = sfxCtx.createGain();
+        bOsc.type = isLobby ? "triangle" : "sawtooth";
+        bOsc.frequency.setValueAtTime(cur.b, now);
+        bG.gain.setValueAtTime(isLobby ? 0.07 : 0.09, now);
+        bG.gain.exponentialRampToValueAtTime(0.001, now + (intervalMs * 0.001 * 1.5));
+        bOsc.connect(bG);
+        bG.connect(this.masterGain);
+        bOsc.start(now);
+        bOsc.stop(now + (intervalMs * 0.001 * 1.55));
+      }
+
+      if (cur.c && Array.isArray(cur.c)) {
+        cur.c.forEach(freq => {
+          const cOsc = sfxCtx.createOscillator();
+          const cG = sfxCtx.createGain();
+          cOsc.type = "sine";
+          cOsc.frequency.setValueAtTime(freq, now);
+          cG.gain.setValueAtTime(0.025, now);
+          cG.gain.exponentialRampToValueAtTime(0.001, now + (intervalMs * 0.001 * 3.8));
+          cOsc.connect(cG);
+          cG.connect(this.masterGain);
+          cOsc.start(now);
+          cOsc.stop(now + (intervalMs * 0.001 * 4.0));
+        });
+      }
+
+      if (cur.r) {
+        if (cur.r === "kick") {
+          const kOsc = sfxCtx.createOscillator();
+          const kG = sfxCtx.createGain();
+          kOsc.type = "sine";
+          kOsc.frequency.setValueAtTime(140, now);
+          kOsc.frequency.exponentialRampToValueAtTime(38, now + 0.08);
+          kG.gain.setValueAtTime(0.09, now);
+          kG.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+          kOsc.connect(kG);
+          kG.connect(this.masterGain);
+          kOsc.start(now);
+          kOsc.stop(now + 0.09);
+        } else if (cur.r === "snare") {
+          const sOsc = sfxCtx.createOscillator();
+          const sG = sfxCtx.createGain();
+          sOsc.type = "triangle";
+          sOsc.frequency.setValueAtTime(210, now);
+          sOsc.frequency.exponentialRampToValueAtTime(80, now + 0.06);
+          sG.gain.setValueAtTime(0.05, now);
+          sG.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+          sOsc.connect(sG);
+          sG.connect(this.masterGain);
+          sOsc.start(now);
+          sOsc.stop(now + 0.07);
+        } else if (cur.r === "hihat") {
+          const hOsc = sfxCtx.createOscillator();
+          const hG = sfxCtx.createGain();
+          hOsc.type = "square";
+          hOsc.frequency.setValueAtTime(8500, now);
+          hOsc.frequency.exponentialRampToValueAtTime(3200, now + 0.025);
+          hG.gain.setValueAtTime(0.02, now);
+          hG.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+          hOsc.connect(hG);
+          hG.connect(this.masterGain);
+          hOsc.start(now);
+          hOsc.stop(now + 0.028);
+        }
+      }
+    } catch (e) {}
+
+    if (this.stepTimer) clearTimeout(this.stepTimer);
+    this.stepTimer = setTimeout(() => {
+      this.playStep();
+    }, intervalMs);
+  },
+
+  playFanfare(type) {
+    if (!this.enabled) return;
+    this.initNodes();
+    if (!sfxCtx) return;
+    const now = sfxCtx.currentTime;
+    const N = this.N;
+
+    this.fanfareActiveUntil = Date.now() + 3200;
+
+    try {
+      if (type === "victory") {
+        const notes = [
+          { f: N.G4, t: 0.00, d: 0.12 },
+          { f: N.C5, t: 0.12, d: 0.12 },
+          { f: N.E5, t: 0.24, d: 0.12 },
+          { f: N.G5, t: 0.36, d: 0.22 },
+          { f: N.E5, t: 0.58, d: 0.12 },
+          { f: N.G5, t: 0.70, d: 0.14 },
+          { f: N.C6, t: 0.84, d: 1.40 }
+        ];
+        notes.forEach(n => {
+          const osc = sfxCtx.createOscillator();
+          const g = sfxCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(n.f, now + n.t);
+          g.gain.setValueAtTime(0.12, now + n.t);
+          g.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+          osc.connect(g);
+          g.connect(this.masterGain);
+          osc.start(now + n.t);
+          osc.stop(now + n.t + n.d + 0.05);
+        });
+        [N.C5, N.E5, N.G5, N.C6].forEach(f => {
+          const hOsc = sfxCtx.createOscillator();
+          const hG = sfxCtx.createGain();
+          hOsc.type = "sine";
+          hOsc.frequency.setValueAtTime(f, now + 0.84);
+          hG.gain.setValueAtTime(0.07, now + 0.84);
+          hG.gain.exponentialRampToValueAtTime(0.001, now + 2.3);
+          hOsc.connect(hG);
+          hG.connect(this.masterGain);
+          hOsc.start(now + 0.84);
+          hOsc.stop(now + 2.4);
+        });
+      } else if (type === "defeat") {
+        const notes = [
+          { f: N.D5,  t: 0.00, d: 0.25 },
+          { f: N.Cs5, t: 0.25, d: 0.25 },
+          { f: N.C5,  t: 0.50, d: 0.25 },
+          { f: N.B4,  t: 0.75, d: 0.30 },
+          { f: N.Bb4, t: 1.05, d: 0.30 },
+          { f: N.A4,  t: 1.35, d: 1.20 }
+        ];
+        notes.forEach(n => {
+          const osc = sfxCtx.createOscillator();
+          const g = sfxCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(n.f, now + n.t);
+          g.gain.setValueAtTime(0.08, now + n.t);
+          g.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+          osc.connect(g);
+          g.connect(this.masterGain);
+          osc.start(now + n.t);
+          osc.stop(now + n.t + n.d + 0.05);
+        });
+      } else if (type === "booster") {
+        const notes = [
+          { f: N.C5, t: 0.00, d: 0.08 },
+          { f: N.E5, t: 0.08, d: 0.08 },
+          { f: N.G5, t: 0.16, d: 0.08 },
+          { f: N.B5, t: 0.24, d: 0.08 },
+          { f: N.D6, t: 0.32, d: 0.10 },
+          { f: N.E6, t: 0.42, d: 0.12 },
+          { f: N.G6, t: 0.54, d: 0.90 }
+        ];
+        notes.forEach(n => {
+          const osc = sfxCtx.createOscillator();
+          const g = sfxCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(n.f, now + n.t);
+          g.gain.setValueAtTime(0.10, now + n.t);
+          g.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+          osc.connect(g);
+          g.connect(this.masterGain);
+          osc.start(now + n.t);
+          osc.stop(now + n.t + n.d + 0.05);
+        });
+      }
+    } catch (e) {}
+  },
+
+  start() {
+    if (!this.enabled) return;
+    this.initNodes();
+    if (!sfxCtx) return;
+    this.isPlaying = true;
+    this.playStep();
+    this.syncUi();
+  },
+
+  stop() {
+    this.isPlaying = false;
+    if (this.stepTimer) {
+      clearTimeout(this.stepTimer);
+      this.stepTimer = null;
+    }
+    this.syncUi();
+  },
+
+  toggle() {
+    this.enabled = !this.enabled;
+    bgmEnabled = this.enabled;
+    try {
+      localStorage.setItem("pokeduel_bgm_enabled", this.enabled ? "1" : "0");
+    } catch (e) {}
+    if (this.enabled) {
+      this.start();
+    } else {
+      this.stop();
+    }
+    this.syncUi();
+  },
+
+  syncUi() {
+    const mBtn = document.getElementById("menu-bgm-btn");
+    if (mBtn) {
+      mBtn.textContent = this.enabled ? "🎵 Música (BGM): ON" : "🔇 Música (BGM): OFF";
+      mBtn.className = "btn " + (this.enabled ? "gold" : "secondary");
+    }
+    const bBtn = document.getElementById("bgm-toggle-btn");
+    if (bBtn) {
+      bBtn.textContent = this.enabled ? "🎵ON" : "🔇OFF";
+    }
+  }
+};
 
 function toggleWebAudioBgm() {
   ensureAudio();
-  bgmEnabled = !bgmEnabled;
-  const btn = document.getElementById("bgm-toggle-btn");
-  if (btn) btn.textContent = bgmEnabled ? "🎵ON" : "🔊BGM";
-  if (bgmEnabled) {
-    if (bgmTimer) clearInterval(bgmTimer);
-    bgmTimer = setInterval(() => {
-      if (!bgmEnabled || !audioCtx) return;
-      const isLobby = document.getElementById("drawer-modal").classList.contains("show");
-      const seq = isLobby ? CARMONTE_NOTES : BATTLE_NOTES;
-      const freq = seq[bgmStep % seq.length];
-      bgmStep++;
-      try {
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.type = isLobby ? "triangle" : "sawtooth";
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        g.gain.setValueAtTime(0.035, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.24);
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.25);
-      } catch (e) {}
-    }, 260);
-  } else if (bgmTimer) {
-    clearInterval(bgmTimer);
-    bgmTimer = null;
-  }
+  BgmEngine.toggle();
 }
 
 function applyFusionMaterial(matType) {
@@ -7159,6 +7571,9 @@ function rollFiguresForBox(count, guaranteedHighRarity = false) {
  * Unlocks pulled figures (or upgrades CLv +1 if duplicate) and displays the Unboxing Modal with NEW / DUPLICATE badges!
  */
 function unlockAndShowBoosterModal(title, pulledIndices, bonusText) {
+  if (typeof BgmEngine !== "undefined") {
+    BgmEngine.playFanfare("booster");
+  }
   const cardData = pulledIndices.map(idx => {
     const f = FIGURES_DB[idx] || FIGURES_DB[0];
     const wasUnlocked = isFigureUnlocked(idx);
@@ -14732,6 +15147,47 @@ generateNewRoomCode();
 requestAnimationFrame(renderHomeCarouselLoop);
 demoFullMatchState();
 requestAnimationFrame(boardRenderLoop);
+
+// Pokémon Duel Web Audio BGM Initialization & User Gesture Auto-Unlock
+(function initBgmEngineAutoStart() {
+  if (typeof BgmEngine !== "undefined") {
+    try {
+      const savedPref = localStorage.getItem("pokeduel_bgm_enabled");
+      if (savedPref !== null) {
+        BgmEngine.enabled = (savedPref === "1");
+        bgmEnabled = BgmEngine.enabled;
+      }
+    } catch (e) {}
+    BgmEngine.syncUi();
+  }
+
+  const unlockAndPlayBgm = () => {
+    ensureAudio();
+    if (sfxCtx && sfxCtx.state === "suspended") {
+      sfxCtx.resume().then(() => {
+        if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
+          BgmEngine.start();
+        }
+      }).catch(() => {});
+    } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
+      BgmEngine.start();
+    }
+  };
+
+  ["pointerdown", "touchstart", "click", "keydown"].forEach(evt => {
+    window.addEventListener(evt, unlockAndPlayBgm, { passive: true });
+  });
+
+  // Attempt immediate playback if browser context allows
+  setTimeout(() => {
+    try {
+      ensureAudio();
+      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
+        BgmEngine.start();
+      }
+    } catch (e) {}
+  }, 100);
+})();
 </script>
 </body>
 </html>
