@@ -17,20 +17,30 @@
   * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; padding: 0; width: 100%; height: 100%;
-    background: #020305; color: #f8fafc;
+    background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b14 65%, #020305 100%);
+    color: #f8fafc;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow: hidden; display: flex; align-items: center; justify-content: center;
   }
 
-  /* 1:1 FULL-SCREEN STAGE CONTAINER (3x Full HD 1059x1590 Internal Canvas!) */
+  /* 1:1 STAGE CONTAINER (Aspect-Ratio Constrained & Centered for PC & Mobile!) */
   #stage-container {
-    position: relative; width: 100vw; height: 100vh;
+    position: relative;
+    width: 100%;
+    max-width: min(480px, calc(100vh * (353 / 530)));
+    height: 100%;
+    max-height: 100vh;
+    aspect-ratio: 353 / 530;
+    margin: 0 auto;
     display: flex; align-items: center; justify-content: center;
     background: #020305; overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.22);
+    border-left: 1.5px solid rgba(56, 189, 248, 0.28);
+    border-right: 1.5px solid rgba(56, 189, 248, 0.28);
   }
   #board-canvas {
-    width: 100%; height: 100%; max-width: 500px;
-    object-fit: fill; display: block; touch-action: none;
+    width: 100%; height: 100%;
+    object-fit: contain; display: block; touch-action: none;
   }
 
   /* SUBTLE AUTO-FADING HINT PILL ON FIRST LOAD */
@@ -79,23 +89,48 @@
 
   /* AUTHENTIC FULL-SCREEN POKÉMON DUEL DATA DISK BATTLE OVERLAY (1059x1590 Full HD!) */
   #wheel-overlay {
-    display: none; position: fixed; inset: 0;
+    display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100%; max-width: min(480px, calc(100vh * (353 / 530))); height: 100%; max-height: 100vh;
     background: radial-gradient(circle at 50% 35%, #102142 0%, #060b16 60%, #020409 100%);
     z-index: 95; flex-direction: column; align-items: center; justify-content: space-between;
     padding: 0; overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95);
+    border-left: 1.5px solid rgba(56, 189, 248, 0.28);
+    border-right: 1.5px solid rgba(56, 189, 248, 0.28);
   }
   #wheel-overlay.show { display: flex; }
   #datadisk-canvas {
-    width: 100%; height: 100%; max-width: 500px; display: block; cursor: pointer;
+    width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer;
   }
 
   /* AUTHENTIC POKÉMON DUEL CARMONTE ISLAND MAIN MENU / HUB / P2P / MONACO 7.0.16 */
   #drawer-modal {
-    display: none; position: fixed; inset: 0;
+    display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100%; max-width: min(480px, calc(100vh * (353 / 530))); height: 100%; max-height: 100vh;
     background: radial-gradient(circle at 50% 25%, #0f2942 0%, #071120 55%, #03060c 100%);
     z-index: 90; flex-direction: column; justify-content: space-between; overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.22);
+    border-left: 1.5px solid rgba(56, 189, 248, 0.28);
+    border-right: 1.5px solid rgba(56, 189, 248, 0.28);
   }
   #drawer-modal.show { display: flex; }
+
+  @media (max-width: 599px) {
+    #stage-container,
+    #drawer-modal,
+    #wheel-overlay {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      aspect-ratio: unset !important;
+      border-left: none !important;
+      border-right: none !important;
+      box-shadow: none !important;
+      top: 0 !important; left: 0 !important;
+      transform: none !important;
+    }
+  }
 
   .comaster-top-hud {
     height: 48px; background: linear-gradient(180deg, #16243b 0%, #0a111e 100%);
@@ -1109,6 +1144,24 @@
 </div>
 
 <script>
+// Canvas roundRect Polyfill for universal browser/webview compatibility
+if (typeof CanvasRenderingContext2D !== "undefined" && !CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
+    let r = Array.isArray(radii) ? (radii[0] || 0) : (typeof radii === "number" ? radii : 0);
+    if (r < 0) r = 0;
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    this.beginPath();
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r);
+    this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r);
+    this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+    return this;
+  };
+}
+
 // ============================================================================
 // 0. 3x FULL HD (1059x1590) SUPER-RESOLUTION CONSTANTS & ASSETS
 // ============================================================================
@@ -2447,12 +2500,16 @@ function drawFullTabletopFrame() {
   const curS = window.ACTIVE_SCALE || HD_SCALE; ctx.scale(curS, curS);
 
   // 1. Draw the 2x Retina sharpened crystal tabletop & portrait base
-  if (state.surface === "banana" && bananaArenaImg.complete) {
+  if (state.surface === "banana" && bananaArenaImg && bananaArenaImg.complete && bananaArenaImg.naturalWidth > 0) {
     ctx.drawImage(bananaArenaImg, 0, 0, LOGICAL_W, LOGICAL_H);
-  } else if (cleanBoardImg.complete) {
+  } else if (cleanBoardImg && cleanBoardImg.complete && cleanBoardImg.naturalWidth > 0) {
     ctx.drawImage(cleanBoardImg, 0, 0, LOGICAL_W, LOGICAL_H);
   } else {
-    ctx.fillStyle = "#050811";
+    const bgGrad = ctx.createRadialGradient(LOGICAL_W / 2, LOGICAL_H / 2, 40, LOGICAL_W / 2, LOGICAL_H / 2, 280);
+    bgGrad.addColorStop(0, "#0e223d");
+    bgGrad.addColorStop(0.65, "#071120");
+    bgGrad.addColorStop(1, "#020408");
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
   }
 
@@ -9708,7 +9765,11 @@ applyExplicitTurn = function(nextTurn, nextCounter) {
 // Draw a pulsing golden tutorial indicator ring + label directly on the 3D board canvas for the active lesson!
 const _v520DrawVideoMatchOverlays = drawVideoMatchOverlays;
 drawVideoMatchOverlays = function() {
-  _v520DrawVideoMatchOverlays();
+  try {
+    _v520DrawVideoMatchOverlays();
+  } catch (e) {
+    console.warn("drawVideoMatchOverlays recovered from error:", e);
+  }
   if (state.matchKind === "tutorial" && currentTutorialStep >= 1 && currentTutorialStep <= 6 && !state.winCelebrationAnim) {
     const info = TUTORIAL_MATCH_STEPS[currentTutorialStep - 1];
     if (info && typeof info.targetNode === "number") {
@@ -9732,7 +9793,11 @@ drawVideoMatchOverlays = function() {
         ctx.strokeStyle = "#fde047";
         ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.roundRect(nPos.x - 28, nPos.y - 34 - pulse * 3, 56, 13, 4);
+        if (typeof ctx.roundRect === "function") {
+          ctx.roundRect(nPos.x - 28, nPos.y - 34 - pulse * 3, 56, 13, 4);
+        } else {
+          ctx.rect(nPos.x - 28, nPos.y - 34 - pulse * 3, 56, 13);
+        }
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = "#fde047";
@@ -9828,6 +9893,10 @@ function startInteractiveTutorialMatch() {
   const tourHud = document.getElementById("tutorial-hub-tour-hud");
   if (tourHud) tourHud.style.display = "none";
 
+  // Force authentic presentation starter decks
+  state.deckP1 = [1, 2, 3, 4, 6, 0];
+  state.deckP2 = [5, 6, 7, 0, 2, 8];
+
   // Use a dedicated tutorial mode so AI auto-moves never fire!
   setGameMode("ai");
   demoFullMatchState();
@@ -9851,11 +9920,11 @@ function startInteractiveTutorialMatch() {
   const charmanderP2 = p2Units.find(u => u.baseId === "charmander") || p2Units[0];
   const squirtleP2   = p2Units.find(u => u.baseId === "squirtle" && u !== charmanderP2) || p2Units[1];
 
-  pikachu.name = "Pikachu"; pikachu.mp = 3;
-  bulbasaur.name = "Bulbasaur";
-  charizard.name = "Charizard";
-  charmanderP2.name = "Charmander";
-  squirtleP2.name = "Squirtle";
+  if (pikachu)      { pikachu.name = "Pikachu"; pikachu.mp = 3; pikachu.baseId = "pikachu"; pikachu.spriteKey = "pikachu"; }
+  if (bulbasaur)    { bulbasaur.name = "Bulbasaur"; bulbasaur.baseId = "bulbasaur"; bulbasaur.spriteKey = "bulbasaur"; }
+  if (charizard)    { charizard.name = "Charizard"; charizard.baseId = "charizard"; charizard.spriteKey = "charizard"; }
+  if (charmanderP2) { charmanderP2.name = "Charmander"; charmanderP2.baseId = "charmander"; charmanderP2.spriteKey = "charmander"; }
+  if (squirtleP2)   { squirtleP2.name = "Squirtle"; squirtleP2.baseId = "squirtle"; squirtleP2.spriteKey = "squirtle_p2"; }
 
   state.tutorialUnits = { pikachu, bulbasaur, charizard, charmanderP2, squirtleP2 };
   tutorialStepBusy = false;
@@ -11448,7 +11517,7 @@ renderHubAndCollection = function() {
   }
 
   const searchInp = document.getElementById("collection-search-inp");
-  if (searchInp && searchInp.placeholder.includes("217")) {
+  if (searchInp && searchInp.placeholder && searchInp.placeholder.includes("217")) {
     searchInp.placeholder = `🔍 Buscar entre os ${FIGURES_DB.length} Pokémon (nome, tipo, raridade)...`;
   }
 
