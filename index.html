@@ -897,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.1 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.2 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,6 +906,12 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
+        <!-- Feature 0: Roleta 100% Limpa sem Mensagem de Total (v5.7.2) -->
+        <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎯 Roleta 100% Limpa: Mensagem de Total no Topo Removida</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Removida a caixinha/ticker superior que exibia o resumo e total do multiplicador. O topo da tela fica completamente desimpedido, mantendo o foco exclusivo nas roletas e nos números e faíscas flutuantes estilo Vampire Survivors!</div>
+        </div>
+
         <!-- Feature 0: Músicas Oficiais BGM Ativadas (v5.7.1) -->
         <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">🎵 Trilha Sonora Oficial BGM Ativada (OST Pokémon Duel)</div>
@@ -1042,7 +1048,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.1</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.2</span>
           </div>
         </div>
 
@@ -1456,7 +1462,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.1 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.2 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -4917,38 +4923,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     // ======================================================================
     // VAMPIRE SURVIVORS STYLE: FLOATING COMBAT TEXT & COMBO DAMAGE SUMMING
     // ======================================================================
-    // 1. Unobtrusive Top-Left HUD Ticker during active multiplier chains
-    if (totalStages > 1) {
-      const isPlayerMulti = (mySteps.length > 1);
-      const activeStep = isPlayerMulti ? myActiveStep : oppActiveStep;
-      const isComplete = allSpinStagesFinished || activeStep.stoppedChain;
-
-      ddCtx.save();
-      ddCtx.textAlign = "left";
-      ddCtx.textBaseline = "middle";
-
-      // Semi-transparent pill in top-left empty corner (safely away from wheels)
-      ddCtx.fillStyle = isPlayerMulti ? "rgba(8, 22, 40, 0.85)" : "rgba(38, 12, 18, 0.85)";
-      ddCtx.strokeStyle = isPlayerMulti ? "#38bdf8" : "#fb7185";
-      ddCtx.lineWidth = 1.5;
-      ddCtx.beginPath();
-      ddCtx.roundRect(10, 10, 155, 36, 8);
-      ddCtx.fill();
-      ddCtx.stroke();
-
-      ddCtx.font = "900 8.5px system-ui, -apple-system, sans-serif";
-      ddCtx.fillStyle = isPlayerMulti ? "#93c5fd" : "#fca5a5";
-      ddCtx.fillText(isComplete ? "★ MULTIPLICADOR TOTAL ★" : `⚡ MULTIPLICADOR (${activeStep.hits}x)`, 16, 20);
-
-      ddCtx.font = "900 12px Impact, system-ui, sans-serif";
-      ddCtx.fillStyle = isPlayerMulti ? "#fde047" : "#fb7185";
-      if (isComplete) {
-        ddCtx.fillText(`${activeStep.accumDmg} DANO TOTAL!`, 16, 34);
-      } else {
-        ddCtx.fillText(`${activeStep.unitDmg} × ${activeStep.hits} = ${activeStep.accumDmg}`, 16, 34);
-      }
-      ddCtx.restore();
-    }
+    // (Top-left HUD message removed per user request: wheel arena is 100% clean!)
 
     // 2. Shockwave Expanding Rings
     for (let i = vsFloatingTexts.length - 1; i >= 0; i--) {
