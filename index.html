@@ -904,7 +904,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v6.0.0 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v6.0.1 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -1085,7 +1085,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v6.0.0</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v6.0.1</span>
           </div>
         </div>
 
@@ -1499,7 +1499,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v6.0.0 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v6.0.1 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -2080,23 +2080,126 @@ let state = {
 
 let boardParticles = [], boardShockwaves = [], boardBeams = [], activePieceAnim = null;
 
+const POKEMON_EVOLUTION_FAMILIES = [
+  ["Bulbasaur", "Ivysaur", "Venusaur", "Mega Venusaur"],
+  ["Charmander", "Charmeleon", "Charizard", "Mega Charizard X"],
+  ["Squirtle", "Wartortle", "Blastoise", "Mega Blastoise"],
+  ["Chikorita", "Bayleef", "Meganium"],
+  ["Cyndaquil", "Quilava", "Typhlosion"],
+  ["Totodile", "Croconaw", "Feraligatr"],
+  ["Treecko", "Grovyle", "Sceptile"],
+  ["Torchic", "Combusken", "Blaziken"],
+  ["Mudkip", "Marshtomp", "Swampert"],
+  ["Turtwig", "Grotle", "Torterra"],
+  ["Chimchar", "Monferno", "Infernape"],
+  ["Piplup", "Prinplup", "Empoleon"],
+  ["Snivy", "Servine", "Serperior"],
+  ["Tepig", "Pignite", "Emboar"],
+  ["Oshawott", "Dewott", "Samurott"],
+  ["Froakie", "Frogadier", "Greninja"],
+  ["Rowlet", "Dartrix", "Decidueye"],
+  ["Litten", "Torracat", "Incineroar"],
+  ["Popplio", "Brionne", "Primarina"],
+  ["Pikachu", "Raichu"],
+  ["Pichu", "Pikachu", "Raichu"],
+  ["Magikarp", "Gyarados", "Mega Gyarados"],
+  ["Gastly", "Haunter", "Gengar", "Mega Gengar"],
+  ["Dratini", "Dragonair", "Dragonite"],
+  ["Riolu", "Lucario", "Mega Lucario"],
+  ["Bagon", "Shelgon", "Salamence"],
+  ["Beldum", "Metang", "Metagross"],
+  ["Gible", "Gabite", "Garchomp"],
+  ["Larvitar", "Pupitar", "Tyranitar"],
+  ["Trapinch", "Vibrava", "Flygon"],
+  ["Ralts", "Kirlia", "Gardevoir"],
+  ["Ralts", "Kirlia", "Gallade"],
+  ["Caterpie", "Metapod", "Butterfree"],
+  ["Weedle", "Kakuna", "Beedrill"],
+  ["Pidgey", "Pidgeotto", "Pidgeot"],
+  ["Rattata", "Raticate"],
+  ["Abra", "Kadabra", "Alakazam"],
+  ["Machop", "Machoke", "Machamp"],
+  ["Bellsprout", "Weepinbell", "Victreebel"],
+  ["Geodude", "Graveler", "Golem"],
+  ["Poliwag", "Poliwhirl", "Poliwrath"],
+  ["Slowpoke", "Slowbro"],
+  ["Magnemite", "Magneton", "Magnezone"],
+  ["Horsea", "Seadra", "Kingdra"],
+  ["Staryu", "Starmie", "Mega Starmie"],
+  ["Buneary", "Lopunny", "Mega Lopunny"],
+  ["Cosmog", "Cosmoem", "Lunala"],
+  ["Kabuto", "Kabutops"],
+  ["Omanyte", "Omastar"],
+  ["Scyther", "Scizor"],
+  ["Onix", "Steelix"],
+  ["Eevee", "Vaporeon"],
+  ["Eevee", "Jolteon"],
+  ["Eevee", "Flareon"],
+  ["Eevee", "Espeon"],
+  ["Eevee", "Umbreon"],
+  ["Eevee", "Sylveon"],
+  ["Rayquaza", "Mega Rayquaza"]
+];
+
+function getEvolutionChainToTarget(targetName) {
+  if (!targetName) return [];
+  const tClean = targetName.toLowerCase().replace(/[\s\-_]/g, "");
+  for (const fam of POKEMON_EVOLUTION_FAMILIES) {
+    const idx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === tClean);
+    if (idx !== -1) {
+      return fam.slice(0, idx + 1);
+    }
+  }
+  return [targetName];
+}
+
+function findFigureByName(name) {
+  if (!name) return null;
+  const clean = name.toLowerCase().replace(/[\s\-_]/g, "");
+  let f = FIGURES_DB.find(fig => {
+    const fn = (fig.name || "").toLowerCase().replace(/[\s\-_]/g, "");
+    const fid = (fig.id || "").toLowerCase().replace(/[\s\-_]/g, "");
+    return fn === clean || fid === clean;
+  });
+  if (!f && typeof NEW_200_FIGURES_DATA !== "undefined") {
+    f = NEW_200_FIGURES_DATA.find(fig => {
+      const fn = (fig.name || "").toLowerCase().replace(/[\s\-_]/g, "");
+      const fid = (fig.id || "").toLowerCase().replace(/[\s\-_]/g, "");
+      return fn === clean || fid === clean;
+    });
+  }
+  return f || null;
+}
 function makeTeamUnits(owner, deckIndices) {
   return deckIndices.map((idx, slot) => {
     const base = FIGURES_DB[idx % FIGURES_DB.length];
-    let spriteKey = base.spriteKey;
-    if (owner === "p1" && base.id === "pikachu" && slot === 1) spriteKey = "pikachu_back";
-    if (owner === "p2" && base.id === "squirtle") spriteKey = "squirtle_p2";
+    const targetName = base.name;
+    const chain = getEvolutionChainToTarget(targetName);
+    const startName = (chain && chain.length > 0) ? chain[0] : targetName;
+    const startFig = findFigureByName(startName) || base;
+    const startFigIdx = FIGURES_DB.indexOf(startFig) !== -1 ? FIGURES_DB.indexOf(startFig) : (idx % FIGURES_DB.length);
+
+    let spriteKey = startFig.spriteKey;
+    if (owner === "p1" && startFig.id === "pikachu" && slot === 1) spriteKey = "pikachu_back";
+    if (owner === "p2" && startFig.id === "squirtle") spriteKey = "squirtle_p2";
+
     return {
       uid: owner + "_" + slot,
       owner,
       benchSlot: slot,
-      baseIdx: idx % FIGURES_DB.length,
-      baseId: base.id,
+      deckTargetName: targetName,
+      targetIdx: idx % FIGURES_DB.length,
+      evoChain: chain,
+      evoStep: 0,
+      evoStage: 0,
+      baseIdx: startFigIdx,
+      baseId: startFig.id,
       spriteKey,
-      name: base.name,
-      mp: base.mp,
-      type: base.type,
-      rarity: base.rarity,
+      name: startFig.name,
+      mp: startFig.mp || base.mp || 2,
+      baseMp: startFig.mp || base.mp || 2,
+      type: startFig.type || base.type,
+      rarity: startFig.rarity || base.rarity,
       level: base.level,
       clv: base.clv,
       location: "bench", // ALL 6 Pokémon start on the bench!
@@ -2467,21 +2570,27 @@ function resolveEvolutionPrompt(confirmEvo) {
 
 function evolveUnitInMatch(unit) {
   if (!unit) return;
-  const nextStage = (unit.evoStage || 0) + 1;
-  const chain = EVO_CHAIN_NAMES[unit.baseId];
-  if (!chain || nextStage > chain.length) return;
-  const nextName = chain[nextStage - 1];
+  const chain = unit.evoChain || getEvolutionChainToTarget(unit.deckTargetName || unit.name);
+  const currentStep = (typeof unit.evoStep === "number") ? unit.evoStep : chain.indexOf(unit.name);
+  const nextStep = currentStep + 1;
 
-  // If human player won, show the authentic Evolution / [UX] Mega confirmation banner!
+  // CRITICAL RULE: If the unit has reached or surpassed its deck target figure, STOP asking to evolve!
+  // "e se ele nota que chego no chalizard ele para de pedir pra evoluir"
+  // "o msm acontece se eu colocar um charmilion no deck... mas ai ele nao evolui para chalizard, ele para no charmilion"
+  if (nextStep >= chain.length) {
+    return;
+  }
+
+  const nextName = chain[nextStep];
+
+  // If human player won, show the authentic Evolution confirmation prompt!
   if (unit.owner === getBottomRole() && !state.aiExecutingNow) {
     pendingEvoUnit = unit;
     const tEl = document.getElementById("evo-prompt-title");
     const sEl = document.getElementById("evo-prompt-sub");
     const mEl = document.getElementById("evolution-prompt-modal");
-    if (tEl) tEl.textContent = `Evolve ${unit.name} ➔ ${nextName}?`;
-    if (sEl) sEl.innerHTML = nextName.startsWith("Mega ")
-      ? `Ativa <strong>[UX] ${nextName}</strong> por 7 turnos (<strong>+20 DMG, +1★ Purple, MP +1 & Pass-Through</strong>)!`
-      : `Evolui para <strong>${nextName}</strong> ganhando permanentemente <strong>+10 DMG</strong> em ataques White/Gold e <strong>+1★ Purple</strong>!`;
+    if (tEl) tEl.textContent = `Evolver ${unit.name} ➔ ${nextName}?`;
+    if (sEl) sEl.innerHTML = `Evolui para <strong>${nextName}</strong> ganhando permanentemente <strong>+10 DMG</strong> e <strong>+1★ Purple</strong>!<br><span style="font-size:9.5px; color:#38bdf8; font-weight:800;">Alvo Final do Deck: <strong>${unit.deckTargetName || nextName}</strong></span>`;
     if (mEl) mEl.style.display = "flex";
   } else {
     applyUnitEvolutionNow(unit);
@@ -2490,34 +2599,37 @@ function evolveUnitInMatch(unit) {
 
 function applyUnitEvolutionNow(unit) {
   if (!unit || unit._justEvolvedTurn === state.turnCounter) return;
+
+  const chain = unit.evoChain || getEvolutionChainToTarget(unit.deckTargetName || unit.name);
+  const currentStep = (typeof unit.evoStep === "number") ? unit.evoStep : chain.indexOf(unit.name);
+  const nextStep = currentStep + 1;
+
+  // Stop if already at deck target figure
+  if (nextStep >= chain.length) return;
+
   unit._justEvolvedTurn = state.turnCounter;
-  unit.evoStage = (unit.evoStage || 0) + 1;
-  // Section 4.3 (Cura Total / Cleanse): Evoluir purga instantaneamente qualquer condição de status negativo!
-  unit.condition = PokemonCondition.Normal;
+  unit.evoStep = nextStep;
+  unit.evoStage = (unit.evoStage || 0) + 1; // +10 DMG & +1★ per stage
+  unit.condition = PokemonCondition.Normal; // Evoluir purga condições de status negativo
+
   const oldName = unit.name;
-  const chain = EVO_CHAIN_NAMES[unit.baseId];
-  let nextName = "";
-  if (chain && chain[unit.evoStage - 1]) {
-    nextName = chain[unit.evoStage - 1];
-  } else if (!unit.name.startsWith("Mega ")) {
-    nextName = "Mega " + unit.name;
-  }
-  if (nextName) {
-    unit.name = nextName;
-    if (unit.name.startsWith("Mega ")) {
-      unit.megaTurns = 7;
-      unit.mp = Math.min(3, (unit.baseMp || unit.mp) + 1);
-    }
+  const nextName = chain[nextStep];
+  unit.name = nextName;
+
+  // Look up evolved figure in FIGURES_DB to update baseIdx, baseId, spriteKey, mp, type, rarity
+  const nextFig = findFigureByName(nextName);
+  if (nextFig) {
+    unit.baseIdx = FIGURES_DB.indexOf(nextFig) !== -1 ? FIGURES_DB.indexOf(nextFig) : unit.baseIdx;
+    unit.baseId = nextFig.id;
+    unit.spriteKey = nextFig.spriteKey;
+    if (nextFig.mp) unit.mp = nextFig.mp;
+    if (nextFig.type) unit.type = nextFig.type;
+    if (nextFig.rarity) unit.rarity = nextFig.rarity;
   }
 
-  // Look up if evolved figure exists in DB
-  const foundIdx = FIGURES_DB.findIndex(f => f.name.toLowerCase() === unit.name.toLowerCase() || (f.id && unit.name.toLowerCase().includes(f.id)));
-  if (foundIdx !== -1) {
-    const f = FIGURES_DB[foundIdx];
-    unit.baseIdx = foundIdx;
-    unit.baseId = f.id;
-    unit.spriteKey = f.spriteKey;
-    if (f.mp) unit.mp = f.mp;
+  if (unit.name.startsWith("Mega ")) {
+    unit.megaTurns = 7;
+    unit.mp = Math.min(3, (unit.baseMp || unit.mp) + 1);
   }
 
   if (unit.location === "board" && unit.nodeId !== null) {
@@ -2526,7 +2638,13 @@ function applyUnitEvolutionNow(unit) {
   }
   playSfx("portal");
   if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
-  setLogText(`✨ EVOLUÇÃO EM PARTIDA! ${oldName} evoluiu para ${unit.name} (+10 DMG, +1★)!`);
+
+  const reachedFinal = (unit.name.toLowerCase() === (unit.deckTargetName || "").toLowerCase()) || (unit.evoStep === chain.length - 1);
+  if (reachedFinal) {
+    setLogText(`✨ EVOLUÇÃO FINAL ATINGIDA! ${oldName} atingiu a forma final do seu Deck: ${unit.name} (+${unit.evoStage * 10} DMG, +${unit.evoStage}★)! Parando de evoluir.`);
+  } else {
+    setLogText(`✨ EVOLUÇÃO EM PARTIDA! ${oldName} evoluiu para ${unit.name} (+${unit.evoStage * 10} DMG, +${unit.evoStage}★)! Próximo alvo: ${unit.deckTargetName}.`);
+  }
 }
 
 function computeDuelDbOdds(atkUnit, defUnit) {
