@@ -854,6 +854,39 @@
     </div>
   </div>
 
+  <!-- MODAL DE RENOMEAR TIME (v5.6.6) -->
+  <div id="rename-team-modal" style="display:none; position:fixed; inset:0; z-index:288; background:rgba(2,6,23,0.92); align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(3px);">
+    <div style="width:100%; max-width:320px; background:linear-gradient(180deg,#0f2347 0%,#091120 100%); border:2px solid #38bdf8; border-radius:12px; padding:16px; color:#f8fafc; box-shadow:0 0 35px rgba(56,189,248,0.3);">
+      <div style="font-size:14px; font-weight:900; color:#38bdf8; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+        <span>✏️</span> RENOMEAR TIME
+      </div>
+      <div style="font-size:10px; color:#cbd5e1; margin-bottom:12px;">
+        Digite um novo nome para este time (máximo de 20 caracteres):
+      </div>
+      <input id="rename-team-input" type="text" maxlength="20" placeholder="Ex: Time Dragão" style="width:100%; padding:8px 10px; border-radius:7px; border:1.5px solid #38bdf8; background:#050912; color:#ffffff; font-size:12px; font-weight:900; margin-bottom:14px;" onkeydown="if(event.key==='Enter') applyRenameTeam(this.value)">
+      <div style="display:flex; gap:8px;">
+        <button onclick="closeRenameTeamModal()" class="btn secondary" style="flex:1; padding:8px; font-size:11px;">Cancelar</button>
+        <button onclick="applyRenameTeam(document.getElementById('rename-team-input').value)" class="btn gold" style="flex:1; padding:8px; font-size:11px; font-weight:900;">Salvar Nome</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE TIME (v5.6.6) -->
+  <div id="delete-team-modal" style="display:none; position:fixed; inset:0; z-index:288; background:rgba(2,6,23,0.92); align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(3px);">
+    <div style="width:100%; max-width:320px; background:linear-gradient(180deg,#200e14 0%,#0f0508 100%); border:2px solid #f87171; border-radius:12px; padding:16px; color:#f8fafc; box-shadow:0 0 35px rgba(248,113,113,0.3); text-align:center;">
+      <div style="font-size:14px; font-weight:900; color:#f87171; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:6px;">
+        <span>🗑️</span> EXCLUIR TIME
+      </div>
+      <div id="delete-team-desc" style="font-size:10.5px; color:#cbd5e1; margin-bottom:14px; line-height:1.4;">
+        Tem certeza que deseja excluir este time?
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="closeDeleteTeamModal()" class="btn secondary" style="flex:1; padding:8px; font-size:11px;">Cancelar</button>
+        <button onclick="confirmDeleteActiveTeam()" class="btn" style="flex:1; padding:8px; font-size:11px; font-weight:900; background:#dc2626; border-color:#fca5a5; color:#fff;">Sim, Excluir</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL DE ATUALIZAÇÃO & CHANGELOG (v5.6.1) -->
   <div id="changelog-modal" style="display:none; position:fixed; inset:0; z-index:295; background:rgba(2,6,23,0.92); align-items:center; justify-content:center; padding:14px; backdrop-filter:blur(3px);">
     <div style="width:100%; max-width:345px; max-height:88vh; background:linear-gradient(180deg,#0f172a 0%,#090d16 100%); border:2px solid #38bdf8; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,0.9), 0 0 20px rgba(56,189,248,0.3); color:#f8fafc;">
@@ -864,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.5 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.6 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -873,7 +906,13 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
-        <!-- Feature 0: Roleta de Batalha Limpa (v5.6.5) -->
+        <!-- Feature 0: Gerenciamento de Times (v5.6.6) -->
+        <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">⚔️ Gerenciamento de Times (Max. 3)</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Adicionada a opção de <strong>renomear seus times</strong> livremente (ex: Time Fogo, Elétrico, etc.) e <strong>excluir times</strong> que você não usa mais. A quantidade de times foi <strong>limitada a no máximo 3 times</strong>, mantendo tudo limpo e organizado!</div>
+        </div>
+
+        <!-- Feature 0.5: Roleta de Batalha Limpa (v5.6.5) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎯 Roleta de Batalha 100% Limpa</div>
           <div style="color:#cbd5e1; font-size:10.5px;">Removidos todos os pop-ups, banners de multiplicador e mensagens sobrepostas na tela de confronto da roleta. Agora a tela exibe exclusivamente os dois Data Disks autênticos com o pino central e brilho neon na fatia sorteada!</div>
@@ -973,7 +1012,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.5</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.6</span>
           </div>
         </div>
 
@@ -1099,9 +1138,9 @@
           <div style="font-size:9.5px; font-weight:900; color:#fde047;" id="collection-progress-lbl">🔓 Coleção: 6/17 Pokémon · 1 Time Ativo</div>
           <button id="deck-victory-box-btn" class="btn gold" style="padding:3px 7px; font-size:8.5px; display:none;" onclick="openEarnedVictoryBox()">🎁 Abrir Caixa Ganha (0)</button>
         </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:4px;">
-          <div id="deck-presets-bar" style="display:flex; gap:4px; flex-wrap:wrap;"></div>
-          <span id="editing-slot-indicator" style="font-size:9px; font-weight:900; color:#facc15;">Slot #1 Ativo</span>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; gap:4px;">
+          <div id="deck-presets-bar" style="display:flex; flex-direction:column; gap:4px; flex:1;"></div>
+          <span id="editing-slot-indicator" style="font-size:9px; font-weight:900; color:#facc15; white-space:nowrap; margin-top:2px;">Slot #1 Ativo</span>
         </div>
 
         <!-- 6 Figure Pedestal Slots + Circular `[+ Evo / UX Mega]` Sub-Slots below each figure -->
@@ -1387,7 +1426,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.5 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.6 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -6780,7 +6819,11 @@ function isFigureUnlocked(figIdx) {
 // Sync active team with state.deckP1 & DECK_PRESETS
 function syncProgressionToDeckState() {
   if (!playerProgression.teams || playerProgression.teams.length === 0) {
-    playerProgression.teams = [{ name: "Time #1 (Inicial)", slots: [...STARTER_TEAM_INDICES] }];
+    playerProgression.teams = [{ name: "Time #1", slots: [...STARTER_TEAM_INDICES] }];
+  }
+  // Enforce maximum 3 teams limit!
+  if (playerProgression.teams.length > 3) {
+    playerProgression.teams = playerProgression.teams.slice(0, 3);
   }
   activeDeckPresetIdx = Math.max(0, Math.min(playerProgression.teams.length - 1, playerProgression.activeTeamIdx || 0));
   playerProgression.activeTeamIdx = activeDeckPresetIdx;
@@ -7192,15 +7235,12 @@ exchangeMaterialForFigure = function(idx) {
 };
 
 function createNewTeamSlot() {
-  const maxTeams = 8;
+  const maxTeams = 3;
+  if (!playerProgression.teams) playerProgression.teams = [];
   if (playerProgression.teams.length >= maxTeams) {
-    playSfx("tick");
-    return;
-  }
-  if (playerProgression.unlockedFigures.length < 7 && state.rareMetals < 50) {
     playSfx("hit");
     const ind = document.getElementById("editing-slot-indicator");
-    if (ind) ind.textContent = "🔒 Desbloqueie +1 Pokémon em Caixas/Loja para criar o Time #2!";
+    if (ind) ind.textContent = "⚠️ Limite máximo de 3 times atingido!";
     return;
   }
   playSfx("portal");
@@ -7214,6 +7254,96 @@ function createNewTeamSlot() {
   syncProgressionToDeckState();
   demoFullMatchState();
   renderHubAndCollection();
+  const ind = document.getElementById("editing-slot-indicator");
+  if (ind) ind.textContent = `Time #${newTeamNum} criado com sucesso!`;
+}
+
+function promptRenameActiveTeam() {
+  const actIdx = playerProgression.activeTeamIdx || 0;
+  const team = (playerProgression.teams && playerProgression.teams[actIdx]) ? playerProgression.teams[actIdx] : null;
+  if (!team) return;
+  const modal = document.getElementById("rename-team-modal");
+  const inp = document.getElementById("rename-team-input");
+  if (modal && inp) {
+    inp.value = team.name || `Time #${actIdx + 1}`;
+    modal.style.display = "flex";
+    setTimeout(() => { inp.focus(); inp.select(); }, 50);
+  } else {
+    const newName = window.prompt("Digite o novo nome para o time:", team.name);
+    if (newName !== null) {
+      applyRenameTeam(newName);
+    }
+  }
+}
+
+function applyRenameTeam(rawName) {
+  const actIdx = playerProgression.activeTeamIdx || 0;
+  const team = (playerProgression.teams && playerProgression.teams[actIdx]) ? playerProgression.teams[actIdx] : null;
+  if (!team) return;
+  const trimmed = (rawName || "").trim();
+  if (!trimmed) {
+    playSfx("hit");
+    return;
+  }
+  team.name = trimmed.slice(0, 20);
+  saveProgressionState();
+  playSfx("portal");
+  closeRenameTeamModal();
+  renderHubAndCollection();
+  const ind = document.getElementById("editing-slot-indicator");
+  if (ind) ind.textContent = `Time renomeado para "${team.name}"!`;
+}
+
+function closeRenameTeamModal() {
+  const m = document.getElementById("rename-team-modal");
+  if (m) m.style.display = "none";
+}
+
+function deleteActiveTeamPrompt() {
+  if (!playerProgression.teams || playerProgression.teams.length <= 1) {
+    playSfx("hit");
+    const ind = document.getElementById("editing-slot-indicator");
+    if (ind) ind.textContent = "⚠️ Você precisa manter pelo menos 1 time ativo!";
+    return;
+  }
+  const actIdx = playerProgression.activeTeamIdx || 0;
+  const team = playerProgression.teams[actIdx];
+  if (!team) return;
+
+  const modal = document.getElementById("delete-team-modal");
+  const desc = document.getElementById("delete-team-desc");
+  if (modal && desc) {
+    desc.textContent = `Tem certeza que deseja excluir o time "${team.name}"? Esta ação não pode ser desfeita.`;
+    modal.style.display = "flex";
+  } else {
+    if (window.confirm(`Tem certeza que deseja excluir o time "${team.name}"?`)) {
+      confirmDeleteActiveTeam();
+    }
+  }
+}
+
+function confirmDeleteActiveTeam() {
+  if (!playerProgression.teams || playerProgression.teams.length <= 1) {
+    playSfx("hit");
+    return;
+  }
+  const actIdx = playerProgression.activeTeamIdx || 0;
+  const deletedName = playerProgression.teams[actIdx].name;
+  playerProgression.teams.splice(actIdx, 1);
+  playerProgression.activeTeamIdx = Math.max(0, actIdx > 0 ? actIdx - 1 : 0);
+  saveProgressionState();
+  syncProgressionToDeckState();
+  demoFullMatchState();
+  renderHubAndCollection();
+  closeDeleteTeamModal();
+  playSfx("portal");
+  const ind = document.getElementById("editing-slot-indicator");
+  if (ind) ind.textContent = `Time "${deletedName}" excluído com sucesso!`;
+}
+
+function closeDeleteTeamModal() {
+  const m = document.getElementById("delete-team-modal");
+  if (m) m.style.display = "none";
 }
 
 switchDeckPreset = function(presetIdx) {
@@ -7282,7 +7412,7 @@ renderHubAndCollection = function() {
       const isAct = (i === playerProgression.activeTeamIdx);
       return `<button class="btn ${isAct ? 'gold' : 'secondary'}" style="padding:3px 7px; font-size:8.5px;" onclick="switchDeckPreset(${i})">⚔️ ${t.name}</button>`;
     }).join("");
-    const addBtn = playerProgression.teams.length < 8
+    const addBtn = playerProgression.teams.length < 3
       ? `<button class="btn secondary" style="padding:3px 7px; font-size:8px; border-style:dashed;" onclick="createNewTeamSlot()">➕ Novo Time</button>`
       : "";
     pBarEl.innerHTML = teamBtns + addBtn;
@@ -7835,7 +7965,7 @@ renderHubAndCollection = function() {
       const isAct = (i === playerProgression.activeTeamIdx);
       return `<button class="btn ${isAct ? 'gold' : 'secondary'}" style="padding:3px 7px; font-size:8.5px;" onclick="switchDeckPreset(${i})">⚔️ ${t.name}</button>`;
     }).join("");
-    const addBtn = playerProgression.teams.length < 8
+    const addBtn = playerProgression.teams.length < 3
       ? `<button class="btn secondary" style="padding:3px 7px; font-size:8px; border-style:dashed;" onclick="createNewTeamSlot()">➕ Novo Time</button>`
       : "";
     pBarEl.innerHTML = teamBtns + addBtn;
@@ -8928,6 +9058,8 @@ window.handleAndroidBackButton = function() {
     if (el && el.style.display === "flex") { el.style.display = "none"; return true; }
     return false;
   };
+  if (closeIfFlex("rename-team-modal")) return;
+  if (closeIfFlex("delete-team-modal")) return;
   if (closeIfFlex("exit-game-modal")) return;
   if (closeIfFlex("player-profile-modal")) return;
   if (closeIfFlex("figure-details-modal")) return;
@@ -11740,15 +11872,32 @@ renderHubAndCollection = function() {
 
   const pBarEl = document.getElementById("deck-presets-bar");
   if (pBarEl) {
+    const maxTeams = 3;
+    const canAdd = playerProgression.teams.length < maxTeams;
+    const canDelete = playerProgression.teams.length > 1;
+    const curTeam = playerProgression.teams[playerProgression.activeTeamIdx] || playerProgression.teams[0] || { name: "Time #1" };
+
     const teamBtns = playerProgression.teams.map((t, i) => {
       const isAct = (i === playerProgression.activeTeamIdx);
       return `<button class="btn ${isAct ? 'gold' : 'secondary'}" style="padding:3px 7px; font-size:8px;" onclick="switchDeckPreset(${i})">⚔️ ${t.name}</button>`;
     }).join("");
-    const addBtn = playerProgression.teams.length < 8
-      ? `<button class="btn secondary" style="padding:3px 6px; font-size:7.8px; border-style:dashed;" onclick="createNewTeamSlot()">➕ Time</button>`
-      : "";
+    const addBtn = canAdd
+      ? `<button class="btn secondary" style="padding:3px 6px; font-size:7.8px; border-style:dashed;" onclick="createNewTeamSlot()" title="Criar novo time (máximo 3)">➕ Time (${playerProgression.teams.length}/3)</button>`
+      : `<span style="padding:3px 6px; font-size:7.5px; color:#94a3b8; font-weight:800; border:1px solid #334155; border-radius:4px; background:rgba(0,0,0,0.3);">🔒 3/3 Times</span>`;
     const autoBtn = `<button class="btn green" style="padding:3px 6px; font-size:7.8px;" onclick="autoBuildBalancedTeamV540()" title="Monta automaticamente o melhor time com seus Pokémon desbloqueados">⚡ Auto-Time</button>`;
-    pBarEl.innerHTML = teamBtns + addBtn + autoBtn;
+
+    const manageBar = `
+      <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-top:3px; padding-top:3px; border-top:1px solid rgba(56,189,248,0.2);">
+        <div style="display:flex; align-items:center; gap:4px;">
+          <span style="font-size:8px; color:#93c5fd; font-weight:800; max-width:85px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${curTeam.name}">${curTeam.name}:</span>
+          <button class="btn secondary" style="padding:2px 6px; font-size:7.8px; color:#38bdf8;" onclick="promptRenameActiveTeam()" title="Mudar nome do time atual">✏️ Renomear</button>
+          <button class="btn" style="padding:2px 6px; font-size:7.8px; background:${canDelete ? '#991b1b' : '#334155'}; border:1px solid ${canDelete ? '#f87171' : '#475569'}; color:${canDelete ? '#fff' : '#64748b'}; cursor:${canDelete ? 'pointer' : 'not-allowed'};" onclick="deleteActiveTeamPrompt()" ${canDelete ? '' : 'disabled'} title="${canDelete ? 'Excluir este time' : 'Mínimo de 1 time obrigatório'}">🗑️ Excluir</button>
+        </div>
+        <span style="font-size:7.8px; color:#facc15; font-weight:800;">Limite: ${playerProgression.teams.length}/3</span>
+      </div>
+    `;
+
+    pBarEl.innerHTML = `<div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">` + teamBtns + addBtn + autoBtn + `</div>` + manageBar;
   }
 
   const indEl = document.getElementById("editing-slot-indicator");
@@ -14202,7 +14351,7 @@ async function triggerInAppUpdateAction() {
   setTimeout(() => {
     try {
       const url = new URL(window.location.href);
-      url.searchParams.set("v", "5.6.5");
+      url.searchParams.set("v", "5.6.6");
       url.searchParams.set("t", Date.now().toString());
       window.location.href = url.toString();
     } catch (e) {
