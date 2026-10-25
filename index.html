@@ -864,7 +864,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.1 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.5 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -873,6 +873,12 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
+        <!-- Feature 0: Roleta de Batalha Limpa (v5.6.5) -->
+        <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎯 Roleta de Batalha 100% Limpa</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Removidos todos os pop-ups, banners de multiplicador e mensagens sobrepostas na tela de confronto da roleta. Agora a tela exibe exclusivamente os dois Data Disks autênticos com o pino central e brilho neon na fatia sorteada!</div>
+        </div>
+
         <!-- Feature 1: Limpeza da Barra Superior -->
         <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">🧹 Visual Limpo no Tabuleiro</div>
@@ -967,7 +973,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.1</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.5</span>
           </div>
         </div>
 
@@ -1381,7 +1387,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.1 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.5 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -4343,11 +4349,11 @@ ddCanvas.addEventListener("pointerdown", (e) => {
   const sx = (e.clientX - rect.left) * (LOGICAL_W / rect.width);
   const sy = (e.clientY - rect.top) * (LOGICAL_H / rect.height);
   if (state.doubleChanceWaitingChoice) {
-    if (sx >= 180 && sy >= 230 && sy <= 295 && activeBattleRespinFn) {
+    if (sx >= 180 && sy >= 460 && sy <= 525 && activeBattleRespinFn) {
       activeBattleRespinFn();
       return;
     }
-    if (activeBattleAcceptFn) {
+    if (sx < 180 && sy >= 460 && sy <= 525 && activeBattleAcceptFn) {
       activeBattleAcceptFn();
       return;
     }
@@ -4600,310 +4606,128 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     const didMyUnitWin  = (outcome.winner === "atk" && isMyUnitAttacker)  || (outcome.winner === "def" && !isMyUnitAttacker);
     const didOppUnitWin = (outcome.winner === "atk" && !isMyUnitAttacker) || (outcome.winner === "def" && isMyUnitAttacker);
 
-    if (!allSpinStagesFinished || postElapsed < 820) {
-      // ======================================================================
-      // SCENE A: TWO GIANT INTERLOCKING DATA DISKS WITH A SINGLE CENTRAL CLASH PIN!
-      // Top-Right Wheel = Opponent (`oppUnit`), Bottom-Left Wheel = You (`myUnit`)
-      // ======================================================================
-      ddCtx.fillStyle = "#04060b";
-      ddCtx.fillRect(0, 0, 353, 530);
-      if (bananaWheelImg.complete) {
-        ddCtx.save();
-        ddCtx.globalAlpha = 0.22;
-        ddCtx.drawImage(bananaWheelImg, 0, 88, 353, 353);
-        ddCtx.restore();
-      }
-
-      // Golden friction sparks flying out from the central contact point (176.5, 265) while spinning
-      if (p < 1 && clashParticles.length < 28) {
-        const ang = (Math.random() < 0.5 ? -0.35 : 2.79) + (Math.random() - 0.5) * 0.7;
-        const spd = 2.5 + Math.random() * 5.5;
-        clashParticles.push({
-          x: CLASH_X, y: CLASH_Y,
-          vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
-          r: 2 + Math.random() * 2.5, life: 1.0, col: Math.random() < 0.6 ? "#facc15" : "#fb923c"
-        });
-      }
-      for (let i = clashParticles.length - 1; i >= 0; i--) {
-        const cp = clashParticles[i];
-        cp.x += cp.vx; cp.y += cp.vy; cp.life -= 0.05;
-        if (cp.life <= 0) { clashParticles.splice(i, 1); continue; }
-        ddCtx.strokeStyle = cp.col; ddCtx.globalAlpha = cp.life; ddCtx.lineWidth = 2;
-        ddCtx.beginPath(); ddCtx.moveTo(cp.x, cp.y); ddCtx.lineTo(cp.x - cp.vx * 2.5, cp.y - cp.vy * 2.5); ddCtx.stroke();
-      }
-      ddCtx.globalAlpha = 1;
-
-      const oppHighlightIdx = (p >= 1 || !isOppWheelSpinningThisStage) ? oppActiveStep.idx : -1;
-      const myHighlightIdx  = (p >= 1 || !isMyWheelSpinningThisStage)  ? myActiveStep.idx  : -1;
-
-      // 1. Draw Opponent's Giant Data Disk at Top-Right (cx=220, cy=146, r=122) — showTopPin = FALSE!
-      drawAuthenticDataDisk(
-        ddCtx, OPP_WHEEL_CX, OPP_WHEEL_CY, 122,
-        oppSpin.segs, curOppRot,
-        oppHighlightIdx,
-        0, "#f43f5e", false, null
-      );
-
-      // 2. Draw Player's Giant Data Disk at Bottom-Left (cx=133, cy=384, r=122) — showTopPin = FALSE!
-      drawAuthenticDataDisk(
-        ddCtx, MY_WHEEL_CX, MY_WHEEL_CY, 122,
-        mySpin.segs, curMyRot,
-        myHighlightIdx,
-        0, "#38bdf8", false, null
-      );
-
-      // 3. THE SINGLE UNAMBIGUOUS CENTRAL CLASH PIN (`176.5, 265`) WITH DUAL ARROWS POINTING INTO EACH WHEEL!
-      ddCtx.save();
-      ddCtx.translate(CLASH_X, CLASH_Y);
-      ddCtx.rotate(oppContactAngle + Math.PI / 2 + wobble);
-      ddCtx.strokeStyle = "#facc15";
-      ddCtx.lineWidth = 2.5;
-      ddCtx.shadowColor = "#facc15";
-      ddCtx.shadowBlur = 10;
-      ddCtx.beginPath();
-      ddCtx.moveTo(0, -22);
-      ddCtx.lineTo(0, 22);
-      ddCtx.stroke();
-
-      // Top Arrowhead pointing directly into Opponent's winning slice
-      ddCtx.beginPath();
-      ddCtx.moveTo(0, -24);
-      ddCtx.lineTo(-8, -9);
-      ddCtx.lineTo(8, -9);
-      ddCtx.closePath();
-      ddCtx.fillStyle = "#fb7185";
-      ddCtx.fill();
-      ddCtx.strokeStyle = "#ffffff";
-      ddCtx.lineWidth = 1.5;
-      ddCtx.stroke();
-
-      // Bottom Arrowhead pointing directly into Player's winning slice
-      ddCtx.beginPath();
-      ddCtx.moveTo(0, 24);
-      ddCtx.lineTo(-8, 9);
-      ddCtx.lineTo(8, 9);
-      ddCtx.closePath();
-      ddCtx.fillStyle = "#38bdf8";
-      ddCtx.fill();
-      ddCtx.strokeStyle = "#ffffff";
-      ddCtx.lineWidth = 1.5;
-      ddCtx.stroke();
-
-      // Central Gold Hub Gem
-      ddCtx.beginPath();
-      ddCtx.arc(0, 0, 7.5, 0, Math.PI * 2);
-      ddCtx.fillStyle = "#facc15";
-      ddCtx.fill();
-      ddCtx.strokeStyle = "#090d16";
-      ddCtx.lineWidth = 2;
-      ddCtx.stroke();
-      ddCtx.restore();
-
-      // 4. MULTI-HIT LIVE RE-SPIN & ACCUMULATION HUD BANNER!
-      // Whenever either wheel is in a Multi-Hit sequence (`mySpin.isMulti` or `oppSpin.isMulti`),
-      // display a live step-by-step banner showing the re-spin count and accumulating damage!
-      if (mySpin.isMulti || oppSpin.isMulti) {
-        const focusMy = mySpin.isMulti && (curStageIdx < mySteps.length || !oppSpin.isMulti);
-        const mSpin = focusMy ? mySpin : oppSpin;
-        const mStep = focusMy ? myActiveStep : oppActiveStep;
-        const mUnit = focusMy ? myUnit : oppUnit;
-        const isSpinningNow = (focusMy ? isMyWheelSpinningThisStage : isOppWheelSpinningThisStage) && (p < 1);
-
-        let badgeTitle = "";
-        let badgeSub = "";
-        let badgeCol = "#facc15";
-        if (isSpinningNow && curStageIdx === 0) {
-          badgeTitle = `🎲 GIRANDO ROLETA...`;
-          badgeSub = `${mUnit.name} possui ${mSpin.baseMultiName}`;
-          badgeCol = "#38bdf8";
-        } else if (isSpinningNow && curStageIdx > 0) {
-          const prevStep = (focusMy ? mySteps : oppSteps)[curStageIdx - 1];
-          badgeTitle = `🔄 GIRANDO DE NOVO! (${curStageIdx}º Re-Giro do Multiplicador)`;
-          badgeSub = `Soma acumulada até agora: ${prevStep.hits}x = ${prevStep.accumDmg} DMG (+${mSpin.unitBaseDmg} se cair em ${mSpin.baseMultiName}!)`;
-          badgeCol = "#fde047";
-        } else if (mStep.isMultiHit) {
-          badgeTitle = mStep.hits === 1
-            ? `⚡ MULTIPLICADOR ATIVADO! 1x = ${mStep.accumDmg} DMG`
-            : `🔥 SOMA +${mStep.unitDmg}! COMBO ${mStep.hits}x = ${mStep.accumDmg} DMG!`;
-          badgeSub = `Caiu em ${mSpin.baseMultiName}! Girando a roleta novamente...`;
-          badgeCol = "#4ade80";
-        } else if (mStep.stoppedChain) {
-          badgeTitle = `⏹️ PAROU FORA DO MULTIPLICADOR (${mStep.landedName})!`;
-          badgeSub = `Fim dos Re-Giros ➔ Dano Final Acumulado: ${mStep.hits}x = ${mStep.accumDmg} DMG!`;
-          badgeCol = "#fb923c";
-        }
-
-        if (badgeTitle) {
-          ddCtx.save();
-          ddCtx.fillStyle = "rgba(9, 13, 24, 0.94)";
-          ddCtx.strokeStyle = badgeCol;
-          ddCtx.lineWidth = 2;
-          ddCtx.shadowColor = badgeCol;
-          ddCtx.shadowBlur = 10;
-          ddCtx.beginPath();
-          ddCtx.roundRect(10, 224, 333, 38, 8);
-          ddCtx.fill();
-          ddCtx.stroke();
-          ddCtx.shadowBlur = 0;
-          ddCtx.fillStyle = badgeCol;
-          ddCtx.font = "900 10px sans-serif";
-          ddCtx.textAlign = "center";
-          ddCtx.fillText(badgeTitle, 176.5, 238);
-          ddCtx.fillStyle = "#f8fafc";
-          ddCtx.font = "bold 8.5px sans-serif";
-          ddCtx.fillText(badgeSub, 176.5, 253);
-          ddCtx.restore();
-        }
-      }
-    } else {
-      // ======================================================================
-      // SCENE B: 3D CRYSTAL FLOOR CLOSE-UP STRIKE (Bottom-Left = You, Top-Right = Opponent)
-      // ======================================================================
-      if (cleanBoardImg.complete) {
-        ddCtx.drawImage(cleanBoardImg, 65, 190, 220, 220, 0, 0, 353, 530);
-      } else {
-        ddCtx.fillStyle = "#080d18"; ddCtx.fillRect(0, 0, 353, 530);
-      }
-      ddCtx.fillStyle = "rgba(4, 8, 16, 0.45)";
-      ddCtx.fillRect(0, 0, 353, 530);
-
-      const strikeT = Math.min(1, (postElapsed - 820) / 550);
-      const lunge = Math.sin(strikeT * Math.PI) * 52;
-      let myX  = 122 + (didMyUnitWin  ? lunge : 0);
-      let myY  = 335 - (didMyUnitWin  ? lunge * 0.65 : 0);
-      let oppX = 232 - (didOppUnitWin ? lunge : 0);
-      let oppY = 215 + (didOppUnitWin ? lunge * 0.65 : 0);
-
-      if (strikeT > 0.45) {
-        const kb = (strikeT - 0.45) * 180;
-        if (didMyUnitWin)  { oppX += kb; oppY -= kb * 0.6; }
-        if (didOppUnitWin) { myX  -= kb; myY  += kb * 0.6; }
-      }
-
-      const oppImg = loadedFigImages[oppUnit.spriteKey] || loadedFigImages[oppUnit.baseId];
-      const myImg  = loadedFigImages[myUnit.spriteKey]  || loadedFigImages[myUnit.baseId];
-      if (oppImg && oppImg.complete) ddCtx.drawImage(oppImg, oppX - 42, oppY - 64, 84, 80);
-      if (myImg && myImg.complete)   ddCtx.drawImage(myImg,  myX - 48,  myY - 72,  96, 92);
-
-      if (strikeT > 0.2 && strikeT < 0.85) {
-        ddCtx.save();
-        ddCtx.strokeStyle = didMyUnitWin ? "#38bdf8" : "#f43f5e";
-        ddCtx.lineWidth = 7;
-        ddCtx.shadowColor = didMyUnitWin ? "#0284c7" : "#e11d48";
-        ddCtx.shadowBlur = 16;
-        ddCtx.beginPath(); ddCtx.moveTo(myX + 10, myY - 24); ddCtx.lineTo(oppX + 18, oppY - 30); ddCtx.stroke();
-        ddCtx.restore();
-      }
-    }
-
     // ======================================================================
-    // DIAGONAL NEON RED (TOP-LEFT = OPPONENT) & BLUE (BOTTOM-RIGHT = YOU) ATTACK BANNERS!
-    // Shows live progressive multiplier sum (`50 -> 100 -> 150...`) after each spin stops!
+    // PURE BATTLE ROULETTE: TWO INTERLOCKING DATA DISKS & CENTRAL CLASH PIN!
+    // Clean, authentic Pokémon Duel roulette without intrusive popups or message boxes!
     // ======================================================================
-    const showMyCorner  = allSpinStagesFinished || (curStageIdx > 0) || (p >= 1);
-    const showOppCorner = allSpinStagesFinished || (curStageIdx > 0) || (p >= 1);
-
-    const getCornerDisplay = (spinObj, stepObj, isSpinningNow) => {
-      if (!spinObj.isMulti) {
-        const s = spinObj.chosen;
-        const val = s.color === "purple" ? "★".repeat(s.stars || 1) : (s.dmg > 0 ? String(s.dmg) : s.name);
-        return { name: s.name, val };
-      }
-      // For a Multiplier attack, show the progressive sum as each spin step completes!
-      const completedStep = (isSpinningNow && curStageIdx > 0)
-        ? spinObj.spinSteps[Math.min(curStageIdx - 1, spinObj.spinSteps.length - 1)]
-        : stepObj;
-      const curHits = completedStep ? completedStep.hits : 1;
-      const curDmg  = completedStep ? completedStep.accumDmg : spinObj.unitBaseDmg;
-      const statusSuffix = (!allSpinStagesFinished && !completedStep.stoppedChain)
-        ? ` (${curHits}x · 🔄 Girando...)`
-        : ` (${curHits}x Hits!)`;
-      return {
-        name: `${spinObj.baseMultiName}${statusSuffix}`,
-        val: `${curDmg}`
-      };
-    };
-
-    if (showOppCorner) {
-      const oppDisp = getCornerDisplay(oppSpin, oppActiveStep, isOppWheelSpinningThisStage && p < 1);
+    ddCtx.fillStyle = "#04060b";
+    ddCtx.fillRect(0, 0, 353, 530);
+    if (bananaWheelImg.complete) {
       ddCtx.save();
-      ddCtx.fillStyle = "rgba(40, 6, 18, 0.92)";
-      ddCtx.beginPath(); ddCtx.moveTo(0, 0); ddCtx.lineTo(255, 0); ddCtx.lineTo(0, 128); ddCtx.closePath(); ddCtx.fill();
-      ddCtx.strokeStyle = (allSpinStagesFinished && didOppUnitWin) ? "#fde047" : "#f43f5e";
-      ddCtx.lineWidth = (allSpinStagesFinished && didOppUnitWin) ? 4.2 : 3.2;
-      ddCtx.shadowColor = "#f43f5e"; ddCtx.shadowBlur = 12;
-      ddCtx.beginPath(); ddCtx.moveTo(0, 128); ddCtx.lineTo(255, 0); ddCtx.stroke();
-      ddCtx.shadowBlur = 0;
-      ddCtx.fillStyle = "#fecdd3"; ddCtx.font = "900 9.5px sans-serif"; ddCtx.textAlign = "left";
-      ddCtx.fillText(`🔴 OPONENTE (${oppUnit.name})`, 12, 16);
-      ddCtx.fillStyle = "#fda4af"; ddCtx.font = "bold 10.5px sans-serif";
-      ddCtx.fillText(oppDisp.name, 12, 31);
-      ddCtx.fillStyle = (allSpinStagesFinished && didOppUnitWin) ? "#fde047" : "#fb7185"; ddCtx.font = "900 25px sans-serif";
-      ddCtx.fillText(oppDisp.val + ((allSpinStagesFinished && didOppUnitWin) ? " ★WIN" : ""), 12, 57);
+      ddCtx.globalAlpha = 0.22;
+      ddCtx.drawImage(bananaWheelImg, 0, 88, 353, 353);
       ddCtx.restore();
     }
 
-    if (showMyCorner) {
-      const myDisp = getCornerDisplay(mySpin, myActiveStep, isMyWheelSpinningThisStage && p < 1);
-      ddCtx.save();
-      ddCtx.fillStyle = "rgba(6, 22, 48, 0.92)";
-      ddCtx.beginPath(); ddCtx.moveTo(353, 530); ddCtx.lineTo(98, 530); ddCtx.lineTo(353, 402); ddCtx.closePath(); ddCtx.fill();
-      ddCtx.strokeStyle = (allSpinStagesFinished && didMyUnitWin) ? "#fde047" : "#38bdf8";
-      ddCtx.lineWidth = (allSpinStagesFinished && didMyUnitWin) ? 4.2 : 3.2;
-      ddCtx.shadowColor = "#38bdf8"; ddCtx.shadowBlur = 12;
-      ddCtx.beginPath(); ddCtx.moveTo(98, 530); ddCtx.lineTo(353, 402); ddCtx.stroke();
-      ddCtx.shadowBlur = 0;
-      ddCtx.fillStyle = (allSpinStagesFinished && didMyUnitWin) ? "#fde047" : "#38bdf8"; ddCtx.font = "900 26px sans-serif"; ddCtx.textAlign = "right";
-      ddCtx.fillText(((allSpinStagesFinished && didMyUnitWin) ? "★WIN " : "") + myDisp.val, 341, 482);
-      ddCtx.fillStyle = "#bae6fd"; ddCtx.font = "bold 10.5px sans-serif";
-      ddCtx.fillText(myDisp.name, 341, 500);
-      ddCtx.fillStyle = "#e0f2fe"; ddCtx.font = "900 9.5px sans-serif";
-      ddCtx.fillText(`🔵 VOCÊ (${myUnit.name})`, 341, 515);
-      ddCtx.restore();
+    // Golden friction sparks flying out from the central contact point (176.5, 265) while spinning
+    if (p < 1 && clashParticles.length < 28) {
+      const ang = (Math.random() < 0.5 ? -0.35 : 2.79) + (Math.random() - 0.5) * 0.7;
+      const spd = 2.5 + Math.random() * 5.5;
+      clashParticles.push({
+        x: CLASH_X, y: CLASH_Y,
+        vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+        r: 2 + Math.random() * 2.5, life: 1.0, col: Math.random() < 0.6 ? "#facc15" : "#fb923c"
+      });
     }
-
-    if (allSpinStagesFinished) {
-      // Center Verdict Pill at Bottom-Center so the comparison is 100% transparent
-      ddCtx.save();
-      ddCtx.fillStyle = "rgba(9, 13, 22, 0.92)";
-      ddCtx.strokeStyle = didMyUnitWin ? "#4ade80" : (didOppUnitWin ? "#f87171" : "#94a3b8");
-      ddCtx.lineWidth = 1.6;
-      ddCtx.beginPath(); ddCtx.roundRect(14, 294, 210, 22, 6); ddCtx.fill(); ddCtx.stroke();
-      ddCtx.fillStyle = didMyUnitWin ? "#4ade80" : (didOppUnitWin ? "#fda4af" : "#e2e8f0");
-      ddCtx.font = "900 9px sans-serif"; ddCtx.textAlign = "center"; ddCtx.textBaseline = "middle";
-      const verdTxt = didMyUnitWin ? `🏆 VOCÊ VENCEU! (${myUnit.name})` : (didOppUnitWin ? `💥 OPONENTE VENCEU! (${oppUnit.name})` : `⚖️ EMPATE! Ambos permanecem`);
-      ddCtx.fillText(verdTxt, 119, 305);
-      ddCtx.restore();
+    for (let i = clashParticles.length - 1; i >= 0; i--) {
+      const cp = clashParticles[i];
+      cp.x += cp.vx; cp.y += cp.vy; cp.life -= 0.05;
+      if (cp.life <= 0) { clashParticles.splice(i, 1); continue; }
+      ddCtx.strokeStyle = cp.col; ddCtx.globalAlpha = cp.life; ddCtx.lineWidth = 2;
+      ddCtx.beginPath(); ddCtx.moveTo(cp.x, cp.y); ddCtx.lineTo(cp.x - cp.vx * 2.5, cp.y - cp.vy * 2.5); ddCtx.stroke();
     }
+    ddCtx.globalAlpha = 1;
 
-    // Interactive Double Chance Buttons (`[✓ Keep Roll]` vs `[↻ Re-Spin!]`)
+    const oppHighlightIdx = (p >= 1 || !isOppWheelSpinningThisStage) ? oppActiveStep.idx : -1;
+    const myHighlightIdx  = (p >= 1 || !isMyWheelSpinningThisStage)  ? myActiveStep.idx  : -1;
+
+    // 1. Draw Opponent's Giant Data Disk at Top-Right (cx=220, cy=146, r=122) — showTopPin = FALSE!
+    drawAuthenticDataDisk(
+      ddCtx, OPP_WHEEL_CX, OPP_WHEEL_CY, 122,
+      oppSpin.segs, curOppRot,
+      oppHighlightIdx,
+      0, "#f43f5e", false, null
+    );
+
+    // 2. Draw Player's Giant Data Disk at Bottom-Left (cx=133, cy=384, r=122) — showTopPin = FALSE!
+    drawAuthenticDataDisk(
+      ddCtx, MY_WHEEL_CX, MY_WHEEL_CY, 122,
+      mySpin.segs, curMyRot,
+      myHighlightIdx,
+      0, "#38bdf8", false, null
+    );
+
+    // 3. THE SINGLE UNAMBIGUOUS CENTRAL CLASH PIN (`176.5, 265`) WITH DUAL ARROWS POINTING INTO EACH WHEEL!
+    ddCtx.save();
+    ddCtx.translate(CLASH_X, CLASH_Y);
+    ddCtx.rotate(oppContactAngle + Math.PI / 2 + wobble);
+    ddCtx.strokeStyle = "#facc15";
+    ddCtx.lineWidth = 2.5;
+    ddCtx.shadowColor = "#facc15";
+    ddCtx.shadowBlur = 10;
+    ddCtx.beginPath();
+    ddCtx.moveTo(0, -22);
+    ddCtx.lineTo(0, 22);
+    ddCtx.stroke();
+
+    // Top Arrowhead pointing directly into Opponent's winning slice
+    ddCtx.beginPath();
+    ddCtx.moveTo(0, -24);
+    ddCtx.lineTo(-8, -9);
+    ddCtx.lineTo(8, -9);
+    ddCtx.closePath();
+    ddCtx.fillStyle = "#fb7185";
+    ddCtx.fill();
+    ddCtx.strokeStyle = "#ffffff";
+    ddCtx.lineWidth = 1.5;
+    ddCtx.stroke();
+
+    // Bottom Arrowhead pointing directly into Player's winning slice
+    ddCtx.beginPath();
+    ddCtx.moveTo(0, 24);
+    ddCtx.lineTo(-8, 9);
+    ddCtx.lineTo(8, 9);
+    ddCtx.closePath();
+    ddCtx.fillStyle = "#38bdf8";
+    ddCtx.fill();
+    ddCtx.strokeStyle = "#ffffff";
+    ddCtx.lineWidth = 1.5;
+    ddCtx.stroke();
+
+    // Central Gold Hub Gem
+    ddCtx.beginPath();
+    ddCtx.arc(0, 0, 7.5, 0, Math.PI * 2);
+    ddCtx.fillStyle = "#facc15";
+    ddCtx.fill();
+    ddCtx.strokeStyle = "#090d16";
+    ddCtx.lineWidth = 2;
+    ddCtx.stroke();
+    ddCtx.restore();
+
+    // Interactive Double Chance Buttons (Clean bottom placement outside wheels)
     if (state.doubleChanceWaitingChoice) {
+      ddCtx.save();
       ddCtx.fillStyle = "rgba(9, 13, 22, 0.94)";
-      ddCtx.fillRect(18, 232, 317, 58);
+      ddCtx.fillRect(18, 466, 317, 56);
       ddCtx.fillStyle = "#fde047"; ddCtx.font = "900 10px sans-serif"; ddCtx.textAlign = "center";
-      ddCtx.fillText("DOUBLE CHANCE — Aceitar giro ou Re-girar Roleta?", 176.5, 244);
+      ddCtx.fillText("DOUBLE CHANCE — Aceitar giro ou Re-girar Roleta?", 176.5, 479);
 
       ddCtx.fillStyle = "#15803d"; ddCtx.strokeStyle = "#86efac"; ddCtx.lineWidth = 1.5;
-      ddCtx.beginPath(); ddCtx.roundRect(28, 252, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
+      ddCtx.beginPath(); ddCtx.roundRect(28, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
       ddCtx.fillStyle = "#ffffff"; ddCtx.font = "900 11px sans-serif";
-      ddCtx.fillText("✓ Keep Roll", 97, 267.5);
+      ddCtx.fillText("✓ Manter", 97, 501.5);
 
       ddCtx.fillStyle = "#b45309"; ddCtx.strokeStyle = "#fde047"; ddCtx.lineWidth = 1.5;
-      ddCtx.beginPath(); ddCtx.roundRect(186, 252, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
+      ddCtx.beginPath(); ddCtx.roundRect(186, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
       ddCtx.fillStyle = "#fef08a"; ddCtx.font = "900 11px sans-serif";
-      ddCtx.fillText("↻ Re-Spin!", 255, 267.5);
+      ddCtx.fillText("↻ Re-Girar", 255, 501.5);
+      ddCtx.restore();
     }
-
-    // Top-right `[Skip]` button on battle screen
-    ddCtx.fillStyle = "#1e293b"; ddCtx.strokeStyle = "#94a3b8"; ddCtx.lineWidth = 1;
-    ddCtx.beginPath(); ddCtx.roundRect(298, 6, 46, 18, 3); ddCtx.fill(); ddCtx.stroke();
-    ddCtx.fillStyle = "#f8fafc"; ddCtx.font = "bold 9.5px sans-serif"; ddCtx.textAlign = "center";
-    ddCtx.fillText("Skip", 321, 15.5);
 
     ddCtx.restore();
 
-    // Auto-close battle screen after all multiplier re-spins and 3D strike complete
-    if (allSpinStagesFinished && postElapsed > 1600 && ddCanClose && !state.doubleChanceWaitingChoice) {
+    // Auto-close battle screen after wheels finish spinning and outcome is clearly shown
+    if (allSpinStagesFinished && postElapsed > 1500 && ddCanClose && !state.doubleChanceWaitingChoice) {
       closeBattleOverlay();
       return;
     }
@@ -14378,7 +14202,7 @@ async function triggerInAppUpdateAction() {
   setTimeout(() => {
     try {
       const url = new URL(window.location.href);
-      url.searchParams.set("v", "5.6.1");
+      url.searchParams.set("v", "5.6.5");
       url.searchParams.set("t", Date.now().toString());
       window.location.href = url.toString();
     } catch (e) {
