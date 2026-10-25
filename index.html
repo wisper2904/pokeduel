@@ -485,6 +485,41 @@
     padding: 2px 6px; cursor: pointer; box-shadow: 2px 2px 0px #052e16;
   }
 
+
+/* --- RANKED MATCHMAKER 30S RADAR & ANIMATIONS --- */
+@keyframes mm-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes mm-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes mm-radar-pulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.mm-radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  pointer-events: none;
+}
+.mm-radar-ring.ring1 { width: 140px; height: 140px; animation: mm-radar-pulse 2.4s ease-out infinite; }
+.mm-radar-ring.ring2 { width: 190px; height: 190px; animation: mm-radar-pulse 2.4s ease-out 0.8s infinite; }
+.mm-radar-ring.ring3 { width: 240px; height: 240px; animation: mm-radar-pulse 2.4s ease-out 1.6s infinite; }
+.mm-scanner-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0) 0deg, rgba(56, 189, 248, 0.35) 60deg, transparent 65deg);
+  animation: mm-sweep 2s linear infinite;
+  pointer-events: none;
+}
+
 </style>
 </head>
 <body>
@@ -700,6 +735,58 @@
     </div>
   </div>
 
+  
+  <!-- AUTHENTIC RANKED MATCHMAKING RADAR MODAL (30S TIMEOUT + 5 BOTS FALLBACK) -->
+  <div id="ranked-matchmaker-modal" style="display:none; position:fixed; inset:0; z-index:285; background:rgba(3,6,15,0.94); flex-direction:column; align-items:center; justify-content:center; padding:14px; backdrop-filter:blur(8px);">
+    <div style="width:100%; max-width:345px; background:linear-gradient(180deg,#0f1f3d 0%,#060c1a 100%); border:2px solid #facc15; border-radius:14px; padding:16px 14px; text-align:center; box-shadow:0 0 50px rgba(250,204,21,0.35); color:#fff; position:relative; overflow:hidden;">
+      <!-- Pulsing Radar Background -->
+      <div class="mm-radar-ring ring1"></div>
+      <div class="mm-radar-ring ring2"></div>
+      <div class="mm-radar-ring ring3"></div>
+
+      <div class="ux-rainbow-badge" style="display:inline-block; margin-bottom:6px;">🏆 LIGA CARMONTE · RANQUEADA</div>
+      <div id="mm-status-title" style="font-size:16px; font-weight:900; color:#fde047; letter-spacing:0.5px; margin-bottom:2px;">BUSCANDO ADVERSÁRIO ONLINE</div>
+      <div id="mm-status-sub" style="font-size:10px; color:#93c5fd; font-weight:700; margin-bottom:12px;">Sincronizando com a rede de treinadores da Liga...</div>
+
+      <!-- Animated Center Radar & Ball -->
+      <div style="position:relative; width:110px; height:110px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center;">
+        <div class="mm-scanner-sweep"></div>
+        <div style="width:70px; height:70px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#ef4444 0%,#7f1d1d 55%,#1e293b 56%,#0f172a 100%); border:3px solid #facc15; box-shadow:0 0 25px rgba(250,204,21,0.6); display:flex; align-items:center; justify-content:center; position:relative; z-index:2; animation:mm-spin 4s linear infinite;">
+          <div style="position:absolute; width:100%; height:4px; background:#0f172a; top:50%; transform:translateY(-50%);"></div>
+          <div style="width:20px; height:20px; border-radius:50%; background:#f8fafc; border:3px solid #0f172a; box-shadow:0 0 10px #38bdf8; z-index:3;"></div>
+        </div>
+      </div>
+
+      <!-- Timer & Progress Bar -->
+      <div style="background:#091224; border:1px solid #1e3a8a; border-radius:8px; padding:8px 10px; margin-bottom:12px; position:relative; z-index:4;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-size:10px; color:#cbd5e1; font-weight:800;">Tempo de Busca:</span>
+          <span id="mm-timer-display" style="font-size:13px; font-weight:900; color:#fde047; font-family:monospace;">00:00 / 00:30</span>
+        </div>
+        <div style="width:100%; height:6px; background:#1e293b; border-radius:99px; overflow:hidden;">
+          <div id="mm-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg,#38bdf8,#facc15); transition:width 0.9s linear;"></div>
+        </div>
+        <div id="mm-live-log" style="font-size:9px; color:#7dd3fc; margin-top:5px; min-height:14px; font-weight:700;">📡 Escaneando fila de matchmaking online...</div>
+      </div>
+
+      <!-- Player Info Badge -->
+      <div id="mm-player-badge" style="display:flex; align-items:center; gap:8px; background:#070d1a; border:1px solid #334155; border-radius:8px; padding:6px 10px; margin-bottom:12px; text-align:left; position:relative; z-index:4;">
+        <img id="mm-player-avatar" src="" style="width:34px; height:34px; border-radius:6px; border:1.5px solid #facc15; object-fit:contain; background:#0f172a;">
+        <div style="flex:1;">
+          <div id="mm-player-name" style="font-size:11px; font-weight:900; color:#f8fafc;">Você</div>
+          <div id="mm-player-elo" style="font-size:9.5px; color:#facc15; font-weight:800;">1,850 ELO · Master League</div>
+        </div>
+        <div id="mm-queue-tag" style="font-size:9px; color:#4ade80; font-weight:800; background:rgba(74,222,128,0.15); border:1px solid #4ade80; border-radius:4px; padding:2px 5px;">FILA ATIVA</div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; gap:6px; position:relative; z-index:4;">
+        <button onclick="cancelRankedMatchmaking()" style="flex:1; height:34px; border-radius:6px; background:#1e293b; border:1.5px solid #64748b; color:#cbd5e1; font-weight:900; font-size:10.5px; cursor:pointer;">✕ Cancelar</button>
+        <button onclick="triggerBotFallbackNow()" style="flex:1.2; height:34px; border-radius:6px; background:linear-gradient(180deg,#fef08a 0%,#facc15 50%,#ca8a04 100%); border:1.5px solid #ffffff; color:#090d16; font-weight:900; font-size:10.5px; cursor:pointer;">⚡ Jogar com Bot</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SECTION 1: CLEAN INDIVIDUAL TRAINER PROFILE MODAL (v4.8.0) -->
   <div id="player-profile-modal" style="display:none; position:fixed; inset:0; z-index:270; background:rgba(3,7,18,0.92); align-items:center; justify-content:center; padding:12px;">
     <div style="width:100%; max-width:360px; max-height:90vh; overflow-y:auto; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #38bdf8; border-radius:12px; padding:14px; color:#f8fafc; box-shadow:0 10px 35px rgba(0,0,0,0.95);">
@@ -904,7 +991,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v6.0.1 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v6.1.0 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -1085,7 +1172,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v6.0.1</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v6.1.0</span>
           </div>
         </div>
 
@@ -1499,7 +1586,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v6.0.1 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v6.1.0 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -2832,7 +2919,7 @@ function drawHDVectorBoardAndChrome() {
   ctx.font = "700 10px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.textAlign = "left";
   const myNick = (window.trainerProfileData && window.trainerProfileData.nickname) ? window.trainerProfileData.nickname : "Você";
-  const oppNick = ((state.mode === "p2p" || state.gameMode === "p2p") && remoteOpponentProfile && remoteOpponentProfile.nickname) ? remoteOpponentProfile.nickname : "Rival";
+  const oppNick = (remoteOpponentProfile && remoteOpponentProfile.nickname) ? remoteOpponentProfile.nickname : "Rival";
   ctx.fillText(flipped ? `${myNick} (P2)` : `${myNick} (P1)`, 69, 28.5);
 
   const redPatch = ctx.createLinearGradient(202, 19, 286, 48);
@@ -3696,7 +3783,7 @@ function showWinResultScreen(winner) {
   // Section 1.2: Dynamic ELO Calculation (K=32) & Trainer Profile Stats Update
   if (window.trainerProfileData) {
     const p = window.trainerProfileData;
-    const oppRating = (state.gameMode === 'p2p' && remoteOpponentProfile && remoteOpponentProfile.rankRating) ? remoteOpponentProfile.rankRating : (window.trainerProfileData.rankRating || 1000);
+    const oppRating = (remoteOpponentProfile && remoteOpponentProfile.rankRating) ? remoteOpponentProfile.rankRating : (window.trainerProfileData.rankRating || 1000);
     const expected = 1 / (1 + Math.pow(10, (oppRating - p.rankRating) / 400));
     const delta = Math.round(32 * ((didWin ? 1 : 0) - expected));
     p.rankRating = Math.max(800, p.rankRating + delta);
@@ -8772,7 +8859,7 @@ showWinResultScreen = function(winner) {
   }
   if (window.trainerProfileData) {
     const p = window.trainerProfileData;
-    const oppRating = (state.gameMode === 'p2p' && remoteOpponentProfile && remoteOpponentProfile.rankRating) ? remoteOpponentProfile.rankRating : (window.trainerProfileData.rankRating || 1000);
+    const oppRating = (remoteOpponentProfile && remoteOpponentProfile.rankRating) ? remoteOpponentProfile.rankRating : (window.trainerProfileData.rankRating || 1000);
     const expected = 1 / (1 + Math.pow(10, (oppRating - p.rankRating) / 400));
     const delta = Math.round(32 * ((didWin ? 1 : 0) - expected));
     p.rankRating = Math.max(800, p.rankRating + delta);
@@ -11729,11 +11816,400 @@ function hideTutorialCoachHud() {
   if (hud) hud.style.display = "none";
 }
 
-function startLeagueRankedMatch() {
+
+// ============================================================================
+// 18. AUTHENTIC RANKED MATCHMAKER (30S P2P SYNC + 5 DIVERSE BOTS FALLBACK)
+// ============================================================================
+const RANKED_BOT_TRAINERS = [
+  {
+    id: "bot_red",
+    name: "Red (Champion)",
+    title: "Lenda do Monte Prata",
+    rating: 2180,
+    tier: "Master League",
+    avatar: "charizard",
+    deck: [0, 1, 20, 25, 23, 7], // Charizard EX, Pikachu EX, Zapdos EX, Snorlax R, Blastoise EX, Venusaur EX
+    desc: "Equipe clássica de Kanto: alto impacto com Charizard, avanço do Zapdos e defesa de Snorlax e Blastoise."
+  },
+  {
+    id: "bot_cynthia",
+    name: "Cynthia (Champion)",
+    title: "Mestre de Sinnoh & Dragões",
+    rating: 2350,
+    tier: "Grandmaster",
+    avatar: "mega_rayquaza",
+    deck: [15, 29, 14, 12, 11, 13], // Rayquaza EX, Mega Rayquaza UX, Lucario EX, Dialga Origin UX, Palkia Origin UX, Gengar EX
+    desc: "Dragões de Sinnoh: Roar of Time de 160 Dano, Extreme Speed e Dragon Ascent 150 Dourado."
+  },
+  {
+    id: "bot_misty",
+    name: "Misty (Gym Leader)",
+    title: "A Garota Moleca Toda-Água",
+    rating: 1890,
+    tier: "Champion League",
+    avatar: "gyarados",
+    deck: [18, 19, 16, 5, 23, 2], // Magikarp UC, Gyarados R, Greninja EX, Lapras EX, Blastoise EX, Squirtle UC
+    desc: "Evolução tática de Magikarp para Gyarados (+10 DMG), Water Shuriken dourado e sono com Lapras."
+  },
+  {
+    id: "bot_morty",
+    name: "Morty (Ghost Master)",
+    title: "O Místico dos Fantasmas",
+    rating: 1980,
+    tier: "Master League",
+    avatar: "mega_gengar",
+    deck: [13, 27, 26, 17, 24, 6], // Gengar EX, Mega Gengar UX, Lunala UX, Mew EX, Deoxys Attack EX, Charmander UC
+    desc: "Fantasmas com Pass-Through sobre o campo, Shadow Tag para travar o inimigo e escudo Hyper Sonic do Mew."
+  },
+  {
+    id: "bot_steven",
+    name: "Steven Stone (Champion)",
+    title: "Especialista em Fósseis e Minerais",
+    rating: 2240,
+    tier: "Master League",
+    avatar: "zapdos",
+    deck: [8, 14, 21, 22, 20, 0], // Kabutops EX, Lucario EX, Articuno EX, Moltres EX, Zapdos EX, Charizard EX
+    desc: "Trio de Aves Lendárias com Soar (infiltração sobre Pokémon terrestres), Freeze, Burn e Aura Sphere."
+  }
+];
+
+let windowCurrentSelectedBot = null;
+let rankedMatchmakerInterval = null;
+let rankedMatchmakerElapsed = 0;
+let rankedMatchmakerChannel = null;
+let rankedMatchmakerHostPeer = null;
+let rankedMatchmakerConn = null;
+let rankedMatchmakerMatched = false;
+
+function openRankedMatchmakerModal() {
   hideTutorialCoachHud();
+  rankedMatchmakerMatched = false;
+  rankedMatchmakerElapsed = 0;
+
+  const modal = document.getElementById("ranked-matchmaker-modal");
+  if (!modal) {
+    startLeagueRankedMatchFallbackBot();
+    return;
+  }
+
+  // Populate Player Details
+  const p = window.trainerProfileData || { nickname: "Treinador", rankRating: 1000, leagueTier: "Beginner", avatar: "pikachu" };
+  const avEl = document.getElementById("mm-player-avatar");
+  const nmEl = document.getElementById("mm-player-name");
+  const eloEl = document.getElementById("mm-player-elo");
+  const tDisp = document.getElementById("mm-timer-display");
+  const pBar = document.getElementById("mm-progress-bar");
+  const lLog = document.getElementById("mm-live-log");
+  const stSub = document.getElementById("mm-status-sub");
+  const stTitle = document.getElementById("mm-status-title");
+
+  const sp = AUTHENTIC_FIG_SPRITES[p.avatar] || AUTHENTIC_FIG_SPRITES["pikachu"];
+  if (avEl) avEl.src = sp ? sp.uri : "";
+  if (nmEl) nmEl.textContent = p.nickname || "Você";
+  if (eloEl) eloEl.textContent = `${p.rankRating} ELO · ${p.leagueTier || 'Liga Carmonte'}`;
+  if (tDisp) tDisp.textContent = "00:00 / 00:30";
+  if (pBar) pBar.style.width = "0%";
+  if (lLog) lLog.textContent = "📡 Sincronizando com a rede de matchmaking online...";
+  if (stSub) stSub.textContent = "Buscando jogadores online próximos do seu ELO...";
+  if (stTitle) {
+    stTitle.textContent = "BUSCANDO ADVERSÁRIO ONLINE";
+    stTitle.style.color = "#fde047";
+  }
+
+  modal.style.display = "flex";
+  playSfx("portal");
+
+  // 1. Initialize Real Cross-Tab / LAN Sync (BroadcastChannel)
+  try {
+    if (typeof BroadcastChannel !== "undefined") {
+      rankedMatchmakerChannel = new BroadcastChannel("pokeduel_ranked_mm_v6");
+      rankedMatchmakerChannel.onmessage = function(ev) {
+        if (!ev || !ev.data || rankedMatchmakerMatched) return;
+        const msg = ev.data;
+        if (msg.type === "RANKED_QUEUE_PING" && msg.senderId !== p.trainerId) {
+          // Found another human player in queue!
+          rankedMatchmakerMatched = true;
+          rankedMatchmakerChannel.postMessage({
+            type: "RANKED_QUEUE_PONG",
+            senderId: p.trainerId,
+            senderNick: p.nickname,
+            senderRating: p.rankRating,
+            senderTier: p.leagueTier,
+            deck: state.deckP1
+          });
+          onHumanMatchFound({
+            nickname: msg.senderNick || "Treinador Online",
+            rankRating: msg.senderRating || 1800,
+            leagueTier: msg.senderTier || "Master",
+            deck: msg.deck || [0, 1, 2, 3, 4, 5],
+            isBot: false,
+            role: "p2"
+          });
+        } else if (msg.type === "RANKED_QUEUE_PONG" && msg.senderId !== p.trainerId) {
+          rankedMatchmakerMatched = true;
+          onHumanMatchFound({
+            nickname: msg.senderNick || "Treinador Online",
+            rankRating: msg.senderRating || 1800,
+            leagueTier: msg.senderTier || "Master",
+            deck: msg.deck || [0, 1, 2, 3, 4, 5],
+            isBot: false,
+            role: "p1"
+          });
+        }
+      };
+      rankedMatchmakerChannel.postMessage({
+        type: "RANKED_QUEUE_PING",
+        senderId: p.trainerId,
+        senderNick: p.nickname,
+        senderRating: p.rankRating,
+        senderTier: p.leagueTier,
+        deck: state.deckP1
+      });
+    }
+  } catch (e) {}
+
+  // 2. Initialize PeerJS Global Cloud Signaling for 2 phones across Internet
+  if (window.Peer) {
+    try {
+      const publicQueueId = "pdr-ranked-global-queue-v6";
+      const guestPeer = new Peer(undefined, { config: PEER_ICE_CONFIG, debug: 0 });
+      guestPeer.on("open", () => {
+        const conn = guestPeer.connect(publicQueueId, { reliable: true });
+        conn.on("open", () => {
+          if (rankedMatchmakerMatched) return;
+          rankedMatchmakerMatched = true;
+          conn.send({
+            type: "RANKED_HANDSHAKE",
+            profile: {
+              nickname: p.nickname,
+              rankRating: p.rankRating,
+              leagueTier: p.leagueTier,
+              trainerId: p.trainerId
+            },
+            deck: state.deckP1
+          });
+          conn.on("data", data => {
+            if (data && data.type === "RANKED_ACCEPT") {
+              attachPeerJSConn(conn);
+              remoteOpponentProfile = data.profile;
+              state.deckP2 = data.deck || state.deckP2;
+              state.mode = "p2p";
+              state.myRole = "p2";
+              launchMatchFromMatchmaker(false);
+            }
+          });
+        });
+        conn.on("error", () => {});
+      });
+
+      guestPeer.on("error", err => {
+        // If queue room not hosted, try hosting it for the next 30 seconds!
+        if (rankedMatchmakerMatched) return;
+        try {
+          guestPeer.destroy();
+          const hostPeer = new Peer(publicQueueId, { config: PEER_ICE_CONFIG, debug: 0 });
+          rankedMatchmakerHostPeer = hostPeer;
+          hostPeer.on("connection", c => {
+            if (rankedMatchmakerMatched) return;
+            rankedMatchmakerMatched = true;
+            c.on("data", data => {
+              if (data && data.type === "RANKED_HANDSHAKE") {
+                c.send({
+                  type: "RANKED_ACCEPT",
+                  profile: {
+                    nickname: p.nickname,
+                    rankRating: p.rankRating,
+                    leagueTier: p.leagueTier,
+                    trainerId: p.trainerId
+                  },
+                  deck: state.deckP1
+                });
+                attachPeerJSConn(c);
+                remoteOpponentProfile = data.profile;
+                state.deckP2 = data.deck || state.deckP2;
+                state.mode = "p2p";
+                state.myRole = "p1";
+                launchMatchFromMatchmaker(false);
+              }
+            });
+          });
+        } catch (e) {}
+      });
+    } catch (e) {}
+  }
+
+  // 3. Start 30-Second Countdown Timer
+  clearInterval(rankedMatchmakerInterval);
+  rankedMatchmakerInterval = setInterval(() => {
+    if (rankedMatchmakerMatched) {
+      clearInterval(rankedMatchmakerInterval);
+      return;
+    }
+    rankedMatchmakerElapsed++;
+    const secStr = rankedMatchmakerElapsed < 10 ? `0${rankedMatchmakerElapsed}` : `${rankedMatchmakerElapsed}`;
+    if (tDisp) tDisp.textContent = `00:${secStr} / 00:30`;
+    if (pBar) pBar.style.width = `${Math.min(100, (rankedMatchmakerElapsed / 30) * 100)}%`;
+
+    // Dynamic scanning commentary
+    if (lLog) {
+      if (rankedMatchmakerElapsed < 7) {
+        lLog.textContent = "📡 Sincronizando com a rede de treinadores da Liga...";
+      } else if (rankedMatchmakerElapsed < 15) {
+        lLog.textContent = "🔍 Buscando jogadores online próximos do seu ELO...";
+      } else if (rankedMatchmakerElapsed < 23) {
+        lLog.textContent = "🌐 Ampliando busca para salas e ligas adjacentes...";
+      } else if (rankedMatchmakerElapsed < 29) {
+        lLog.textContent = "⚡ Limite de 30s se aproximando... Preparando Bot Mestre!";
+      } else {
+        lLog.textContent = "🤖 30s esgotados! Puxando Bot Ranqueado com ELO sincronizado...";
+      }
+    }
+
+    // Ping broadcast channel periodically
+    if (rankedMatchmakerChannel && rankedMatchmakerElapsed % 3 === 0) {
+      try {
+        rankedMatchmakerChannel.postMessage({
+          type: "RANKED_QUEUE_PING",
+          senderId: p.trainerId,
+          senderNick: p.nickname,
+          senderRating: p.rankRating,
+          senderTier: p.leagueTier,
+          deck: state.deckP1
+        });
+      } catch (e) {}
+    }
+
+    // 30 SECONDS TIMEOUT FALLBACK TO BOT!
+    if (rankedMatchmakerElapsed >= 30) {
+      clearInterval(rankedMatchmakerInterval);
+      triggerBotFallbackTimeout();
+    }
+  }, 1000);
+}
+
+function cancelRankedMatchmaking() {
+  clearInterval(rankedMatchmakerInterval);
+  if (rankedMatchmakerChannel) {
+    try { rankedMatchmakerChannel.close(); } catch (e) {}
+    rankedMatchmakerChannel = null;
+  }
+  if (rankedMatchmakerHostPeer) {
+    try { rankedMatchmakerHostPeer.destroy(); } catch (e) {}
+    rankedMatchmakerHostPeer = null;
+  }
+  rankedMatchmakerMatched = false;
+  const modal = document.getElementById("ranked-matchmaker-modal");
+  if (modal) modal.style.display = "none";
+  playSfx("tick");
+  setLogText("Matchmaking cancelado.");
+}
+
+function onHumanMatchFound(oppData) {
+  clearInterval(rankedMatchmakerInterval);
+  rankedMatchmakerMatched = true;
+  playSfx("level_up");
+  if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+
+  const stTitle = document.getElementById("mm-status-title");
+  const stSub = document.getElementById("mm-status-sub");
+  const lLog = document.getElementById("mm-live-log");
+  if (stTitle) {
+    stTitle.textContent = "🎉 ADVERSÁRIO ENCONTRADO!";
+    stTitle.style.color = "#4ade80";
+  }
+  if (stSub) stSub.textContent = `${oppData.nickname} (${oppData.rankRating} ELO · ${oppData.leagueTier})`;
+  if (lLog) lLog.textContent = `⚡ Sincronizando partida ranqueada com ${oppData.nickname}...`;
+
+  remoteOpponentProfile = {
+    nickname: oppData.nickname,
+    rankRating: oppData.rankRating,
+    leagueTier: oppData.leagueTier,
+    isBot: false
+  };
+  state.deckP2 = oppData.deck || state.deckP2;
+  state.mode = "p2p";
+  state.myRole = oppData.role || "p1";
+
+  setTimeout(() => {
+    launchMatchFromMatchmaker(false);
+  }, 850);
+}
+
+function triggerBotFallbackNow() {
+  if (rankedMatchmakerMatched) return;
+  clearInterval(rankedMatchmakerInterval);
+  rankedMatchmakerMatched = true;
+  triggerBotFallbackTimeout();
+}
+
+function triggerBotFallbackTimeout() {
+  clearInterval(rankedMatchmakerInterval);
+  rankedMatchmakerMatched = true;
+
+  // Clean up network peers
+  if (rankedMatchmakerChannel) {
+    try { rankedMatchmakerChannel.close(); } catch (e) {}
+    rankedMatchmakerChannel = null;
+  }
+  if (rankedMatchmakerHostPeer) {
+    try { rankedMatchmakerHostPeer.destroy(); } catch (e) {}
+    rankedMatchmakerHostPeer = null;
+  }
+
+  // Pick one of the 5 Ranked Bots!
+  const p = window.trainerProfileData || { rankRating: 1000 };
+  const pRating = p.rankRating || 1000;
+  
+  // Sort bots by rating proximity to player or choose dynamically
+  const sorted = [...RANKED_BOT_TRAINERS].sort((a, b) => Math.abs(a.rating - pRating) - Math.abs(b.rating - pRating));
+  const botCandidates = sorted.slice(0, 3);
+  const selectedBot = botCandidates[Math.floor(Math.random() * botCandidates.length)] || RANKED_BOT_TRAINERS[0];
+  windowCurrentSelectedBot = selectedBot;
+
+  playSfx("level_up");
+  if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+
+  const stTitle = document.getElementById("mm-status-title");
+  const stSub = document.getElementById("mm-status-sub");
+  const lLog = document.getElementById("mm-live-log");
+  const pBar = document.getElementById("mm-progress-bar");
+  if (pBar) pBar.style.width = "100%";
+  if (stTitle) {
+    stTitle.textContent = "🤖 BOT ENCONTRADO (30S)";
+    stTitle.style.color = "#38bdf8";
+  }
+  if (stSub) stSub.textContent = `${selectedBot.name} (${selectedBot.rating} ELO · ${selectedBot.tier})`;
+  if (lLog) lLog.textContent = `⚔️ ${selectedBot.title} — Iniciando partida oficial!`;
+
+  remoteOpponentProfile = {
+    nickname: selectedBot.name,
+    rankRating: selectedBot.rating,
+    leagueTier: selectedBot.tier,
+    title: selectedBot.title,
+    avatar: selectedBot.avatar,
+    isBot: true
+  };
+  state.deckP2 = [...selectedBot.deck];
+  window.adaptiveAIOpponentName = selectedBot.name;
+
+  setTimeout(() => {
+    launchMatchFromMatchmaker(true);
+  }, 950);
+}
+
+function launchMatchFromMatchmaker(isBot) {
+  const modal = document.getElementById("ranked-matchmaker-modal");
+  if (modal) modal.style.display = "none";
   state.matchKind = "league";
+  if (isBot) {
+    state.mode = "ai";
+    state.gameMode = "ai";
+  }
   startVideoAuthenticMatch();
-  setLogText("🏆 LEAGUE MATCH RANQUEADO — Vale ELO e Time Booster!");
+  setLogText(`🏆 PARTIDA DA LIGA INICIADA! Você vs ${remoteOpponentProfile ? remoteOpponentProfile.nickname : 'Rival'} (${remoteOpponentProfile ? remoteOpponentProfile.rankRating : 1000} ELO)!`);
+}
+function startLeagueRankedMatch() {
+  openRankedMatchmakerModal();
 }
 
 function startGymCupMatch() {
