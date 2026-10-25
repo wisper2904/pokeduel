@@ -624,6 +624,7 @@
 </div>
 
 <!-- AUTHENTIC BOOSTER CAPSULE UNBOXING MODAL (RAINBOW [UX] & GOLD [EX] REVEAL!) -->
+<canvas id="booster-cinematic-canvas" width="720" height="1280" style="display:none; position:fixed; inset:0; width:100vw; height:100vh; z-index:270; background:#04060c; touch-action:none;"></canvas>
 <div id="booster-unbox-modal" style="display:none; position:fixed; inset:0; z-index:265; background:radial-gradient(circle at 50% 35%,#1e1b4b 0%,#04060c 100%); flex-direction:column; align-items:center; justify-content:center; padding:14px;">
   <div style="width:100%; max-width:345px; background:linear-gradient(180deg,#111c33 0%,#070b14 100%); border:2px solid #facc15; border-radius:12px; padding:12px; text-align:center; box-shadow:0 0 40px rgba(56,189,248,0.5); color:#fff;">
     <div id="unbox-header-badge" class="ux-rainbow-badge" style="display:inline-block; margin-bottom:4px;">🌈 RAINBOW / UX BOOSTER OPENED!</div>
@@ -897,7 +898,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.3 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.8.0 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,6 +907,12 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
+        <!-- Feature 0: Animações Cinemáticas de Abertura de Caixa e Batalha (v5.8.0) -->
+        <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎬 Animações Cinemáticas de Caixa (Única & Múltipla) e Ataques na Batalha</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">1) <strong>Abertura de Caixa Única</strong> (1x Booster & Caixa de Vitória): Caixa 3D flutuando sobre pedestal holográfico, feixes de luz (God Rays), partículas estelares, explosão ao toque e a figura subindo com revelação de raridade!<br>2) <strong>Abertura de Caixa Múltipla</strong> (4x, 6x, 10x): Grande cápsula de pack abrindo e revelando figura por figura com suspense especial de arco-íris para [EX] e [UX], botão de avançar e opção de pular!<br>3) <strong>Efeitos de Ataque na Batalha</strong>: Raio sônico dourado (Hyper Sonic/Gold), cortes incandescentes em diagonal (White), orbe de plasma mágico (Purple) e escudo holográfico (Blue/Hyper Sonic Shield)!</div>
+        </div>
+
         <!-- Feature 0: Correção Oficial do Hyper Sonic do Mew (v5.7.3) -->
         <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">🛡️ Regra Oficial de Hyper Sonic (Mew EX/UX) Corrigida</div>
@@ -1054,7 +1061,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.3</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.8.0</span>
           </div>
         </div>
 
@@ -1468,7 +1475,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.3 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.8.0 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -5052,6 +5059,107 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       ddCtx.restore();
     }
 
+    // ======================================================================
+    // CINEMATIC ATTACK IMPACT ANIMATION (Elemental Slash / Sonic Beam / Shield FX)
+    // ======================================================================
+    if (allSpinStagesFinished && postElapsed > 50 && postElapsed < 1250 && outcome) {
+      const isWinnerAtk = (outcome.winner === "atk");
+      const isWinnerDef = (outcome.winner === "def");
+      const hasWinner = (isWinnerAtk || isWinnerDef);
+
+      const winUnit = isWinnerAtk ? atkUnit : (isWinnerDef ? defUnit : null);
+      const loseUnit = isWinnerAtk ? defUnit : (isWinnerDef ? atkUnit : null);
+      const winSlice = isWinnerAtk ? atkSpin.chosen : (isWinnerDef ? defSpin.chosen : null);
+
+      const targetX = isWinnerAtk ? OPP_WHEEL_CX : MY_WHEEL_CX;
+      const targetY = isWinnerAtk ? OPP_WHEEL_CY : MY_WHEEL_CY;
+      const sourceX = isWinnerAtk ? MY_WHEEL_CX : OPP_WHEEL_CX;
+      const sourceY = isWinnerAtk ? MY_WHEEL_CY : OPP_WHEEL_CY;
+
+      const animProg = Math.min(1.0, (postElapsed - 50) / 450);
+      const fadeAlpha = 1.0 - Math.max(0, (postElapsed - 600) / 600);
+
+      ddCtx.save();
+      ddCtx.globalAlpha = Math.max(0, fadeAlpha);
+
+      if (hasWinner && winSlice) {
+        if (winSlice.color === "gold") {
+          // GOLD SONIC LASER BEAM (Hyper Sonic / Gold Attacks)
+          ddCtx.strokeStyle = "#facc15";
+          ddCtx.lineWidth = 14 * (1.0 - animProg * 0.4);
+          ddCtx.shadowColor = "#fde047";
+          ddCtx.shadowBlur = 25;
+          ddCtx.beginPath();
+          ddCtx.moveTo(sourceX, sourceY);
+          ddCtx.lineTo(targetX, targetY);
+          ddCtx.stroke();
+
+          // Sonic Shockwave Rings on Target
+          ddCtx.beginPath();
+          ddCtx.arc(targetX, targetY, 20 + animProg * 65, 0, Math.PI * 2);
+          ddCtx.strokeStyle = "#ffffff";
+          ddCtx.lineWidth = 3;
+          ddCtx.stroke();
+
+        } else if (winSlice.color === "purple") {
+          // PURPLE MYSTIC PLASMA BURST (Aura Sphere / Status / Special Moves)
+          const plasmaR = 15 + animProg * 80;
+          const pGrad = ddCtx.createRadialGradient(targetX, targetY, 5, targetX, targetY, plasmaR);
+          pGrad.addColorStop(0, "rgba(255, 255, 255, 0.95)");
+          pGrad.addColorStop(0.4, "rgba(192, 132, 252, 0.85)");
+          pGrad.addColorStop(1, "rgba(126, 34, 206, 0)");
+          ddCtx.fillStyle = pGrad;
+          ddCtx.beginPath();
+          ddCtx.arc(targetX, targetY, plasmaR, 0, Math.PI * 2);
+          ddCtx.fill();
+
+        } else {
+          // WHITE / PHYSICAL FLAMING SLASH CUT (Fire Spin / Iron Tail / Tackle)
+          ddCtx.save();
+          ddCtx.translate(targetX, targetY);
+          ddCtx.rotate(Math.PI / 4);
+
+          // 3 diagonal slash cuts
+          [-22, 0, 22].forEach(offset => {
+            ddCtx.beginPath();
+            ddCtx.moveTo(-75 * animProg, offset);
+            ddCtx.lineTo(75 * animProg, offset);
+            ddCtx.strokeStyle = (offset === 0) ? "#ffffff" : "#fb923c";
+            ddCtx.lineWidth = (offset === 0) ? 6 : 3.5;
+            ddCtx.shadowColor = "#ef4444";
+            ddCtx.shadowBlur = 18;
+            ddCtx.stroke();
+          });
+          ddCtx.restore();
+        }
+      } else {
+        // BLUE DEFENSE OR HYPER SONIC IMMUNITY SHIELD
+        const isMewShield = outcome.reason && outcome.reason.includes("Hyper Sonic");
+        const shieldR = 25 + animProg * 50;
+        ddCtx.save();
+        ddCtx.translate(CLASH_X, CLASH_Y);
+        ddCtx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (i * Math.PI) / 3;
+          const sx = Math.cos(a) * shieldR;
+          const sy = Math.sin(a) * shieldR;
+          if (i === 0) ddCtx.moveTo(sx, sy);
+          else ddCtx.lineTo(sx, sy);
+        }
+        ddCtx.closePath();
+        ddCtx.fillStyle = isMewShield ? "rgba(250, 204, 21, 0.28)" : "rgba(56, 189, 248, 0.28)";
+        ddCtx.fill();
+        ddCtx.strokeStyle = isMewShield ? "#fde047" : "#e0f2fe";
+        ddCtx.lineWidth = 4;
+        ddCtx.shadowColor = isMewShield ? "#facc15" : "#38bdf8";
+        ddCtx.shadowBlur = 20;
+        ddCtx.stroke();
+        ddCtx.restore();
+      }
+
+      ddCtx.restore();
+    }
+
     ddCtx.restore();
 
     // Auto-close battle screen after wheels finish spinning and outcome is clearly shown
@@ -5288,11 +5396,503 @@ function openFusionForDetailedFig() {
   }
 }
 
-function showBoosterUnboxModal(title, pulledFigs, bonusText) {
-  if (typeof BgmEngine !== "undefined") {
-    BgmEngine.playFanfare("booster");
+
+// ============================================================================
+// CINEMATIC BOOSTER UNBOXING ENGINE (Pokémon Duel Authentic Box Openings)
+// Based on official animations: Single Box & Multi-Capsule Pack Openings
+// ============================================================================
+const BoosterCinematic = {
+  canvas: null,
+  ctx: null,
+  active: false,
+  animId: null,
+  pulledList: [],
+  currentIndex: 0,
+  isMulti: false,
+  title: "",
+  bonusText: "",
+  onFinishCallback: null,
+  
+  phase: 'box_floating', // 'box_floating' | 'box_opening' | 'figure_reveal' | 'finished'
+  phaseStart: 0,
+  shakeAmt: 0,
+  godRayAngle: 0,
+  particles: [],
+  figureScale: 0.1,
+  figureY: 0,
+  flashAlpha: 0,
+  figImageCache: {},
+
+  init() {
+    if (!this.canvas) {
+      this.canvas = document.getElementById("booster-cinematic-canvas");
+      if (this.canvas) {
+        this.ctx = this.canvas.getContext("2d");
+        this.canvas.addEventListener("pointerdown", (e) => this.handleClick(e));
+        window.addEventListener("resize", () => { if (this.active) this.resize(); });
+      }
+    }
+  },
+
+  start(pulledFigures, isMulti, title, bonusText, onFinish) {
+    this.init();
+    if (!this.canvas || !this.ctx) {
+      if (onFinish) onFinish();
+      return;
+    }
+    this.pulledList = Array.isArray(pulledFigures) ? pulledFigures : [pulledFigures];
+    this.currentIndex = 0;
+    this.isMulti = isMulti || (this.pulledList.length > 1);
+    this.title = title || "BOOSTER PACK OPENED";
+    this.bonusText = bonusText || "";
+    this.onFinishCallback = onFinish;
+    this.active = true;
+    this.phase = 'box_floating';
+    this.phaseStart = performance.now();
+    this.shakeAmt = 0;
+    this.godRayAngle = 0;
+    this.particles = [];
+    this.flashAlpha = 0;
+
+    this.resize();
+    this.canvas.style.display = "block";
+
+    // Preload figure sprite images
+    this.pulledList.forEach(fig => {
+      if (fig && fig.spriteKey) {
+        const sp = AUTHENTIC_FIG_SPRITES[fig.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
+        if (sp && sp.uri && !this.figImageCache[fig.spriteKey]) {
+          const img = new Image();
+          img.src = sp.uri;
+          this.figImageCache[fig.spriteKey] = img;
+        }
+      }
+    });
+
+    if (this.animId) cancelAnimationFrame(this.animId);
+    this.loop = this.loop.bind(this);
+    this.animId = requestAnimationFrame(this.loop);
+  },
+
+  resize() {
+    if (!this.canvas) return;
+    const w = window.innerWidth, h = window.innerHeight;
+    this.canvas.width = w * (window.devicePixelRatio || 1);
+    this.canvas.height = h * (window.devicePixelRatio || 1);
+    this.canvas.style.width = w + "px";
+    this.canvas.style.height = h + "px";
+  },
+
+  handleClick(e) {
+    if (!this.active) return;
+    const rect = this.canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const w = rect.width, h = rect.height;
+
+    // Check "Skip / Pular" button (top right)
+    if (x >= w - 120 && y <= 65) {
+      this.finish();
+      return;
+    }
+
+    if (this.phase === 'box_floating') {
+      this.phase = 'box_opening';
+      this.phaseStart = performance.now();
+      this.shakeAmt = 15;
+      playSfx("portal");
+      if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+    } else if (this.phase === 'figure_reveal') {
+      if (this.currentIndex + 1 < this.pulledList.length) {
+        this.currentIndex++;
+        this.phase = 'figure_reveal';
+        this.phaseStart = performance.now();
+        this.flashAlpha = 1.0;
+        playSfx("step");
+      } else {
+        this.finish();
+      }
+    }
+  },
+
+  finish() {
+    this.active = false;
+    if (this.animId) cancelAnimationFrame(this.animId);
+    if (this.canvas) this.canvas.style.display = "none";
+    if (this.onFinishCallback) this.onFinishCallback();
+  },
+
+  loop(now) {
+    if (!this.active) return;
+    this.render(now);
+    this.animId = requestAnimationFrame(this.loop);
+  },
+
+  render(now) {
+    const ctx = this.ctx;
+    const cw = this.canvas.width, ch = this.canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const w = cw / dpr, h = ch / dpr;
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    // Deep cosmic arena background
+    const bgGrad = ctx.createRadialGradient(w / 2, h * 0.42, 20, w / 2, h * 0.42, w * 0.95);
+    bgGrad.addColorStop(0, "#131b3b");
+    bgGrad.addColorStop(0.5, "#080c1d");
+    bgGrad.addColorStop(1, "#02040a");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    const elapsed = now - this.phaseStart;
+    const cx = w / 2;
+    const cy = h * 0.45;
+
+    // Spawn floating background ambient sparks
+    if (this.particles.length < 55) {
+      this.particles.push({
+        x: cx + (Math.random() - 0.5) * w * 0.85,
+        y: h * 0.75 + Math.random() * 80,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: -1.2 - Math.random() * 2.5,
+        r: 1.5 + Math.random() * 3,
+        life: 1.0,
+        decay: 0.008 + Math.random() * 0.012,
+        col: Math.random() < 0.4 ? "#facc15" : (Math.random() < 0.7 ? "#38bdf8" : "#c084fc")
+      });
+    }
+
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
+      ctx.save();
+      ctx.globalAlpha = p.life * 0.85;
+      ctx.fillStyle = p.col;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 1. Draw 3D Holographic Pedestal at bottom
+    this.drawPedestal(ctx, cx, cy + 115, 135);
+
+    // 2. Render Phase: Box Floating, Box Opening, or Figure Reveal
+    if (this.phase === 'box_floating') {
+      const floatY = Math.sin(now * 0.003) * 12;
+      this.drawBoosterBox(ctx, cx, cy + floatY, 1.0, 0, this.isMulti);
+
+      const pulseAlpha = 0.5 + Math.sin(now * 0.006) * 0.45;
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.fillStyle = `rgba(253, 224, 71, ${pulseAlpha})`;
+      ctx.font = "900 15px sans-serif";
+      ctx.shadowColor = "#facc15";
+      ctx.shadowBlur = 12;
+      ctx.fillText(this.isMulti ? "✨ TOQUE PARA ABRIR O PACK ESPECIAL! ✨" : "✨ TOQUE NA CAIXA PARA ABRIR! ✨", cx, cy + 195);
+      ctx.restore();
+
+    } else if (this.phase === 'box_opening') {
+      this.godRayAngle += 0.025;
+      const shakeX = (Math.random() - 0.5) * this.shakeAmt;
+      const shakeY = (Math.random() - 0.5) * this.shakeAmt;
+      this.shakeAmt = Math.max(0, this.shakeAmt - 0.22);
+
+      const openProg = Math.min(1.0, elapsed / 900);
+      const lidYOffset = -openProg * 75;
+
+      this.drawGodRays(ctx, cx, cy - 10, openProg, this.godRayAngle);
+      this.drawBoosterBox(ctx, cx + shakeX, cy + shakeY, 1.0, lidYOffset, this.isMulti);
+
+      if (elapsed > 1100) {
+        this.phase = 'figure_reveal';
+        this.phaseStart = performance.now();
+        this.flashAlpha = 1.0;
+        playSfx("hit");
+      }
+
+    } else if (this.phase === 'figure_reveal') {
+      this.godRayAngle += 0.015;
+      const curFig = this.pulledList[this.currentIndex] || this.pulledList[0];
+      const isHighRarity = (curFig.rarity === 'UX' || curFig.rarity === 'EX');
+
+      this.drawGodRays(ctx, cx, cy - 20, 1.0, this.godRayAngle, isHighRarity);
+
+      const riseProg = Math.min(1.0, elapsed / 500);
+      const easeScale = 0.2 + 0.8 * Math.sin(riseProg * Math.PI / 2);
+      const floatY = Math.sin(now * 0.0035) * 8;
+
+      this.drawRevealedFigure(ctx, cx, cy - 25 + floatY, easeScale, curFig);
+
+      if (this.isMulti) {
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "800 12px sans-serif";
+        ctx.fillText(`Figura ${this.currentIndex + 1} de ${this.pulledList.length}`, cx, h - 85);
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(cx - 75, h - 65, 150, 38, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#facc15";
+        ctx.font = "900 13px sans-serif";
+        const isLast = (this.currentIndex + 1 >= this.pulledList.length);
+        ctx.fillText(isLast ? "Ver Todos (OK) ➔" : "Próximo Pokémon ❯", cx, h - 41);
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+        ctx.strokeStyle = "#facc15";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(cx - 85, h - 70, 170, 42, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#fde047";
+        ctx.font = "900 14px sans-serif";
+        ctx.fillText("Continuar (OK) ➔", cx, h - 44);
+        ctx.restore();
+      }
+    }
+
+    // Top Skip Button (`[ ⏩ Pular ]`)
+    ctx.save();
+    ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(w - 105, 16, 92, 32, 6);
+    ctx.fill();
+    ctx.stroke();
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "800 11px sans-serif";
+    ctx.fillText("⏩ Pular", w - 59, 36);
+    ctx.restore();
+
+    // White Flash Transition (on reveal)
+    if (this.flashAlpha > 0.01) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${this.flashAlpha})`;
+      ctx.fillRect(0, 0, w, h);
+      this.flashAlpha *= 0.82;
+    }
+
+    ctx.restore();
+  },
+
+  drawPedestal(ctx, cx, cy, radius) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 18, radius * 1.15, radius * 0.45, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, radius, radius * 0.38, 0, 0, Math.PI * 2);
+    const grad = ctx.createLinearGradient(cx - radius, cy, cx + radius, cy);
+    grad.addColorStop(0, "#0369a1");
+    grad.addColorStop(0.5, "#38bdf8");
+    grad.addColorStop(1, "#0284c7");
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = "#e0f2fe";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, radius * 0.72, radius * 0.26, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(6, 182, 212, 0.35)";
+    ctx.fill();
+    ctx.strokeStyle = "#67e8f9";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+  },
+
+  drawBoosterBox(ctx, cx, cy, scale, lidOffset, isMulti) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+
+    const bw = isMulti ? 115 : 95;
+    const bh = isMulti ? 105 : 90;
+
+    ctx.beginPath();
+    ctx.ellipse(0, 75, bw * 0.7, 18, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+    ctx.fill();
+
+    const bodyGrad = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+    if (isMulti) {
+      bodyGrad.addColorStop(0, "#d97706");
+      bodyGrad.addColorStop(0.3, "#fde047");
+      bodyGrad.addColorStop(0.7, "#ca8a04");
+      bodyGrad.addColorStop(1, "#78350f");
+    } else {
+      bodyGrad.addColorStop(0, "#0369a1");
+      bodyGrad.addColorStop(0.3, "#38bdf8");
+      bodyGrad.addColorStop(0.7, "#0284c7");
+      bodyGrad.addColorStop(1, "#082f49");
+    }
+
+    ctx.fillStyle = bodyGrad;
+    ctx.strokeStyle = isMulti ? "#fde047" : "#e0f2fe";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(-bw / 2, -bh / 4, bw, bh * 0.75, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, bh * 0.15, 18, 0, Math.PI * 2);
+    ctx.fillStyle = "#0f172a";
+    ctx.fill();
+    ctx.strokeStyle = isMulti ? "#fde047" : "#38bdf8";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 14px sans-serif";
+    ctx.fillText(isMulti ? "★" : "P", 0, bh * 0.15);
+
+    ctx.save();
+    ctx.translate(0, lidOffset);
+    const lidGrad = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+    if (isMulti) {
+      lidGrad.addColorStop(0, "#fde047");
+      lidGrad.addColorStop(0.5, "#ffffff");
+      lidGrad.addColorStop(1, "#facc15");
+    } else {
+      lidGrad.addColorStop(0, "#38bdf8");
+      lidGrad.addColorStop(0.5, "#ffffff");
+      lidGrad.addColorStop(1, "#0284c7");
+    }
+    ctx.fillStyle = lidGrad;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.roundRect(-(bw + 8) / 2, -bh * 0.55, bw + 8, bh * 0.38, 7);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.strokeStyle = isMulti ? "#b45309" : "#0369a1";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-(bw + 4) / 2, -bh * 0.36);
+    ctx.lineTo((bw + 4) / 2, -bh * 0.36);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.restore();
+  },
+
+  drawGodRays(ctx, cx, cy, intensity, angle, isRainbow = false) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    const rayCount = 14;
+    const maxR = 480;
+
+    for (let i = 0; i < rayCount; i++) {
+      const a1 = angle + (i / rayCount) * Math.PI * 2;
+      const a2 = a1 + (Math.PI / rayCount) * 0.72;
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, maxR, a1, a2);
+      ctx.closePath();
+
+      const rGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, maxR);
+      if (isRainbow) {
+        const cols = ["#f43f5e", "#fb923c", "#facc15", "#4ade80", "#38bdf8", "#c084fc"];
+        const col = cols[i % cols.length];
+        rGrad.addColorStop(0, "rgba(255, 255, 255, 0.7)");
+        rGrad.addColorStop(0.4, col);
+        rGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      } else {
+        rGrad.addColorStop(0, "rgba(255, 255, 255, 0.8)");
+        rGrad.addColorStop(0.35, "rgba(250, 204, 21, 0.45)");
+        rGrad.addColorStop(1, "rgba(250, 204, 21, 0)");
+      }
+      ctx.fillStyle = rGrad;
+      ctx.globalAlpha = intensity * 0.65;
+      ctx.fill();
+    }
+    ctx.restore();
+  },
+
+  drawRevealedFigure(ctx, cx, cy, scale, fig) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+
+    const isUX = (fig.rarity === 'UX');
+    const isEX = (fig.rarity === 'EX');
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 68, 0, Math.PI * 2);
+    ctx.fillStyle = isUX ? "rgba(192, 132, 252, 0.25)" : (isEX ? "rgba(250, 204, 21, 0.22)" : "rgba(56, 189, 248, 0.18)");
+    ctx.fill();
+
+    const img = this.figImageCache[fig.spriteKey];
+    if (img && img.complete) {
+      ctx.drawImage(img, -55, -60, 110, 110);
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, -5, 46, 0, Math.PI * 2);
+      ctx.fillStyle = fig.c1 || "#38bdf8";
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    const badgeW = isUX ? 130 : 100;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(-badgeW / 2, 58, badgeW, 26, 13);
+    ctx.fillStyle = isUX ? "#7e22ce" : (isEX ? "#b45309" : "#0369a1");
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 12px sans-serif";
+    ctx.shadowColor = "#000";
+    ctx.shadowBlur = 4;
+    ctx.fillText(`★ [${fig.rarity}] ${fig.rarity === 'UX' ? 'ULTRA RARE' : (fig.rarity === 'EX' ? 'EX RARE' : 'RARE')} ★`, 0, 71);
+
+    ctx.font = "900 18px Impact, sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(fig.name.toUpperCase(), 0, 102);
+
+    ctx.font = "800 11px sans-serif";
+    ctx.fillStyle = "#bae6fd";
+    ctx.fillText(`${fig.type} Type · MP ${fig.mp} · Wheel 96`, 0, 122);
+
+    ctx.restore();
   }
-  const modal = document.getElementById("booster-unbox-modal");
+};
+
+function showBoosterUnboxModal(title, pulledFigs, bonusText) {
+  const openStaticModal = () => {
+    if (typeof BgmEngine !== "undefined") {
+      BgmEngine.playFanfare("booster");
+    }
+    const modal = document.getElementById("booster-unbox-modal");
   const tEl = document.getElementById("unbox-title");
   const gEl = document.getElementById("unbox-cards-grid");
   const bEl = document.getElementById("unbox-bonus-summary");
@@ -5313,6 +5913,12 @@ function showBoosterUnboxModal(title, pulledFigs, bonusText) {
     }).join("");
   }
   if (modal) modal.style.display = "flex";
+  };
+  if (typeof BoosterCinematic !== "undefined") {
+    BoosterCinematic.start(pulledFigs, pulledFigs.length > 1, title, bonusText, openStaticModal);
+  } else {
+    openStaticModal();
+  }
 }
 
 function closeBoosterUnboxModal() {
@@ -7618,7 +8224,15 @@ function unlockAndShowBoosterModal(title, pulledIndices, bonusText) {
       </div>`;
     }).join("");
   }
-  if (modal) modal.style.display = "flex";
+  const openStaticModal = () => {
+    if (modal) modal.style.display = "flex";
+  };
+  const pulledFigures = cardData.map(c => c.fig);
+  if (typeof BoosterCinematic !== "undefined") {
+    BoosterCinematic.start(pulledFigures, pulledFigures.length > 1, title, bonusText, openStaticModal);
+  } else {
+    openStaticModal();
+  }
 }
 
 function openEarnedVictoryBox() {
