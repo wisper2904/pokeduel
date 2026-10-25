@@ -12,6 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://www.youtube.com/iframe_api" async></script>
 <script src="vendor/peerjs-1.5.5.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s);"></script>
 <style>
   * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -898,7 +899,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.8.0 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.8.1 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -907,6 +908,12 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
+        <!-- Feature 0: Playlist Oficial do Pokémon Duel OST Integrada (v5.8.1) -->
+        <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎶 Trilha Sonora Oficial do Pokémon Duel (YouTube OST Gamerip) Integrada</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">1) <strong>Playlist Oficial de Shota Kageyama</strong> integrada diretamente ao jogo com reprodução em alta fidelidade!<br>2) <strong>Mapeamento Fiel aos Locais Originais</strong>:<br>&bull; <em>Main Menu / Carmonte Island Lounge</em>: Toca no Hub, Editor de Decks, Loja e Fusão.<br>&bull; <em>Online Duel Theme</em>: Toca durante as partidas da Liga na arena.<br>&bull; <em>Online Duel (Pinch)</em>: Transiciona dinamicamente para o alarme de perigo quando o Goal está sob ameaça (&le; 2 passos)!<br>&bull; <em>Victory & Lose Jingles</em>: Fanfarra de vitória e derrota oficiais ao encerrar a partida.<br>&bull; <em>Success Jingle</em>: Fanfarra clássica tocando na abertura das caixas de vitória e boosters!<br>3) <strong>Controle de Fonte de Áudio no Menu</strong>: Alternância com 1-toque entre a Trilha Oficial do YouTube e o Sintetizador Web Audio Offline.</div>
+        </div>
+
         <!-- Feature 0: Animações Cinemáticas de Abertura de Caixa e Batalha (v5.8.0) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎬 Animações Cinemáticas de Caixa (Única & Múltipla) e Ataques na Batalha</div>
@@ -1061,7 +1068,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.8.0</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.8.1</span>
           </div>
         </div>
 
@@ -1475,7 +1482,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.8.0 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.8.1 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -1490,6 +1497,10 @@
         <strong style="color:#38bdf8; font-size:11.5px; display:block; margin-bottom:6px;">🔊 ÁUDIO, VISUAL & ARENA DE BATALHA</strong>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
           <button class="btn gold" id="menu-bgm-btn" style="font-size:9.5px; padding:6px;" onclick="toggleWebAudioBgm()">🎵 Música (BGM): ON</button>
+          <button class="btn secondary" id="menu-bgm-source-btn" style="font-size:9.5px; padding:6px;" onclick="if (typeof BgmEngine !== 'undefined') BgmEngine.cycleAudioSource()">💿 Fonte: YouTube OST</button>
+        </div>
+        <div style="font-size:8.5px; color:#38bdf8; font-weight:800; margin-bottom:8px;">🎶 Trilha Sonora Oficial de Pokémon Duel (Shota Kageyama OST) com reprodução da Playlist oficial!</div>
+        <div style="display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:8px;">
           <button class="btn secondary" id="pixel-mode-btn" style="font-size:9.5px; padding:6px;" onclick="cyclePixelArtMode()">✨ Gráficos: 3D HD</button>
         </div>
 
@@ -7534,6 +7545,54 @@ const BgmEngine = {
   filterNode: null,
   fanfareActiveUntil: 0,
 
+  // YouTube Official OST Player Integration
+  ytPlayer: null,
+  ytReady: false,
+  audioSource: "youtube", // "youtube" | "webaudio"
+  playlistId: "PLjrVBVlg13D5yAiEr6l25nA_1XjTLddnq",
+  trackMap: {
+    title: 0,
+    booster: 1,      // Success Jingle (Booster Open / Victory Rewards)
+    defeat: 2,       // Lose Jingle
+    lobby: 3,        // Main Menu / Carmonte Island Hub (Carmonte Lounge)
+    training_hub: 4, // Training Center / Hotel Map
+    concierge: 5,    // Hotel Concierge Duel
+    battle: 6,       // Online Duel (League Match Battle Theme)
+    pinch: 7,        // Online Duel Pinch (Goal under threat)
+    epic: 8,         // Epic Duel
+    victory: 13      // Victory Fanfare
+  },
+
+  cycleAudioSource() {
+    this.audioSource = (this.audioSource === "youtube") ? "webaudio" : "youtube";
+    try {
+      localStorage.setItem("pokeduel_bgm_source", this.audioSource);
+    } catch (e) {}
+    if (this.audioSource === "webaudio") {
+      if (this.ytPlayer && typeof this.ytPlayer.pauseVideo === "function") {
+        try { this.ytPlayer.pauseVideo(); } catch (e) {}
+      }
+      if (this.enabled && !this.stepTimer) this.playStep();
+    } else {
+      if (this.stepTimer) {
+        clearTimeout(this.stepTimer);
+        this.stepTimer = null;
+      }
+      this.syncYouTubeTrack(this.currentTrack);
+    }
+    this.syncUi();
+  },
+
+  syncYouTubeTrack(targetTrack) {
+    if (this.audioSource !== "youtube" || !this.enabled) return;
+    if (!this.ytReady || !this.ytPlayer || typeof this.ytPlayer.playVideoAt !== "function") return;
+    const targetIdx = this.trackMap[targetTrack] ?? 3;
+    try {
+      this.ytPlayer.setVolume(75);
+      this.ytPlayer.playVideoAt(targetIdx);
+    } catch (e) {}
+  },
+
   N: {
     C2: 65.41, D2: 73.42, E2: 82.41, F2: 87.31, G2: 98.00, A2: 110.00, Bb2: 116.54, B2: 123.47,
     C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, Bb3: 233.08, B3: 246.94,
@@ -7676,6 +7735,7 @@ const BgmEngine = {
     const isLobby = drawerModal && drawerModal.classList.contains("show");
 
     let pattern, intervalMs, isPinch = false;
+    const prevTrack = this.currentTrack;
     if (isLobby) {
       pattern = this.getLobbyPattern();
       intervalMs = 135;
@@ -7691,6 +7751,10 @@ const BgmEngine = {
         intervalMs = 112;
         this.currentTrack = "battle";
       }
+    }
+
+    if (this.currentTrack !== prevTrack && this.audioSource === "youtube") {
+      this.syncYouTubeTrack(this.currentTrack);
     }
 
     const cur = pattern[this.step % pattern.length];
@@ -7788,6 +7852,10 @@ const BgmEngine = {
 
   playFanfare(type) {
     if (!this.enabled) return;
+    if (this.audioSource === "youtube" && this.ytReady && this.ytPlayer) {
+      const fanfareTrack = (type === "victory") ? "victory" : ((type === "defeat") ? "defeat" : "booster");
+      this.syncYouTubeTrack(fanfareTrack);
+    }
     this.initNodes();
     if (!sfxCtx) return;
     const now = sfxCtx.currentTime;
@@ -7880,9 +7948,15 @@ const BgmEngine = {
   start() {
     if (!this.enabled) return;
     this.initNodes();
-    if (!sfxCtx) return;
     this.isPlaying = true;
-    this.playStep();
+    if (this.audioSource === "youtube" && this.ytReady && this.ytPlayer) {
+      try {
+        const isLobby = document.getElementById("drawer-modal")?.classList.contains("show");
+        this.syncYouTubeTrack(isLobby ? "lobby" : "battle");
+      } catch (e) {}
+    } else {
+      this.playStep();
+    }
     this.syncUi();
   },
 
@@ -7891,6 +7965,9 @@ const BgmEngine = {
     if (this.stepTimer) {
       clearTimeout(this.stepTimer);
       this.stepTimer = null;
+    }
+    if (this.ytPlayer && typeof this.ytPlayer.pauseVideo === "function") {
+      try { this.ytPlayer.pauseVideo(); } catch (e) {}
     }
     this.syncUi();
   },
@@ -7914,6 +7991,11 @@ const BgmEngine = {
     if (mBtn) {
       mBtn.textContent = this.enabled ? "🎵 Música (BGM): ON" : "🔇 Música (BGM): OFF";
       mBtn.className = "btn " + (this.enabled ? "gold" : "secondary");
+    }
+    const sBtn = document.getElementById("menu-bgm-source-btn");
+    if (sBtn) {
+      sBtn.textContent = (this.audioSource === "youtube") ? "💿 Fonte: YouTube OST" : "🎛️ Fonte: Web Audio";
+      sBtn.className = "btn " + (this.audioSource === "youtube" ? "gold" : "secondary");
     }
     const bBtn = document.getElementById("bgm-toggle-btn");
     if (bBtn) {
@@ -15755,6 +15837,58 @@ generateNewRoomCode();
 requestAnimationFrame(renderHomeCarouselLoop);
 demoFullMatchState();
 requestAnimationFrame(boardRenderLoop);
+
+
+// Global callback required by YouTube IFrame API
+window.onYouTubeIframeAPIReady = function() {
+  try {
+    if (typeof BgmEngine === "undefined") return;
+    BgmEngine.ytPlayer = new YT.Player('pokeduel-yt-bgm-container', {
+      height: '1',
+      width: '1',
+      playerVars: {
+        listType: 'playlist',
+        list: BgmEngine.playlistId,
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        enablejsapi: 1,
+        fs: 0,
+        loop: 1,
+        modestbranding: 1,
+        playsinline: 1,
+        origin: window.location.origin
+      },
+      events: {
+        onReady: function(event) {
+          BgmEngine.ytReady = true;
+          try {
+            event.target.setVolume(75);
+            if (BgmEngine.enabled && BgmEngine.isPlaying) {
+              const drawerModal = document.getElementById("drawer-modal");
+              const isLobby = drawerModal && drawerModal.classList.contains("show");
+              BgmEngine.syncYouTubeTrack(isLobby ? "lobby" : "battle");
+            }
+          } catch (e) {}
+        },
+        onStateChange: function(event) {
+          // Loop current track
+          if (event.data === (window.YT ? YT.PlayerState.ENDED : 0)) {
+            const targetIdx = BgmEngine.trackMap[BgmEngine.currentTrack] || 3;
+            try { BgmEngine.ytPlayer.playVideoAt(targetIdx); } catch (e) {}
+          }
+        },
+        onError: function() {
+          // Fallback seamlessly to native Web Audio if YouTube playback is restricted
+          BgmEngine.ytReady = false;
+          if (BgmEngine.enabled && !BgmEngine.stepTimer) {
+            BgmEngine.playStep();
+          }
+        }
+      }
+    });
+  } catch (e) {}
+};
 
 // Pokémon Duel Web Audio BGM Initialization & User Gesture Auto-Unlock
 (function initBgmEngineAutoStart() {
