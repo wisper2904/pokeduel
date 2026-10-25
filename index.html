@@ -897,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.8 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.9 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,9 +906,15 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
-        <!-- Feature 0: Multiplicador Estilo Vampire Survivors (v5.6.8) -->
+        <!-- Feature 0: Saldo Inicial de Novas Contas (v5.6.9) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
-          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">⚡ Dano Multiplicador Estilo Vampire Survivors</div>
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🪙 Saldo Inicial Balanceado: 100 Gems & 15.000 Ouro</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Todas as contas novas criadas pelo menu de boas-vindas ou resetadas iniciam exatamente com <strong>100 Gems (🔻)</strong> e <strong>15.000 Moedas de Ouro (🪙 Coins)</strong>, proporcionando uma progressão justa e autêntica!</div>
+        </div>
+
+        <!-- Feature 0.2: Multiplicador Estilo Vampire Survivors (v5.6.8) -->
+        <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">⚡ Dano Multiplicador Estilo Vampire Survivors</div>
           <div style="color:#cbd5e1; font-size:10.5px;">Quando a roleta cai em um ataque multiplicador (como <em>Fire Spin 50x</em> ou <em>Vine Whip 40x</em>), números de combate flutuantes com mola elástica, partículas de faíscas, contorno grosso e efeito sonoro arcade somam o dano na tela (+50! ➔ 2x COMBO ➔ 100 DANO!) até o encerramento do combo, mantendo a roleta 100% limpa!</div>
         </div>
 
@@ -980,13 +986,13 @@
     <!-- Center: Blue Metallic Coin Pill (`C 415`) -->
     <div style="width:112px; height:24px; background:linear-gradient(180deg,#0369a1 0%,#075985 50%,#0c4a6e 100%); border:1.5px solid #38bdf8; border-radius:13px; padding:0 10px 0 3px; display:flex; align-items:center; justify-content:space-between; box-shadow:inset 0 1px 2px rgba(0,0,0,0.6);">
       <span style="width:19px; height:19px; border-radius:50%; background:radial-gradient(circle,#fef08a 0%,#facc15 55%,#b45309 100%); border:1.5px solid #fde047; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; color:#78350f; box-shadow:0 1px 2px rgba(0,0,0,0.6);">C</span>
-      <span id="coins-lbl" style="font-size:12px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000;">415</span>
+      <span id="coins-lbl" style="font-size:12px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000;">15,000</span>
     </div>
 
-    <!-- Right: Blue Metallic Red Gem Pill (`💎 23 [+]`) -->
+    <!-- Right: Blue Metallic Red Gem Pill (`💎 100 [+]`) -->
     <div style="width:118px; height:24px; background:linear-gradient(180deg,#0369a1 0%,#075985 50%,#0c4a6e 100%); border:1.5px solid #38bdf8; border-radius:13px; padding:0 3px 0 6px; display:flex; align-items:center; justify-content:space-between; box-shadow:inset 0 1px 2px rgba(0,0,0,0.6);">
       <span style="font-size:14px; line-height:1; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.8));">🔻</span>
-      <span id="rm-lbl" style="font-size:12px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000; margin-left:auto; margin-right:6px;">23</span>
+      <span id="rm-lbl" style="font-size:12px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000; margin-left:auto; margin-right:6px;">100</span>
       <button onclick="openDrawer('shop')" title="Abrir Loja" style="width:19px; height:19px; border-radius:50%; background:linear-gradient(180deg,#38bdf8 0%,#0284c7 100%); border:1.5px solid #e0f2fe; color:#ffffff; font-size:13px; font-weight:900; line-height:1; display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer;">+</button>
     </div>
   </div>
@@ -1024,7 +1030,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.8</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.9</span>
           </div>
         </div>
 
@@ -1438,7 +1444,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.8 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.9 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -8484,8 +8490,8 @@ function loadEconomyAndUpgrades() {
     if (raw) {
       const data = JSON.parse(raw);
       if (data && typeof data === "object") {
-        state.rareMetals   = typeof data.gems === "number" ? Math.max(0, data.gems) : 150;
-        userCoins          = typeof data.coins === "number" ? Math.max(0, data.coins) : 10000;
+        state.rareMetals   = typeof data.gems === "number" ? Math.max(0, data.gems) : 100;
+        userCoins          = typeof data.coins === "number" ? Math.max(0, data.coins) : 15000;
         userMaterial       = typeof data.material === "number" ? Math.max(0, data.material) : 250;
         userRareMetalItems = typeof data.rareMetalItems === "number" ? Math.max(0, data.rareMetalItems) : 2;
         userCarmonite      = typeof data.carmonite === "number" ? Math.max(0, data.carmonite) : 50;
@@ -8520,9 +8526,9 @@ function loadEconomyAndUpgrades() {
     }
   } catch (e) {}
 
-  // Default balanced starter wallet on a fresh v4.7.0 profile
-  state.rareMetals   = 4000;  // 4000 Gems (Wisper Special Edition) (enough for 1-3 starter boxes, NOT infinite!)
-  userCoins          = 10000; // 10,000 Coins (for initial fusions or 1 Coin Box)
+  // Default balanced starter wallet on a fresh profile (exact 100 Gems & 15,000 Coins / Gold)
+  state.rareMetals   = 100;   // 100 Gems apenas (Novo Balanceamento)
+  userCoins          = 15000; // 15,000 Moedas de Ouro (Novo Balanceamento)
   userMaterial       = 250;   // 250 Material
   userRareMetalItems = 2;     // 2 Blue Rare Metals
   userCarmonite      = 50;    // 50 Carmonite
@@ -9253,8 +9259,8 @@ function confirmResetIndividualProfile() {
     if (f.baseWheelLv1) f.wheel = f.baseWheelLv1.map(w => ({ ...w }));
     f.clvAlloc = f.wheel.map(() => 0);
   });
-  state.rareMetals   = 150;
-  userCoins          = 10000;
+  state.rareMetals   = 100;   // 100 Gems apenas (Novo Balanceamento)
+  userCoins          = 15000; // 15,000 Coins / Ouro (Novo Balanceamento)
   userMaterial       = 250;
   userRareMetalItems = 2;
   userCarmonite      = 50;
@@ -14431,10 +14437,39 @@ async function handleWelcomeAuthSubmit() {
     }
 
     // 2. USER DOES NOT EXIST: REGISTER AS NEW USER WITH THIS PASSWORD!
-    window.trainerProfileData.nickname = rawUser.slice(0, 16);
+    window.trainerProfileData = createBlankIndividualProfile(rawUser.slice(0, 16));
     window.trainerProfileData.isSetupDone = true;
     saveIndividualProfile();
+
+    // Clean initial starter progression & starter figures:
+    playerProgression = createFreshProgressionState();
+    saveProgressionState();
+    playerKeyFragments = 0;
+    FIGURES_DB.forEach(f => {
+      f.level = 1;
+      f.clv = 0;
+      f.diskPointsSpent = 0;
+      if (f.baseWheelLv1) f.wheel = f.baseWheelLv1.map(w => ({ ...w }));
+      f.clvAlloc = f.wheel.map(() => 0);
+    });
+
+    // Exact starter wallet: 100 Gems & 15,000 Coins / Gold
+    state.rareMetals   = 100;   // 100 Gems apenas (Novo Balanceamento)
+    userCoins          = 15000; // 15,000 Coins / Ouro (Novo Balanceamento)
+    userMaterial       = 250;
+    userRareMetalItems = 2;
+    userCarmonite      = 50;
+    state.chainCubes   = 1;
+    userIngots         = 1;
+    lastDailyBonusTs   = 0;
+    claimedMissionWinsCount = 0;
+    saveEconomyAndUpgrades();
+
+    syncProgressionToDeckState();
+    syncAllCurrencyLabels();
     syncIndividualProfileUI();
+    renderHubAndCollection();
+    renderShopExchange();
 
     const timeStr = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     saveCloudSession({
