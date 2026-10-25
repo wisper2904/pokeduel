@@ -897,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.6 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.7 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,7 +906,13 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
-        <!-- Feature 0: Gerenciamento de Times (v5.6.6) -->
+        <!-- Feature 0: Bônus Diário Balanceado (v5.6.7) -->
+        <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">💎 Recompensa Diária Fixada em 50 Gems</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">O Bônus Diário da Loja foi ajustado para conceder exatamente <strong>50 Gems (🔻)</strong>, além de 1.500 Coins e 1 Rare Metal a cada 24 horas!</div>
+        </div>
+
+        <!-- Feature 0.5: Gerenciamento de Times (v5.6.6) -->
         <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">⚔️ Gerenciamento de Times (Max. 3)</div>
           <div style="color:#cbd5e1; font-size:10.5px;">Adicionada a opção de <strong>renomear seus times</strong> livremente (ex: Time Fogo, Elétrico, etc.) e <strong>excluir times</strong> que você não usa mais. A quantidade de times foi <strong>limitada a no máximo 3 times</strong>, mantendo tudo limpo e organizado!</div>
@@ -1012,7 +1018,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.6</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.7</span>
           </div>
         </div>
 
@@ -1426,7 +1432,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.6 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.7 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -6700,12 +6706,12 @@ function applyFusionMaterial(matType) {
 
 function claimDailyGems() {
   playSfx("portal");
-  state.rareMetals += 100;
-  userMaterial += 500;
+  state.rareMetals += 50;
+  userMaterial += 250;
   document.getElementById("rm-lbl").textContent = state.rareMetals;
   { const ml = document.getElementById("mat-lbl"); if (ml) ml.textContent = userMaterial.toLocaleString("en-US"); }
   const m = document.getElementById("shop-exchange-msg");
-  if (m) m.textContent = "🎁 +100 Gems e +500 Material adicionados à sua conta!";
+  if (m) m.textContent = "🎁 +50 Gems e +250 Material adicionados à sua conta!";
 }
 
 function buyShopBooster(count) {
@@ -8310,7 +8316,7 @@ function updateDailyBonusButtonUI() {
   const elapsed = now - (lastDailyBonusTs || 0);
   const cooldownMs = 24 * 3600 * 1000;
   if (elapsed >= cooldownMs) {
-    btn.textContent = "🎁 Bônus Diário (+30🔻 +1,500🪙)";
+    btn.textContent = "🎁 Bônus Diário (+50🔻 +1,500🪙)";
     btn.style.opacity = "1.0";
     btn.className = "btn gold";
   } else {
@@ -8339,14 +8345,14 @@ claimDailyGems = function() {
   }
   playSfx("portal");
   lastDailyBonusTs = now;
-  state.rareMetals += 30;
+  state.rareMetals += 50;
   userCoins += 1500;
   userRareMetalItems += 1;
   saveEconomyAndUpgrades();
   syncAllCurrencyLabels();
   if (m) {
     m.style.color = "#4ade80";
-    m.textContent = "🎁 Bônus Diário de 24h resgatado: +30🔻 Gems, +1,500🪙 Coins e +1🟦 Rare Metal!";
+    m.textContent = "🎁 Bônus Diário de 24h resgatado: +50🔻 Gems, +1,500🪙 Coins e +1🟦 Rare Metal!";
   }
 };
 
@@ -14351,7 +14357,7 @@ async function triggerInAppUpdateAction() {
   setTimeout(() => {
     try {
       const url = new URL(window.location.href);
-      url.searchParams.set("v", "5.6.6");
+      url.searchParams.set("v", "5.6.7");
       url.searchParams.set("t", Date.now().toString());
       window.location.href = url.toString();
     } catch (e) {
