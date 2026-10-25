@@ -17,30 +17,248 @@
   * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; padding: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b14 65%, #020305 100%);
+    background: #020305;
     color: #f8fafc;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
   }
 
-  /* 1:1 STAGE CONTAINER (Aspect-Ratio Constrained & Centered for PC & Mobile!) */
-  #stage-container {
+  /* ========================================================
+     1. MOBILE MODE (Full Screen Native 1:1 Experience)
+     ======================================================== */
+  body.mode-mobile,
+  html[data-device="mobile"] body {
+    background: #020305;
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+    height: 100vh;
+  }
+
+  body.mode-mobile #stage-container,
+  html[data-device="mobile"] #stage-container {
+    position: fixed;
+    inset: 0;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    height: 100vh !important;
+    max-height: 100dvh !important;
+    aspect-ratio: unset !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex; align-items: center; justify-content: center;
+    background: #020305;
+    overflow: hidden;
+  }
+
+  body.mode-mobile #board-canvas,
+  html[data-device="mobile"] #board-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: fill !important;
+    display: block;
+    touch-action: none;
+  }
+
+  body.mode-mobile #drawer-modal,
+  body.mode-mobile #wheel-overlay,
+  html[data-device="mobile"] #drawer-modal,
+  html[data-device="mobile"] #wheel-overlay {
+    position: fixed;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    height: 100vh !important;
+    max-height: 100dvh !important;
+    aspect-ratio: unset !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
+  }
+
+  body.mode-mobile #datadisk-canvas,
+  html[data-device="mobile"] #datadisk-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: fill !important;
+  }
+
+  body.mode-mobile #plates-tray,
+  html[data-device="mobile"] #plates-tray {
+    position: fixed;
+    left: 50%;
+    bottom: 8.5%;
+    transform: translateX(-50%);
+    width: 94%;
+    max-width: 440px;
+  }
+
+  /* ========================================================
+     2. PC MODE (Centered Smartphone Simulator Frame)
+     ======================================================== */
+  body.mode-pc,
+  html[data-device="pc"] body {
+    background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b14 65%, #020305 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  body.mode-pc #stage-container,
+  html[data-device="pc"] #stage-container {
     position: relative;
     width: 100%;
-    max-width: min(480px, calc(100vh * (353 / 530)));
+    max-width: min(440px, calc(100vh * (353 / 530)));
     height: 100%;
     max-height: 100vh;
     aspect-ratio: 353 / 530;
     margin: 0 auto;
-    display: flex; align-items: center; justify-content: center;
-    background: #020305; overflow: hidden;
-    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.22);
-    border-left: 1.5px solid rgba(56, 189, 248, 0.28);
-    border-right: 1.5px solid rgba(56, 189, 248, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #020305;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+    border-left: 2px solid rgba(56, 189, 248, 0.35);
+    border-right: 2px solid rgba(56, 189, 248, 0.35);
+    border-radius: 14px;
   }
-  #board-canvas {
-    width: 100%; height: 100%;
-    object-fit: contain; display: block; touch-action: none;
+
+  body.mode-pc #board-canvas,
+  html[data-device="pc"] #board-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+    touch-action: none;
+  }
+
+  body.mode-pc #drawer-modal,
+  body.mode-pc #wheel-overlay,
+  html[data-device="pc"] #drawer-modal,
+  html[data-device="pc"] #wheel-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: min(440px, calc(100vh * (353 / 530)));
+    height: 100%;
+    max-height: 100vh;
+    aspect-ratio: 353 / 530;
+    border-left: 2px solid rgba(56, 189, 248, 0.35);
+    border-right: 2px solid rgba(56, 189, 248, 0.35);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+  }
+
+  body.mode-pc #datadisk-canvas,
+  html[data-device="pc"] #datadisk-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
+
+  body.mode-pc #plates-tray,
+  html[data-device="pc"] #plates-tray {
+    position: fixed;
+    left: 50%;
+    bottom: calc(50% - min(50vh, calc(440px * (530 / 353) / 2)) + 46px);
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+  }
+
+  /* ----------------------------------------------------
+     3. DEFAULT RESPONSIVE FALLBACK (CSS Media Queries)
+     ---------------------------------------------------- */
+  @media (max-width: 640px), (pointer: coarse) and (max-aspect-ratio: 13/10) {
+    :root:not([data-device="pc"]) body {
+      background: #020305;
+      display: block;
+      width: 100vw;
+      height: 100dvh;
+    }
+    :root:not([data-device="pc"]) #stage-container,
+    :root:not([data-device="pc"]) #drawer-modal,
+    :root:not([data-device="pc"]) #wheel-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      top: 0 !important; left: 0 !important;
+      transform: none !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      aspect-ratio: unset !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    :root:not([data-device="pc"]) #board-canvas,
+    :root:not([data-device="pc"]) #datadisk-canvas {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: fill !important;
+    }
+  }
+
+  @media (min-width: 641px) and (min-aspect-ratio: 1/1) {
+    :root:not([data-device="mobile"]) body {
+      background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b14 65%, #020305 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    :root:not([data-device="mobile"]) #stage-container {
+      position: relative;
+      width: 100%;
+      max-width: min(440px, calc(100vh * (353 / 530)));
+      height: 100%;
+      max-height: 100vh;
+      aspect-ratio: 353 / 530;
+      margin: 0 auto;
+      border-left: 2px solid rgba(56, 189, 248, 0.35);
+      border-right: 2px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+    }
+    :root:not([data-device="mobile"]) #board-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+    :root:not([data-device="mobile"]) #drawer-modal,
+    :root:not([data-device="mobile"]) #wheel-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      max-width: min(440px, calc(100vh * (353 / 530)));
+      height: 100%;
+      max-height: 100vh;
+      aspect-ratio: 353 / 530;
+      border-left: 2px solid rgba(56, 189, 248, 0.35);
+      border-right: 2px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+    }
   }
 
   /* SUBTLE AUTO-FADING HINT PILL ON FIRST LOAD */
@@ -89,48 +307,23 @@
 
   /* AUTHENTIC FULL-SCREEN POKÉMON DUEL DATA DISK BATTLE OVERLAY (1059x1590 Full HD!) */
   #wheel-overlay {
-    display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 100%; max-width: min(480px, calc(100vh * (353 / 530))); height: 100%; max-height: 100vh;
+    display: none;
     background: radial-gradient(circle at 50% 35%, #102142 0%, #060b16 60%, #020409 100%);
     z-index: 95; flex-direction: column; align-items: center; justify-content: space-between;
     padding: 0; overflow: hidden;
-    box-shadow: 0 0 50px rgba(0,0,0,0.95);
-    border-left: 1.5px solid rgba(56, 189, 248, 0.28);
-    border-right: 1.5px solid rgba(56, 189, 248, 0.28);
   }
   #wheel-overlay.show { display: flex; }
   #datadisk-canvas {
-    width: 100%; height: 100%; object-fit: contain; display: block; cursor: pointer;
+    display: block; cursor: pointer;
   }
 
   /* AUTHENTIC POKÉMON DUEL CARMONTE ISLAND MAIN MENU / HUB / P2P / MONACO 7.0.16 */
   #drawer-modal {
-    display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 100%; max-width: min(480px, calc(100vh * (353 / 530))); height: 100%; max-height: 100vh;
+    display: none;
     background: radial-gradient(circle at 50% 25%, #0f2942 0%, #071120 55%, #03060c 100%);
     z-index: 90; flex-direction: column; justify-content: space-between; overflow: hidden;
-    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.22);
-    border-left: 1.5px solid rgba(56, 189, 248, 0.28);
-    border-right: 1.5px solid rgba(56, 189, 248, 0.28);
   }
   #drawer-modal.show { display: flex; }
-
-  @media (max-width: 599px) {
-    #stage-container,
-    #drawer-modal,
-    #wheel-overlay {
-      width: 100vw !important;
-      max-width: 100vw !important;
-      height: 100vh !important;
-      max-height: 100vh !important;
-      aspect-ratio: unset !important;
-      border-left: none !important;
-      border-right: none !important;
-      box-shadow: none !important;
-      top: 0 !important; left: 0 !important;
-      transform: none !important;
-    }
-  }
 
   .comaster-top-hud {
     height: 48px; background: linear-gradient(180deg, #16243b 0%, #0a111e 100%);
@@ -1201,6 +1394,15 @@
           <button class="btn secondary" id="menu-bgm-btn" style="font-size:9.5px; padding:6px;" onclick="toggleWebAudioBgm()">🔊 Música (BGM): OFF</button>
           <button class="btn secondary" id="pixel-mode-btn" style="font-size:9.5px; padding:6px;" onclick="cyclePixelArtMode()">✨ Gráficos: 3D HD</button>
         </div>
+
+        <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;">Proporção & Modo de Exibição da Tela:</div>
+        <div style="display:grid; grid-template-columns:1fr; margin-bottom:4px;">
+          <button class="btn secondary" id="menu-layout-mode-btn" style="font-size:9.5px; padding:6px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="cycleDeviceLayoutMode()">
+            📱 Modo de Tela: Auto (Detectando...)
+          </button>
+        </div>
+        <div id="menu-layout-msg" style="font-size:9px; color:#4ade80; font-weight:800; min-height:12px; margin-bottom:6px;"></div>
+
         <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;">Tema do Tabuleiro de Duelo:</div>
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:5px;">
           <button class="btn secondary" id="surf-btn-crystal" style="font-size:8.5px; padding:5px;" onclick="selectArenaThemeFromMenu('crystal')">💎 Cristal</button>
@@ -13964,6 +14166,76 @@ try {
     }, 700);
   }
 } catch (e) {}
+
+// --- 21.7: DYNAMIC DEVICE DETECTION (MOBILE vs PC PROPORTIONS) ---
+function detectAndApplyDeviceLayout() {
+  const ua = navigator.userAgent || "";
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  const isCoarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  const isNarrow = window.innerWidth <= 680;
+  const isPortraitTouch = isCoarse && (window.innerHeight >= window.innerWidth);
+  
+  const savedPref = localStorage.getItem("pdr_device_layout_pref") || "auto";
+  let isMobile = false;
+  if (savedPref === "mobile") {
+    isMobile = true;
+  } else if (savedPref === "pc") {
+    isMobile = false;
+  } else {
+    isMobile = isMobileUA || isPortraitTouch || isNarrow;
+  }
+
+  const root = document.documentElement;
+  const body = document.body;
+  if (isMobile) {
+    root.setAttribute("data-device", "mobile");
+    body.classList.add("mode-mobile");
+    body.classList.remove("mode-pc");
+  } else {
+    root.setAttribute("data-device", "pc");
+    body.classList.add("mode-pc");
+    body.classList.remove("mode-mobile");
+  }
+
+  const btn = document.getElementById("menu-layout-mode-btn");
+  if (btn) {
+    if (savedPref === "auto") {
+      btn.textContent = isMobile ? "📱 Exibição: Auto (Detectado Mobile 1:1)" : "💻 Exibição: Auto (Detectado PC Simulador)";
+    } else if (savedPref === "mobile") {
+      btn.textContent = "📱 Exibição: Forçado Mobile (Tela Cheia 1:1)";
+    } else {
+      btn.textContent = "💻 Exibição: Forçado PC (Simulador Smartphone)";
+    }
+  }
+  return isMobile;
+}
+
+function cycleDeviceLayoutMode() {
+  const cur = localStorage.getItem("pdr_device_layout_pref") || "auto";
+  let next = "mobile";
+  if (cur === "auto") next = "mobile";
+  else if (cur === "mobile") next = "pc";
+  else next = "auto";
+
+  if (next === "auto") {
+    localStorage.removeItem("pdr_device_layout_pref");
+  } else {
+    localStorage.setItem("pdr_device_layout_pref", next);
+  }
+  const isMob = detectAndApplyDeviceLayout();
+  playSfx("tick");
+  const msg = document.getElementById("menu-layout-msg");
+  if (msg) {
+    msg.textContent = next === "auto"
+      ? (isMob ? "✅ Automático: Mobile Detectado (Tela Cheia 1:1)" : "✅ Automático: PC Detectado (Simulador)")
+      : `✅ Modo fixado em: ${next.toUpperCase()}`;
+    setTimeout(() => { if (msg) msg.textContent = ""; }, 3000);
+  }
+}
+
+window.addEventListener("resize", detectAndApplyDeviceLayout);
+window.addEventListener("orientationchange", detectAndApplyDeviceLayout);
+detectAndApplyDeviceLayout();
 
 initVerbatimCodeViewer();
 renderHubAndCollection();
