@@ -897,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.7 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.8 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,9 +906,15 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
-        <!-- Feature 0: Bônus Diário Balanceado (v5.6.7) -->
+        <!-- Feature 0: Multiplicador Estilo Vampire Survivors (v5.6.8) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
-          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">💎 Recompensa Diária Fixada em 50 Gems</div>
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">⚡ Dano Multiplicador Estilo Vampire Survivors</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Quando a roleta cai em um ataque multiplicador (como <em>Fire Spin 50x</em> ou <em>Vine Whip 40x</em>), números de combate flutuantes com mola elástica, partículas de faíscas, contorno grosso e efeito sonoro arcade somam o dano na tela (+50! ➔ 2x COMBO ➔ 100 DANO!) até o encerramento do combo, mantendo a roleta 100% limpa!</div>
+        </div>
+
+        <!-- Feature 0.2: Bônus Diário Balanceado (v5.6.7) -->
+        <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">💎 Recompensa Diária Fixada em 50 Gems</div>
           <div style="color:#cbd5e1; font-size:10.5px;">O Bônus Diário da Loja foi ajustado para conceder exatamente <strong>50 Gems (🔻)</strong>, além de 1.500 Coins e 1 Rare Metal a cada 24 horas!</div>
         </div>
 
@@ -1018,7 +1024,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.7</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.8</span>
           </div>
         </div>
 
@@ -1432,7 +1438,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.7 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.8 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -4495,6 +4501,101 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
   let postSpinStart = 0;
   let lastTick = 0, impactTriggered = false;
   const clashParticles = [];
+  const vsFloatingTexts = [];
+  const vsSparks = [];
+  let screenShakeMagnitude = 0;
+
+  function playComboSfx(hits, isStop) {
+    try {
+      ensureAudio();
+      if (!sfxCtx) return;
+      const now = sfxCtx.currentTime;
+      const osc = sfxCtx.createOscillator();
+      const g = sfxCtx.createGain();
+      osc.connect(g);
+      g.connect(sfxCtx.destination);
+      if (isStop) {
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(480, now);
+        osc.frequency.exponentialRampToValueAtTime(960, now + 0.22);
+        g.gain.setValueAtTime(0.08, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else {
+        const baseFreq = 420 + Math.min(hits, 8) * 85;
+        osc.type = "square";
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.45, now + 0.12);
+        g.gain.setValueAtTime(0.07, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      }
+    } catch (e) {}
+  }
+
+  function triggerVsMultiplierHit({ wheelCx, wheelCy, step, side }) {
+    const isPlayer = (side === "player");
+    const isStop = Boolean(step.stoppedChain);
+    const spawnX = isPlayer ? (wheelCx + 12) : (wheelCx - 12);
+    const spawnY = isPlayer ? (wheelCy - 52) : (wheelCy + 52);
+
+    const mainColor = isStop ? (isPlayer ? "#4ade80" : "#fb7185") : (isPlayer ? "#fde047" : "#f43f5e");
+    const glowColor = isPlayer ? "#eab308" : "#e11d48";
+
+    const mainText = isStop ? `TOTAL: ${step.accumDmg}` : `+${step.unitDmg}!`;
+    const comboBadge = `${step.hits}x COMBO`;
+    const sumText = isStop ? `(FINALIZADO)` : `➔ ${step.accumDmg} DANO`;
+
+    vsFloatingTexts.push({
+      x: spawnX + (Math.random() - 0.5) * 8,
+      y: spawnY,
+      startX: spawnX,
+      startY: spawnY,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: isStop ? -1.2 : -2.2,
+      scale: 2.35,
+      targetScale: 1.0,
+      life: 1.0,
+      decay: isStop ? 0.012 : 0.015,
+      mainText,
+      comboBadge,
+      sumText,
+      mainColor,
+      strokeColor: "#000000",
+      glowColor,
+      isStop,
+      shockwaveR: 10,
+      shockwaveAlpha: 0.95
+    });
+
+    screenShakeMagnitude = Math.min(7.5, 3.2 + step.hits * 1.0);
+
+    const burstCount = isStop ? 24 : 18;
+    for (let i = 0; i < burstCount; i++) {
+      const ang = (Math.PI * 2 * i) / burstCount + (Math.random() - 0.5) * 0.45;
+      const spd = 2.4 + Math.random() * 4.6;
+      const colPalette = isPlayer
+        ? ["#ffffff", "#fef08a", "#fde047", "#f59e0b", "#38bdf8"]
+        : ["#ffffff", "#fecdd3", "#fb7185", "#f43f5e", "#fb923c"];
+      vsSparks.push({
+        x: spawnX,
+        y: spawnY,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd - 0.7,
+        size: 3.5 + Math.random() * 3.5,
+        rot: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.3,
+        color: colPalette[Math.floor(Math.random() * colPalette.length)],
+        life: 1.0,
+        decay: 0.022 + Math.random() * 0.018,
+        shape: Math.random() < 0.65 ? "star" : "diamond"
+      });
+    }
+
+    playComboSfx(step.hits, isStop);
+  }
 
   // Track the angle at which each wheel finished its previous stage so re-spins start smoothly from there!
   let prevMyRot = 0;
@@ -4516,7 +4617,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     const isOppWheelSpinningThisStage = !allSpinStagesFinished && (curStageIdx < oppSteps.length);
 
     const stageSpinDur = (curStageIdx === 0) ? 1420 : 1020;
-    const stageHoldDur = (totalStages > 1) ? 780 : 0;
+    const stageHoldDur = (totalStages > 1) ? 880 : 0;
     const stageElapsed = now - stageStart;
     const p = allSpinStagesFinished ? 1 : Math.min(1, stageElapsed / stageSpinDur);
     const ease = 1 - Math.pow(1 - p, 3.5);
@@ -4550,6 +4651,24 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
         stageHoldAnnounced = true;
         const anyMultiHitThisStage = (isMyWheelSpinningThisStage && myActiveStep.isMultiHit) || (isOppWheelSpinningThisStage && oppActiveStep.isMultiHit);
         playSfx(anyMultiHitThisStage ? "portal" : "hit");
+
+        // Vampire Survivors Style: Floating Combat Text & Particle Bursts for Multiplier Hits & Chain End!
+        if (isMyWheelSpinningThisStage && (myActiveStep.isMultiHit || myActiveStep.stoppedChain)) {
+          triggerVsMultiplierHit({
+            wheelCx: MY_WHEEL_CX,
+            wheelCy: MY_WHEEL_CY,
+            step: myActiveStep,
+            side: "player"
+          });
+        }
+        if (isOppWheelSpinningThisStage && (oppActiveStep.isMultiHit || oppActiveStep.stoppedChain)) {
+          triggerVsMultiplierHit({
+            wheelCx: OPP_WHEEL_CX,
+            wheelCy: OPP_WHEEL_CY,
+            step: oppActiveStep,
+            side: "opp"
+          });
+        }
       }
       if (stageElapsed >= stageSpinDur + stageHoldDur) {
         if (stageIdx + 1 < totalStages) {
@@ -4571,7 +4690,13 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     ddCtx.imageSmoothingQuality = "high";
     const curS = window.ACTIVE_SCALE || HD_SCALE;
     ddCtx.scale(curS, curS);
-    ddCtx.clearRect(0, 0, LOGICAL_W, LOGICAL_H);
+    if (screenShakeMagnitude > 0.1) {
+      const shakeX = (Math.random() - 0.5) * screenShakeMagnitude;
+      const shakeY = (Math.random() - 0.5) * screenShakeMagnitude;
+      ddCtx.translate(shakeX, shakeY);
+      screenShakeMagnitude *= 0.88;
+    }
+    ddCtx.clearRect(-10, -10, LOGICAL_W + 20, LOGICAL_H + 20);
 
     // Interactive Double Chance prompt once all spin stages finish!
     if (allSpinStagesFinished && !impactTriggered && canInteractiveDoubleChance && !state.doubleChanceUsedOnce) {
@@ -4769,10 +4894,156 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       ddCtx.restore();
     }
 
+    // ======================================================================
+    // VAMPIRE SURVIVORS STYLE: FLOATING COMBAT TEXT & COMBO DAMAGE SUMMING
+    // ======================================================================
+    // 1. Unobtrusive Top-Left HUD Ticker during active multiplier chains
+    if (totalStages > 1) {
+      const isPlayerMulti = (mySteps.length > 1);
+      const activeStep = isPlayerMulti ? myActiveStep : oppActiveStep;
+      const isComplete = allSpinStagesFinished || activeStep.stoppedChain;
+
+      ddCtx.save();
+      ddCtx.textAlign = "left";
+      ddCtx.textBaseline = "middle";
+
+      // Semi-transparent pill in top-left empty corner (safely away from wheels)
+      ddCtx.fillStyle = isPlayerMulti ? "rgba(8, 22, 40, 0.85)" : "rgba(38, 12, 18, 0.85)";
+      ddCtx.strokeStyle = isPlayerMulti ? "#38bdf8" : "#fb7185";
+      ddCtx.lineWidth = 1.5;
+      ddCtx.beginPath();
+      ddCtx.roundRect(10, 10, 155, 36, 8);
+      ddCtx.fill();
+      ddCtx.stroke();
+
+      ddCtx.font = "900 8.5px system-ui, -apple-system, sans-serif";
+      ddCtx.fillStyle = isPlayerMulti ? "#93c5fd" : "#fca5a5";
+      ddCtx.fillText(isComplete ? "★ MULTIPLICADOR TOTAL ★" : `⚡ MULTIPLICADOR (${activeStep.hits}x)`, 16, 20);
+
+      ddCtx.font = "900 12px Impact, system-ui, sans-serif";
+      ddCtx.fillStyle = isPlayerMulti ? "#fde047" : "#fb7185";
+      if (isComplete) {
+        ddCtx.fillText(`${activeStep.accumDmg} DANO TOTAL!`, 16, 34);
+      } else {
+        ddCtx.fillText(`${activeStep.unitDmg} × ${activeStep.hits} = ${activeStep.accumDmg}`, 16, 34);
+      }
+      ddCtx.restore();
+    }
+
+    // 2. Shockwave Expanding Rings
+    for (let i = vsFloatingTexts.length - 1; i >= 0; i--) {
+      const ft = vsFloatingTexts[i];
+      if (ft.shockwaveAlpha > 0.05) {
+        ddCtx.save();
+        ddCtx.beginPath();
+        ddCtx.arc(ft.startX, ft.startY, ft.shockwaveR, 0, Math.PI * 2);
+        ddCtx.strokeStyle = ft.mainColor;
+        ddCtx.lineWidth = 3 * ft.shockwaveAlpha;
+        ddCtx.globalAlpha = ft.shockwaveAlpha;
+        ddCtx.stroke();
+        ddCtx.restore();
+        ft.shockwaveR += 3.8;
+        ft.shockwaveAlpha *= 0.88;
+      }
+    }
+
+    // 3. Spark Particles (Stars & Diamonds)
+    for (let i = vsSparks.length - 1; i >= 0; i--) {
+      const sp = vsSparks[i];
+      sp.x += sp.vx;
+      sp.y += sp.vy;
+      sp.vy += 0.08; // gentle gravity
+      sp.rot += sp.vrot;
+      sp.life -= sp.decay;
+      if (sp.life <= 0) {
+        vsSparks.splice(i, 1);
+        continue;
+      }
+
+      ddCtx.save();
+      ddCtx.translate(sp.x, sp.y);
+      ddCtx.rotate(sp.rot);
+      ddCtx.globalAlpha = Math.max(0, sp.life);
+      ddCtx.fillStyle = sp.color;
+
+      if (sp.shape === "star") {
+        const rOut = sp.size;
+        const rIn = sp.size * 0.32;
+        ddCtx.beginPath();
+        for (let s = 0; s < 4; s++) {
+          const a1 = (s * Math.PI) / 2;
+          const a2 = a1 + Math.PI / 4;
+          if (s === 0) ddCtx.moveTo(Math.cos(a1) * rOut, Math.sin(a1) * rOut);
+          else ddCtx.lineTo(Math.cos(a1) * rOut, Math.sin(a1) * rOut);
+          ddCtx.lineTo(Math.cos(a2) * rIn, Math.sin(a2) * rIn);
+        }
+        ddCtx.closePath();
+        ddCtx.fill();
+      } else {
+        const r = sp.size * 0.9;
+        ddCtx.beginPath();
+        ddCtx.moveTo(0, -r);
+        ddCtx.lineTo(r * 0.7, 0);
+        ddCtx.lineTo(0, r);
+        ddCtx.lineTo(-r * 0.7, 0);
+        ddCtx.closePath();
+        ddCtx.fill();
+      }
+      ddCtx.restore();
+    }
+
+    // 4. Vampire Survivors Floating Combat Texts
+    for (let i = vsFloatingTexts.length - 1; i >= 0; i--) {
+      const ft = vsFloatingTexts[i];
+      ft.x += ft.vx;
+      ft.y += ft.vy;
+      ft.scale += (ft.targetScale - ft.scale) * 0.24;
+      ft.life -= ft.decay;
+      if (ft.life <= 0) {
+        vsFloatingTexts.splice(i, 1);
+        continue;
+      }
+
+      const alpha = Math.min(1, ft.life * 1.5);
+      ddCtx.save();
+      ddCtx.translate(ft.x, ft.y);
+      ddCtx.scale(ft.scale, ft.scale);
+      ddCtx.globalAlpha = alpha;
+      ddCtx.textAlign = "center";
+      ddCtx.textBaseline = "middle";
+      ddCtx.lineJoin = "round";
+
+      // Glow / Shadow
+      ddCtx.shadowColor = ft.glowColor;
+      ddCtx.shadowBlur = 12;
+
+      // Primary Pop Number (e.g. "+50!" or "TOTAL: 150")
+      const mainFontSize = ft.isStop ? 19 : 25;
+      ddCtx.font = `900 ${mainFontSize}px Impact, system-ui, sans-serif`;
+      ddCtx.strokeStyle = "#000000";
+      ddCtx.lineWidth = 5;
+      ddCtx.strokeText(ft.mainText, 0, -8);
+      ddCtx.fillStyle = ft.mainColor;
+      ddCtx.fillText(ft.mainText, 0, -8);
+
+      // Sub-label: Combo & Progressive Sum ("2x COMBO ➔ 100 DANO")
+      ddCtx.shadowBlur = 6;
+      ddCtx.font = "900 11px system-ui, -apple-system, sans-serif";
+      const fullSub = `${ft.comboBadge} ${ft.sumText}`;
+      ddCtx.lineWidth = 3.5;
+      ddCtx.strokeStyle = "#000000";
+      ddCtx.strokeText(fullSub, 0, 11);
+      ddCtx.fillStyle = "#ffffff";
+      ddCtx.fillText(fullSub, 0, 11);
+
+      ddCtx.restore();
+    }
+
     ddCtx.restore();
 
     // Auto-close battle screen after wheels finish spinning and outcome is clearly shown
-    if (allSpinStagesFinished && postElapsed > 1500 && ddCanClose && !state.doubleChanceWaitingChoice) {
+    const closeWaitMs = (totalStages > 1) ? 1900 : 1500;
+    if (allSpinStagesFinished && postElapsed > closeWaitMs && ddCanClose && !state.doubleChanceWaitingChoice) {
       closeBattleOverlay();
       return;
     }
