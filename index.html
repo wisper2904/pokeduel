@@ -897,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.9 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.0 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,9 +906,15 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
-        <!-- Feature 0: Saldo Inicial de Novas Contas (v5.6.9) -->
+        <!-- Feature 0: Correção do P.C. da IA & Remoção do Botão Rewind (v5.7.0) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
-          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🪙 Saldo Inicial Balanceado: 100 Gems & 15.000 Ouro</div>
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🛡️ Regras Oficiais do P.C. & Interface sem Rewind</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">1) <strong>Removido o botão Rewind</strong> da barra inferior de jogo para manter o tabuleiro autêntico e focado.<br>2) <strong>Correção rigorosa do P.C. do Bot na Ranqueada</strong>: removida qualquer ressurreição automática pré-turno. Quando os Pokémon da IA são derrotados, eles vão diretamente para os pods do P.C. e ficam lá até a rotação oficial (máx. 2 vagas), saindo ao banco com Wait 2 sem poder agir de imediato!</div>
+        </div>
+
+        <!-- Feature 0.2: Saldo Inicial de Novas Contas (v5.6.9) -->
+        <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">🪙 Saldo Inicial Balanceado: 100 Gems & 15.000 Ouro</div>
           <div style="color:#cbd5e1; font-size:10.5px;">Todas as contas novas criadas pelo menu de boas-vindas ou resetadas iniciam exatamente com <strong>100 Gems (🔻)</strong> e <strong>15.000 Moedas de Ouro (🪙 Coins)</strong>, proporcionando uma progressão justa e autêntica!</div>
         </div>
 
@@ -1030,7 +1036,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.9</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.0</span>
           </div>
         </div>
 
@@ -1444,7 +1450,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.9 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.0 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -2249,8 +2255,8 @@ function sendToPC(unit) {
     const releasedUnit = state.units.find(u => u.uid === releasedUid);
     if (releasedUnit) {
       releasedUnit.location = "bench";
-      releasedUnit.waitTurns = 1;
-      setLogText(`${releasedUnit.name} rejoined bench (Wait 1)`);
+      releasedUnit.waitTurns = 2;
+      setLogText(`${releasedUnit.name} retornou ao Banco com Wait 2 (${q.length}/2 no P.C.)`);
     }
   } else {
     setLogText(`${unit.name} knocked out to P.C. (${q.length}/2)`);
@@ -2801,7 +2807,7 @@ function drawHDVectorBoardAndChrome() {
   ctx.textBaseline = "middle";
   ctx.fillText(state.postMoveAttackMode ? "End Turn ⏭️" : "AI", 176.5, 460.5);
 
-  // 9. Crisp 1080p Bottom 3-Button Bar ([Forfeit] · [Activate Ability] · [↻ Rewind])
+  // 9. Crisp 1080p Bottom 2-Button Bar ([Forfeit] · [Activate Ability]) - Rewind removed!
   const drawBotBtn = (x, y, w, h, lbl, isBlue, hasDot) => {
     const g = ctx.createLinearGradient(x, y, x, y + h);
     if (isBlue) {
@@ -2822,9 +2828,8 @@ function drawHDVectorBoardAndChrome() {
       ctx.beginPath(); ctx.arc(x + w - 2, y + 2, 4.5, 0, Math.PI * 2); ctx.fill();
     }
   };
-  drawBotBtn(31, 497, 46, 26, "Forfeit", false, false);
-  drawBotBtn(125, 497, 102, 26, "Activate Ability", true, false);
-  drawBotBtn(262, 497, 56, 26, "↻Rewind", false, true);
+  drawBotBtn(31, 497, 56, 26, "Forfeit", false, false);
+  drawBotBtn(118, 497, 117, 26, "Activate Ability", true, false);
 
   ctx.restore();
 }
@@ -3570,14 +3575,12 @@ canvas.addEventListener("pointerdown", e => {
     return;
   }
 
-  // 5. Bottom 3-Button Bar: [Forfeit] | [Activate Ability] | [↻ Rewind]
+  // 5. Bottom Button Bar: [Forfeit] | [Activate Ability] (Rewind removed!)
   if (sy >= 490) {
-    if (sx <= 105) {
+    if (sx <= 95) {
       triggerVoluntaryForfeit();
-    } else if (sx >= 115 && sx <= 238) {
+    } else if (sx >= 105 && sx <= 245) {
       togglePlatesTray();
-    } else if (sx >= 248) {
-      rewindLastAction();
     }
     return;
   }
@@ -3927,17 +3930,7 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
 }
 
 function rewindLastAction() {
-  if (state.isAnimating || state.historyStack.length === 0) return;
-  const snap = JSON.parse(state.historyStack.pop());
-  state.units = snap.units;
-  state.reviverQueueP1 = snap.rev1;
-  state.reviverQueueP2 = snap.rev2;
-  state.turn = snap.turn;
-  state.turnCounter = snap.turnCounter;
-  state.logText = snap.logText || "Rewound turn.";
-  state.selectedUnitId = null;
-  state.reachableNodes = [];
-  playSfx("portal");
+  // Rewind desativado na v5.7.0 a pedido do jogador
 }
 
 function skipOrDemoTurn() {
@@ -12581,7 +12574,6 @@ initAITacticalPlates = function() {
   state.aiPlates = [
     { id: "hurdle",    name: "Hurdle Jump",     cost: 2, used: false },
     { id: "goalblock", name: "Goal Block",      cost: 2, used: false },
-    { id: "revive",    name: "Max Revive",      cost: 2, used: false },
     { id: "megaplate", name: "Mega Plate [UX]", cost: 1, used: false },
     { id: "double",    name: "Double Chance",   cost: 1, used: false },
     { id: "xatk",      name: "X Attack",        cost: 1, used: false },
@@ -12705,28 +12697,10 @@ triggerPlayerAIMove = function() {
   const aiPlates = (owner === "p2" && Array.isArray(state.aiPlates)) ? state.aiPlates : [];
   const hurdlePlate    = aiPlates.find(p => p.id === "hurdle"    && !p.used);
   const goalBlockPlate = aiPlates.find(p => p.id === "goalblock" && !p.used);
-  const revivePlate    = aiPlates.find(p => p.id === "revive"    && !p.used);
   const megaPlate      = aiPlates.find(p => p.id === "megaplate" && !p.used);
   const doublePlate    = aiPlates.find(p => p.id === "double"    && !p.used);
   const xAtkPlate      = aiPlates.find(p => p.id === "xatk"      && !p.used);
   const xSpdPlate      = aiPlates.find(p => p.id === "xspeed"    && !p.used);
-
-  // STEP 0: FREE PRE-MOVE `MAX REVIVE` PLATE!
-  // If AI has >= 1 figure in P.C. and fewer than 4 active figures on board+bench (or 2 in PC), revive immediately!
-  const myRevQueue = (owner === "p2") ? state.reviverQueueP2 : state.reviverQueueP1;
-  if (revivePlate && Array.isArray(myRevQueue) && myRevQueue.length >= 1) {
-    const uid = myRevQueue.shift();
-    const revUnit = state.units.find(x => x.uid === uid);
-    if (revUnit) {
-      revivePlate.used = true;
-      revUnit.location = "bench";
-      revUnit.nodeId = null;
-      revUnit.waitTurns = 0;
-      revUnit.condition = PokemonCondition.Normal;
-      playSfx("portal");
-      setLogText(`💖 ${aiTitle} ativou Plate [Max Revive]: ${revUnit.name} retornou do P.C. pronto para o jogo!`);
-    }
-  }
 
   const myUnits = state.units.filter(u =>
     u.owner === owner &&
