@@ -1,0 +1,25 @@
+{
+  "name": "PokeDuel — Trading Figure Game 3D",
+  "short_name": "PokeDuel",
+  "description": "Pokémon Duel (TFG v7.0.16 / PokeDuel v5.6.0) — 306 Figuras 3D Nano Banana, Plates Táticas, IA Grandmaster 2-Ply e Multiplayer P2P Cross-Play.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020305",
+  "theme_color": "#050914",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
