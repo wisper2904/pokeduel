@@ -594,6 +594,23 @@
           <select id="prof-centerpiece-select" style="width:100%; margin-top:3px; font-size:10px; font-weight:800; padding:5px; border-radius:5px; background:#050912; border:1px solid #38bdf8; color:#fff;"></select>
         </div>
 
+        <!-- CONTA & SAVE NA NUVEM (LOGIN E SENHA) -->
+        <div style="background:linear-gradient(180deg,#0a192f 0%,#040a16 100%); border:1.5px solid #38bdf8; border-radius:9px; padding:9px 10px; margin-top:4px; box-shadow:inset 0 1px 2px rgba(0,0,0,0.5);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span style="font-size:14px;">☁️</span>
+              <strong style="color:#38bdf8; font-size:10.5px;">CONTA NA NUVEM (SAVE & SYNC)</strong>
+            </div>
+            <span id="prof-cloud-status-pill" style="font-size:8.5px; font-weight:900; padding:2px 7px; border-radius:99px; background:#0f172a; border:1px solid #38bdf8; color:#bae6fd;">☁️ Desconectado</span>
+          </div>
+          <div id="prof-cloud-desc-txt" style="font-size:9px; color:#94a3b8; line-height:1.35; margin-bottom:7px;">
+            Sincronize seu progresso, figuras Kaiyodo e gemas por Login e Senha para jogar no celular ou PC.
+          </div>
+          <button type="button" onclick="closePlayerProfileModal(); openCloudAccountModal();" class="btn green" style="width:100%; padding:7px; font-size:10.5px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
+            <span>☁️</span> <span id="prof-cloud-action-btn-lbl">Gerenciar Conta / Fazer Login</span>
+          </button>
+        </div>
+
         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:4px;">
           <button onclick="confirmResetIndividualProfile()" class="btn secondary" style="font-size:9px; padding:7px 10px; color:#fca5a5; border-color:#ef4444;">🔄 Resetar Perfil</button>
           <button onclick="savePlayerProfileSettings(); closePlayerProfileModal();" class="btn gold" style="flex:1; font-size:10.5px; padding:7px 14px;">💾 Salvar Meu Perfil</button>
@@ -612,6 +629,19 @@
         <input id="welcome-nick-inp" type="text" maxlength="16" placeholder="Digite seu apelido..." style="width:100%; margin-top:4px; padding:8px 10px; border-radius:7px; border:1.5px solid #38bdf8; background:#050912; color:#ffffff; font-size:12px; font-weight:900;">
       </div>
       <button onclick="completeWelcomeProfileSetup()" class="btn gold" style="width:100%; padding:9px; font-size:12px; font-weight:900;">🚀 Iniciar Minha Jornada (0 Duelos · 1000 Pts)</button>
+      
+      <!-- Opção de Login na Nuvem para quem já tem conta -->
+      <div style="margin:14px 0 10px; display:flex; align-items:center; gap:8px;">
+        <div style="flex:1; height:1px; background:rgba(56,189,248,0.35);"></div>
+        <span style="font-size:8.5px; font-weight:900; color:#94a3b8; letter-spacing:0.5px;">OU JÁ TEM UMA CONTA SALVA?</span>
+        <div style="flex:1; height:1px; background:rgba(56,189,248,0.35);"></div>
+      </div>
+      <button onclick="openCloudLoginFromWelcome()" class="btn green" style="width:100%; padding:9px; font-size:11.5px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 3px 8px rgba(34,197,94,0.3);">
+        <span>☁️</span> Entrar com Login e Senha na Nuvem
+      </button>
+      <div style="font-size:8.5px; color:#94a3b8; margin-top:6px; line-height:1.35;">
+        Restaura instantaneamente seu nome, decks, gemas e troféus salvos.
+      </div>
     </div>
   </div>
 
@@ -5973,6 +6003,7 @@ function openPlayerProfileModal() {
       return `<option value="${sPos}" ${sPos === (selectedCarouselSlot % 6) ? "selected" : ""}>Slot #${sPos + 1} do Meu Time: [${f.rarity}] ${f.name}</option>`;
     }).join("");
   }
+  refreshCloudAccountUI();
   if (m) m.style.display = "flex";
 }
 function closePlayerProfileModal() {
@@ -13432,7 +13463,7 @@ function refreshCloudAccountUI() {
   const badgeEls = [
     document.getElementById("cloud-account-status-pill"),
     document.getElementById("modal-cloud-status-pill"),
-    document.getElementById("hub-top-cloud-pill")
+    document.getElementById("prof-cloud-status-pill")
   ];
   badgeEls.forEach(el => {
     if (!el) return;
@@ -13440,14 +13471,27 @@ function refreshCloudAccountUI() {
       el.style.background = "linear-gradient(90deg,#065f46,#047857)";
       el.style.borderColor = "#4ade80";
       el.style.color = "#ecfdf5";
-      el.innerHTML = `🟢 @${sess.username} ${sess.lastSync ? "· ☁️ " + sess.lastSync : ""}`;
+      el.innerHTML = `🟢 @${sess.username}`;
     } else {
       el.style.background = "#0f172a";
       el.style.borderColor = "#38bdf8";
       el.style.color = "#bae6fd";
-      el.innerHTML = `☁️ Entrar (Login/Senha)`;
+      el.innerHTML = `☁️ Desconectado`;
     }
   });
+
+  const profDesc = document.getElementById("prof-cloud-desc-txt");
+  const profBtnLbl = document.getElementById("prof-cloud-action-btn-lbl");
+  if (profDesc && profBtnLbl) {
+    if (sess && sess.username) {
+      profDesc.textContent = `Sessão ativa como @${sess.username}. Seu progresso, gemas e troféus são salvos na nuvem.`;
+      profBtnLbl.textContent = `Gerenciar Conta (@${sess.username})`;
+    } else {
+      profDesc.textContent = "Sincronize seu progresso, figuras Kaiyodo e gemas por Login e Senha para jogar no celular ou PC.";
+      profBtnLbl.textContent = "Entrar ou Criar Conta na Nuvem";
+    }
+  }
+
   if (sess && sess.username) {
     ["cloud-login-user", "modal-cloud-user"].forEach(id => {
       const el = document.getElementById(id);
@@ -13730,35 +13774,24 @@ function openCloudAccountModal() {
 function closeCloudAccountModal() {
   const modal = document.getElementById("cloud-account-login-modal");
   if (modal) modal.style.display = "none";
+  if (!window.trainerProfileData || !window.trainerProfileData.isSetupDone) {
+    const wm = document.getElementById("welcome-profile-modal");
+    if (wm) wm.style.display = "flex";
+  }
+}
+
+function openCloudLoginFromWelcome() {
+  const wm = document.getElementById("welcome-profile-modal");
+  if (wm) wm.style.display = "none";
+  openCloudAccountModal();
 }
 
 (function injectCloudSaveAndGitHubPagesCards() {
-  // 1. Add a quick "☁️ Nuvem" pill on the Hub next to the Trainer Profile banner & inside #player-profile-modal
-  const profModal = document.getElementById("player-profile-modal");
-  if (profModal && !document.getElementById("prof-modal-cloud-btn")) {
-    const targetBtnRow = profModal.querySelector("button[onclick*='savePlayerProfileSettings']");
-    if (targetBtnRow && targetBtnRow.parentElement) {
-      const cloudBtn = document.createElement("button");
-      cloudBtn.id = "prof-modal-cloud-btn";
-      cloudBtn.className = "btn green";
-      cloudBtn.style.cssText = "font-size:9px; padding:7px 9px;";
-      cloudBtn.innerHTML = "☁️ Login Nuvem";
-      cloudBtn.onclick = () => { closePlayerProfileModal(); openCloudAccountModal(); };
-      targetBtnRow.parentElement.insertBefore(cloudBtn, targetBtnRow);
-    }
-  }
+  // Clean up any old floating cloud pill if present
+  const oldPill = document.getElementById("hub-top-cloud-pill");
+  if (oldPill) oldPill.remove();
 
-  // Add floating quick Cloud Login badge on top-left of Hub below Top HUD
-  const hubTab = document.getElementById("dtab-hub");
-  if (hubTab && !document.getElementById("hub-top-cloud-pill")) {
-    const pill = document.createElement("div");
-    pill.id = "hub-top-cloud-pill";
-    pill.onclick = openCloudAccountModal;
-    pill.title = "Save na Nuvem por Login e Senha";
-    pill.style.cssText = "position:absolute; left:6px; top:48px; z-index:14; background:#0f172a; border:1.5px solid #38bdf8; color:#bae6fd; border-radius:99px; padding:3px 8px; font-size:8.5px; font-weight:900; cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,0.75);";
-    pill.innerHTML = "☁️ Entrar (Login/Senha)";
-    hubTab.appendChild(pill);
-  }
+  // Inject full Cloud Save (Login & Password) + 1-Click GitHub Pages Publisher into Config Tab (#dtab-menu)
 
   // 2. Inject full Cloud Save (Login & Password) + 1-Click GitHub Pages Publisher into Config Tab (#dtab-menu)
   const cfgTab = document.getElementById("dtab-menu") || document.getElementById("dtab-config");
