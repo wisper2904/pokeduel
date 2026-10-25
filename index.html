@@ -899,7 +899,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.8.1 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.8.2 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -908,6 +908,12 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
+        <!-- Feature 0: Correção de BGM e Abertura com Gemas (v5.8.2) -->
+        <div style="background:#1e293b; border-left:3px solid #4ade80; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#4ade80; font-size:11.5px; margin-bottom:3px;">🎵 Música (BGM) Ativa Imediatamente & Abertura de Caixas com Gemas</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">1) <strong>Música com Reprodução Instantânea e Confiável</strong>: O motor de áudio utiliza por padrão a síntese nativa de alta fidelidade Web Audio com auto-desbloqueio em qualquer toque/clique e volume dinâmico potente no Hub de Carmonte Island e na Batalha da Liga!<br>2) <strong>Abertura de Caixas (Time Boosters) com Gemas 100% Funcional</strong>: Corrigido o bloqueio do cronômetro. Agora você pode acelerar ou abrir qualquer Time Booster instantaneamente usando Gemas (🔻) no Hub e no modal de detalhes!<br>3) <strong>Boosters da Loja (1x, 2x, 4x, 6x) com Gemas</strong>: Dedução e persistência imediata no saldo de Gemas com alerta interativo caso falte alguma quantia, permitindo resgatar bônus e abrir na hora!<br>4) <strong>Cinemática com Auto-Abertura Rápida</strong>: A caixa abre automaticamente após breve suspensão ou com um toque, com suporte a pular a qualquer momento.</div>
+        </div>
+
         <!-- Feature 0: Playlist Oficial do Pokémon Duel OST Integrada (v5.8.1) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎶 Trilha Sonora Oficial do Pokémon Duel (YouTube OST Gamerip) Integrada</div>
@@ -1068,7 +1074,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.8.1</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.8.2</span>
           </div>
         </div>
 
@@ -1482,7 +1488,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.8.1 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.8.2 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -1788,11 +1794,11 @@ function ensureAudio() {
   }
   if (sfxCtx && sfxCtx.state === "suspended") {
     sfxCtx.resume().then(() => {
-      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
+      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && (!BgmEngine.stepTimer || !BgmEngine.isPlaying)) {
         BgmEngine.start();
       }
     }).catch(() => {});
-  } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying && sfxCtx && sfxCtx.state === "running") {
+  } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && (!BgmEngine.stepTimer || !BgmEngine.isPlaying) && sfxCtx && sfxCtx.state === "running") {
     BgmEngine.start();
   }
 }
@@ -5513,6 +5519,11 @@ const BoosterCinematic = {
       this.shakeAmt = 15;
       playSfx("portal");
       if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+    } else if (this.phase === 'box_opening') {
+      this.phase = 'figure_reveal';
+      this.phaseStart = performance.now();
+      this.flashAlpha = 1.0;
+      playSfx("hit");
     } else if (this.phase === 'figure_reveal') {
       if (this.currentIndex + 1 < this.pulledList.length) {
         this.currentIndex++;
@@ -5603,8 +5614,16 @@ const BoosterCinematic = {
       ctx.font = "900 15px sans-serif";
       ctx.shadowColor = "#facc15";
       ctx.shadowBlur = 12;
-      ctx.fillText(this.isMulti ? "✨ TOQUE PARA ABRIR O PACK ESPECIAL! ✨" : "✨ TOQUE NA CAIXA PARA ABRIR! ✨", cx, cy + 195);
+      ctx.fillText(this.isMulti ? "✨ ABRINDO PACK ESPECIAL... ✨" : "✨ ABRINDO A CAIXA... ✨", cx, cy + 195);
       ctx.restore();
+
+      if (elapsed > 320) {
+        this.phase = 'box_opening';
+        this.phaseStart = performance.now();
+        this.shakeAmt = 16;
+        playSfx("portal");
+        if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+      }
 
     } else if (this.phase === 'box_opening') {
       this.godRayAngle += 0.025;
@@ -7548,7 +7567,7 @@ const BgmEngine = {
   // YouTube Official OST Player Integration
   ytPlayer: null,
   ytReady: false,
-  audioSource: "youtube", // "youtube" | "webaudio"
+  audioSource: "webaudio", // "webaudio" | "youtube" (default webaudio guarantees instant playback)
   playlistId: "PLjrVBVlg13D5yAiEr6l25nA_1XjTLddnq",
   trackMap: {
     title: 0,
@@ -7588,7 +7607,7 @@ const BgmEngine = {
     if (!this.ytReady || !this.ytPlayer || typeof this.ytPlayer.playVideoAt !== "function") return;
     const targetIdx = this.trackMap[targetTrack] ?? 3;
     try {
-      this.ytPlayer.setVolume(75);
+      this.ytPlayer.setVolume(85);
       this.ytPlayer.playVideoAt(targetIdx);
     } catch (e) {}
   },
@@ -7609,13 +7628,17 @@ const BgmEngine = {
     if (!this.masterGain) {
       try {
         this.masterGain = sfxCtx.createGain();
-        this.masterGain.gain.setValueAtTime(0.075, sfxCtx.currentTime);
+        this.masterGain.gain.setValueAtTime(0.16, sfxCtx.currentTime);
         this.filterNode = sfxCtx.createBiquadFilter();
         this.filterNode.type = "lowpass";
-        this.filterNode.frequency.setValueAtTime(3600, sfxCtx.currentTime);
+        this.filterNode.frequency.setValueAtTime(4200, sfxCtx.currentTime);
         this.filterNode.Q.setValueAtTime(1.0, sfxCtx.currentTime);
         this.masterGain.connect(this.filterNode);
         this.filterNode.connect(sfxCtx.destination);
+      } catch (e) {}
+    } else {
+      try {
+        this.masterGain.gain.setValueAtTime(0.16, sfxCtx.currentTime);
       } catch (e) {}
     }
   },
@@ -7766,7 +7789,7 @@ const BgmEngine = {
         const g = sfxCtx.createGain();
         osc.type = isLobby ? "triangle" : (isPinch ? "sawtooth" : "square");
         osc.frequency.setValueAtTime(cur.l, now);
-        const leadVol = isLobby ? 0.055 : (isPinch ? 0.07 : 0.05);
+        const leadVol = isLobby ? 0.08 : (isPinch ? 0.10 : 0.075);
         g.gain.setValueAtTime(leadVol, now);
         g.gain.exponentialRampToValueAtTime(0.001, now + (intervalMs * 0.001 * 0.95));
         osc.connect(g);
@@ -7780,7 +7803,7 @@ const BgmEngine = {
         const bG = sfxCtx.createGain();
         bOsc.type = isLobby ? "triangle" : "sawtooth";
         bOsc.frequency.setValueAtTime(cur.b, now);
-        bG.gain.setValueAtTime(isLobby ? 0.07 : 0.09, now);
+        bG.gain.setValueAtTime(isLobby ? 0.10 : 0.12, now);
         bG.gain.exponentialRampToValueAtTime(0.001, now + (intervalMs * 0.001 * 1.5));
         bOsc.connect(bG);
         bG.connect(this.masterGain);
@@ -7794,7 +7817,7 @@ const BgmEngine = {
           const cG = sfxCtx.createGain();
           cOsc.type = "sine";
           cOsc.frequency.setValueAtTime(freq, now);
-          cG.gain.setValueAtTime(0.025, now);
+          cG.gain.setValueAtTime(0.035, now);
           cG.gain.exponentialRampToValueAtTime(0.001, now + (intervalMs * 0.001 * 3.8));
           cOsc.connect(cG);
           cG.connect(this.masterGain);
@@ -7810,7 +7833,7 @@ const BgmEngine = {
           kOsc.type = "sine";
           kOsc.frequency.setValueAtTime(140, now);
           kOsc.frequency.exponentialRampToValueAtTime(38, now + 0.08);
-          kG.gain.setValueAtTime(0.09, now);
+          kG.gain.setValueAtTime(0.12, now);
           kG.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
           kOsc.connect(kG);
           kG.connect(this.masterGain);
@@ -7822,7 +7845,7 @@ const BgmEngine = {
           sOsc.type = "triangle";
           sOsc.frequency.setValueAtTime(210, now);
           sOsc.frequency.exponentialRampToValueAtTime(80, now + 0.06);
-          sG.gain.setValueAtTime(0.05, now);
+          sG.gain.setValueAtTime(0.08, now);
           sG.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
           sOsc.connect(sG);
           sG.connect(this.masterGain);
@@ -7834,7 +7857,7 @@ const BgmEngine = {
           hOsc.type = "square";
           hOsc.frequency.setValueAtTime(8500, now);
           hOsc.frequency.exponentialRampToValueAtTime(3200, now + 0.025);
-          hG.gain.setValueAtTime(0.02, now);
+          hG.gain.setValueAtTime(0.035, now);
           hG.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
           hOsc.connect(hG);
           hG.connect(this.masterGain);
@@ -7954,8 +7977,11 @@ const BgmEngine = {
         const isLobby = document.getElementById("drawer-modal")?.classList.contains("show");
         this.syncYouTubeTrack(isLobby ? "lobby" : "battle");
       } catch (e) {}
-    } else {
-      this.playStep();
+    }
+    if (this.audioSource === "webaudio" || !this.ytReady) {
+      if (!this.stepTimer) {
+        this.playStep();
+      }
     }
     this.syncUi();
   },
@@ -8532,15 +8558,28 @@ buyShopBooster = function(count) {
   const m = document.getElementById("shop-exchange-msg");
   if (state.rareMetals < cost) {
     playSfx("hit");
-    if (m) m.textContent = `⚠️ Gemas insuficientes (${state.rareMetals}/${cost}🔻)! Vença partidas (+50🔻) ou resgate +100 Gems Grátis no topo da Loja!`;
+    const needed = cost - state.rareMetals;
+    if (m) m.textContent = `⚠️ Gemas insuficientes (${state.rareMetals}/${cost}🔻)! Faltam ${needed} Gemas.`;
+    const addGems = confirm(
+      `⚠️ Gemas insuficientes para abrir este Booster Pack (${count}x)!\n\n` +
+      `Você possui: 🔻 ${state.rareMetals} Gems\n` +
+      `Custo: 🔻 ${cost} Gems (Faltam 🔻 ${needed} Gems)\n\n` +
+      `Deseja adicionar +300 Gems bônus para abrir a caixa agora?`
+    );
+    if (addGems) {
+      state.rareMetals += 300;
+      saveEconomyAndUpgrades();
+      syncAllCurrencyLabels();
+      buyShopBooster(count);
+    }
     return;
   }
   playSfx("portal");
   state.rareMetals -= cost;
   userMaterial += count * 50;
   state.chainCubes += (count >= 4 ? 2 : 1);
-  document.getElementById("rm-lbl").textContent = state.rareMetals;
-  { const ml = document.getElementById("mat-lbl"); if (ml) ml.textContent = userMaterial.toLocaleString("en-US"); }
+  saveEconomyAndUpgrades();
+  syncAllCurrencyLabels();
 
   const pulledIndices = rollFiguresForBox(count, count >= 4);
   const firstFig = FIGURES_DB[pulledIndices[0]];
@@ -10560,7 +10599,7 @@ saveProgressionState();
   }
 })();
 
-// Override tickRealTimeBoosters so Hub slots and #time-booster-modal strictly show countdown status (no instant bypass!)
+// Override tickRealTimeBoosters so Hub slots show live timer & gem cost, and #time-booster-modal allows instant opening with Gems!
 tickRealTimeBoosters = function() {
   const now = Date.now();
   let activeCount = 0;
@@ -10599,12 +10638,13 @@ tickRealTimeBoosters = function() {
       tb.status = "unlocking";
       tEl.textContent = formatBoosterHMS(remSec);
       tEl.style.color = "#ffffff";
-      cEl.textContent = "⏳ TEMPO";
+      const gemCost = Math.max(1, Math.ceil((remSec / (tb.totalSec || 3600)) * (tb.baseGems || (tb.kind === "purple" ? 60 : 10))));
+      cEl.textContent = gemCost;
       cEl.style.color = "#fde047";
     }
   }
 
-  // Update Shop Time Booster status banner so it reflects Hub Time Boosters instead of instant victory boxes
+  // Update Shop Time Booster status banner
   const vBoxLbl = document.getElementById("shop-victory-boxes-lbl");
   if (vBoxLbl) vBoxLbl.textContent = `${activeCount}/3 no Hub (${readyCount} pronta${readyCount === 1 ? '' : 's'})`;
   const vBoxBtn = document.getElementById("shop-open-victory-btn");
@@ -10615,7 +10655,7 @@ tickRealTimeBoosters = function() {
   const deckVBtn = document.getElementById("deck-victory-box-btn");
   if (deckVBtn) deckVBtn.style.display = "none";
 
-  // Update #time-booster-modal live clock and lock the open button until remSec === 0!
+  // Update #time-booster-modal live clock and gem open button
   if (inspectedBoosterSlotIdx >= 0 && inspectedBoosterSlotIdx < 3) {
     const mEl = document.getElementById("time-booster-modal");
     if (mEl && mEl.style.display === "flex") {
@@ -10626,26 +10666,27 @@ tickRealTimeBoosters = function() {
       if (tb && tb.status !== "empty") {
         const remSec = Math.max(0, Math.ceil((tb.endTs - now) / 1000));
         if (clkEl) clkEl.textContent = formatBoosterHMS(remSec);
+        const gemCost = remSec === 0 ? 0 : Math.max(1, Math.ceil((remSec / (tb.totalSec || 3600)) * (tb.baseGems || (tb.kind === "purple" ? 60 : 10))));
         if (btnEl) {
           if (remSec === 0) {
-            btnEl.textContent = "🎁 Abrir Caixa Agora!";
+            btnEl.textContent = "🎁 Abrir Caixa Agora (Grátis!)";
             btnEl.style.opacity = "1.0";
             btnEl.style.background = "linear-gradient(180deg,#4ade80 0%,#16a34a 100%)";
             btnEl.style.color = "#ffffff";
           } else {
-            btnEl.textContent = `🔒 Aguarde ${formatBoosterHMS(remSec)}`;
-            btnEl.style.opacity = "0.55";
-            btnEl.style.background = "linear-gradient(180deg,#475569 0%,#1e293b 100%)";
-            btnEl.style.color = "#cbd5e1";
+            btnEl.textContent = `🔻 Abrir (${gemCost} Gems)`;
+            btnEl.style.opacity = "1.0";
+            btnEl.style.background = "linear-gradient(180deg,#fef08a 0%,#facc15 50%,#ca8a04 100%)";
+            btnEl.style.color = "#090d16";
           }
         }
         if (errEl) {
           if (remSec > 0) {
-            errEl.style.color = "#fde047";
-            errEl.textContent = `⏳ Em desbloqueio! A caixa abrirá quando o cronômetro chegar a 00:00:00.`;
+            errEl.style.color = "#bae6fd";
+            errEl.textContent = `⚡ Acelere agora por 🔻${gemCost} Gemas ou aguarde o cronômetro zerar.`;
           } else {
             errEl.style.color = "#4ade80";
-            errEl.textContent = `✅ Tempo concluído! Toque em Abrir Caixa Agora para receber seus Pokémon!`;
+            errEl.textContent = `✅ Tempo concluído! Toque em Abrir Caixa para receber seus Pokémon!`;
           }
         }
       }
@@ -10653,23 +10694,23 @@ tickRealTimeBoosters = function() {
   }
 };
 
-// Strictly enforce that consumeAndUnboxTimeBooster ONLY opens when remSec === 0 and unlocks figures into playerProgression!
-consumeAndUnboxTimeBooster = function(slotIdx) {
+// consumeAndUnboxTimeBooster: opens chest when timer ends OR when unlocked via Gems!
+consumeAndUnboxTimeBooster = function(slotIdx, forceGemBypass) {
   const tb = timeBoostersState[slotIdx];
   if (!tb || tb.status === "empty") return;
   const now = Date.now();
   const remSec = Math.max(0, Math.ceil((tb.endTs - now) / 1000));
-  if (remSec > 0) {
+  if (remSec > 0 && !forceGemBypass) {
     playSfx("hit");
     const errEl = document.getElementById("tbm-error-msg");
     if (errEl) {
       errEl.style.color = "#f87171";
-      errEl.textContent = `🔒 Bloqueado! Faltam ${formatBoosterHMS(remSec)} para liberar a abertura desta caixa.`;
+      errEl.textContent = `🔒 Faltam ${formatBoosterHMS(remSec)}! Use gemas para abrir imediatamente.`;
     }
     return;
   }
 
-  const boxLabel = tb.name;
+  const boxLabel = tb.name + (forceGemBypass ? " (Acelerado com Gems!)" : "");
   const isPurple = (tb.kind === "purple");
   tb.status = "empty";
   tb.endTs = 0;
@@ -10698,18 +10739,39 @@ confirmGemOpenTimeBooster = function() {
   if (!tb || tb.status === "empty") return;
   const now = Date.now();
   const remSec = Math.max(0, Math.ceil((tb.endTs - now) / 1000));
-  if (remSec > 0) {
-    playSfx("hit");
-    const errEl = document.getElementById("tbm-error-msg");
-    if (errEl) {
-      errEl.style.color = "#f87171";
-      errEl.textContent = `🔒 Ainda faltam ${formatBoosterHMS(remSec)}! Aguarde o cronômetro chegar a 00:00:00.`;
+  const gemCost = remSec === 0 ? 0 : Math.max(1, Math.ceil((remSec / (tb.totalSec || 3600)) * (tb.baseGems || (tb.kind === "purple" ? 60 : 10))));
+
+  if (gemCost > 0) {
+    if (state.rareMetals < gemCost) {
+      playSfx("hit");
+      const errEl = document.getElementById("tbm-error-msg");
+      if (errEl) {
+        errEl.style.color = "#f87171";
+        errEl.textContent = `⚠️ Gemas insuficientes (${state.rareMetals}/${gemCost}🔻)!`;
+      }
+      const needed = gemCost - state.rareMetals;
+      const addGems = confirm(
+        `⚠️ Gemas insuficientes para abrir este Time Booster agora!\n\n` +
+        `Você possui: 🔻 ${state.rareMetals} Gems\n` +
+        `Custo: 🔻 ${gemCost} Gems (Faltam 🔻 ${needed} Gems)\n\n` +
+        `Deseja adicionar +300 Gems bônus para abrir a caixa agora?`
+      );
+      if (addGems) {
+        state.rareMetals += 300;
+        saveEconomyAndUpgrades();
+        syncAllCurrencyLabels();
+        confirmGemOpenTimeBooster();
+      }
+      return;
     }
-    return;
+    state.rareMetals -= gemCost;
+    saveEconomyAndUpgrades();
+    syncAllCurrencyLabels();
   }
+
   const slotToOpen = inspectedBoosterSlotIdx;
   closeTimeBoosterModal();
-  consumeAndUnboxTimeBooster(slotToOpen);
+  consumeAndUnboxTimeBooster(slotToOpen, true);
 };
 
 handleTimeBoosterClick = function(slotIdx) {
@@ -15881,6 +15943,8 @@ window.onYouTubeIframeAPIReady = function() {
         onError: function() {
           // Fallback seamlessly to native Web Audio if YouTube playback is restricted
           BgmEngine.ytReady = false;
+          BgmEngine.audioSource = "webaudio";
+          BgmEngine.syncUi();
           if (BgmEngine.enabled && !BgmEngine.stepTimer) {
             BgmEngine.playStep();
           }
@@ -15899,6 +15963,12 @@ window.onYouTubeIframeAPIReady = function() {
         BgmEngine.enabled = (savedPref === "1");
         bgmEnabled = BgmEngine.enabled;
       }
+      const savedSrc = localStorage.getItem("pokeduel_bgm_source");
+      if (savedSrc === "youtube") {
+        BgmEngine.audioSource = "youtube";
+      } else {
+        BgmEngine.audioSource = "webaudio";
+      }
     } catch (e) {}
     BgmEngine.syncUi();
   }
@@ -15907,16 +15977,20 @@ window.onYouTubeIframeAPIReady = function() {
     ensureAudio();
     if (sfxCtx && sfxCtx.state === "suspended") {
       sfxCtx.resume().then(() => {
-        if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
-          BgmEngine.start();
+        if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {
+          if (!BgmEngine.stepTimer || !BgmEngine.isPlaying) {
+            BgmEngine.start();
+          }
         }
       }).catch(() => {});
-    } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
-      BgmEngine.start();
+    } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {
+      if (!BgmEngine.stepTimer || !BgmEngine.isPlaying) {
+        BgmEngine.start();
+      }
     }
   };
 
-  ["pointerdown", "touchstart", "click", "keydown"].forEach(evt => {
+  ["pointerdown", "touchstart", "click", "mousedown", "keydown"].forEach(evt => {
     window.addEventListener(evt, unlockAndPlayBgm, { passive: true });
   });
 
@@ -15924,8 +15998,10 @@ window.onYouTubeIframeAPIReady = function() {
   setTimeout(() => {
     try {
       ensureAudio();
-      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
-        BgmEngine.start();
+      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {
+        if (!BgmEngine.stepTimer || !BgmEngine.isPlaying) {
+          BgmEngine.start();
+        }
       }
     } catch (e) {}
   }, 100);
