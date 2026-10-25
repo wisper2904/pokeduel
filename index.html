@@ -627,6 +627,64 @@
     </div>
   </div>
 
+  <!-- MODAL DE ATUALIZAÇÃO & CHANGELOG (v5.6.1) -->
+  <div id="changelog-modal" style="display:none; position:fixed; inset:0; z-index:295; background:rgba(2,6,23,0.92); align-items:center; justify-content:center; padding:14px; backdrop-filter:blur(3px);">
+    <div style="width:100%; max-width:345px; max-height:88vh; background:linear-gradient(180deg,#0f172a 0%,#090d16 100%); border:2px solid #38bdf8; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,0.9), 0 0 20px rgba(56,189,248,0.3); color:#f8fafc;">
+      
+      <!-- Header -->
+      <div style="background:linear-gradient(90deg,#0284c7 0%,#2563eb 100%); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #38bdf8;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">📢</span>
+          <div>
+            <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.6.1 · Estável</div>
+          </div>
+        </div>
+        <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+      </div>
+
+      <!-- Scrollable Changelog Content -->
+      <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
+        
+        <!-- Feature 1: Limpeza da Barra Superior -->
+        <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">🧹 Visual Limpo no Tabuleiro</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Removidos os botões <span style="color:#f87171; font-weight:bold;">[Skip]</span> e <span style="color:#f87171; font-weight:bold;">[🔄 Visão P1]</span> da barra superior para expandir os registros de combate e dar foco total na partida sem poluição visual.</div>
+        </div>
+
+        <!-- Feature 2: Multiplayer 100% Funcional -->
+        <div style="background:#1e293b; border-left:3px solid #4ade80; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#4ade80; font-size:11.5px; margin-bottom:3px;">🌐 Multiplayer P2P e 2P Local Estável</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Corrigido travamento que bloqueava toques e seleções nas partidas multiplayer. Área de seleção das miniaturas expandida (hitbox de 28px) e adicionado indicador dinâmico de turno na mesa.</div>
+        </div>
+
+        <!-- Feature 3: Botão de Atualização Integrado -->
+        <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🔄 Atualizador Automático em 1 Toque</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Novo botão para verificar e aplicar atualizações instantaneamente, limpando caches do navegador e Service Worker para carregar a versão mais recente sem resetar seus dados!</div>
+        </div>
+
+        <!-- Feature 4: Cloud Save na Nuvem -->
+        <div style="background:#1e293b; border-left:3px solid #c084fc; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#c084fc; font-size:11.5px; margin-bottom:3px;">☁️ Salve na Nuvem com Login e Senha</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Sincronização na nuvem protegida por senha, mantendo seus decks, gemas e progresso acessíveis em qualquer celular ou PC.</div>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div style="padding:10px 14px; background:#0b1120; border-top:1.5px solid #1e293b; display:flex; flex-direction:column; gap:6px;">
+        <button onclick="triggerInAppUpdateAction()" style="background:linear-gradient(180deg,#22c55e 0%,#15803d 100%); border:1.5px solid #86efac; border-radius:8px; padding:9px; color:#fff; font-size:11.5px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 3px 8px rgba(34,197,94,0.4);">
+          <span>🔄</span> Recarregar e Atualizar Agora
+        </button>
+        <button onclick="closeChangelogModal()" style="background:#1e293b; border:1px solid #475569; border-radius:8px; padding:7px; color:#94a3b8; font-size:10.5px; font-weight:800; cursor:pointer;">
+          Continuar no Jogo
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Row 1: Exact `1001314047.jpg` Top Status Bar (Green Energy `110/110` | Coin `415` | Red Gem `23 [+]`) -->
   <div class="comaster-top-hud" style="height:40px; background:linear-gradient(180deg,#081d4a 0%,#04112e 60%,#02091c 100%); border-bottom:2px solid #1d4ed8; padding:0 8px; display:flex; align-items:center; justify-content:space-between;">
     <!-- Left: Interactive Segmented Glossy Green Stamina/Energy Bar (`⚡ 110/110`) -->
@@ -671,6 +729,27 @@
               <span id="trainer-name-lbl" style="font-size:11.5px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000;">Treinador</span>
               <span style="font-size:11px; font-weight:900; color:#e0f2fe;">❯</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left Floating `Update / Changelog` Action Buttons (v5.6.1) -->
+      <div style="position:absolute; left:6px; top:48px; z-index:14; display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
+        <!-- Changelog Modal Button -->
+        <div onclick="openChangelogModal()" title="Ver Novidades da Atualização v5.6.1" style="cursor:pointer; background:linear-gradient(180deg,#0284c7 0%,#03458e 100%); border:1.5px solid #38bdf8; border-radius:8px; padding:5px 8px; display:flex; align-items:center; gap:5px; box-shadow:0 3px 8px rgba(0,0,0,0.7);">
+          <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.6.1</span>
+          </div>
+        </div>
+
+        <!-- 1-Touch In-App Refresh / Update Button -->
+        <div onclick="triggerInAppUpdateAction()" title="Limpar Cache e Atualizar Jogo" style="cursor:pointer; background:linear-gradient(180deg,#15803d 0%,#0f5128 100%); border:1.5px solid #4ade80; border-radius:8px; padding:5px 8px; display:flex; align-items:center; gap:5px; box-shadow:0 3px 8px rgba(0,0,0,0.7);">
+          <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">🔄</span>
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">ATUALIZAR</span>
+            <span style="font-size:7.5px; font-weight:800; color:#86efac;">1-Toque</span>
           </div>
         </div>
       </div>
@@ -1067,6 +1146,21 @@
         <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:6px;">
           <button class="btn gold" style="font-size:9.5px; padding:6px;" onclick="openPlayerProfileModal()">✏️ Editar Perfil & Avatar</button>
           <button class="btn secondary" style="font-size:9px; padding:6px; color:#fca5a5; border-color:#ef4444;" onclick="confirmResetIndividualProfile()">🔄 Resetar Perfil (Zerar)</button>
+        </div>
+      </div>
+
+      <!-- CARD: VERSÃO DO JOGO & ATUALIZADOR -->
+      <div class="card" style="background:linear-gradient(180deg,#0a2540,#051329); border:1.5px solid #38bdf8; margin-bottom:8px; padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div>
+            <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.6.1 · Estável</div>
+          </div>
+          <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+          <button class="btn gold" style="font-size:9.5px; padding:6px;" onclick="openChangelogModal()">📢 Ver Notas da Atualização</button>
+          <button class="btn" style="font-size:9.5px; padding:6px; background:linear-gradient(180deg,#22c55e,#15803d); border-color:#86efac; color:#fff;" onclick="triggerInAppUpdateAction()">🔄 Atualizar Agora (1-Toque)</button>
         </div>
       </div>
 
@@ -2134,39 +2228,15 @@ function drawHDBenchRing(cx, cy, rx, ry, isPlus) {
 }
 
 function drawHDVectorBoardAndChrome() {
-  // 1. Crisp 1080p Top Action Bar & [Skip] Button (y = 0..19)
+  // 1. Crisp 1080p Top Action Bar (Clean full-width log without Skip / Perspective buttons)
   ctx.save();
   ctx.fillStyle = "#030508";
-  ctx.fillRect(0, 0, 255, 18.5);
+  ctx.fillRect(0, 0, LOGICAL_W, 18.5);
   ctx.fillStyle = "#2bb8e8";
   ctx.font = "700 10.2px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(state.logText, 4, 9.5);
-
-  // [🔄 Mesa P1/P2] Perspective Toggle Button (x = 204..258, y = 2..19)
-  ctx.fillStyle = isBoardFlipped() ? "#7f1d1d" : "#0c4a6e";
-  ctx.strokeStyle = isBoardFlipped() ? "#fb7185" : "#38bdf8";
-  ctx.lineWidth = 1.1;
-  ctx.beginPath(); ctx.roundRect(204, 2, 54, 16.5, 3); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "800 8.5px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(isBoardFlipped() ? "🔄 Visão P2" : "🔄 Visão P1", 231, 10.5);
-
-  // Crisp 1080p [Skip] button (x = 262..317, y = 2..19)
-  const skGrad = ctx.createLinearGradient(0, 2, 0, 19);
-  skGrad.addColorStop(0, "#334155");
-  skGrad.addColorStop(0.5, "#1e293b");
-  skGrad.addColorStop(1, "#0f172a");
-  ctx.fillStyle = skGrad;
-  ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = 1.1;
-  ctx.beginPath(); ctx.roundRect(262, 2, 55, 16.5, 3); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = "#f8fafc";
-  ctx.font = "700 10px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("Skip", 289.5, 10.5);
+  ctx.fillText(state.logText, 6, 9.5);
 
   // 2. Crisp 1080p Trainer Names & Seat Colors (swaps when viewing from P2's seat across the table!)
   const flipped = isBoardFlipped();
@@ -3143,18 +3213,6 @@ canvas.addEventListener("pointerdown", e => {
   const rect = canvas.getBoundingClientRect();
   const sx = (e.clientX - rect.left) * (LOGICAL_W / rect.width);
   const sy = (e.clientY - rect.top) * (LOGICAL_H / rect.height);
-
-  // 0. Top [🔄 Visão P1/P2] Tabletop Flip button
-  if (sx >= 202 && sx < 258 && sy >= 0 && sy <= 21) {
-    toggleTablePerspective();
-    return;
-  }
-
-  // 1. Top-Right [Skip] button
-  if (sx >= 258 && sx <= 324 && sy >= 0 && sy <= 21) {
-    skipOrDemoTurn();
-    return;
-  }
 
   // 2. Top-Left "Uptodown" Trainer Portrait or Center "TURN" Badge -> Opens League Hub (Blocked during active multiplayer)
   if (sx >= 0 && sx <= 210 && sy >= 18 && sy <= 54) {
@@ -13795,6 +13853,84 @@ function closeCloudAccountModal() {
   }
   refreshCloudAccountUI();
 })();
+
+// --- 21.6: IN-GAME UPDATER & CHANGELOG MODAL (v5.6.1) ---
+function openChangelogModal() {
+  const m = document.getElementById("changelog-modal");
+  if (m) m.style.display = "flex";
+  try {
+    localStorage.setItem("pdr_viewed_changelog_v561", "true");
+  } catch (e) {}
+}
+
+function closeChangelogModal() {
+  const m = document.getElementById("changelog-modal");
+  if (m) m.style.display = "none";
+}
+
+async function triggerInAppUpdateAction() {
+  playSfx("portal");
+  const modal = document.getElementById("changelog-modal");
+  if (modal) modal.style.display = "none";
+
+  let overlay = document.getElementById("pdr-update-toast");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "pdr-update-toast";
+    overlay.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:20px;";
+    overlay.innerHTML = `
+      <div style="font-size:38px; animation:pdrSpin 0.9s linear infinite; margin-bottom:14px;">🔄</div>
+      <div style="font-size:16px; font-weight:900; color:#38bdf8; margin-bottom:6px;">ATUALIZANDO POKÉMON DUEL...</div>
+      <div style="font-size:11px; color:#94a3b8; max-width:280px; line-height:1.45;">Limpando cache do navegador, Service Worker e baixando a versão mais recente...</div>
+      <style>@keyframes pdrSpin { 100% { transform: rotate(360deg); } }</style>
+    `;
+    document.body.appendChild(overlay);
+  } else {
+    overlay.style.display = "flex";
+  }
+
+  try {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        await reg.unregister();
+      }
+    }
+  } catch (e) {
+    console.warn("ServiceWorker unregister error:", e);
+  }
+
+  try {
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      for (const key of keys) {
+        await caches.delete(key);
+      }
+    }
+  } catch (e) {
+    console.warn("CacheStorage delete error:", e);
+  }
+
+  setTimeout(() => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("v", "5.6.1");
+      url.searchParams.set("t", Date.now().toString());
+      window.location.href = url.toString();
+    } catch (e) {
+      window.location.reload(true);
+    }
+  }, 450);
+}
+
+// Auto-show changelog once on home screen
+try {
+  if (localStorage.getItem("pdr_viewed_changelog_v561") !== "true") {
+    setTimeout(() => {
+      openChangelogModal();
+    }, 700);
+  }
+} catch (e) {}
 
 initVerbatimCodeViewer();
 renderHubAndCollection();
