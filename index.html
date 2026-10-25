@@ -897,7 +897,7 @@
           <span style="font-size:18px;">📢</span>
           <div>
             <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">NOTAS DE ATUALIZAÇÃO</div>
-            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.2 · Estável</div>
+            <div style="font-size:9.5px; font-weight:700; color:#bae6fd;">Versão v5.7.3 · Estável</div>
           </div>
         </div>
         <button onclick="closeChangelogModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
@@ -906,6 +906,12 @@
       <!-- Scrollable Changelog Content -->
       <div style="padding:12px 14px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:10px;">
         
+        <!-- Feature 0: Correção Oficial do Hyper Sonic do Mew (v5.7.3) -->
+        <div style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:8px 10px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:11.5px; margin-bottom:3px;">🛡️ Regra Oficial de Hyper Sonic (Mew EX/UX) Corrigida</div>
+          <div style="color:#cbd5e1; font-size:10.5px;">Implementada com fidelidade a habilidade passiva do ataque dourado <strong>Hyper Sonic</strong> (50 DMG): quando o Mew cai em Hyper Sonic e o adversário gira um ataque Branco ou Dourado de <strong>100 de dano ou superior</strong>, o Mew <strong>NÃO é nocauteado</strong>! Ele absorve o impacto e ambos mantêm suas posições no tabuleiro.</div>
+        </div>
+
         <!-- Feature 0: Roleta 100% Limpa sem Mensagem de Total (v5.7.2) -->
         <div style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:8px 10px;">
           <div style="font-weight:900; color:#facc15; font-size:11.5px; margin-bottom:3px;">🎯 Roleta 100% Limpa: Mensagem de Total no Topo Removida</div>
@@ -1048,7 +1054,7 @@
           <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📢</span>
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">NOTAS</span>
-            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.2</span>
+            <span style="font-size:7.5px; font-weight:800; color:#fde047;">v5.7.3</span>
           </div>
         </div>
 
@@ -1462,7 +1468,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
             <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
-            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.2 · Estável</div>
+            <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v5.7.3 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
@@ -4286,6 +4292,18 @@ function evaluateCombat(atkUnit, defUnit, atkSpin, defSpin) {
     if (d.stars > a.stars) return { winner:"def", effect:d.effect||"ko", reason:`★${d.stars} beats ★${a.stars}!` };
     return { winner:"none", reason:`Purple Star Tie (★${a.stars})!` };
   }
+
+  // === HYPER SONIC IMMUNITY RULE (Mew / Official Pokémon Duel Rule) ===
+  // If a Pokémon spins Hyper Sonic (Gold, 50 DMG) and the opponent spins a White or Gold attack with 100+ DMG,
+  // this Pokémon is NOT knocked out! It survives the hit and both hold ground.
+  const isHyperSonicMove = (s) => s && typeof s.name === "string" && s.name.toLowerCase().replace(/[\s\-_]/g, "") === "hypersonic";
+  if (isHyperSonicMove(a) && (d.color === "white" || d.color === "gold") && (d.dmg || 0) >= 100) {
+    return { winner: "none", reason: `🛡️ Hyper Sonic (${atkUnit.name}): Imune a nocaute contra 100+ DANO (${d.name} ${d.dmg})! Ambos mantêm posição.` };
+  }
+  if (isHyperSonicMove(d) && (a.color === "white" || a.color === "gold") && (a.dmg || 0) >= 100) {
+    return { winner: "none", reason: `🛡️ Hyper Sonic (${defUnit.name}): Imune a nocaute contra 100+ DANO (${a.name} ${a.dmg})! Ambos mantêm posição.` };
+  }
+
   if (a.dmg > d.dmg) return { winner:"atk", effect:"ko", reason:`${a.name} (${a.dmg}) defeats ${d.name} (${d.dmg})!` };
   if (d.dmg > a.dmg) return { winner:"def", effect:"ko", reason:`${d.name} (${d.dmg}) defeats ${a.name} (${a.dmg})!` };
   return { winner:"none", reason:`Damage Tie (${a.dmg} vs ${d.dmg})!` };
@@ -5169,6 +5187,7 @@ const FIGURE_ABILITIES_DB = {
   dialga_o: "[UX] Temporal Origin Forme: Roar of Time 160 DMG + Time Distortion ★★★ instant knockout.",
   gengar: "Infiltrator Shadow (3 MP): Moves through figures on the board; knocks out sleeping/poisoned targets it passes over.",
   lucario: "Steadfast Aura: Aura Sphere ★★ knocks out opponent regardless of damage; Metal Claw 100.",
+  mew: "Hyper Sonic Shield (3 MP): Gold Hyper Sonic (50 DMG) is immune to knock out against attacks of 100+ DMG; Shuttle Flip leaps backward.",
   rayquaza: "Air Lock Extreme: Extreme Speed 140 Gold destroys Purple wheels; Fly ★★★ leaps over opponents."
 };
 
