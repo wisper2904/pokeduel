@@ -967,13 +967,24 @@
     </div>
 
     <!-- TAB 5: `ONLINE P2P` (DEDICATED, SUPER-INTUITIVE ROOM MATCH MULTIPLAYER TAB!) -->
-    <div id="dtab-p2p" class="dtab-content" style="display:none; padding:8px; overflow-y:auto;">
+    <div id="dtab-p2p" class="dtab-content" style="display:none; padding:8px; overflow-y:auto; flex:1; height:100%;">
+      <!-- Top Navigation Header with Back / Close Buttons -->
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid rgba(56,189,248,0.28);">
+        <button class="btn secondary" style="padding:6px 10px; font-size:10px; font-weight:800;" onclick="switchDrawerTab('hub')">
+          ← Voltar ao Hub
+        </button>
+        <div style="font-size:12px; font-weight:900; color:#38bdf8; letter-spacing:0.5px;">🌐 MULTIPLAYER P2P & LOCAL</div>
+        <button class="btn gold" style="padding:6px 10px; font-size:10px; font-weight:900;" onclick="closeDrawer()">
+          ✕ Ver Tabuleiro
+        </button>
+      </div>
+
       <div style="display:flex; gap:4px; margin-bottom:6px;"><button class="btn gold" style="flex:1; padding:4px;" onclick="switchDrawerTab('p2p')">🌐 Multiplayer P2P</button><button class="btn secondary" style="flex:1; padding:4px;" onclick="switchDrawerTab('menu')">🏨 Quests / Arenas / Monaco</button><button class="btn secondary" id="pixel-mode-btn" style="padding:4px 6px;" onclick="cyclePixelArtMode()">✨ HD</button></div>
       <!-- Live Connection Status Banner -->
       <div id="p2p-status-banner" style="background:linear-gradient(90deg,#0f172a,#1e293b); border:1.5px solid #38bdf8; border-radius:10px; padding:8px 10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
         <div>
           <div id="p2p-status-title" style="font-size:11.5px; font-weight:900; color:#38bdf8;">⚪ MULTIPLAYER P2P — PRONTO PARA CONECTAR</div>
-          <div id="p2p-status-sub" style="font-size:9.5px; color:#cbd5e1; margin-top:2px;">Escolha abaixo: Criar Sala (Celular 1) ou Digitar Código (Celular 2)</div>
+          <div id="p2p-status-sub" style="font-size:9.5px; color:#cbd5e1; margin-top:2px;">Escolha abaixo: Criar Sala (Celular 1), Digitar Código (Celular 2) ou Jogar 2P Local</div>
         </div>
         <span id="p2p-ping-badge" style="background:#090d16; border:1px solid #475569; border-radius:99px; padding:3px 8px; font-size:9px; font-weight:900; color:#94a3b8;">OFFLINE</span>
       </div>
@@ -1016,9 +1027,9 @@
       <div class="card" style="background:linear-gradient(90deg,#1e1b4b,#0f172a); border-color:#c084fc; display:flex; justify-content:space-between; align-items:center; gap:8px;">
         <div>
           <strong style="font-size:11px; color:#e9d5ff;">📱 Jogar 2 Pessoas no Mesmo Celular (Pass & Play)</strong>
-          <div class="small-muted">Sem internet: vocês revezam o turno na mesma tela!</div>
+          <div class="small-muted">Sem internet: vocês revezam o turno na mesma tela com rotação 180°!</div>
         </div>
-        <button class="btn purple" style="white-space:nowrap; padding:8px 12px;" onclick="setGameMode('pass'); demoFullMatchState(); closeDrawer();">
+        <button class="btn purple" style="white-space:nowrap; padding:8px 12px; font-weight:900;" onclick="startLocalPassAndPlayMatch()">
           👥 Iniciar 2P Local
         </button>
       </div>
@@ -1083,7 +1094,7 @@
         <strong style="color:#facc15; font-size:11.5px; display:block; margin-bottom:6px;">🎮 MODOS DE JOGO & HOTÉIS DA CAMPANHA</strong>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
           <button class="btn purple" style="font-size:9.5px; padding:7px;" onclick="switchDrawerTab('p2p')">🌐 Multiplayer Online (P2P)</button>
-          <button class="btn" style="font-size:9.5px; padding:7px;" onclick="setGameMode('pass'); demoFullMatchState(); closeDrawer();">👥 2 Jogadores (Local)</button>
+          <button class="btn" style="font-size:9.5px; padding:7px;" onclick="startLocalPassAndPlayMatch()">👥 2 Jogadores (Local)</button>
         </div>
         <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;">Desafie os Chefes dos Hotéis (Vitória = +1 Caixa de Pokémon + 3.500🪙):</div>
         <div class="grid-cards" id="hub-quests-list"></div>
@@ -1607,6 +1618,34 @@ function makeTeamUnits(owner, deckIndices) {
 }
 
 function demoFullMatchState() {
+  // Reset all tutorial step locks and animation locks
+  tutorialStepBusy = false;
+  currentTutorialStep = 0;
+  hideTutorialCoachHud();
+  const tourHud = document.getElementById("tutorial-hub-tour-hud");
+  if (tourHud) tourHud.style.display = "none";
+
+  if (state.mode === "p2p" || state.gameMode === "p2p") {
+    state.matchKind = "p2p";
+    state.mode = "p2p";
+    state.gameMode = "p2p";
+  } else if (state.mode === "pass" || state.gameMode === "pass") {
+    state.matchKind = "pass";
+    state.mode = "pass";
+    state.gameMode = "pass";
+  } else if (state.mode === "tutorial" || state.matchKind === "tutorial") {
+    state.matchKind = "tutorial";
+    state.mode = "tutorial";
+  } else {
+    state.matchKind = "league";
+  }
+
+  state.isAnimating = false;
+  activePieceAnim = null;
+  state.preMatchAnim = null;
+  state.winCelebrationAnim = null;
+  state.turnBannerAnim = null;
+
   state.units = [
     ...makeTeamUnits("p1", state.deckP1),
     ...makeTeamUnits("p2", state.deckP2)
@@ -1638,7 +1677,14 @@ function demoFullMatchState() {
   state.attackTargets = [];
   state.historyStack = [];
 
-  setLogText("TURN 300 (First Turn: -1 MP). Select a Pokémon!");
+  if (state.mode === "p2p") {
+    const isMine = (state.myRole === "p1");
+    setLogText(isMine ? "🟢 SUA VEZ! (P1 Azul · Embaixo) Selecione uma figura no Banco." : "⏳ Vez do Oponente P1... (Sua Mesa P2 · Embaixo)");
+  } else if (state.mode === "pass") {
+    setLogText("🔵 VEZ DO JOGADOR 1 (Azul · Embaixo) Selecione uma figura no Banco.");
+  } else {
+    setLogText("TURN 300 (First Turn: -1 MP). Select a Pokémon!");
+  }
   renderPlatesTray();
 }
 
@@ -2133,7 +2179,7 @@ function drawHDVectorBoardAndChrome() {
   ctx.font = "700 10px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.textAlign = "left";
   const myNick = (window.trainerProfileData && window.trainerProfileData.nickname) ? window.trainerProfileData.nickname : "Você";
-  const oppNick = (state.gameMode === "p2p" && remoteOpponentProfile && remoteOpponentProfile.nickname) ? remoteOpponentProfile.nickname : "Rival IA";
+  const oppNick = ((state.mode === "p2p" || state.gameMode === "p2p") && remoteOpponentProfile && remoteOpponentProfile.nickname) ? remoteOpponentProfile.nickname : "Rival";
   ctx.fillText(flipped ? `${myNick} (P2)` : `${myNick} (P1)`, 69, 28.5);
 
   const redPatch = ctx.createLinearGradient(202, 19, 286, 48);
@@ -2165,6 +2211,42 @@ function drawHDVectorBoardAndChrome() {
   ctx.fillStyle = "#fde047";
   ctx.font = "900 12.5px sans-serif";
   ctx.fillText(String(state.turnCounter), 176, 39);
+
+  // Prominent Multiplayer & Pass-and-Play Turn Indicator Pill (y = 49..63)
+  if (state.mode === "p2p") {
+    const isMyTurn = (state.turn === state.myRole);
+    ctx.save();
+    ctx.fillStyle = isMyTurn ? "rgba(16, 185, 129, 0.95)" : "rgba(220, 38, 38, 0.92)";
+    ctx.strokeStyle = isMyTurn ? "#6ee7b7" : "#fca5a5";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(82, 49, 189, 14, 3);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 8.5px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      isMyTurn ? "🟢 SEU TURNO — Selecione uma peça" : "⏳ TURNO DO OPONENTE — Aguarde...",
+      176.5, 59
+    );
+    ctx.restore();
+  } else if (state.mode === "pass") {
+    const curP = state.turn === "p1" ? "Jogador 1 (Azul)" : "Jogador 2 (Vermelho)";
+    ctx.save();
+    ctx.fillStyle = state.turn === "p1" ? "rgba(2, 132, 199, 0.95)" : "rgba(225, 29, 72, 0.95)";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(82, 49, 189, 14, 3);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 8.5px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`👥 Vez de: ${curP}`, 176.5, 59);
+    ctx.restore();
+  }
 
   // 3. Crisp 1080p Enhancements on Green Incubator Capsules & Mechanical P.C. Pods
   // Top-Right P.C. empty concave pods (so P2 P.C. starts 100% empty & crisp!)
@@ -3074,14 +3156,22 @@ canvas.addEventListener("pointerdown", e => {
     return;
   }
 
-  // 2. Top-Left "Uptodown" Trainer Portrait or Center "TURN" Badge -> Opens League Hub
+  // 2. Top-Left "Uptodown" Trainer Portrait or Center "TURN" Badge -> Opens League Hub (Blocked during active multiplayer)
   if (sx >= 0 && sx <= 210 && sy >= 18 && sy <= 54) {
+    if (state.mode === "p2p" || state.mode === "pass") {
+      setLogText("ℹ️ Partida Multiplayer ativa! Use o botão Desistir (🏳️) para sair.");
+      return;
+    }
     openDrawer("hub");
     return;
   }
 
-  // 3. Top-Right "Luca" Trainer Portrait -> Opens P2P Room Match
+  // 3. Top-Right "Luca" Trainer Portrait -> Opens P2P Room Match (Blocked during active multiplayer)
   if (sx >= 240 && sx <= 353 && sy >= 18 && sy <= 54) {
+    if (state.mode === "p2p" || state.mode === "pass") {
+      setLogText("ℹ️ Partida Multiplayer ativa! Use o botão Desistir (🏳️) para sair.");
+      return;
+    }
     openDrawer("p2p");
     return;
   }
@@ -3140,24 +3230,24 @@ canvas.addEventListener("pointerdown", e => {
   const botRole = getBottomRole();
   const topRole = botRole === "p1" ? "p2" : "p1";
 
-  // 6. Check Local Viewer's Bottom Bench Slots (front row checked first for overlap priority)
+  // 6. Check Local Viewer's Bottom Bench Slots (comfortable 28px hitbox for mobile/touch)
   const botBench = state.units.filter(u => u.owner === botRole && u.location === "bench");
   botBench.sort((a, b) => BENCH_SLOTS_P1[b.benchSlot % BENCH_SLOTS_P1.length].y - BENCH_SLOTS_P1[a.benchSlot % BENCH_SLOTS_P1.length].y);
   for (const u of botBench) {
     const slot = BENCH_SLOTS_P1[u.benchSlot % BENCH_SLOTS_P1.length];
-    if (Math.hypot(sx - slot.x, sy - (slot.y - 6)) < 21) { selectUnit(u.uid); return; }
+    if (Math.hypot(sx - slot.x, (sy - (slot.y - 10)) * 0.85) < 28) { selectUnit(u.uid); return; }
   }
 
-  // 7. Check Opponent's Top Bench Slots
+  // 7. Check Opponent's Top Bench Slots (comfortable 26px hitbox)
   const topBench = state.units.filter(u => u.owner === topRole && u.location === "bench");
   topBench.sort((a, b) => P2_BENCH_COORDS[b.benchSlot % P2_BENCH_COORDS.length].y - P2_BENCH_COORDS[a.benchSlot % P2_BENCH_COORDS.length].y);
   for (const u of topBench) {
     const slot = P2_BENCH_COORDS[u.benchSlot % P2_BENCH_COORDS.length];
-    if (Math.hypot(sx - slot.x, sy - (slot.y - 6)) < 20) { selectUnit(u.uid); return; }
+    if (Math.hypot(sx - slot.x, (sy - (slot.y - 10)) * 0.85) < 26) { selectUnit(u.uid); return; }
   }
 
-  // 8. Check 28 Board Nodes (mapped to viewer's 180-degree tabletop perspective!)
-  let bestNode = null, bestDist = 22;
+  // 8. Check 28 Board Nodes (mapped to viewer's 180-degree tabletop perspective, with 28px touch tolerance!)
+  let bestNode = null, bestDist = 28;
   BOARD_NODES.forEach(n => {
     const pos = getNodePos(n.id);
     const d = Math.hypot(pos.x - sx, pos.y - sy);
@@ -3185,7 +3275,14 @@ function finishPostMoveWithoutAttack() {
 }
 
 function selectUnit(uid) {
-  if (!canControlTurn()) return;
+  if (!canControlTurn()) {
+    if (state.mode === "p2p") {
+      playSfx("tick");
+      const isP1 = (state.myRole === "p1");
+      setLogText(`⏳ Vez do ${isP1 ? "Jogador 2 (Vermelho)" : "Jogador 1 (Azul)"}! Aguarde o oponente jogar.`);
+    }
+    return;
+  }
   if (state.postMoveAttackMode) {
     if (uid === state.selectedUnitId) { finishPostMoveWithoutAttack(); }
     return;
@@ -3389,7 +3486,7 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
       targetNodeId,
       segs,
       seed: sharedPrngState,
-      combat: precomputedCombat,
+      combat: null,
       nextTurn: nextTurnVal,
       nextTurnCounter: nextCounterVal
     });
@@ -4593,9 +4690,14 @@ function applyExplicitTurn(nextTurn, nextCounter) {
   if (state.mode === "p2p") {
     const isMine = (state.turn === state.myRole);
     const sideLbl = state.myRole === "p1" ? "P1 Azul · Sua Mesa Embaixo" : "P2 Vermelho · Sua Mesa Embaixo (Visão Oposta 180°)";
-    setLogText(isMine ? `🟢 SUA VEZ! (${sideLbl})` : `⏳ Vez do Oponente... (${sideLbl})`);
+    setLogText(isMine ? `🟢 SUA VEZ! (${sideLbl}) Toque numa figura no banco.` : `⏳ Vez do Oponente... (${sideLbl}) Aguarde a jogada.`);
+    state.turnBannerAnim = { turn: nextTurn, t0: performance.now() };
+    if (isMine) playSfx("portal");
   } else if (state.mode === "pass") {
-    setLogText(state.turn === "p1" ? "🔵 Vez do Jogador 1 (Embaixo)" : "🔴 Vez do Jogador 2 (Topo)");
+    const curP = state.turn === "p1" ? "Jogador 1 (Azul · Embaixo)" : "Jogador 2 (Vermelho · Embaixo)";
+    setLogText(`👥 VEZ DE: ${curP} Toque numa figura.`);
+    state.turnBannerAnim = { turn: nextTurn, t0: performance.now() };
+    playSfx("portal");
   }
 
   if (state.mode === "ai" && state.turn === "p2") {
@@ -5046,10 +5148,62 @@ function sendP2PPacket(payload) {
   }
 }
 
+function startP2PMatch(role) {
+  state.mode = "p2p";
+  state.gameMode = "p2p";
+  state.matchKind = "p2p";
+  state.myRole = role; // "p1" (Host) or "p2" (Guest)
+  state.viewSeatOverride = null;
+  state.turn = "p1";
+  state.turnCounter = 300;
+
+  // Clean tutorial locks and animation state
+  tutorialStepBusy = false;
+  currentTutorialStep = 0;
+  hideTutorialCoachHud();
+  const tourHud = document.getElementById("tutorial-hub-tour-hud");
+  if (tourHud) tourHud.style.display = "none";
+
+  demoFullMatchState();
+  playSfx("portal");
+  closeDrawer();
+
+  const isMine = (state.myRole === "p1");
+  const sideLbl = isMine ? "P1 Azul · Sua Mesa Embaixo" : "P2 Vermelho · Sua Mesa Embaixo (Visão Oposta 180°)";
+  setLogText(isMine ? `🟢 SUA VEZ! (${sideLbl}) Selecione uma figura no Banco.` : `⏳ Vez do Oponente P1... (${sideLbl}) Aguarde a jogada.`);
+  state.turnBannerAnim = { turn: "p1", t0: performance.now() };
+}
+
+function startLocalPassAndPlayMatch() {
+  state.mode = "pass";
+  state.gameMode = "pass";
+  state.matchKind = "pass";
+  state.myRole = "p1";
+  state.viewSeatOverride = null;
+  state.turn = "p1";
+  state.turnCounter = 300;
+
+  tutorialStepBusy = false;
+  currentTutorialStep = 0;
+  hideTutorialCoachHud();
+  const tourHud = document.getElementById("tutorial-hub-tour-hud");
+  if (tourHud) tourHud.style.display = "none";
+
+  demoFullMatchState();
+  playSfx("portal");
+  closeDrawer();
+
+  setLogText("🔵 VEZ DO JOGADOR 1 (Azul · Embaixo) Selecione uma figura no Banco.");
+  state.turnBannerAnim = { turn: "p1", t0: performance.now() };
+}
+
 function handleP2PPacket(raw) {
   try {
-    const msg = typeof raw === "string" ? JSON.parse(raw) : raw;
-    if (!msg || !msg.type) return;
+    let msg = raw;
+    if (typeof raw === "string") {
+      try { msg = JSON.parse(raw); } catch (e) { return; }
+    }
+    if (!msg || typeof msg !== "object" || !msg.type) return;
     lastPeerSignalTs = performance.now();
     if (msg.type === "P2P_FORFEIT") {
       const w = msg.winner || (state.myRole || "p1");
@@ -5066,32 +5220,22 @@ function handleP2PPacket(raw) {
         }
         const syncSeed = generateFreshSeed32();
         setSharedSeed(syncSeed);
-        state.mode = "p2p";
-        demoFullMatchState();
         sendP2PPacket({
           type: "P2P_START",
           seed: syncSeed,
           deckP1: state.deckP1,
           deckP2: state.deckP2
         });
-        playSfx("portal");
+        startP2PMatch("p1");
         updateP2PStatusUI("🟢 CONECTADO AO JOGADOR 2!", "Partida iniciada! Você é o Jogador 1 (Azul · Embaixo).", "ONLINE P1", "#4ade80");
-        setLogText("🟢 SUA VEZ! (P1 Azul · Embaixo)");
-        closeDrawer();
       }
     } else if (msg.type === "P2P_START" || msg.type === "@enter") {
       // Guest receives authoritative match start from Host!
       if (msg.seed) setSharedSeed(msg.seed);
       if (Array.isArray(msg.deckP1) && msg.deckP1.length === 6) state.deckP1 = msg.deckP1;
       if (Array.isArray(msg.deckP2) && msg.deckP2.length === 6) state.deckP2 = msg.deckP2;
-      state.mode = "p2p";
-      state.myRole = "p2";
-      demoFullMatchState();
-      playSfx("portal");
-      state.viewSeatOverride = null;
+      startP2PMatch("p2");
       updateP2PStatusUI("🟢 CONECTADO AO HOST (P1)!", "Partida iniciada! Visão de Mesa Oposta (180°): seu time P2 está EMBAIXO olhando P1 de frente!", "ONLINE P2", "#4ade80");
-      setLogText("⏳ Vez do Oponente P1... (Sua Mesa P2 · Embaixo)");
-      closeDrawer();
     } else if (msg.type === "P2P_MOVE" || msg.type === "DoMove") {
       if (msg.seed) setSharedSeed(msg.seed);
       appendTcpLog(`< P2P_MOVE uid=${msg.uid} dest=${msg.targetNodeId}`);
@@ -5255,6 +5399,7 @@ function joinIntuitiveP2PRoom() {
 }
 
 function attachPeerJSConn(c) {
+  if (!c) return;
   peerConnObj = c;
   c.on("open", () => {
     appendTcpLog(`[P2P] Canal WebRTC aberto (${state.myRole.toUpperCase()})!`);
@@ -5267,6 +5412,10 @@ function attachPeerJSConn(c) {
   c.on("data", data => handleP2PPacket(data));
   c.on("close", () => {
     updateP2PStatusUI("⚠️ Conexão P2P encerrada", "O outro jogador desconectou.", "OFFLINE", "#f87171");
+    appendTcpLog("[P2P] Conexão encerrada.");
+  });
+  c.on("error", err => {
+    appendTcpLog(`[P2P Erro Canal] ${err ? (err.message || err.type || err) : "desconhecido"}`);
   });
 }
 
@@ -8688,8 +8837,12 @@ sendP2PPacket = function(obj) {
 
 const _origHandleP2PPacket = handleP2PPacket;
 handleP2PPacket = function(msg) {
-  if (msg && msg.senderProfile) {
-    remoteOpponentProfile = msg.senderProfile;
+  let parsed = msg;
+  if (typeof msg === "string") {
+    try { parsed = JSON.parse(msg); } catch (e) {}
+  }
+  if (parsed && parsed.senderProfile) {
+    remoteOpponentProfile = parsed.senderProfile;
   }
   return _origHandleP2PPacket(msg);
 };
@@ -9291,12 +9444,39 @@ function enforceStrict6CostPlates() {
 
 enforceStrict6CostPlates();
 
-// Ensure demoFullMatchState preserves the 6-cost Plate loadout and resets `used = false`
+// Ensure demoFullMatchState preserves the 6-cost Plate loadout, resets `used = false`, and cleans any stuck tutorial/anim locks
 const _v500DemoFullMatchState = demoFullMatchState;
 demoFullMatchState = function() {
   _v500DemoFullMatchState();
   enforceStrict6CostPlates();
   state.plates.forEach(p => { p.used = false; });
+  state.isAnimating = false;
+  activePieceAnim = null;
+  state.preMatchAnim = null;
+  state.winCelebrationAnim = null;
+  state.selectedUnitId = null;
+  state.reachableNodes = [];
+  state.reachablePaths = {};
+  state.attackTargets = [];
+  state.postMoveAttackMode = false;
+  state.pendingPostMoveTurn = null;
+
+  if (state.mode === "p2p" || state.gameMode === "p2p") {
+    state.matchKind = "p2p";
+    state.mode = "p2p";
+    state.gameMode = "p2p";
+    tutorialStepBusy = false;
+    currentTutorialStep = 0;
+    hideTutorialCoachHud();
+  } else if (state.mode === "pass" || state.gameMode === "pass") {
+    state.matchKind = "pass";
+    state.mode = "pass";
+    state.gameMode = "pass";
+    tutorialStepBusy = false;
+    currentTutorialStep = 0;
+    hideTutorialCoachHud();
+  }
+
   renderPlatesTray();
 };
 
