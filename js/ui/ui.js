@@ -7545,6 +7545,8 @@ function openMiniTutorialModal() {
   try { playSfx("select"); } catch (e) {}
   const m = document.getElementById("mini-tutorial-modal");
   if (m) m.style.display = "flex";
+  const bEl = document.getElementById("mini-tutorial-body");
+  if (bEl) bEl.scrollTop = 0;
 }
 
 function closeMiniTutorialModal() {
@@ -7575,6 +7577,8 @@ function filterTutorialCategory(cat) {
       c.style.display = "none";
     }
   });
+  const bEl = document.getElementById("mini-tutorial-body");
+  if (bEl) bEl.scrollTop = 0;
 }
 
 window.openMiniTutorialModal = openMiniTutorialModal;
