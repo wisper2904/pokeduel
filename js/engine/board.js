@@ -1127,26 +1127,6 @@ function drawHDVectorBoardAndChrome() {
     ctx.restore();
   }
 
-  // Live Git P2P Low-Latency HUD Pill on Battle Canvas
-  const isP2P = (state.mode === "p2p");
-  const p2pPing = state.p2pLatency || (isP2P ? 14 : 8);
-  ctx.save();
-  ctx.fillStyle = "rgba(10, 16, 30, 0.88)";
-  ctx.strokeStyle = isP2P ? (p2pPing < 45 ? "#4ade80" : "#facc15") : "#38bdf8";
-  ctx.lineWidth = 1.0;
-  ctx.beginPath();
-  ctx.roundRect(8, 6, 96, 13, 3);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = isP2P ? (p2pPing < 45 ? "#4ade80" : "#facc15") : "#38bdf8";
-  ctx.beginPath();
-  ctx.arc(14, 12.5, 2.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 7.5px sans-serif";
-  ctx.textAlign = "left";
-  ctx.fillText(isP2P ? `⚡ Git P2P · ${p2pPing}ms` : `⚡ Git P2P · Direct`, 20, 15.5);
-  ctx.restore();
 
   // 3. Crisp 1080p Enhancements on Green Incubator Capsules & Mechanical P.C. Pods
   // Top-Right P.C. empty concave pods (so P2 P.C. starts 100% empty & crisp!)
