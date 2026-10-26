@@ -291,13 +291,42 @@ function makeTeamUnits(owner, deckIndices) {
     const base = FIGURES_DB[idx % FIGURES_DB.length];
     const targetName = base.name;
     const chain = getEvolutionChainToTarget(targetName);
-    const startName = (chain && chain.length > 0) ? chain[0] : targetName;
-    const startFig = findFigureByName(startName) || base;
-    const startFigIdx = FIGURES_DB.indexOf(startFig) !== -1 ? FIGURES_DB.indexOf(startFig) : (idx % FIGURES_DB.length);
 
-    let spriteKey = startFig.spriteKey;
+    // CRITICAL: Megas NEVER start as Mega in a match!
+    // Find the earliest valid non-Mega starting figure in the evolution chain that exists in FIGURES_DB
+    let startFig = null;
+    let startName = targetName;
+    if (chain && chain.length > 0) {
+      for (let i = 0; i < chain.length; i++) {
+        const candidateName = chain[i];
+        if (candidateName.startsWith("Mega ") || candidateName.startsWith("Primal ")) continue;
+        const fig = findFigureByName(candidateName);
+        if (fig) {
+          startFig = fig;
+          startName = fig.name;
+          break;
+        }
+      }
+    }
+    // If targetName itself was a Mega and no prior non-Mega step was found, strip "Mega " and look up base
+    if (!startFig && (targetName.startsWith("Mega ") || targetName.startsWith("Primal ") || base.rarity === "UX")) {
+      const baseCandidate = targetName.replace(/^Mega\s+/, "").replace(/^Primal\s+/, "").replace(/\s+[XY]$/, "");
+      startFig = findFigureByName(baseCandidate);
+    }
+    if (!startFig) {
+      startFig = base;
+      startName = base.name;
+    }
+
+    const startFigIdx = (typeof FIGURES_DB !== "undefined" && FIGURES_DB.indexOf(startFig) !== -1)
+      ? FIGURES_DB.indexOf(startFig)
+      : (idx % FIGURES_DB.length);
+
+    let spriteKey = startFig.spriteKey || startFig.id;
     if (owner === "p1" && startFig.id === "pikachu" && slot === 1) spriteKey = "pikachu_back";
     if (owner === "p2" && startFig.id === "squirtle") spriteKey = "squirtle_p2";
+
+    const currentEvoStep = chain.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === startFig.name.toLowerCase().replace(/[\s\-_]/g, ""));
 
     return {
       uid: owner + "_" + slot,
@@ -306,7 +335,7 @@ function makeTeamUnits(owner, deckIndices) {
       deckTargetName: targetName,
       targetIdx: idx % FIGURES_DB.length,
       evoChain: chain,
-      evoStep: 0,
+      evoStep: Math.max(0, currentEvoStep),
       evoStage: 0,
       baseIdx: startFigIdx,
       baseId: startFig.id,
@@ -316,8 +345,8 @@ function makeTeamUnits(owner, deckIndices) {
       baseMp: startFig.mp || base.mp || 2,
       type: startFig.type || base.type,
       rarity: startFig.rarity || base.rarity,
-      level: base.level,
-      clv: base.clv,
+      level: base.level || 5,
+      clv: base.clv || 0,
       location: "bench", // ALL 6 Pokémon start on the bench!
       nodeId: null,      // ZERO Pokémon on the field at match start!
       condition: PokemonCondition.Normal,

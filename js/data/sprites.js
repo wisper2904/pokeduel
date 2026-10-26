@@ -1461,6 +1461,20 @@ const AUTHENTIC_FIG_SPRITES = {
     "ox": 22,
     "oy": 28
   },
+  "staryu": {
+    "uri": "assets/sprites/starmie.webp",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "lopunny": {
+    "uri": "assets/sprites/megalopunny.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
   "steelix": {
     "uri": "assets/sprites/steelix.webp",
     "w": 44,
