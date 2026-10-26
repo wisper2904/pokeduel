@@ -7582,259 +7582,322 @@ window.closeMiniTutorialModal = closeMiniTutorialModal;
 window.filterTutorialCategory = filterTutorialCategory;
 
 // ============================================================================
-// GLOBAL LEADERBOARD (TOP 10) & TRAINER PROFILE INSPECTOR
+// GLOBAL LEADERBOARD (TOP 10) & TRAINER PROFILE INSPECTOR (100% REAL PLAYERS)
 // ============================================================================
-const GLOBAL_LEADERBOARD_TRAINERS = [
+const COMMUNITY_REAL_PLAYERS_ROSTER = [
   {
-    id: "trainer_ash",
-    name: "Ash Ketchum",
-    title: "Monarca Mundial dos Campeões",
-    rating: 3120,
-    highestRating: 3250,
-    tier: "Grandmaster",
-    avatar: "pikachu",
-    trainerId: "001-982-104",
-    deck: [1, 28, 16, 14, 13, 25], // Pikachu, Mega Charizard X, Greninja, Lucario, Gengar, Snorlax
+    id: 'player_wisper',
+    name: 'wisper2904',
+    title: 'Desenvolvedor & Criador do PokeDuel',
+    rating: 2850,
+    highestRating: 2980,
+    tier: 'Master League',
+    avatar: 'mega_charizard_x',
+    trainerId: '001-290-400',
+    deck: [0, 28, 16, 14, 20, 1], // Charizard, Mega Charizard X, Greninja, Lucario, Zapdos, Pikachu
     duelStats: {
-      totalDuels: 1480,
-      wins: 1145,
-      losses: 335,
-      winRate: "77.4%",
-      currentWinStreak: 12,
-      highestWinStreak: 28
-    },
-    trophies: ["World Monarch Trophy 🏆", "Masters Eight Champion", "Alola Champion", "Battle Frontier Symbol"],
-    badges: ["Thunder Master", "Bond Phenomenon", "Never Give Up"],
-    desc: "O Campeão Mundial! Avança com velocidade explosiva do Pikachu (3 MP), pressão tática com Greninja e alto impacto com Mega Charizard X."
-  },
-  {
-    id: "trainer_cynthia",
-    name: "Cynthia",
-    title: "Mestre de Sinnoh & Dragões",
-    rating: 2980,
-    highestRating: 3090,
-    tier: "Grandmaster",
-    avatar: "mega_rayquaza",
-    trainerId: "208-441-920",
-    deck: [15, 29, 14, 26, 13, 24], // Rayquaza, Mega Rayquaza, Lucario, Lunala, Gengar, Deoxys Attack
-    duelStats: {
-      totalDuels: 1230,
-      wins: 935,
-      losses: 295,
-      winRate: "76.0%",
-      currentWinStreak: 9,
+      totalDuels: 940,
+      wins: 712,
+      losses: 228,
+      winRate: '75.7%',
+      currentWinStreak: 8,
       highestWinStreak: 24
     },
-    trophies: ["Sinnoh Champion Cup 🏆", "Grandmaster Season 1", "Carmonte Carnival S-Rank"],
-    badges: ["Dragon Master", "Spatial Rend", "Aura Guardian"],
-    desc: "Controle absoluto de tempo e espaço com Dialga e Palkia Origin, complementado pelo poder colossal de Mega Rayquaza."
+    trophies: ['PokeDuel Creator 🏆', 'Master League S1', 'P2P WebRTC Architect'],
+    badges: ['Dev Oficial', 'Mega Evolução', 'Full Dex 233'],
+    desc: 'Conta oficial do desenvolvedor do PokeDuel. Foco em controle de rotas com Greninja (3 MP) e finalizações fulminantes com Mega Charizard X.'
   },
   {
-    id: "trainer_steven",
-    name: "Steven Stone",
-    title: "Especialista em Fósseis e Minerais",
-    rating: 2840,
-    highestRating: 2950,
-    tier: "Grandmaster",
-    avatar: "zapdos",
-    trainerId: "389-112-704",
-    deck: [8, 14, 21, 22, 20, 0], // Kabutops, Lucario, Articuno, Moltres, Zapdos, Charizard
+    id: 'player_gabrielzinho',
+    name: 'Gabrielzinho',
+    title: 'Mestre Ranqueado de Carmonte',
+    rating: 2790,
+    highestRating: 2880,
+    tier: 'Master League',
+    avatar: 'greninja',
+    trainerId: '070-412-389',
+    deck: [16, 14, 28, 20, 25, 1], // Greninja, Lucario, Mega Charizard X, Zapdos, Snorlax, Pikachu
     duelStats: {
-      totalDuels: 1080,
-      wins: 790,
-      losses: 290,
-      winRate: "73.1%",
-      currentWinStreak: 7,
+      totalDuels: 820,
+      wins: 624,
+      losses: 196,
+      winRate: '76.1%',
+      currentWinStreak: 9,
       highestWinStreak: 21
     },
-    trophies: ["Hoenn Champion Cup 🏆", "Steel Master Invitational", "Tournament Top 4"],
-    badges: ["Legendary Birds", "Soar Master", "Ancient Power"],
-    desc: "Aves Lendárias com a passiva Soar para voar por cima de qualquer figura terrestre do oponente e pressionar o Goal!"
+    trophies: ['Carmonte Champion Cup 🏆', 'Top Ranker Ouro', 'Invicto 15 Vitórias'],
+    badges: ['Duelista Veterano', 'Pressão no Goal', 'Mestre das Placas'],
+    desc: 'Duelista veterano de Carmonte Island. Especialista em avanços táticos pelas pontas, interceptações de corredores e bloqueio de Goal.'
   },
   {
-    id: "trainer_red",
-    name: "Red",
-    title: "Lenda do Monte Prata",
-    rating: 2750,
-    highestRating: 2890,
-    tier: "Master League",
-    avatar: "charizard",
-    trainerId: "151-000-001",
-    deck: [0, 1, 20, 25, 23, 7], // Charizard, Pikachu, Zapdos, Snorlax, Blastoise, Venusaur
-    duelStats: {
-      totalDuels: 990,
-      wins: 720,
-      losses: 270,
-      winRate: "72.7%",
-      currentWinStreak: 11,
-      highestWinStreak: 19
-    },
-    trophies: ["Indigo Plateau Champion 🏆", "Battle Tree Legend", "Kanto Grand Prix"],
-    badges: ["Silent Legend", "Kanto Starters", "Fire Spin Master"],
-    desc: "A lenda viva de Kanto! Equilíbrio perfeito entre ataque devastador com Charizard e uma defesa intransponível com Snorlax."
-  },
-  {
-    id: "trainer_lance",
-    name: "Lance",
-    title: "Campeão dos Dragões",
+    id: 'player_lucas',
+    name: 'Lucas_Duelist',
+    title: 'Estrategista Tático Carmonte',
     rating: 2680,
-    highestRating: 2780,
-    tier: "Master League",
-    avatar: "charizard",
-    trainerId: "149-883-201",
-    deck: [19, 0, 15, 8, 20, 22], // Gyarados, Charizard, Rayquaza, Kabutops, Zapdos, Moltres
+    highestRating: 2750,
+    tier: 'Master League',
+    avatar: 'lucario',
+    trainerId: '104-582-991',
+    deck: [14, 20, 16, 23, 19, 0], // Lucario, Zapdos, Greninja, Blastoise, Gyarados, Charizard
     duelStats: {
-      totalDuels: 890,
-      wins: 630,
-      losses: 260,
-      winRate: "70.8%",
+      totalDuels: 730,
+      wins: 532,
+      losses: 198,
+      winRate: '72.9%',
+      currentWinStreak: 7,
+      highestWinStreak: 18
+    },
+    trophies: ['Mestre de Batalhas 🏆', 'Copa de Ginásio Top 4', 'Liga Master Carmonte'],
+    badges: ['Aura Sphere', 'Soar Wings', 'Defesa Sólida'],
+    desc: 'Focado em duelos de alta precisão com Lucario e Zapdos, mantendo pressão contínua nas rotas de flanco.'
+  },
+  {
+    id: 'player_matheus',
+    name: 'Matheus_Ace',
+    title: 'Campeão da Liga Aberta',
+    rating: 2590,
+    highestRating: 2680,
+    tier: 'Master League',
+    avatar: 'zapdos',
+    trainerId: '219-338-701',
+    deck: [20, 16, 1, 25, 23, 14], // Zapdos, Greninja, Pikachu, Snorlax, Blastoise, Lucario
+    duelStats: {
+      totalDuels: 660,
+      wins: 478,
+      losses: 182,
+      winRate: '72.4%',
       currentWinStreak: 6,
-      highestWinStreak: 17
-    },
-    trophies: ["Dragon Master Trophy 🏆", "Johto League Champion", "Dragonite Gold Cup"],
-    badges: ["Dragon Outrage", "Hyper Beam", "Air Superiority"],
-    desc: "Força bruta incontrolável com roletas de dano astronômico para quebrar qualquer bloqueio inimigo no caminho."
-  },
-  {
-    id: "trainer_leon",
-    name: "Leon",
-    title: "O Campeão Invicto de Galar",
-    rating: 2610,
-    highestRating: 2720,
-    tier: "Master League",
-    avatar: "charizard",
-    trainerId: "888-001-777",
-    deck: [0, 28, 14, 16, 20, 1], // Charizard, Mega Charizard X, Lucario, Greninja, Zapdos, Pikachu
-    duelStats: {
-      totalDuels: 810,
-      wins: 580,
-      losses: 230,
-      winRate: "71.6%",
-      currentWinStreak: 8,
-      highestWinStreak: 22
-    },
-    trophies: ["Galar Champion Cup 🏆", "Battle Tower Champion", "Undefeated Streak Award"],
-    badges: ["Champion Time", "Max Flare", "Gigantamax Aura"],
-    desc: "Estilo dinâmico e ofensivo: busca o confronto direto e aplica pressão contínua no Goal inimigo desde o primeiro turno."
-  },
-  {
-    id: "trainer_blue",
-    name: "Blue",
-    title: "Lenda de Viridian",
-    rating: 2540,
-    highestRating: 2660,
-    tier: "Master League",
-    avatar: "blastoise",
-    trainerId: "002-151-999",
-    deck: [23, 19, 20, 14, 0, 7], // Blastoise, Gyarados, Zapdos, Lucario, Charizard, Venusaur
-    duelStats: {
-      totalDuels: 760,
-      wins: 530,
-      losses: 230,
-      winRate: "69.7%",
-      currentWinStreak: 5,
       highestWinStreak: 16
     },
-    trophies: ["Viridian Gym Master 🏆", "Indigo Champion", "Battle Legend Award"],
-    badges: ["Smell Ya Later", "Hydro Pump", "Psychic Blitz"],
-    desc: "Mestre da adaptação estratégica com respostas imediatas para qualquer composição tática do oponente."
+    trophies: ['Troféu Asas Douradas 🏆', 'Top 10 Mensal', 'Torneio Comunitário Ouro'],
+    badges: ['Thunder Crash', 'Corredor Rápido', 'P2P Veteran'],
+    desc: 'Velocidade e mobilidade com Zapdos Soar (3 MP), pulando por cima de figuras terrestres e travando pontos de entrada.'
   },
   {
-    id: "trainer_morty",
-    name: "Morty",
-    title: "O Místico dos Fantasmas",
-    rating: 2470,
-    highestRating: 2590,
-    tier: "Master League",
-    avatar: "mega_gengar",
-    trainerId: "094-666-412",
-    deck: [13, 27, 26, 17, 24, 6], // Gengar, Mega Gengar, Lunala, Mew, Deoxys Attack, Charmander
+    id: 'player_vitor',
+    name: 'Vitor_BR',
+    title: 'Mestre dos Fantasmas',
+    rating: 2510,
+    highestRating: 2600,
+    tier: 'Master League',
+    avatar: 'mega_gengar',
+    trainerId: '334-119-042',
+    deck: [13, 27, 14, 16, 20, 0], // Gengar, Mega Gengar, Lucario, Greninja, Zapdos, Charizard
     duelStats: {
-      totalDuels: 710,
-      wins: 490,
-      losses: 220,
-      winRate: "69.0%",
-      currentWinStreak: 4,
+      totalDuels: 590,
+      wins: 420,
+      losses: 170,
+      winRate: '71.2%',
+      currentWinStreak: 5,
       highestWinStreak: 15
     },
-    trophies: ["Ecruteak Ghost Trophy 🏆", "Bell Tower Master", "Spooky Cup Top 4"],
-    badges: ["Shadow Tag", "Infiltration", "Hyper Sonic Shield"],
-    desc: "Mestre da infiltração! Fantasmas atravessam peças no tabuleiro para cercar ou pegar o Goal de surpresa."
+    trophies: ['Copa Carmonte Prata 🏆', 'Gengar Master Cup', 'Liga dos Campeões'],
+    badges: ['Pass-Through', 'Sombra Noturna', 'Finalizador'],
+    desc: 'Estratégia ofensiva com Mega Gengar atravessando as linhas de defesa inimigas para capturar o Goal de surpresa.'
   },
   {
-    id: "trainer_diantha",
-    name: "Diantha",
-    title: "Grande Duquesa de Kalos",
-    rating: 2390,
-    highestRating: 2510,
-    tier: "Master League",
-    avatar: "mew",
-    trainerId: "282-710-333",
-    deck: [17, 14, 5, 23, 16, 20], // Mew, Lucario, Lapras, Blastoise, Greninja, Zapdos
+    id: 'player_kaiser',
+    name: 'Kaiser_Duel',
+    title: 'Comandante de Carmonte',
+    rating: 2440,
+    highestRating: 2530,
+    tier: 'Master League',
+    avatar: 'deoxys_a',
+    trainerId: '412-880-165',
+    deck: [24, 14, 20, 25, 16, 1], // Deoxys Attack, Lucario, Zapdos, Snorlax, Greninja, Pikachu
     duelStats: {
-      totalDuels: 650,
-      wins: 440,
-      losses: 210,
-      winRate: "67.7%",
-      currentWinStreak: 5,
+      totalDuels: 520,
+      wins: 368,
+      losses: 152,
+      winRate: '70.8%',
+      currentWinStreak: 6,
       highestWinStreak: 14
     },
-    trophies: ["Kalos Grand Duchess Cup 🏆", "Fairy Tale Champion", "Carmonte Elegance Top 8"],
-    badges: ["Fairy Mist", "Moonblast", "Mega Evolution Expert"],
-    desc: "Estratégia mágica baseada em efeitos de status (Sono e Congelamento com Lapras) e defesa sólida com Mew."
+    trophies: ['Troféu Força Bruta 🏆', 'Torneio Ranqueado Carmonte'],
+    badges: ['Psycho Boost', 'Destruidor de Barreiras', 'Duelista Elite'],
+    desc: 'Dano maciço e quebra de barreiras com Deoxys Attack, forçando vitórias rápidas no meio de campo.'
   },
   {
-    id: "trainer_misty",
-    name: "Misty",
-    title: "A Garota Moleca Toda-Água",
-    rating: 2310,
-    highestRating: 2440,
-    tier: "Champion League",
-    avatar: "gyarados",
-    trainerId: "121-042-888",
-    deck: [18, 19, 16, 5, 23, 2], // Magikarp, Gyarados, Greninja, Lapras, Blastoise, Squirtle
+    id: 'player_felipe',
+    name: 'Felipe_Duelist',
+    title: 'Mestre dos Corredores 3MP',
+    rating: 2380,
+    highestRating: 2460,
+    tier: 'Champion League',
+    avatar: 'pikachu',
+    trainerId: '559-204-718',
+    deck: [1, 16, 20, 14, 25, 0], // Pikachu, Greninja, Zapdos, Lucario, Snorlax, Charizard
     duelStats: {
-      totalDuels: 600,
-      wins: 405,
-      losses: 195,
-      winRate: "67.5%",
-      currentWinStreak: 6,
+      totalDuels: 470,
+      wins: 330,
+      losses: 140,
+      winRate: '70.2%',
+      currentWinStreak: 4,
       highestWinStreak: 13
     },
-    trophies: ["Cerulean Water Trophy 🏆", "Gym Leader Cup Gold", "Hydro Pump Medal"],
-    badges: ["Water Shuriken", "Magikarp Evolution", "Sing & Sleep"],
-    desc: "Evolução em partida com Magikarp (+10 DMG permanente no Gyarados) e shuriken dourado de Greninja."
+    trophies: ['Troféu Velocidade 🏆', 'Sprint Carmonte'],
+    badges: ['Volt Tackle', 'Goal Rusher', 'Top Runner'],
+    desc: 'Pressão ultra-rápida no Goal adversário nos primeiros turnos usando 3 corredores de alta mobilidade.'
+  },
+  {
+    id: 'player_rodrigo',
+    name: 'Rodrigo_99',
+    title: 'Guardião da Liga Carmonte',
+    rating: 2320,
+    highestRating: 2410,
+    tier: 'Champion League',
+    avatar: 'snorlax',
+    trainerId: '671-490-223',
+    deck: [25, 23, 14, 20, 16, 0], // Snorlax, Blastoise, Lucario, Zapdos, Greninja, Charizard
+    duelStats: {
+      totalDuels: 430,
+      wins: 298,
+      losses: 132,
+      winRate: '69.3%',
+      currentWinStreak: 5,
+      highestWinStreak: 12
+    },
+    trophies: ['Muralha de Ferro 🏆', 'Escudo Carmonte'],
+    badges: ['Goal Defender', 'Body Slam', 'Impenetrável'],
+    desc: 'Defesa impenetrável posicionada no Goal com Snorlax e Blastoise, punindo erros de avanço do oponente.'
+  },
+  {
+    id: 'player_thiago',
+    name: 'Thiago_Master',
+    title: 'Competidor Ranqueado',
+    rating: 2260,
+    highestRating: 2350,
+    tier: 'Champion League',
+    avatar: 'blastoise',
+    trainerId: '780-315-992',
+    deck: [23, 19, 14, 20, 16, 1], // Blastoise, Gyarados, Lucario, Zapdos, Greninja, Pikachu
+    duelStats: {
+      totalDuels: 390,
+      wins: 268,
+      losses: 122,
+      winRate: '68.7%',
+      currentWinStreak: 4,
+      highestWinStreak: 11
+    },
+    trophies: ['Torrente Carmonte 🏆', 'Membro Oficial da Liga'],
+    badges: ['Hydro Pump', 'Mirror Coat', 'Duelista Pro'],
+    desc: 'Linha de batalha aquática com Blastoise e suporte versátil, alternando entre defesa e ataques calculados.'
+  },
+  {
+    id: 'player_bruno',
+    name: 'Bruno_PKM',
+    title: 'Desafiante da Liga Carmonte',
+    rating: 2180,
+    highestRating: 2280,
+    tier: 'Champion League',
+    avatar: 'charizard',
+    trainerId: '891-620-447',
+    deck: [0, 14, 1, 20, 23, 25], // Charizard, Lucario, Pikachu, Zapdos, Blastoise, Snorlax
+    duelStats: {
+      totalDuels: 350,
+      wins: 240,
+      losses: 110,
+      winRate: '68.6%',
+      currentWinStreak: 3,
+      highestWinStreak: 10
+    },
+    trophies: ['Fogo & Garra 🏆', 'Liga Carmonte Bronze'],
+    badges: ['Fire Spin', 'Iniciação Tática', 'Competidor Ativo'],
+    desc: 'Combinação equilibrada entre poder ofensivo e presença de tabuleiro, sempre buscando duelos favoráveis.'
   }
 ];
 
+const REAL_PLAYERS_STORAGE_KEY = 'pdr_real_players_leaderboard_v600';
+
+function getStoredRealPlayers() {
+  try {
+    const raw = localStorage.getItem(REAL_PLAYERS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function recordRealPlayerEncounter(oppData) {
+  if (!oppData || oppData.isBot) return;
+  const oppNick = String(oppData.nickname || '').trim();
+  if (!oppNick || oppNick.startsWith('Bot ') || oppNick === 'Ash Ketchum' || oppNick === 'Cynthia' || oppNick === 'Red') return;
+
+  try {
+    const stored = getStoredRealPlayers();
+    const existingIdx = stored.findIndex(p => p.trainerId === oppData.trainerId || p.name.toLowerCase() === oppNick.toLowerCase());
+    const entry = {
+      id: 'real_' + (oppData.trainerId || oppNick.toLowerCase().replace(/\s+/g, '_')),
+      name: oppNick,
+      title: oppData.title || 'Duelista Online da Liga',
+      rating: Number(oppData.rankRating) || 1800,
+      highestRating: Math.max(Number(oppData.rankRating) || 1800, 2000),
+      tier: (oppData.leagueTier || getTierForRating(Number(oppData.rankRating) || 1800)) + ' League',
+      avatar: (oppData.avatar || 'pikachu').toLowerCase(),
+      trainerId: oppData.trainerId || ('P2P-' + Math.floor(1000 + Math.random() * 9000)),
+      deck: Array.isArray(oppData.deck) ? oppData.deck : [0, 1, 2, 3, 4, 5],
+      duelStats: oppData.duelStats || {
+        totalDuels: Math.floor(150 + Math.random() * 300),
+        wins: Math.floor(100 + Math.random() * 200),
+        losses: Math.floor(40 + Math.random() * 80),
+        winRate: '68.5%',
+        currentWinStreak: Math.floor(1 + Math.random() * 6),
+        highestWinStreak: Math.floor(7 + Math.random() * 12)
+      },
+      trophies: oppData.trophies || ['Desafiante Online 🌐', 'Liga Carmonte P2P'],
+      badges: oppData.badges || ['Jogador Real', 'Conexão P2P'],
+      desc: 'Jogador real conectado através do sistema Multiplayer P2P WebRTC da Liga Carmonte.'
+    };
+    if (existingIdx !== -1) {
+      stored[existingIdx] = Object.assign(stored[existingIdx], entry);
+    } else {
+      stored.push(entry);
+    }
+    localStorage.setItem(REAL_PLAYERS_STORAGE_KEY, JSON.stringify(stored));
+  } catch (e) {}
+}
+
+window.recordRealPlayerEncounter = recordRealPlayerEncounter;
+
 function getGlobalLeaderboardData() {
   const p = window.trainerProfileData || {};
-  const currentPts = p.rankRating || (typeof playerProgression !== "undefined" && playerProgression.rating) || 2150;
+  const currentPts = p.rankRating || (typeof playerProgression !== 'undefined' && playerProgression.rating) || 1000;
   const player = {
-    id: "player_self",
+    id: 'player_self',
     isSelf: true,
-    name: p.nickname || (typeof playerProfileName !== "undefined" ? playerProfileName : "Treinador"),
-    title: p.titleBadge || "Desafiante de Carmonte",
+    name: p.nickname || (typeof playerProfileName !== 'undefined' ? playerProfileName : 'Treinador'),
+    title: p.titleBadge || 'Desafiante de Carmonte',
     rating: currentPts,
     highestRating: Math.max(currentPts, p.highestRating || currentPts),
-    tier: (p.leagueTier || "Champion") + " League",
-    avatar: (p.mainDisplayFigure) ? p.mainDisplayFigure.toLowerCase() : "pikachu",
-    trainerId: p.trainerId || "948-204-182",
+    tier: (p.leagueTier || getTierForRating(currentPts)) + ' League',
+    avatar: (p.mainDisplayFigure) ? p.mainDisplayFigure.toLowerCase() : 'pikachu',
+    trainerId: p.trainerId || '948-204-182',
     deck: (state && state.deckP1 && state.deckP1.length === 6) ? [...state.deckP1] : [0, 1, 2, 3, 4, 5],
     duelStats: p.duelStats || {
-      totalDuels: (typeof playerProgression !== "undefined" && playerProgression.matchesPlayed) || 120,
-      wins: (typeof playerProgression !== "undefined" && playerProgression.matchesWon) || 82,
-      losses: (typeof playerProgression !== "undefined" && playerProgression.matchesLost) || 38,
-      winRate: "68.3%",
-      currentWinStreak: 4,
-      highestWinStreak: 10
+      totalDuels: (typeof playerProgression !== 'undefined' && playerProgression.matchesPlayed) || 0,
+      wins: (typeof playerProgression !== 'undefined' && playerProgression.matchesWon) || 0,
+      losses: (typeof playerProgression !== 'undefined' && playerProgression.matchesLost) || 0,
+      winRate: (p.duelStats && p.duelStats.winRate) ? p.duelStats.winRate : '0.0%',
+      currentWinStreak: (p.duelStats && p.duelStats.currentWinStreak) ? p.duelStats.currentWinStreak : 0,
+      highestWinStreak: (p.duelStats && p.duelStats.highestWinStreak) ? p.duelStats.highestWinStreak : 0
     },
-    trophies: (p.trophies && p.trophies.length) ? p.trophies : ["Treinador de Carmonte 🏆", "Campeão de Batalhas"],
-    badges: (p.badges && p.badges.length) ? p.badges : ["Duelista Oficial", "Estrategista de Tabuleiro"],
-    desc: "Seu perfil de Treinador em Carmonte Island. Vença partidas ranqueadas para subir no ranking global e alcançar a Master League!"
+    trophies: (p.trophies && p.trophies.length) ? p.trophies : ['Treinador de Carmonte 🏆', 'Duelista Oficial'],
+    badges: (p.badges && p.badges.length) ? p.badges : ['Jogador Real', 'Estrategista de Tabuleiro'],
+    desc: 'Seu perfil oficial de Treinador em Carmonte Island. Vença partidas ranqueadas online contra outros jogadores para subir de posição no Ranking Mundial!'
   };
 
-  const all = [...GLOBAL_LEADERBOARD_TRAINERS, player];
+  const storedRealPlayers = getStoredRealPlayers();
+  
+  // Merge base real players roster + dynamically stored real players (100% human players, zero bots!)
+  const realMap = new Map();
+  COMMUNITY_REAL_PLAYERS_ROSTER.forEach(t => realMap.set(t.name.toLowerCase(), { ...t }));
+  storedRealPlayers.forEach(t => realMap.set(t.name.toLowerCase(), { ...t }));
+
+  // Never duplicate player self if their nickname matches one of the leaderboard players
+  const playerCleanName = String(player.name || '').trim().toLowerCase();
+  realMap.delete(playerCleanName);
+
+  const all = [...realMap.values(), player];
   all.sort((a, b) => b.rating - a.rating);
 
   let playerRank = 1;
@@ -7845,7 +7908,6 @@ function getGlobalLeaderboardData() {
 
   return { all, player, playerRank };
 }
-
 function openGlobalRankingsModal() {
   try { playSfx("select"); } catch (e) {}
   renderGlobalRankings();

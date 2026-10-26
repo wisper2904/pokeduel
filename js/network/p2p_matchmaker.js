@@ -131,24 +131,38 @@ function handleP2PPacket(raw) {
     }
 
     if (msg.type === "P2P_JOIN" || msg.type === "@login") {
-      // Guest joined Host's room! Host initializes fresh match & sends P2P_START
+      // Guest joined Host's room! Record real player and Host initializes fresh match & sends P2P_START
+      if (msg.profile && typeof recordRealPlayerEncounter === "function") {
+        try { recordRealPlayerEncounter(msg.profile); } catch (e) {}
+      }
       if (state.myRole === "p1") {
         if (Array.isArray(msg.deckP2) && msg.deckP2.length === 6) {
           state.deckP2 = msg.deckP2;
         }
         const syncSeed = generateFreshSeed32();
         setSharedSeed(syncSeed);
+        const hostProf = window.trainerProfileData || {};
         sendP2PPacket({
           type: "P2P_START",
           seed: syncSeed,
           deckP1: state.deckP1,
-          deckP2: state.deckP2
+          deckP2: state.deckP2,
+          profile: {
+            nickname: hostProf.nickname || "Treinador P1",
+            rankRating: hostProf.rankRating || 1200,
+            leagueTier: hostProf.leagueTier || "Prata",
+            trainerId: hostProf.trainerId || "100-200-300",
+            deck: state.deckP1
+          }
         });
         startP2PMatch("p1");
         updateP2PStatusUI("🟢 CONECTADO AO JOGADOR 2!", "Partida iniciada! Você é o Jogador 1 (Azul · Embaixo).", "ONLINE P1", "#4ade80");
       }
     } else if (msg.type === "P2P_START" || msg.type === "@enter") {
       // Guest receives authoritative match start from Host!
+      if (msg.profile && typeof recordRealPlayerEncounter === "function") {
+        try { recordRealPlayerEncounter(msg.profile); } catch (e) {}
+      }
       if (msg.seed) setSharedSeed(msg.seed);
       if (Array.isArray(msg.deckP1) && msg.deckP1.length === 6) state.deckP1 = msg.deckP1;
       if (Array.isArray(msg.deckP2) && msg.deckP2.length === 6) state.deckP2 = msg.deckP2;
@@ -452,8 +466,20 @@ function attachPeerJSConn(c) {
     appendTcpLog(`[P2P] Canal WebRTC aberto (${state.myRole.toUpperCase()})!`);
     startP2PHeartbeat();
     if (state.myRole === "p2") {
-      // Guest immediately announces join with their deck!
-      sendP2PPacket({ type: "P2P_JOIN", deckP2: state.deckP1, trainer: "Luca" });
+      // Guest immediately announces join with their deck and profile!
+      const guestProf = window.trainerProfileData || {};
+      sendP2PPacket({
+        type: "P2P_JOIN",
+        deckP2: state.deckP1,
+        trainer: guestProf.nickname || "Luca",
+        profile: {
+          nickname: guestProf.nickname || "Treinador P2",
+          rankRating: guestProf.rankRating || 1200,
+          leagueTier: guestProf.leagueTier || "Prata",
+          trainerId: guestProf.trainerId || "200-300-400",
+          deck: state.deckP1
+        }
+      });
     }
   });
   c.on("data", data => handleP2PPacket(data));
@@ -472,7 +498,19 @@ function setupDataChannelEvents(dc) {
     state.mode = "p2p";
     startP2PHeartbeat();
     if (state.myRole === "p2") {
-      sendP2PPacket({ type: "P2P_JOIN", deckP2: state.deckP1, trainer: "Luca" });
+      const guestProf = window.trainerProfileData || {};
+      sendP2PPacket({
+        type: "P2P_JOIN",
+        deckP2: state.deckP1,
+        trainer: guestProf.nickname || "Luca",
+        profile: {
+          nickname: guestProf.nickname || "Treinador P2",
+          rankRating: guestProf.rankRating || 1200,
+          leagueTier: guestProf.leagueTier || "Prata",
+          trainerId: guestProf.trainerId || "200-300-400",
+          deck: state.deckP1
+        }
+      });
     }
   };
   dc.onmessage = e => handleP2PPacket(e.data);
@@ -870,6 +908,11 @@ function onHumanMatchFound(oppData) {
   rankedMatchmakerMatched = true;
   playSfx("level_up");
   if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+
+  // Save encountered human player to the real-player global leaderboard
+  if (typeof recordRealPlayerEncounter === "function") {
+    try { recordRealPlayerEncounter(oppData); } catch (e) {}
+  }
 
   const stTitle = document.getElementById("mm-status-title");
   const stSub = document.getElementById("mm-status-sub");
