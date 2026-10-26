@@ -58,11 +58,9 @@ const LOGICAL_H = 530;
 
 const UPLOADED_REPO_FILES = {};
 // (AUTHENTIC_FIG_SPRITES loaded from js/data/sprites.js)
-const CLEAN_BOARD_URI = BANANA_ARENA_B64;
-
-
-
-const cleanBoardImg = new Image(); cleanBoardImg.src = BANANA_ARENA_B64;
+const CLEAN_BOARD_URI = typeof CLASSIC_ARENA_B64 !== "undefined" ? CLASSIC_ARENA_B64 : "assets/arena/classic_arena.jpg";
+const cleanBoardImg = new Image(); cleanBoardImg.src = CLEAN_BOARD_URI;
+const bananaArenaImg = new Image(); bananaArenaImg.src = typeof BANANA_ARENA_B64 !== "undefined" ? BANANA_ARENA_B64 : "assets/arena/carmonte_arena.jpg";
 
 
 // ============================================================================
@@ -263,9 +261,6 @@ let state = {
   winCelebrationAnim: null,
   postMoveAttackMode: false,
   pendingPostMoveTurn: null,
-  zGaugeP1: 50,
-  zGaugeP2: 50,
-  // (zMoveArmed removido)
   doubleChanceArmed: false,
   doubleChanceWaitingChoice: false,
   excludedP1: [],
@@ -375,9 +370,6 @@ function demoFullMatchState() {
   state.longThrowActive = false;
   state.postMoveAttackMode = false;
   state.pendingPostMoveTurn = null;
-  state.zGaugeP1 = 50;
-  state.zGaugeP2 = 50;
-  // (zMoveArmed removido)
   state.doubleChanceArmed = false;
   state.doubleChanceWaitingChoice = false;
   state.clockMsP1 = 300000;
@@ -1322,13 +1314,15 @@ function drawHDVectorBoardAndChrome() {
       ctx.beginPath(); ctx.arc(x + w - 2, y + 2, 4.5, 0, Math.PI * 2); ctx.fill();
     }
   };
-  // Cleanly paint over residual rewind button frame from the arena floor
-  const cleanFloorGrad = ctx.createLinearGradient(245, 490, 245, 528);
-  cleanFloorGrad.addColorStop(0, "#08111e");
-  cleanFloorGrad.addColorStop(0.5, "#040812");
-  cleanFloorGrad.addColorStop(1, "#020408");
-  ctx.fillStyle = cleanFloorGrad;
-  ctx.beginPath(); ctx.roundRect(244, 490, 92, 36, 4); ctx.fill();
+  // Cleanly paint over residual rewind button frame only if using the banana arena
+  if (state.surface === "banana") {
+    const cleanFloorGrad = ctx.createLinearGradient(245, 490, 245, 528);
+    cleanFloorGrad.addColorStop(0, "#08111e");
+    cleanFloorGrad.addColorStop(0.5, "#040812");
+    cleanFloorGrad.addColorStop(1, "#020408");
+    ctx.fillStyle = cleanFloorGrad;
+    ctx.beginPath(); ctx.roundRect(244, 490, 92, 36, 4); ctx.fill();
+  }
 
   const unUsedPlates = (state.plates || []).filter(p => !p.used).length;
   drawBotBtn(24, 497, 68, 26, "🏳️ Forfeit", false, false);
@@ -2365,8 +2359,6 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
   }
 
   state.longThrowActive = false;
-  if (u.owner === "p1") state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 25);
-  else state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 25);
 
   animatePieceAlongSegments(u, segs, () => {
     // 1. Ally Tag Cure: moving adjacent to a Sleeping or Frozen friendly figure wakes/unfreezes it (`02:50` & `19:12` tournament rule!)

@@ -4,6 +4,8 @@
 // ============================================================================
 // 9. AUTHENTIC POKÉMON DUEL FULL-SCREEN 3x HD DATA DISK COMBAT OVERLAY
 // ============================================================================
+const bananaWheelImg = new Image();
+bananaWheelImg.src = typeof BANANA_WHEEL_B64 !== "undefined" ? BANANA_WHEEL_B64 : "assets/ui/banana_wheel.jpg";
 function getActiveWheel(unit) {
   const fig = FIGURES_DB[unit.baseIdx] || FIGURES_DB[0];
   ensureFigureUpgradeMetadata(fig);
@@ -597,6 +599,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
   if (ddAnimId) cancelAnimationFrame(ddAnimId);
 
   function renderDataDiskFrame(now) {
+    try {
     const mySpin  = isMyUnitAttacker ? atkSpin : defSpin;
     const oppSpin = isMyUnitAttacker ? defSpin : atkSpin;
     const mySteps  = (mySpin.spinSteps && mySpin.spinSteps.length > 0) ? mySpin.spinSteps : [{ idx: mySpin.chosenIdx, sliceFrac: mySpin.sliceFrac, extraTurns: 6, isMultiHit: false, stoppedChain: false, hits: 1, unitDmg: mySpin.chosen.dmg, accumDmg: mySpin.chosen.dmg, landedName: mySpin.chosen.name }];
@@ -780,7 +783,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     // ======================================================================
     ddCtx.fillStyle = "#04060b";
     ddCtx.fillRect(0, 0, 353, 530);
-    if (bananaWheelImg.complete) {
+    if (typeof bananaWheelImg !== "undefined" && bananaWheelImg && bananaWheelImg.complete && bananaWheelImg.naturalWidth > 0) {
       ddCtx.save();
       ddCtx.globalAlpha = 0.22;
       ddCtx.drawImage(bananaWheelImg, 0, 88, 353, 353);
@@ -1118,6 +1121,11 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
 
     if (overlay.classList.contains("show")) {
       ddAnimId = requestAnimationFrame(renderDataDiskFrame);
+    }
+    } catch (err) {
+      console.error("renderDataDiskFrame caught error:", err);
+      try { ddCtx.restore(); } catch (e2) {}
+      closeBattleOverlay();
     }
   }
 

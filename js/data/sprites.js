@@ -1,7 +1,9 @@
 // ============================================================================
 // POKÉMON DUEL MODULAR ASSET REGISTRY (assets/sprites/, assets/ui/, assets/arena/)
 // ============================================================================
+const CLASSIC_ARENA_B64 = "assets/arena/classic_arena.jpg";
 const BANANA_ARENA_B64 = "assets/arena/carmonte_arena.jpg";
+const BANANA_WHEEL_B64 = "assets/ui/banana_wheel.jpg";
 const POKEDUEL_BANANA_LOGO_URI = "assets/ui/pokeduel_logo.webp";
 
 const HOME_V380_UI_ASSETS = {
