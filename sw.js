@@ -1,12 +1,22 @@
-const CACHE_NAME = "pokeduel-pwa-v561";
+const CACHE_NAME = "pokeduel-pwa-v630";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./apple-touch-icon.png",
-  "./vendor/peerjs-1.5.5.min.js"
+  "./css/style.css",
+  "./vendor/peerjs-1.5.5.min.js",
+  "./assets/arena/carmonte_arena.jpg",
+  "./assets/ui/pokeduel_logo.webp",
+  "./js/data/sprites.js",
+  "./js/data/figures.js",
+  "./js/data/bots.js",
+  "./js/audio/audio.js",
+  "./js/engine/board.js",
+  "./js/engine/battle.js",
+  "./js/network/p2p_matchmaker.js",
+  "./js/ui/ui.js",
+  "./js/engine/ai.js",
+  "./js/app.js"
 ];
 
 self.addEventListener("install", (event) => {

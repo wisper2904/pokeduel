@@ -1,0 +1,504 @@
+* { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #020305;
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  /* ========================================================
+     1. MOBILE MODE (Full Screen Native 1:1 Experience)
+     ======================================================== */
+  body.mode-mobile,
+  html[data-device="mobile"] body {
+    background: #020305;
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+    height: 100vh;
+  }
+
+  body.mode-mobile #stage-container,
+  html[data-device="mobile"] #stage-container {
+    position: fixed;
+    inset: 0;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    height: 100vh !important;
+    max-height: 100dvh !important;
+    aspect-ratio: unset !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex; align-items: center; justify-content: center;
+    background: #020305;
+    overflow: hidden;
+  }
+
+  body.mode-mobile #board-canvas,
+  html[data-device="mobile"] #board-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: fill !important;
+    display: block;
+    touch-action: none;
+  }
+
+  body.mode-mobile #drawer-modal,
+  body.mode-mobile #wheel-overlay,
+  html[data-device="mobile"] #drawer-modal,
+  html[data-device="mobile"] #wheel-overlay {
+    position: fixed;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    height: 100vh !important;
+    max-height: 100dvh !important;
+    aspect-ratio: unset !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
+  }
+
+  body.mode-mobile #datadisk-canvas,
+  html[data-device="mobile"] #datadisk-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    object-fit: fill !important;
+  }
+
+  body.mode-mobile #plates-tray,
+  html[data-device="mobile"] #plates-tray {
+    position: fixed;
+    left: 50%;
+    bottom: 8.5%;
+    transform: translateX(-50%);
+    width: 94%;
+    max-width: 440px;
+  }
+
+  /* ========================================================
+     2. PC MODE (Centered Smartphone Simulator Frame)
+     ======================================================== */
+  body.mode-pc,
+  html[data-device="pc"] body {
+    background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b14 65%, #020305 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  body.mode-pc #stage-container,
+  html[data-device="pc"] #stage-container {
+    position: relative;
+    width: 100%;
+    max-width: min(440px, calc(100vh * (353 / 530)));
+    height: 100%;
+    max-height: 100vh;
+    aspect-ratio: 353 / 530;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #020305;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+    border-left: 2px solid rgba(56, 189, 248, 0.35);
+    border-right: 2px solid rgba(56, 189, 248, 0.35);
+    border-radius: 14px;
+  }
+
+  body.mode-pc #board-canvas,
+  html[data-device="pc"] #board-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+    touch-action: none;
+  }
+
+  body.mode-pc #drawer-modal,
+  body.mode-pc #wheel-overlay,
+  html[data-device="pc"] #drawer-modal,
+  html[data-device="pc"] #wheel-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: min(440px, calc(100vh * (353 / 530)));
+    height: 100%;
+    max-height: 100vh;
+    aspect-ratio: 353 / 530;
+    border-left: 2px solid rgba(56, 189, 248, 0.35);
+    border-right: 2px solid rgba(56, 189, 248, 0.35);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+  }
+
+  body.mode-pc #datadisk-canvas,
+  html[data-device="pc"] #datadisk-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
+
+  body.mode-pc #plates-tray,
+  html[data-device="pc"] #plates-tray {
+    position: fixed;
+    left: 50%;
+    bottom: calc(50% - min(50vh, calc(440px * (530 / 353) / 2)) + 46px);
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+  }
+
+  /* ----------------------------------------------------
+     3. DEFAULT RESPONSIVE FALLBACK (CSS Media Queries)
+     ---------------------------------------------------- */
+  @media (max-width: 640px), (pointer: coarse) and (max-aspect-ratio: 13/10) {
+    :root:not([data-device="pc"]) body {
+      background: #020305;
+      display: block;
+      width: 100vw;
+      height: 100dvh;
+    }
+    :root:not([data-device="pc"]) #stage-container,
+    :root:not([data-device="pc"]) #drawer-modal,
+    :root:not([data-device="pc"]) #wheel-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      top: 0 !important; left: 0 !important;
+      transform: none !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      aspect-ratio: unset !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    :root:not([data-device="pc"]) #board-canvas,
+    :root:not([data-device="pc"]) #datadisk-canvas {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: fill !important;
+    }
+  }
+
+  @media (min-width: 641px) and (min-aspect-ratio: 1/1) {
+    :root:not([data-device="mobile"]) body {
+      background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #060b14 65%, #020305 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    :root:not([data-device="mobile"]) #stage-container {
+      position: relative;
+      width: 100%;
+      max-width: min(440px, calc(100vh * (353 / 530)));
+      height: 100%;
+      max-height: 100vh;
+      aspect-ratio: 353 / 530;
+      margin: 0 auto;
+      border-left: 2px solid rgba(56, 189, 248, 0.35);
+      border-right: 2px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+    }
+    :root:not([data-device="mobile"]) #board-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+    :root:not([data-device="mobile"]) #drawer-modal,
+    :root:not([data-device="mobile"]) #wheel-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      max-width: min(440px, calc(100vh * (353 / 530)));
+      height: 100%;
+      max-height: 100vh;
+      aspect-ratio: 353 / 530;
+      border-left: 2px solid rgba(56, 189, 248, 0.35);
+      border-right: 2px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.25);
+    }
+  }
+
+  /* SUBTLE AUTO-FADING HINT PILL ON FIRST LOAD */
+  #hub-hint-pill {
+    position: fixed; top: 58px; left: 50%; transform: translateX(-50%);
+    background: rgba(9, 14, 26, 0.9); border: 1px solid rgba(56, 189, 248, 0.65);
+    color: #bae6fd; font-size: 10.5px; font-weight: 800; padding: 4px 12px;
+    border-radius: 99px; pointer-events: none; z-index: 40;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.85); transition: opacity 0.6s ease;
+    white-space: nowrap;
+  }
+
+  /* AUTHENTIC POKÉMON DUEL ENERGY PLATES & ABILITY POPUP TRAY (`Activate Ability`) */
+  #plates-tray {
+    display: none; position: fixed; left: 50%; bottom: 8.5%; transform: translateX(-50%);
+    width: 94%; max-width: 440px;
+    background: linear-gradient(180deg, rgba(12, 22, 44, 0.97), rgba(5, 9, 20, 0.99));
+    border: 1.5px solid #38bdf8; border-radius: 10px;
+    padding: 8px; z-index: 80;
+    box-shadow: 0 0 24px rgba(0, 180, 216, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+    flex-direction: column; gap: 6px;
+  }
+  #plates-tray.show { display: flex; }
+  .tray-header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(56,189,248,0.3); padding-bottom: 4px;
+  }
+  .plates-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
+  }
+  .plate-card {
+    background: linear-gradient(160deg, #1e293b 0%, #0f172a 65%, #090d16 100%);
+    border: 1.5px solid #60a5fa; border-radius: 6px;
+    padding: 5px 6px; cursor: pointer; position: relative;
+    display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+  }
+  .plate-card.active { border-color: #facc15; box-shadow: 0 0 10px rgba(250,204,21,0.6); }
+  .plate-card.used { opacity: 0.35; pointer-events: none; border-color: #475569; }
+  .plate-card .p-title { font-size: 10px; font-weight: 900; color: #f8fafc; line-height: 1.1; }
+  .plate-card .p-sub { font-size: 8.5px; color: #38bdf8; font-weight: 700; margin-top: 2px; }
+  .plate-card .p-cost {
+    position: absolute; top: 3px; right: 4px;
+    font-size: 8px; font-weight: 900; color: #facc15;
+  }
+
+  /* AUTHENTIC FULL-SCREEN POKÉMON DUEL DATA DISK BATTLE OVERLAY (1059x1590 Full HD!) */
+  #wheel-overlay {
+    display: none;
+    background: radial-gradient(circle at 50% 35%, #102142 0%, #060b16 60%, #020409 100%);
+    z-index: 95; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 0; overflow: hidden;
+  }
+  #wheel-overlay.show { display: flex; }
+  #datadisk-canvas {
+    display: block; cursor: pointer;
+  }
+
+  /* AUTHENTIC POKÉMON DUEL CARMONTE ISLAND MAIN MENU / HUB / P2P / MONACO 7.0.16 */
+  #drawer-modal {
+    display: none;
+    background: radial-gradient(circle at 50% 25%, #0f2942 0%, #071120 55%, #03060c 100%);
+    z-index: 90; flex-direction: column; justify-content: space-between; overflow: hidden;
+  }
+  #drawer-modal.show { display: flex; }
+
+  .comaster-top-hud {
+    height: 48px; background: linear-gradient(180deg, #16243b 0%, #0a111e 100%);
+    border-bottom: 2px solid #38bdf8; padding: 0 8px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.8);
+  }
+  .hud-player-box { display: flex; align-items: center; gap: 6px; }
+  .hud-rank-pill {
+    background: linear-gradient(90deg, #0284c7, #1e3a8a);
+    border: 1px solid #7dd3fc; border-radius: 4px; padding: 2px 6px;
+    font-size: 10px; font-weight: 900; color: #fff;
+  }
+  .hud-currencies { display: flex; gap: 6px; align-items: center; }
+  .curr-chip {
+    background: #050912; border: 1px solid #475569; border-radius: 4px;
+    padding: 2px 6px; font-size: 9.5px; font-weight: 800; color: #f8fafc;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .comaster-body { flex: 1; overflow-y: auto; padding: 8px 10px; }
+  .comaster-bottom-nav {
+    height: 54px; background: linear-gradient(180deg, #1e293b 0%, #090d16 100%);
+    border-top: 2px solid #94a3b8;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px;
+    padding: 4px 6px; flex-shrink: 0;
+  }
+  .nav-metal-btn {
+    background: linear-gradient(180deg, #273549 0%, #111827 55%, #090d16 100%);
+    border: 1.5px solid #64748b; border-radius: 5px;
+    color: #cbd5e1; font-size: 9px; font-weight: 900;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .ux-rainbow-badge {
+  background: linear-gradient(135deg, #f43f5e, #facc15, #4ade80, #38bdf8, #c084fc);
+  color: #090d16;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 99px;
+  border: 1px solid #ffffff;
+  box-shadow: 0 0 8px rgba(192,132,252,0.8);
+  font-size: 8.5px;
+}
+.ex-gold-badge {
+  background: linear-gradient(180deg, #fef08a, #ca8a04);
+  color: #090d16;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 99px;
+  border: 1px solid #ffffff;
+  font-size: 8.5px;
+}
+.deck-slot-box {
+  background: linear-gradient(180deg, #16264c 0%, #090d16 100%);
+  border: 1.5px solid #38bdf8;
+  border-radius: 8px;
+  padding: 4px 2px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.deck-slot-box.selected-slot {
+  border: 2px solid #facc15;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.75);
+  transform: translateY(-2px);
+}
+.evo-sub-slot {
+  margin: 3px auto 0;
+  width: 92%;
+  background: linear-gradient(90deg, #1e1b4b, #311042);
+  border: 1px solid #c084fc;
+  border-radius: 99px;
+  font-size: 7px;
+  font-weight: 900;
+  color: #e9d5ff;
+  padding: 1.5px 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.nav-metal-btn.active {
+    background: linear-gradient(180deg, #0284c7 0%, #0369a1 55%, #0c4a6e 100%);
+    border-color: #38bdf8; color: #ffffff;
+    box-shadow: 0 0 10px rgba(56,189,248,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .card {
+    background: rgba(11, 19, 35, 0.9); border: 1px solid rgba(56,189,248,0.32);
+    border-radius: 10px; padding: 9px; margin-bottom: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  }
+  .btn {
+    background: linear-gradient(180deg, #0ea5e9, #0284c7); color: #fff;
+    border: 1px solid #7dd3fc; border-radius: 6px; padding: 6px 10px;
+    font-weight: 800; font-size: 11px; cursor: pointer;
+  }
+  .btn.gold { background: linear-gradient(180deg, #facc15, #ca8a04); color: #090d16; border-color: #fef08a; }
+  .btn.green { background: linear-gradient(180deg, #22c55e, #15803d); color: #fff; border-color: #86efac; }
+  .btn.purple { background: linear-gradient(180deg, #a855f7, #6b21a8); color: #fff; border-color: #d8b4fe; }
+  .btn.secondary { background: linear-gradient(180deg, #334155, #1e293b); border: 1px solid #64748b; color: #e2e8f0; }
+  .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 7px; }
+  textarea, input[type="text"], select {
+    background: #060a12; border: 1px solid rgba(56,189,248,0.4);
+    color: #f8fafc; border-radius: 6px; padding: 5px 7px; font-size: 11px;
+  }
+  pre.code-view {
+    background: #04070e; border: 1px solid #334155; border-radius: 8px;
+    padding: 8px; color: #bae6fd; font-size: 10px; max-height: 210px;
+    overflow: auto; white-space: pre-wrap; word-break: break-word; margin: 6px 0 0;
+  }
+  .small-muted { font-size: 10px; color: #94a3b8; }
+
+  .sub-util-btn {
+    background: linear-gradient(180deg, #1e293b, #0f172a);
+    border: 1px solid #475569; border-radius: 4px; color: #e2e8f0;
+    font-size: 8.8px; font-weight: 800; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 3px;
+  }
+  .metal-action-btn {
+    height: 44px; border-radius: 7px;
+    background: linear-gradient(180deg, #273549 0%, #111827 60%, #090d16 100%);
+    border: 1.5px solid #60a5fa; color: #f8fafc;
+    font-size: 10px; font-weight: 900; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 2px 6px rgba(0,0,0,0.7);
+  }
+  .booster-slot {
+    background: linear-gradient(180deg, #1e293b 0%, #090d16 100%);
+    border: 1.5px solid #475569; border-radius: 7px;
+    padding: 4px 2px; text-align: center; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .booster-slot.ready {
+    border-color: #4ade80;
+    background: linear-gradient(180deg, #14532d 0%, #052e16 100%);
+    box-shadow: 0 0 10px rgba(74,222,128,0.35);
+  }
+  .booster-slot.locked-ready {
+    border-color: #facc15;
+    background: linear-gradient(180deg, #422006 0%, #1c1917 100%);
+    box-shadow: 0 0 10px rgba(250,204,21,0.35);
+  }
+
+
+  body.pixel-mode-16bit canvas, body.pixel-mode-16bit img, body.pixel-mode-8bit canvas, body.pixel-mode-8bit img {
+    image-rendering: pixelated !important;
+    image-rendering: crisp-edges !important;
+  }
+  body.pixel-mode-8bit #board-canvas,
+  body.pixel-mode-8bit #datadisk-canvas,
+  body.pixel-mode-8bit #home-carousel-canvas {
+    filter: contrast(1.18) saturate(1.25);
+  }
+  .pixel-badge-btn {
+    background: #14532d; border: 2px solid #4ade80; border-radius: 0px !important;
+    color: #bbf7d0; font-family: monospace; font-size: 9.5px; font-weight: 900;
+    padding: 2px 6px; cursor: pointer; box-shadow: 2px 2px 0px #052e16;
+  }
+
+
+/* --- RANKED MATCHMAKER 30S RADAR & ANIMATIONS --- */
+@keyframes mm-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes mm-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes mm-radar-pulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.mm-radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  pointer-events: none;
+}
+.mm-radar-ring.ring1 { width: 140px; height: 140px; animation: mm-radar-pulse 2.4s ease-out infinite; }
+.mm-radar-ring.ring2 { width: 190px; height: 190px; animation: mm-radar-pulse 2.4s ease-out 0.8s infinite; }
+.mm-radar-ring.ring3 { width: 240px; height: 240px; animation: mm-radar-pulse 2.4s ease-out 1.6s infinite; }
+.mm-scanner-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(56, 189, 248, 0) 0deg, rgba(56, 189, 248, 0.35) 60deg, transparent 65deg);
+  animation: mm-sweep 2s linear infinite;
+  pointer-events: none;
+}
