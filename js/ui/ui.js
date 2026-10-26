@@ -7526,6 +7526,47 @@ function closeChangelogModal() {
   if (m) m.style.display = "none";
 }
 
+// --- MINI TUTORIAL MODAL CONTROLS ---
+function openMiniTutorialModal() {
+  try { playSfx("select"); } catch (e) {}
+  const m = document.getElementById("mini-tutorial-modal");
+  if (m) m.style.display = "flex";
+}
+
+function closeMiniTutorialModal() {
+  try { playSfx("back"); } catch (e) {}
+  const m = document.getElementById("mini-tutorial-modal");
+  if (m) m.style.display = "none";
+}
+
+function filterTutorialCategory(cat) {
+  try { playSfx("select"); } catch (e) {}
+  const cards = document.querySelectorAll(".tut-card-item");
+  const buttons = document.querySelectorAll(".tut-tab-btn");
+  buttons.forEach(b => {
+    if (b.getAttribute("data-cat") === cat) {
+      b.style.background = "#7c3aed";
+      b.style.borderColor = "#c084fc";
+      b.style.color = "#ffffff";
+    } else {
+      b.style.background = "#1e293b";
+      b.style.borderColor = "#475569";
+      b.style.color = "#94a3b8";
+    }
+  });
+  cards.forEach(c => {
+    if (cat === "all" || c.getAttribute("data-cat") === cat) {
+      c.style.display = "flex";
+    } else {
+      c.style.display = "none";
+    }
+  });
+}
+
+window.openMiniTutorialModal = openMiniTutorialModal;
+window.closeMiniTutorialModal = closeMiniTutorialModal;
+window.filterTutorialCategory = filterTutorialCategory;
+
 async function triggerInAppUpdateAction() {
   playSfx("portal");
   const modal = document.getElementById("changelog-modal");

@@ -626,6 +626,199 @@
     </div>
   </div>
 
+  <!-- MODAL DE MINI TUTORIAL DO JOGO (COM IMAGENS) -->
+  <div id="mini-tutorial-modal" style="display:none; position:fixed; inset:0; z-index:296; background:rgba(2,6,23,0.94); align-items:center; justify-content:center; padding:12px; backdrop-filter:blur(4px);">
+    <div style="width:100%; max-width:390px; max-height:88vh; background:linear-gradient(180deg,#0f172a 0%,#090d16 100%); border:2px solid #a855f7; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,0.95), 0 0 24px rgba(168,85,247,0.35); color:#f8fafc;">
+      
+      <!-- Header -->
+      <div style="background:linear-gradient(90deg,#7c3aed 0%,#4338ca 100%); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #c084fc;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:20px; filter:drop-shadow(0 1px 2px #000);">📖</span>
+          <div>
+            <div style="font-size:13px; font-weight:900; color:#fff; letter-spacing:0.3px;">MINI TUTORIAL DO JOGO</div>
+            <div style="font-size:9.5px; font-weight:700; color:#e9d5ff;">Guia Rápido Oficial · Regras de Batalha</div>
+          </div>
+        </div>
+        <button onclick="closeMiniTutorialModal()" style="background:#0f172a; border:1px solid #c084fc; color:#fff; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+      </div>
+
+      <!-- Quick Category Filter Tabs -->
+      <div style="display:flex; gap:5px; padding:7px 10px; background:#0b1120; border-bottom:1px solid #1e293b; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+        <button class="tut-tab-btn" data-cat="all" onclick="filterTutorialCategory('all')" style="flex-shrink:0; background:#7c3aed; border:1px solid #c084fc; border-radius:14px; padding:3.5px 9px; font-size:9.5px; font-weight:900; color:#fff; cursor:pointer;">📋 Todos</button>
+        <button class="tut-tab-btn" data-cat="goal" onclick="filterTutorialCategory('goal')" style="flex-shrink:0; background:#1e293b; border:1px solid #475569; border-radius:14px; padding:3.5px 9px; font-size:9.5px; font-weight:800; color:#94a3b8; cursor:pointer;">🎯 Objetivo</button>
+        <button class="tut-tab-btn" data-cat="wheel" onclick="filterTutorialCategory('wheel')" style="flex-shrink:0; background:#1e293b; border:1px solid #475569; border-radius:14px; padding:3.5px 9px; font-size:9.5px; font-weight:800; color:#94a3b8; cursor:pointer;">🔄 Roleta</button>
+        <button class="tut-tab-btn" data-cat="movement" onclick="filterTutorialCategory('movement')" style="flex-shrink:0; background:#1e293b; border:1px solid #475569; border-radius:14px; padding:3.5px 9px; font-size:9.5px; font-weight:800; color:#94a3b8; cursor:pointer;">♟️ MP & Cerco</button>
+        <button class="tut-tab-btn" data-cat="plates" onclick="filterTutorialCategory('plates')" style="flex-shrink:0; background:#1e293b; border:1px solid #475569; border-radius:14px; padding:3.5px 9px; font-size:9.5px; font-weight:800; color:#94a3b8; cursor:pointer;">🎴 Placas & Mega</button>
+      </div>
+
+      <!-- Scrollable Tutorial Cards Body -->
+      <div style="padding:12px; overflow-y:auto; flex:1; font-size:11px; line-height:1.45; display:flex; flex-direction:column; gap:12px; -webkit-overflow-scrolling:touch;">
+        
+        <!-- CARD 1: O Objetivo Principal (GOAL POINT) -->
+        <div class="tut-card-item" data-cat="goal" style="background:#1e293b; border-left:3px solid #ef4444; border-radius:4px 8px 8px 4px; padding:10px 12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:900; color:#f87171; font-size:12px; display:flex; align-items:center; gap:6px;">
+            <span>🎯</span> 1. O Objetivo da Vitória: GOAL POINT!
+          </div>
+          <div style="text-align:center; margin:2px 0;">
+            <div style="position:relative; display:inline-block; border-radius:8px; overflow:hidden; border:2px solid #ef4444; box-shadow:0 3px 10px rgba(239,68,68,0.35);">
+              <img src="assets/arena/classic_arena.jpg" alt="Arena Pokémon Duel" style="max-height:140px; width:auto; display:block; object-fit:contain;">
+              <div style="position:absolute; top:4px; left:50%; transform:translateX(-50%); background:rgba(220,38,38,0.92); border:1px solid #fca5a5; border-radius:5px; padding:1.5px 6px; font-size:8px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000; white-space:nowrap;">
+                🚩 GOAL ADVERSÁRIO (Vitória)
+              </div>
+              <div style="position:absolute; bottom:4px; left:50%; transform:translateX(-50%); background:rgba(37,99,235,0.92); border:1px solid #93c5fd; border-radius:5px; padding:1.5px 6px; font-size:8px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000; white-space:nowrap;">
+                🛡️ SEU GOAL (Defenda!)
+              </div>
+            </div>
+          </div>
+          <div style="color:#cbd5e1; font-size:10.5px;">
+            &bull; <strong>Como Ganhar</strong>: Basta levar <strong>qualquer um dos seus Pokémon até o Goal Point do adversário</strong> (o nó vermelho no topo da arena). Pisou nele, a vitória é instantânea!<br>
+            &bull; <strong>Não precisa derrotar todos</strong>: O objetivo é estratégico e territorial!<br>
+            &bull; <strong>Defenda seu Goal</strong>: Proteja o seu próprio Goal Point na base inferior. Se uma peça inimiga pisar nele, você perde imediatamente.<br>
+            &bull; <strong>Portais de Entrada (Entry Points)</strong>: Os 2 nós na sua base por onde suas figuras saem do Banco para a arena. Cuidado para não deixar o oponente bloquear os dois!
+          </div>
+        </div>
+
+        <!-- CARD 2: A Roleta de Batalha (Data Disk) -->
+        <div class="tut-card-item" data-cat="wheel" style="background:#1e293b; border-left:3px solid #facc15; border-radius:4px 8px 8px 4px; padding:10px 12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:900; color:#facc15; font-size:12px; display:flex; align-items:center; gap:6px;">
+            <span>🔄</span> 2. A Roleta de Batalha & Cores dos Golpes
+          </div>
+          <div style="display:flex; align-items:center; justify-content:center; gap:10px; background:#0f172a; border-radius:8px; padding:8px; border:1px solid #334155;">
+            <img src="assets/ui/banana_wheel.jpg" alt="Data Disk Roleta" style="width:86px; height:86px; border-radius:50%; border:2px solid #facc15; box-shadow:0 0 10px rgba(250,204,21,0.35); object-fit:cover; flex-shrink:0;">
+            <div style="display:flex; flex-direction:column; gap:3px; font-size:9.5px; font-weight:800;">
+              <div style="color:#60a5fa;"><span style="color:#3b82f6;">🔵 Azul</span>: Esquiva / Invulnerável</div>
+              <div style="color:#fde047;"><span style="color:#eab308;">🟡 Dourado</span>: Quebra Roxo (★)</div>
+              <div style="color:#c084fc;"><span style="color:#a855f7;">🟣 Roxo</span>: Vence Branco + Efeito</div>
+              <div style="color:#f8fafc;"><span style="color:#e2e8f0;">⚪ Branco</span>: Vence no Dano</div>
+              <div style="color:#f87171;"><span style="color:#ef4444;">🔴 Vermelho</span>: Miss / Falha</div>
+            </div>
+          </div>
+          <div style="color:#cbd5e1; font-size:10.5px;">
+            Ao combater, ambas as figuras giram seu Data Disk de 96 fatias:<br>
+            &bull; 🔵 <strong>AZUL (Dodge/Esquiva)</strong>: Imune! Defende qualquer ataque e termina em empate seguro.<br>
+            &bull; 🟡 <strong>DOURADO (Gold / Priority)</strong>: <strong>VENCE ROXO (★)</strong> obrigatoriamente, mesmo contra roxo de 4 estrelas! Contra Branco ou Dourado, vence no dano numérico.<br>
+            &bull; 🟣 <strong>ROXO (Purple / Status)</strong>: <strong>VENCE BRANCO E VERMELHO</strong>! Se ambos caírem em roxo, vence quem tiver mais estrelas (★★★ &gt; ★★ &gt; ★). Aplica condições devastadoras como Sono, Paralisia ou Congelamento!<br>
+            &bull; ⚪ <strong>BRANCO (White / Normal)</strong>: Duelo direto de dano! Quem tirar o número mais alto nocauteia o rival.<br>
+            &bull; 🔴 <strong>VERMELHO (Miss / Falha)</strong>: Perde para qualquer ataque e a peça é nocauteada.<br>
+            &bull; ⚡ <strong>Hierarquia Rápida</strong>: <em>Dourado bate Roxo ➔ Roxo bate Branco ➔ Branco bate no Maior Dano!</em>
+          </div>
+        </div>
+
+        <!-- CARD 3: Movimento (MP) e Portais -->
+        <div class="tut-card-item" data-cat="movement" style="background:#1e293b; border-left:3px solid #38bdf8; border-radius:4px 8px 8px 4px; padding:10px 12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:900; color:#38bdf8; font-size:12px; display:flex; align-items:center; gap:6px;">
+            <span>♟️</span> 3. Movimentação (MP) & Portais de Entrada
+          </div>
+          <div style="display:flex; justify-content:space-around; align-items:center; background:#0f172a; border-radius:8px; padding:6px 4px; border:1px solid #334155;">
+            <div style="text-align:center;">
+              <img src="assets/sprites/pikachu.png" alt="Pikachu" style="width:40px; height:40px; object-fit:contain; filter:drop-shadow(0 2px 4px #000);">
+              <div style="font-size:9px; font-weight:900; color:#fde047;">3 MP</div>
+              <div style="font-size:7.5px; color:#94a3b8;">Velocista</div>
+            </div>
+            <div style="text-align:center;">
+              <img src="assets/sprites/mew.webp" alt="Mew" style="width:40px; height:40px; object-fit:contain; filter:drop-shadow(0 2px 4px #000);">
+              <div style="font-size:9px; font-weight:900; color:#38bdf8;">3 MP</div>
+              <div style="font-size:7.5px; color:#94a3b8;">Tático</div>
+            </div>
+            <div style="text-align:center;">
+              <img src="assets/sprites/charizard.png" alt="Charizard" style="width:40px; height:40px; object-fit:contain; filter:drop-shadow(0 2px 4px #000);">
+              <div style="font-size:9px; font-weight:900; color:#f97316;">1 MP</div>
+              <div style="font-size:7.5px; color:#94a3b8;">Tanque Pesado</div>
+            </div>
+          </div>
+          <div style="color:#cbd5e1; font-size:10.5px;">
+            &bull; <strong>MP (Movement Points)</strong>: Define quantas casas a figura pode andar por turno:<br>
+            &nbsp;&nbsp;&bull; <strong>MP 3 (Corredores)</strong>: Avançam até 3 casas (Pikachu, Mew, Froakie). Perfeitos para avançar no Goal inimigo no início!<br>
+            &nbsp;&nbsp;&bull; <strong>MP 2 (Combatentes)</strong>: O equilíbrio ideal de dano e velocidade (Lucario, Blaziken, Greninja).<br>
+            &nbsp;&nbsp;&bull; <strong>MP 1 (Colossos Defensivos)</strong>: Movem 1 casa (Charizard, Snorlax, Rayquaza), mas possuem roletas destrutivas para segurar o Goal!<br>
+            &bull; <strong>Bloqueio de Portais (Entry Trap)</strong>: Se o oponente pisar nos seus dois portais de entrada, seu Banco fica trancado e nenhuma figura nova consegue entrar na arena até expulsá-lo!
+          </div>
+        </div>
+
+        <!-- CARD 4: Cerco Tático (Surround K.O.) -->
+        <div class="tut-card-item" data-cat="movement" style="background:#1e293b; border-left:3px solid #f97316; border-radius:4px 8px 8px 4px; padding:10px 12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:900; color:#fb923c; font-size:12px; display:flex; align-items:center; gap:6px;">
+            <span>⭕</span> 4. Cerco Tático (Surround K.O.)
+          </div>
+          <div style="background:#0f172a; border-radius:8px; padding:8px; border:1px solid #334155; text-align:center;">
+            <div style="font-size:10px; font-weight:900; color:#fde047; margin-bottom:3px;">Nocaute Instantâneo Sem Roleta!</div>
+            <div style="font-size:9px; color:#94a3b8;">Se todas as rotas adjacentes a uma figura forem cercadas por peças adversárias, ela é eliminada na hora!</div>
+          </div>
+          <div style="color:#cbd5e1; font-size:10.5px;">
+            &bull; <strong>Eliminação Imediata</strong>: Quando uma miniatura fica cercada em todos os seus caminhos conectados, ela vai direto para o P.C. sem nem girar a roleta!<br>
+            &bull; <strong>Cuidado nas Bordas</strong>: Miniaturas nas bordas do tabuleiro têm menos caminhos de fuga (apenas 2 ou 3), podendo ser cercadas por apenas 2 peças inimigas!<br>
+            &bull; <strong>Cerco no Goal</strong>: Cercar o defensor do Goal Point nocauteia o Pokémon e garante a vitória da partida!
+          </div>
+        </div>
+
+        <!-- CARD 5: P.C. & Rotação -->
+        <div class="tut-card-item" data-cat="plates" style="background:#1e293b; border-left:3px solid #ec4899; border-radius:4px 8px 8px 4px; padding:10px 12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:900; color:#f472b6; font-size:12px; display:flex; align-items:center; gap:6px;">
+            <span>🏥</span> 5. P.C. (Centro Pokémon) & Ciclo de Rotação
+          </div>
+          <div style="color:#cbd5e1; font-size:10.5px;">
+            &bull; Pokémon nocauteados são enviados aos pods do <strong>P.C.</strong> (capacidade máxima de 2 figuras por jogador).<br>
+            &bull; Quando um 3º Pokémon for nocauteado, o mais antigo que estava no P.C. <strong>sai automaticamente e volta ao seu Banco</strong>!<br>
+            &bull; Ao voltar ao Banco, ele fica com <strong>Wait (Espera)</strong> por 1 a 2 turnos antes de poder andar novamente.
+          </div>
+        </div>
+
+        <!-- CARD 6: Placas Táticas (Plates) -->
+        <div class="tut-card-item" data-cat="plates" style="background:#1e293b; border-left:3px solid #a855f7; border-radius:4px 8px 8px 4px; padding:10px 12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:900; color:#c084fc; font-size:12px; display:flex; align-items:center; gap:6px;">
+            <span>🎴</span> 6. Placas Táticas (Botão [Plates])
+          </div>
+          <div style="color:#cbd5e1; font-size:10.5px;">
+            Toque no botão <strong>[🎴 Plates]</strong> no rodapé da arena antes de mover para usar cartas estratégicas com custo de pontos (◆):<br>
+            &bull; 🔁 <strong>Double Chance</strong>: Permite re-girar a roleta caso não goste do primeiro giro!<br>
+            &bull; 🦘 <strong>Hurdle Jump</strong>: Salta sobre qualquer figura adjacente (aliada ou rival) para avançar livremente!<br>
+            &bull; 🛡️ <strong>Goal Block</strong>: Teleporta instantaneamente um Pokémon seu (do campo ou banco) direto para o seu Goal Point para uma defesa de emergência!<br>
+            &bull; 💖 <strong>Max Revive</strong>: Tira imediatamente um Pokémon do seu P.C. direto para o Banco sem esperar a rotação!<br>
+            &bull; ⚔️ <strong>X Attack</strong>: Concede +30 de dano para o próximo confronto!<br>
+            &bull; ⚡ <strong>X Speed</strong>: Transforma ataques brancos em Dourados para quebrar os ataques roxos do oponente!
+          </div>
+        </div>
+
+        <!-- CARD 7: Evolução em Partida & Mega UX -->
+        <div class="tut-card-item" data-cat="plates" style="background:#1e293b; border-left:3px solid #eab308; border-radius:4px 8px 8px 4px; padding:10px 12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-weight:900; color:#fde047; font-size:12px; display:flex; align-items:center; gap:6px;">
+            <span>🔥</span> 7. Evolução em Batalha & Mega Evolução
+          </div>
+          <div style="display:flex; justify-content:center; align-items:center; gap:8px; background:#0f172a; border-radius:8px; padding:6px; border:1px solid #334155;">
+            <div style="text-align:center;">
+              <img src="assets/sprites/charmander.png" alt="Charmander" style="width:36px; height:36px; object-fit:contain;">
+              <div style="font-size:7.5px; color:#94a3b8;">Base</div>
+            </div>
+            <span style="color:#f59e0b; font-weight:900; font-size:13px;">➔</span>
+            <div style="text-align:center;">
+              <img src="assets/sprites/charizard.png" alt="Charizard" style="width:40px; height:40px; object-fit:contain;">
+              <div style="font-size:7.5px; color:#fde047; font-weight:bold;">+10 Dano</div>
+            </div>
+            <span style="color:#a855f7; font-weight:900; font-size:13px;">➔</span>
+            <div style="text-align:center;">
+              <img src="assets/sprites/mega_charizard_x.webp" alt="Mega Charizard X" style="width:44px; height:44px; object-fit:contain;">
+              <div style="font-size:7.5px; color:#c084fc; font-weight:900;">MEGA (5t)</div>
+            </div>
+          </div>
+          <div style="color:#cbd5e1; font-size:10.5px;">
+            &bull; <strong>Evolução em Partida</strong>: Ao vencer um combate com uma figura básica (ex: Charmander, Squirtle, Magikarp), surge a opção de evoluir em campo!<br>
+            &bull; <strong>Bônus Permanente</strong>: A evolução concede <strong>+10 de Dano permanente</strong> em White/Gold e <strong>+1★</strong> em Purple!<br>
+            &bull; <strong>Mega Evolução (5 Turnos)</strong>: Ative a placa Mega correspondente para despertar o poder da Mega Evolução por 5 turnos com habilidades extras e dano colossal!
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div style="padding:10px 14px; background:#0b1120; border-top:1.5px solid #1e293b; display:flex; flex-direction:column; gap:6px;">
+        <button onclick="closeMiniTutorialModal()" style="background:linear-gradient(180deg,#7c3aed 0%,#5b21b6 100%); border:1.5px solid #c084fc; border-radius:8px; padding:9px; color:#fff; font-size:11.5px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 3px 8px rgba(124,58,237,0.4);">
+          <span>⚔️</span> Entendido! Vamos Jogar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Row 1: Exact `1001314047.jpg` Top Status Bar (Green Energy `110/110` | Coin `415` | Red Gem `23 [+]`) -->
   <div class="comaster-top-hud" style="height:40px; background:linear-gradient(180deg,#081d4a 0%,#04112e 60%,#02091c 100%); border-bottom:2px solid #1d4ed8; padding:0 8px; display:flex; align-items:center; justify-content:space-between;">
     <!-- Left: Interactive Segmented Glossy Green Stamina/Energy Bar (`⚡ 110/110`) -->
@@ -691,6 +884,15 @@
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">ATUALIZAR</span>
             <span style="font-size:7.5px; font-weight:800; color:#86efac;">1-Toque</span>
+          </div>
+        </div>
+
+        <!-- Mini Tutorial Button -->
+        <div onclick="openMiniTutorialModal()" title="Mini Tutorial e Guia do Jogo" style="cursor:pointer; background:linear-gradient(180deg,#7c3aed 0%,#4c1d95 100%); border:1.5px solid #c084fc; border-radius:8px; padding:5px 8px; display:flex; align-items:center; gap:5px; box-shadow:0 3px 8px rgba(0,0,0,0.7);">
+          <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">📖</span>
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">TUTORIAL</span>
+            <span style="font-size:7.5px; font-weight:800; color:#e9d5ff;">Guia</span>
           </div>
         </div>
       </div>
