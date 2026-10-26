@@ -245,14 +245,9 @@
     }
   }
 
-  /* SUBTLE AUTO-FADING HINT PILL ON FIRST LOAD */
+  /* SUBTLE AUTO-FADING HINT PILL (REMOVIDO) */
   #hub-hint-pill {
-    position: fixed; top: 58px; left: 50%; transform: translateX(-50%);
-    background: rgba(9, 14, 26, 0.9); border: 1px solid rgba(56, 189, 248, 0.65);
-    color: #bae6fd; font-size: 10.5px; font-weight: 800; padding: 4px 12px;
-    border-radius: 99px; pointer-events: none; z-index: 40;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.85); transition: opacity 0.6s ease;
-    white-space: nowrap;
+    display: none !important;
   }
 
   /* AUTHENTIC POKÉMON DUEL ENERGY PLATES & ABILITY POPUP TRAY (`Activate Ability`) */
