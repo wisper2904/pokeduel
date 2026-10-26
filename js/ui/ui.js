@@ -5155,7 +5155,7 @@ function ensureV510ModalsInjected() {
   </div>
 
   <!-- 3. INTERACTIVE BOARD TUTORIAL COACH HUD (PHASE 1: 6-STEP PRESENTATION MATCH) -->
-  <div id="tutorial-coach-hud" style="display:none; position:fixed; top:44px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:260; background:linear-gradient(180deg,rgba(15,35,71,0.97) 0%,rgba(6,16,36,0.98) 100%); border:2px solid #facc15; border-radius:11px; padding:9px 11px; color:#f8fafc; box-shadow:0 8px 26px rgba(0,0,0,0.92);">
+  <div id="tutorial-coach-hud" style="display:none !important; position:fixed; top:44px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:260; background:linear-gradient(180deg,rgba(15,35,71,0.97) 0%,rgba(6,16,36,0.98) 100%); border:2px solid #facc15; border-radius:11px; padding:9px 11px; color:#f8fafc; box-shadow:0 8px 26px rgba(0,0,0,0.92);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
       <span id="tut-step-badge" style="background:#facc15; color:#090d16; font-size:9px; font-weight:900; padding:2px 6px; border-radius:4px;">🎓 TUTORIAL · PASSO 1/6</span>
       <div style="display:flex; gap:5px;">
@@ -5171,7 +5171,7 @@ function ensureV510ModalsInjected() {
   </div>
 
   <!-- 4. INTERACTIVE HUB SPOTLIGHT TOUR HUD (PHASE 2: 5-STEP HUB PRESENTATION) -->
-  <div id="tutorial-hub-tour-hud" style="display:none; position:fixed; bottom:64px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:285; background:linear-gradient(180deg,#0f2347 0%,#040b1a 100%); border:2.5px solid #38bdf8; border-radius:12px; padding:11px 12px; color:#f8fafc; box-shadow:0 10px 32px rgba(0,0,0,0.95);">
+  <div id="tutorial-hub-tour-hud" style="display:none !important; position:fixed; bottom:64px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:285; background:linear-gradient(180deg,#0f2347 0%,#040b1a 100%); border:2.5px solid #38bdf8; border-radius:12px; padding:11px 12px; color:#f8fafc; box-shadow:0 10px 32px rgba(0,0,0,0.95);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
       <span id="hub-tour-badge" style="background:#38bdf8; color:#04112e; font-size:9px; font-weight:900; padding:2px 7px; border-radius:4px;">🏛️ TOUR DO HUB · ETAPA 1/5</span>
       <button onclick="finishGuidedHubTour()" style="background:#334155; border:1px solid #94a3b8; color:#fff; font-size:8.5px; font-weight:800; padding:2px 6px; border-radius:4px; cursor:pointer;">✕ Fechar Tour</button>
@@ -7395,9 +7395,9 @@ async function handleWelcomeAuthSubmit() {
     setMsg(`🎉 Conta criada com sucesso para @${creds.username}!`, false);
     const wm = document.getElementById("welcome-profile-modal");
     if (wm) wm.style.display = "none";
-    setTimeout(() => {
-      startInteractiveTutorialMatch();
-    }, 250);
+    try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+    openDrawer("hub");
+    switchDrawerTab("hub");
 
   } catch (err) {
     console.error("handleWelcomeAuthSubmit error:", err);
@@ -7938,48 +7938,14 @@ function setupTutorialStepBoardHighlights() {
 }
 
 function startInteractiveTutorialMatch() {
-  ensureV510ModalsInjected();
+  hideTutorialCoachHud();
   const tourHud = document.getElementById("tutorial-hub-tour-hud");
   if (tourHud) tourHud.style.display = "none";
-
-  // Force authentic presentation starter decks
-  state.deckP1 = [1, 2, 3, 4, 6, 0];
-  state.deckP2 = [5, 6, 7, 0, 2, 8];
-
-  // Use a dedicated tutorial mode so AI auto-moves never fire!
-  setGameMode("ai");
-  demoFullMatchState();
-  state.matchKind = "tutorial";
-  state.mode = "tutorial";
-  state.preMatchAnim = null;
-  state.winCelebrationAnim = null;
-  closeDrawer();
-  playSfx("portal");
-
-  state.turn = "p1";
-  state.turnCounter = 299;
-
-  // Ensure P1 has Pikachu, Bulbasaur, Charizard and P2 has Charmander, Squirtle regardless of custom deck
-  const p1Units = state.units.filter(u => u.owner === "p1");
-  const p2Units = state.units.filter(u => u.owner === "p2");
-
-  const pikachu      = p1Units.find(u => u.baseId === "pikachu")   || p1Units[0];
-  const bulbasaur    = p1Units.find(u => u.baseId === "bulbasaur" && u !== pikachu) || p1Units[1];
-  const charizard    = p1Units.find(u => u.baseId === "charizard" && u !== pikachu && u !== bulbasaur) || p1Units[2];
-  const charmanderP2 = p2Units.find(u => u.baseId === "charmander") || p2Units[0];
-  const squirtleP2   = p2Units.find(u => u.baseId === "squirtle" && u !== charmanderP2) || p2Units[1];
-
-  if (pikachu)      { pikachu.name = "Pikachu"; pikachu.mp = 3; pikachu.baseId = "pikachu"; pikachu.spriteKey = "pikachu"; }
-  if (bulbasaur)    { bulbasaur.name = "Bulbasaur"; bulbasaur.baseId = "bulbasaur"; bulbasaur.spriteKey = "bulbasaur"; }
-  if (charizard)    { charizard.name = "Charizard"; charizard.baseId = "charizard"; charizard.spriteKey = "charizard"; }
-  if (charmanderP2) { charmanderP2.name = "Charmander"; charmanderP2.baseId = "charmander"; charmanderP2.spriteKey = "charmander"; }
-  if (squirtleP2)   { squirtleP2.name = "Squirtle"; squirtleP2.baseId = "squirtle"; squirtleP2.spriteKey = "squirtle_p2"; }
-
-  state.tutorialUnits = { pikachu, bulbasaur, charizard, charmanderP2, squirtleP2 };
-  tutorialStepBusy = false;
-  currentTutorialStep = 1;
-  setupTutorialStepBoardHighlights();
-  setLogText("🎓 AULA 1/6 — Toque no Nó 7 (ou no botão verde) para entrar em campo!");
+  try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+  state.matchKind = "league";
+  state.mode = "ai";
+  openDrawer("hub");
+  switchDrawerTab("hub");
 }
 
 function executeCurrentTutorialStepAction() {
@@ -8200,23 +8166,16 @@ function renderGuidedHubTourStep() {
 }
 
 function startGuidedHubTour() {
-  tutorialStepBusy = false;
-  currentTutorialStep = 0;
   hideTutorialCoachHud();
-  currentHubTourStep = 0;
-  playSfx("portal");
-  renderGuidedHubTourStep();
+  const tourHud = document.getElementById("tutorial-hub-tour-hud");
+  if (tourHud) tourHud.style.display = "none";
+  try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+  openDrawer("hub");
+  switchDrawerTab("hub");
 }
 
 function stepGuidedHubTour(delta) {
-  playSfx("tick");
-  currentHubTourStep += delta;
-  if (currentHubTourStep < 0) currentHubTourStep = 0;
-  if (currentHubTourStep >= HUB_TOUR_STEPS.length) {
-    finishGuidedHubTour();
-    return;
-  }
-  renderGuidedHubTourStep();
+  finishGuidedHubTour();
 }
 
 function finishGuidedHubTour() {
@@ -8227,41 +8186,20 @@ function finishGuidedHubTour() {
   state.mode = "ai";
   openDrawer("hub");
   switchDrawerTab("hub");
-  playSfx("portal");
 }
 
-// Automatically launch the Interactive Tutorial (Presentation Match + Hub Tour) whenever a new account completes profile setup!
+// Tutorial removed: completeWelcomeProfileSetup opens the Hub directly!
 const _v500CompleteWelcomeProfileSetup = completeWelcomeProfileSetup;
 completeWelcomeProfileSetup = function() {
   _v500CompleteWelcomeProfileSetup();
-  setTimeout(() => {
-    startInteractiveTutorialMatch();
-  }, 250);
+  try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+  openDrawer("hub");
+  switchDrawerTab("hub");
 };
 
-// Also add a button in the Config Menu so the player can replay the Tutorial or Hub Tour anytime
+// Tutorial disabled: do not inject replay card in config menu
 (function injectTutorialButtonInConfigMenu() {
-  const cfgTab = document.getElementById("dtab-menu") || document.getElementById("dtab-config");
-  if (cfgTab && !document.getElementById("cfg-replay-tutorial-card")) {
-    const card = document.createElement("div");
-    card.id = "cfg-replay-tutorial-card";
-    card.className = "card";
-    card.style.cssText = "border-color:#38bdf8; margin-bottom:8px;";
-    card.innerHTML = `
-      <strong style="color:#38bdf8; font-size:11px;">🎓 TUTORIAL INTERATIVO & GUIA DO HUB</strong>
-      <div class="small-muted" style="margin:3px 0 6px;">Reveja a Partida de Apresentação das mecânicas ou o Tour Guiado pelas abas do Hub.</div>
-      <div style="display:flex; gap:6px;">
-        <button class="btn" style="flex:1; padding:6px; font-size:9.5px;" onclick="startInteractiveTutorialMatch()">⚔️ Partida de Apresentação</button>
-        <button class="btn gold" style="flex:1; padding:6px; font-size:9.5px;" onclick="startGuidedHubTour()">🏛️ Tour do Hub (5 Etapas)</button>
-      </div>
-    `;
-    const banner = document.getElementById("cfg-banana-logo-banner");
-    if (banner && banner.nextSibling) {
-      cfgTab.insertBefore(card, banner.nextSibling);
-    } else {
-      cfgTab.appendChild(card);
-    }
-  }
+  // no-op
 })();
 
 refreshStrictPlateCaseUI();

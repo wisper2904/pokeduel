@@ -1060,6 +1060,7 @@ showWinResultScreen = function(winner) {
 
 // --- 17.4: INTERACTIVE NEW-ACCOUNT TUTORIAL (6-STEP PRESENTATION MATCH + 5-STEP HUB TOUR, v5.2.1 FIXED) ---
 const TUTORIAL_COMPLETED_KEY = "pdr_tutorial_v510_completed";
+try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
 let currentTutorialStep = 0;
 let currentHubTourStep  = 0;
 let tutorialStepBusy    = false;
