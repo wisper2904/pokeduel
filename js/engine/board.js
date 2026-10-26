@@ -1328,8 +1328,8 @@ function drawHDVectorBoardAndChrome() {
   ctx.restore();
 
   const unUsedPlates = (state.plates || []).filter(p => !p.used).length;
-  drawBotBtn(24, 497, 68, 26, "🏳️ Forfeit", false, false);
-  drawBotBtn(106, 497, 134, 26, `🎴 Plates (${unUsedPlates})`, true, unUsedPlates > 0);
+  drawBotBtn(16, 497, 72, 26, "🏳️ Forfeit", false, false);
+  drawBotBtn(94, 497, 114, 26, `🎴 Plates (${unUsedPlates})`, true, unUsedPlates > 0);
 
   ctx.restore();
 }
@@ -2066,11 +2066,11 @@ canvas.addEventListener("pointerdown", e => {
     return;
   }
 
-  // 5. Bottom Button Bar: [Forfeit] | [Activate Ability] (Rewind removed!)
+  // 5. Bottom Button Bar: [Forfeit] | [Plates]
   if (sy >= 490) {
-    if (sx <= 95) {
+    if (sx <= 90) {
       triggerVoluntaryForfeit();
-    } else if (sx >= 105 && sx <= 245) {
+    } else if (sx >= 92 && sx <= 212) {
       togglePlatesTray();
     }
     return;
@@ -2625,12 +2625,12 @@ function showCornerFigureCard(u) {
 
       return `
         <div class="fcc-move-row">
-          <span style="display:flex; align-items:center; gap:4px; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
-            <span style="width:7px; height:7px; border-radius:2px; background:${colMap[s.color] || '#fff'}; display:inline-block; flex-shrink:0;"></span>
-            <span style="color:#f1f5f9; font-weight:700;">${s.name}</span>
+          <span style="display:flex; align-items:center; gap:2.5px; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+            <span style="width:5px; height:5px; border-radius:1px; background:${colMap[s.color] || '#fff'}; display:inline-block; flex-shrink:0;"></span>
+            <span style="color:#f1f5f9; font-weight:700; overflow:hidden; text-overflow:ellipsis;">${s.name}</span>
             ${effBadge}
           </span>
-          <span style="color:#fde047; font-weight:900; margin-left:3px; flex-shrink:0;">${val}</span>
+          <span style="color:#fde047; font-weight:900; margin-left:2px; flex-shrink:0;">${val}</span>
         </div>
       `;
     }).join("");
