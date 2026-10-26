@@ -1314,15 +1314,18 @@ function drawHDVectorBoardAndChrome() {
       ctx.beginPath(); ctx.arc(x + w - 2, y + 2, 4.5, 0, Math.PI * 2); ctx.fill();
     }
   };
-  // Cleanly paint over residual rewind button frame only if using the banana arena
-  if (state.surface === "banana") {
-    const cleanFloorGrad = ctx.createLinearGradient(245, 490, 245, 528);
-    cleanFloorGrad.addColorStop(0, "#08111e");
-    cleanFloorGrad.addColorStop(0.5, "#040812");
-    cleanFloorGrad.addColorStop(1, "#020408");
-    ctx.fillStyle = cleanFloorGrad;
-    ctx.beginPath(); ctx.roundRect(244, 490, 92, 36, 4); ctx.fill();
-  }
+  // Seamlessly mask out the residual Rewind button baked into the arena floor across all arenas
+  ctx.save();
+  const cleanFloorGrad = ctx.createLinearGradient(240, 486, 240, 528);
+  cleanFloorGrad.addColorStop(0, "#0c1829");
+  cleanFloorGrad.addColorStop(0.3, "#08111e");
+  cleanFloorGrad.addColorStop(0.7, "#040812");
+  cleanFloorGrad.addColorStop(1, "#020408");
+  ctx.fillStyle = cleanFloorGrad;
+  ctx.beginPath();
+  ctx.roundRect(240, 486, 104, 42, 6);
+  ctx.fill();
+  ctx.restore();
 
   const unUsedPlates = (state.plates || []).filter(p => !p.used).length;
   drawBotBtn(24, 497, 68, 26, "🏳️ Forfeit", false, false);
