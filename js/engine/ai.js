@@ -1547,7 +1547,7 @@ triggerPlayerAIMove = function() {
       playSfx("portal");
       if (bestAction.plateToUse.id === "megaplate" && u) {
         if (!u.name.startsWith("Mega ")) u.name = "Mega " + u.name;
-        u.megaTurns = 7;
+        u.megaTurns = 5;
         u.mp = Math.min(3, (u.baseMp || u.mp) + 1);
         if (u.location === "board" && typeof u.nodeId === "number") {
           spawnPortalParticles(BOARD_NODES[u.nodeId].x, BOARD_NODES[u.nodeId].y, "#f472b6");

@@ -1143,8 +1143,14 @@ function applyExplicitTurn(nextTurn, nextCounter) {
     if (u.megaTurns && u.megaTurns > 0) {
       u.megaTurns--;
       if (u.megaTurns === 0) {
-        u.name = u.name.replace(/^Mega /, "");
-        u.mp = u.baseMp || u.mp;
+        if (typeof revertMegaEvolution === "function") {
+          revertMegaEvolution(u);
+        } else if (typeof window.revertMegaEvolution === "function") {
+          window.revertMegaEvolution(u);
+        } else {
+          u.name = (u.preMegaName || u.name).replace(/^Mega\s+/, "");
+          u.mp = u.baseMp || u.mp;
+        }
       }
     }
   });

@@ -282,7 +282,7 @@ let state = {
     { id:"xspeed",    name:"X Speed",        rarity:"UC", badge:"⚡",  sub:"Transforma todos os ataques Brancos em Dourados (Gold quebra Roxo) neste turno.", cost:1, used:false, log:"Used X Speed (White ➔ Gold)!" },
     { id:"revive",    name:"Max Revive",     rarity:"EX", badge:"💖",  sub:"Retira uma figura do P.C. e coloca-a de volta no Banco sem Wait (Wait 0).", cost:2, used:false, log:"Used Max Revive (P.C. ➔ Banco sem Wait)!" },
     { id:"goalblock", name:"Goal Block",     rarity:"R",  badge:"🛡️",  sub:"Teleporta uma figura aliada do campo para o seu Goal Point em emergência (recebe Wait 1).", cost:2, used:false, log:"Used Goal Block (Teleportado ao Goal + Wait 1)!" },
-    { id:"megaplate", name:"Mega Plate [UX]",rarity:"UX", badge:"🧬",  sub:"Mega Evolui a figura selecionada por 7 turnos (+20 DMG, +1★, +1 MP e Pass-Through).", cost:1, used:false, log:"Used Mega Evolution Plate (7 Turnos [UX])!" },
+    { id:"megaplate", name:"Mega Plate [UX]",rarity:"UX", badge:"🧬",  sub:"Mega Evolui a figura selecionada por 5 turnos (+20 DMG, +1★, +1 MP e Pass-Through).", cost:1, used:false, log:"Used Mega Evolution Plate (7 Turnos [UX])!" },
     { id:"longthrow", name:"Long Throw",     rarity:"R",  badge:"🎯",  sub:"Desce uma figura do Banco adjacente ao Entry Point mesmo com Spawn Block.", cost:2, used:false, log:"Used Long Throw!" },
     { id:"pkmswitch", name:"Pokémon Switch", rarity:"UC", badge:"⇄",   sub:"Troca uma figura aliada do campo por uma figura do seu Banco.", cost:1, used:false, log:"Used Pokémon Switch!" }
   ]
@@ -677,29 +677,94 @@ function resolveEvolutionPrompt(confirmEvo) {
   pendingEvoUnit = null;
 }
 
+
+function revertMegaEvolution(u) {
+  if (!u) return;
+  const targetRevertName = u.preMegaName || u.name.replace(/^Mega\s+/, "").replace(/\s+[XY]$/, "");
+  const baseFig = (typeof findFigureByName === "function") ? findFigureByName(targetRevertName) : null;
+  const oldMegaName = u.name;
+  u.name = baseFig ? baseFig.name : targetRevertName;
+  if (baseFig) {
+    u.baseIdx = (typeof FIGURES_DB !== "undefined" && FIGURES_DB.indexOf(baseFig) !== -1) ? FIGURES_DB.indexOf(baseFig) : u.baseIdx;
+    u.baseId = baseFig.id;
+    u.spriteKey = baseFig.spriteKey;
+    u.mp = u.baseMp || baseFig.mp || 2;
+    u.type = baseFig.type;
+    u.rarity = baseFig.rarity;
+  } else {
+    u.mp = u.baseMp || u.mp;
+  }
+  u.megaTurns = 0;
+  if (typeof u.preMegaEvoStep === "number") {
+    u.evoStep = u.preMegaEvoStep;
+  }
+
+  if (u.location === "board" && u.nodeId !== null && BOARD_NODES && BOARD_NODES[u.nodeId]) {
+    const n = BOARD_NODES[u.nodeId];
+    spawnPortalParticles(n.x, n.y, "#38bdf8");
+  }
+  playSfx("portal");
+  setLogText(`⏳ MEGA EVOLUÇÃO TERMINOU! ${oldMegaName} reverteu para ${u.name} após 5 turnos.`);
+}
+window.revertMegaEvolution = revertMegaEvolution;
+
 function evolveUnitInMatch(unit) {
   if (!unit) return;
-  const chain = unit.evoChain || getEvolutionChainToTarget(unit.deckTargetName || unit.name);
-  const currentStep = (typeof unit.evoStep === "number") ? unit.evoStep : chain.indexOf(unit.name);
-  const nextStep = currentStep + 1;
 
-  // CRITICAL RULE: If the unit has reached or surpassed its deck target figure, STOP asking to evolve!
-  // "e se ele nota que chego no chalizard ele para de pedir pra evoluir"
-  // "o msm acontece se eu colocar um charmilion no deck... mas ai ele nao evolui para chalizard, ele para no charmilion"
-  if (nextStep >= chain.length) {
+  // REGRA 1: Se já está em Mega Evolução, NUNCA pergunta pra evoluir ou desevoluir!
+  // "se eu evoluo pra mega e ganho dnv ele pergunta se quero desevoluir, tira isso, se eu ganhei ele evolui e fica por 5 turnos, ate la nao fica aparecendo opcoes"
+  if ((unit.megaTurns && unit.megaTurns > 0) || unit.name.startsWith("Mega ")) {
     return;
   }
 
-  const nextName = chain[nextStep];
+  // REGRA 2: Cadeia de evolução respeitando família e alvo do deck
+  const targetName = unit.deckTargetName || unit.name;
+  const fam = (typeof POKEMON_EVOLUTION_FAMILIES !== "undefined")
+    ? POKEMON_EVOLUTION_FAMILIES.find(f =>
+        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, "")) ||
+        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === unit.name.toLowerCase().replace(/[\s\-_]/g, ""))
+      )
+    : null;
 
-  // If human player won, show the authentic Evolution confirmation prompt!
+  let chain;
+  if (fam) {
+    const targetIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""));
+    const isTargetIntermediate = (targetIdx !== -1 && targetIdx < fam.length - 2); // Ex: Charmeleon para em Charmeleon
+    if (isTargetIntermediate) {
+      chain = fam.slice(0, targetIdx + 1);
+    } else {
+      chain = fam;
+    }
+  } else {
+    chain = unit.evoChain || [unit.name];
+  }
+
+  const currentStep = chain.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === unit.name.toLowerCase().replace(/[\s\-_]/g, ""));
+  if (currentStep === -1 || currentStep >= chain.length - 1) {
+    // Alvo máximo já atingido ou figura não evolui mais
+    return;
+  }
+
+  const nextStep = currentStep + 1;
+  const nextName = chain[nextStep];
+  const isMega = nextName.startsWith("Mega ");
+
+  // Se o jogador humano venceu, exibe a confirmação oficial de evolução
   if (unit.owner === getBottomRole() && !state.aiExecutingNow) {
     pendingEvoUnit = unit;
     const tEl = document.getElementById("evo-prompt-title");
     const sEl = document.getElementById("evo-prompt-sub");
     const mEl = document.getElementById("evolution-prompt-modal");
-    if (tEl) tEl.textContent = `Evolver ${unit.name} ➔ ${nextName}?`;
-    if (sEl) sEl.innerHTML = `Evolui para <strong>${nextName}</strong> ganhando permanentemente <strong>+10 DMG</strong> e <strong>+1★ Purple</strong>!<br><span style="font-size:9.5px; color:#38bdf8; font-weight:800;">Alvo Final do Deck: <strong>${unit.deckTargetName || nextName}</strong></span>`;
+    if (tEl) {
+      tEl.textContent = isMega ? `Mega Evoluir ${unit.name} ➔ ${nextName}?` : `Evoluir ${unit.name} ➔ ${nextName}?`;
+    }
+    if (sEl) {
+      if (isMega) {
+        sEl.innerHTML = `Mega Evolui temporariamente para <strong>${nextName}</strong> por <strong>5 turnos</strong>!<br><span style="font-size:9.5px; color:#facc15; font-weight:800;">Bônus: +20 DMG, +1★ Purple, +1 MP e Pass-Through. Reverte ao 6º turno.</span>`;
+      } else {
+        sEl.innerHTML = `Evolui para <strong>${nextName}</strong> ganhando permanentemente <strong>+10 DMG</strong> e <strong>+1★ Purple</strong>!<br><span style="font-size:9.5px; color:#38bdf8; font-weight:800;">Alvo Final do Deck: <strong>${unit.deckTargetName || nextName}</strong></span>`;
+      }
+    }
     if (mEl) mEl.style.display = "flex";
   } else {
     applyUnitEvolutionNow(unit);
@@ -709,26 +774,48 @@ function evolveUnitInMatch(unit) {
 function applyUnitEvolutionNow(unit) {
   if (!unit || unit._justEvolvedTurn === state.turnCounter) return;
 
-  const chain = unit.evoChain || getEvolutionChainToTarget(unit.deckTargetName || unit.name);
-  const currentStep = (typeof unit.evoStep === "number") ? unit.evoStep : chain.indexOf(unit.name);
-  const nextStep = currentStep + 1;
+  // Nunca evolui se já estiver em Mega
+  if ((unit.megaTurns && unit.megaTurns > 0) || unit.name.startsWith("Mega ")) return;
 
-  // Stop if already at deck target figure
-  if (nextStep >= chain.length) return;
+  const targetName = unit.deckTargetName || unit.name;
+  const fam = (typeof POKEMON_EVOLUTION_FAMILIES !== "undefined")
+    ? POKEMON_EVOLUTION_FAMILIES.find(f =>
+        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, "")) ||
+        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === unit.name.toLowerCase().replace(/[\s\-_]/g, ""))
+      )
+    : null;
+
+  let chain;
+  if (fam) {
+    const targetIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""));
+    const isTargetIntermediate = (targetIdx !== -1 && targetIdx < fam.length - 2);
+    if (isTargetIntermediate) {
+      chain = fam.slice(0, targetIdx + 1);
+    } else {
+      chain = fam;
+    }
+  } else {
+    chain = unit.evoChain || [unit.name];
+  }
+
+  const currentStep = chain.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === unit.name.toLowerCase().replace(/[\s\-_]/g, ""));
+  if (currentStep === -1 || currentStep >= chain.length - 1) return;
+
+  const nextStep = currentStep + 1;
+  const nextName = chain[nextStep];
+  const isMega = nextName.startsWith("Mega ");
 
   unit._justEvolvedTurn = state.turnCounter;
   unit.evoStep = nextStep;
-  unit.evoStage = (unit.evoStage || 0) + 1; // +10 DMG & +1★ per stage
   unit.condition = PokemonCondition.Normal; // Evoluir purga condições de status negativo
 
   const oldName = unit.name;
-  const nextName = chain[nextStep];
   unit.name = nextName;
 
-  // Look up evolved figure in FIGURES_DB to update baseIdx, baseId, spriteKey, mp, type, rarity
-  const nextFig = findFigureByName(nextName);
+  // Atualiza metadados no FIGURES_DB
+  const nextFig = (typeof findFigureByName === "function") ? findFigureByName(nextName) : null;
   if (nextFig) {
-    unit.baseIdx = FIGURES_DB.indexOf(nextFig) !== -1 ? FIGURES_DB.indexOf(nextFig) : unit.baseIdx;
+    unit.baseIdx = (typeof FIGURES_DB !== "undefined" && FIGURES_DB.indexOf(nextFig) !== -1) ? FIGURES_DB.indexOf(nextFig) : unit.baseIdx;
     unit.baseId = nextFig.id;
     unit.spriteKey = nextFig.spriteKey;
     if (nextFig.mp) unit.mp = nextFig.mp;
@@ -736,23 +823,32 @@ function applyUnitEvolutionNow(unit) {
     if (nextFig.rarity) unit.rarity = nextFig.rarity;
   }
 
-  if (unit.name.startsWith("Mega ")) {
-    unit.megaTurns = 7;
+  if (isMega) {
+    unit.megaTurns = 5; // Exatamente 5 turnos de Mega!
+    unit.preMegaName = oldName;
+    unit.preMegaBaseIdx = unit.baseIdx;
+    unit.preMegaBaseId = unit.baseId;
+    unit.preMegaSpriteKey = unit.spriteKey;
+    unit.preMegaMp = unit.mp;
+    unit.preMegaRarity = unit.rarity;
+    unit.preMegaType = unit.type;
+    unit.preMegaEvoStep = currentStep;
     unit.mp = Math.min(3, (unit.baseMp || unit.mp) + 1);
+  } else {
+    unit.evoStage = (unit.evoStage || 0) + 1; // +10 DMG & +1★ por estágio permanente
   }
 
-  if (unit.location === "board" && unit.nodeId !== null) {
+  if (unit.location === "board" && unit.nodeId !== null && BOARD_NODES && BOARD_NODES[unit.nodeId]) {
     const n = BOARD_NODES[unit.nodeId];
-    spawnPortalParticles(n.x, n.y, "#facc15");
+    spawnPortalParticles(n.x, n.y, isMega ? "#f472b6" : "#facc15");
   }
   playSfx("portal");
   if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
 
-  const reachedFinal = (unit.name.toLowerCase() === (unit.deckTargetName || "").toLowerCase()) || (unit.evoStep === chain.length - 1);
-  if (reachedFinal) {
-    setLogText(`✨ EVOLUÇÃO FINAL ATINGIDA! ${oldName} atingiu a forma final do seu Deck: ${unit.name} (+${unit.evoStage * 10} DMG, +${unit.evoStage}★)! Parando de evoluir.`);
+  if (isMega) {
+    setLogText(`🧬 MEGA EVOLUÇÃO EM PARTIDA! ${oldName} Mega Evoluiu para ${unit.name} por 5 turnos (+20 DMG, +1★, +1 MP e Pass-Through)!`);
   } else {
-    setLogText(`✨ EVOLUÇÃO EM PARTIDA! ${oldName} evoluiu para ${unit.name} (+${unit.evoStage * 10} DMG, +${unit.evoStage}★)! Próximo alvo: ${unit.deckTargetName}.`);
+    setLogText(`✨ EVOLUÇÃO EM PARTIDA! ${oldName} evoluiu para ${unit.name} (+${unit.evoStage * 10} DMG, +${unit.evoStage}★)!`);
   }
 }
 
