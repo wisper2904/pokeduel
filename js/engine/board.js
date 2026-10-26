@@ -265,7 +265,7 @@ let state = {
   pendingPostMoveTurn: null,
   zGaugeP1: 50,
   zGaugeP2: 50,
-  zMoveArmed: false,
+  // (zMoveArmed removido)
   doubleChanceArmed: false,
   doubleChanceWaitingChoice: false,
   excludedP1: [],
@@ -377,7 +377,7 @@ function demoFullMatchState() {
   state.pendingPostMoveTurn = null;
   state.zGaugeP1 = 50;
   state.zGaugeP2 = 50;
-  state.zMoveArmed = false;
+  // (zMoveArmed removido)
   state.doubleChanceArmed = false;
   state.doubleChanceWaitingChoice = false;
   state.clockMsP1 = 300000;
@@ -413,15 +413,7 @@ function togglePlatesTray(force) {
   if (show) renderPlatesTray();
 }
 
-function toggleZMoveFromTray() {
-  if ((state.zGaugeP1 || 0) >= 100 && canControlTurn()) {
-    state.zMoveArmed = !state.zMoveArmed;
-    playSfx("portal");
-    setLogText(state.zMoveArmed ? "⚡ Z-MOVE ARMADO! O próximo ataque liberará 200 de Dano e quebrará Blue em Miss!" : "Z-Move desarmado.");
-    renderPlatesTray();
-    demoFullMatchState();
-  }
-}
+function toggleZMoveFromTray() {}
 
 function renderPlatesTray() {
   const grid = document.getElementById("plates-grid");
@@ -442,11 +434,7 @@ function renderPlatesTray() {
   if (cBdg)  cBdg.textContent = curP.badge || "+20";
   if (cName) cName.textContent = curP.name;
   if (cDesc) {
-    const zPct = Math.min(100, state.zGaugeP1 || 0);
-    const zNotice = zPct >= 100 
-      ? `<div style="margin-top:4px; padding:3px 6px; background:${state.zMoveArmed ? '#ca8a04' : '#1e1b4b'}; border:1px solid #facc15; border-radius:4px; color:${state.zMoveArmed ? '#090d16' : '#facc15'}; font-weight:900; cursor:pointer;" onclick="toggleZMoveFromTray(); event.stopPropagation();">⚡ Z-MOVE 100%: ${state.zMoveArmed ? 'ARMADO (200 DMG)!' : 'TOQUE PARA ATIVAR!'}</div>`
-      : `<div style="margin-top:2px; font-size:7.5px; color:#94a3b8;">⚡ Z-Gauge: ${zPct}% / 100%</div>`;
-    cDesc.innerHTML = `${curP.sub}${zNotice}`;
+    cDesc.innerHTML = curP.sub || "";
   }
   if (uBtn)  uBtn.style.opacity = curP.used ? "0.4" : "1.0";
 
@@ -1194,17 +1182,7 @@ function drawHDVectorBoardAndChrome() {
   drawUltraSpacePortal(25, 136, state.excludedP2, "ULTRA");
   drawUltraSpacePortal(328, 434, state.excludedP1, "ULTRA");
 
-  // Z-Gauge & Golden [⚡ Z-MOVE] Button (`x = 282..348, y = 136..155`)
-  const zPct = Math.min(100, state.zGaugeP1 || 0);
-  ctx.save();
-  ctx.fillStyle = state.zMoveArmed ? "#facc15" : (zPct >= 100 ? "#ca8a04" : "#0f172a");
-  ctx.strokeStyle = zPct >= 100 ? "#fef08a" : "#38bdf8";
-  ctx.lineWidth = 1.4;
-  ctx.beginPath(); ctx.roundRect(280, 134, 68, 20, 4); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = (state.zMoveArmed || zPct >= 100) ? "#090d16" : "#e2e8f0";
-  ctx.font = "900 7.8px sans-serif"; ctx.textAlign = "center";
-  ctx.fillText(state.zMoveArmed ? "⚡ Z-ARMED!" : (zPct >= 100 ? "⚡ Z-MOVE!" : `⚡ Z: ${zPct}%`), 314, 144.5);
-  ctx.restore();
+// (Z-Move Gauge e Botão removidos)
 
   // 8. Crisp 1080p Golden-Bronze [AI] Button OR Glowing Blue [End Turn ⏭️] Button during 2-Step Post-Move Target Selection!
   const aiGrad = ctx.createLinearGradient(118, 446, 118, 475);
@@ -1248,9 +1226,17 @@ function drawHDVectorBoardAndChrome() {
       ctx.beginPath(); ctx.arc(x + w - 2, y + 2, 4.5, 0, Math.PI * 2); ctx.fill();
     }
   };
+  // Cleanly paint over residual rewind button frame from the arena floor
+  const cleanFloorGrad = ctx.createLinearGradient(245, 490, 245, 528);
+  cleanFloorGrad.addColorStop(0, "#08111e");
+  cleanFloorGrad.addColorStop(0.5, "#040812");
+  cleanFloorGrad.addColorStop(1, "#020408");
+  ctx.fillStyle = cleanFloorGrad;
+  ctx.beginPath(); ctx.roundRect(244, 490, 92, 36, 4); ctx.fill();
+
   const unUsedPlates = (state.plates || []).filter(p => !p.used).length;
-  drawBotBtn(31, 497, 56, 26, "Forfeit", false, false);
-  drawBotBtn(118, 497, 117, 26, `🎴 Plates (${unUsedPlates})`, true, unUsedPlates > 0);
+  drawBotBtn(24, 497, 68, 26, "🏳️ Forfeit", false, false);
+  drawBotBtn(106, 497, 134, 26, `🎴 Plates (${unUsedPlates})`, true, unUsedPlates > 0);
 
   ctx.restore();
 }
@@ -1526,8 +1512,7 @@ function drawFullTabletopFrame() {
     ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size * pt.life, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   }
 
-  // 11. Draw Top Black Metallic Figure Status & Mini Data Disk + Duel DB Odds HUD (`01:38`, `03:00` in video!)
-  drawSelectedFigureTopHUD();
+  // (Top HUD grande substituído pelo card suave no canto inferior)
 
   // 12. Draw Pre-Match VS/First Spinner (`00:45`), START (`00:58`), Sliding Turn Banners (`01:58`), and WIN (`04:38`)!
   drawVideoMatchOverlays();
@@ -1976,32 +1961,7 @@ canvas.addEventListener("pointerdown", e => {
     return;
   }
 
-  // 3a. Top HUD [Details] Button (`x = 290..348, y = 20..48` — `01:38` in video!)
-  if (state.selectedUnitId && sx >= 290 && sx <= 348 && sy >= 20 && sy <= 48) {
-    const u = state.units.find(x => x.uid === state.selectedUnitId);
-    if (u) openFigureDetailsModal(u.baseIdx, u);
-    return;
-  }
-
-  // 3b. Top HUD [✕] Close Button (`x = 315..348, y = 115..144`)
-  if (state.selectedUnitId && sx >= 315 && sx <= 348 && sy >= 115 && sy <= 144) {
-    state.selectedUnitId = null;
-    state.reachableNodes = [];
-    if (state.postMoveAttackMode) finishPostMoveWithoutAttack();
-    return;
-  }
-
-  // 3c. Golden [⚡ Z-MOVE] Button (`x = 278..350, y = 132..156`)
-  if (sx >= 278 && sx <= 350 && sy >= 132 && sy <= 156) {
-    if ((state.zGaugeP1 || 0) >= 100 && canControlTurn()) {
-      state.zMoveArmed = !state.zMoveArmed;
-      playSfx("portal");
-      setLogText(state.zMoveArmed ? "⚡ Z-MOVE ARMED! Attack an enemy to unleash 200 DMG!" : "Z-Move disarmed.");
-    } else {
-      setLogText(`⚡ Z-Gauge at ${state.zGaugeP1 || 0}% (Requires 100%).`);
-    }
-    return;
-  }
+  // (Top HUD e Z-Move click listeners removidos)
 
   // 4. Golden-brown [AI] button OR Blue [End Turn ⏭️] button during 2-Step Attack Target Selection!
   if (sx >= 116 && sx <= 236 && sy >= 444 && sy <= 478) {
@@ -2063,6 +2023,7 @@ function canControlTurn() {
 }
 
 function finishPostMoveWithoutAttack() {
+  hideCornerFigureCard();
   if (!state.postMoveAttackMode) return;
   state.postMoveAttackMode = false;
   state.attackTargets = [];
@@ -2086,7 +2047,13 @@ function selectUnit(uid) {
     return;
   }
   const u = state.units.find(x => x.uid === uid);
-  if (!u || u.owner !== state.turn || u.location === "pc" || u.location === "ultra_space") return;
+  if (!u || u.location === "pc" || u.location === "ultra_space") return;
+  if (u.owner !== state.turn) {
+    playSfx("tick");
+    showCornerFigureCard(u);
+    setLogText(`Inspecionando ${u.name} (Rival).`);
+    return;
+  }
   if (u.waitTurns > 0) {
     setLogText(`${u.name} has Wait ${u.waitTurns}.`);
     return;
@@ -2105,6 +2072,7 @@ function selectUnit(uid) {
   }
   const effMp = getEffectiveUnitMp(u);
   setLogText(`${u.name} (MP ${effMp}) selected.`);
+  showCornerFigureCard(u);
 }
 
 function onNodeClicked(nodeId) {
@@ -2128,7 +2096,16 @@ function onNodeClicked(nodeId) {
     selectUnit(occ.uid);
     return;
   }
-  if (!sel) return;
+  if (!sel) {
+    if (occ) {
+      playSfx("tick");
+      showCornerFigureCard(occ);
+      setLogText(`Inspecionando ${occ.name} (Rival).`);
+    } else {
+      hideCornerFigureCard();
+    }
+    return;
+  }
 
   if (state.reachableNodes.includes(nodeId)) {
     const pathSegs = state.reachablePaths[nodeId] || [];
@@ -2225,6 +2202,7 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
 
   state.selectedUnitId = uid;
   state.reachableNodes = [];
+  hideCornerFigureCard();
   state.reachablePaths = {};
   state.abilityJumpActive = false;
   u.location = "board";
@@ -2448,3 +2426,151 @@ function triggerPlayerAIMove() {
   }
 }
 
+
+
+
+// ============================================================================
+// CORNER DATA DISK & ABILITY CARD ENGINE (Discreto, Suave & Fiel ao Deck)
+// ============================================================================
+const FCC_EFFECT_LABELS = {
+  push: "Empurrão",
+  sleep: "Dormir",
+  paralyze: "Paralisia",
+  panic: "Confusão",
+  badpoison: "Veneno Tóx.",
+  poison: "Veneno",
+  freeze: "Congelar",
+  burn: "Queimar",
+  ko: "Nocaute"
+};
+
+function drawCornerMiniDisk(canvasEl, segs) {
+  if (!canvasEl) return;
+  const ctx = canvasEl.getContext("2d");
+  if (!ctx) return;
+  const w = canvasEl.width, h = canvasEl.height;
+  const cx = w / 2, cy = h / 2, r = (w / 2) - 4;
+  ctx.clearRect(0, 0, w, h);
+
+  const total = segs.reduce((a, s) => a + s.size, 0) || 96;
+  let ang = -Math.PI / 2;
+  const colMap = { white: "#f8fafc", gold: "#facc15", purple: "#c084fc", blue: "#38bdf8", red: "#ef4444" };
+
+  ctx.save();
+  // Outer ring
+  ctx.beginPath(); ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
+  ctx.fillStyle = "#090d16"; ctx.fill();
+  ctx.strokeStyle = "rgba(148, 163, 184, 0.6)"; ctx.lineWidth = 1.5; ctx.stroke();
+
+  segs.forEach(s => {
+    const sl = (s.size / total) * Math.PI * 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, ang, ang + sl); ctx.closePath();
+    ctx.fillStyle = colMap[s.color] || "#fff"; ctx.fill();
+    ctx.strokeStyle = "#090d16"; ctx.lineWidth = 1.2; ctx.stroke();
+
+    if (s.size >= 14) {
+      const m = ang + sl / 2;
+      const tx = cx + Math.cos(m) * (r * 0.62);
+      const ty = cy + Math.sin(m) * (r * 0.62);
+      ctx.fillStyle = "#090d16";
+      ctx.font = "900 9.5px sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      if (s.color === "purple") {
+        ctx.fillText("★".repeat(Math.min(3, s.stars || 1)), tx, ty);
+      } else if (s.dmg > 0) {
+        ctx.fillText(String(s.dmg), tx, ty);
+      }
+    }
+    ang += sl;
+  });
+
+  // Center hub
+  ctx.beginPath(); ctx.arc(cx, cy, r * 0.22, 0, Math.PI * 2);
+  ctx.fillStyle = "#1e293b"; ctx.fill();
+  ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.restore();
+}
+
+function showCornerFigureCard(u) {
+  if (!u) { hideCornerFigureCard(); return; }
+  const card = document.getElementById("figure-corner-card");
+  if (!card) return;
+
+  const rEl = document.getElementById("fcc-rarity");
+  if (rEl) {
+    rEl.className = u.rarity === "UX" ? "ux-rainbow-badge" : (u.rarity === "EX" ? "ex-gold-badge" : "");
+    rEl.textContent = u.rarity || "UC";
+  }
+
+  const nEl = document.getElementById("fcc-name");
+  if (nEl) nEl.textContent = u.name;
+
+  const mpEl = document.getElementById("fcc-mp");
+  if (mpEl) {
+    const effMp = typeof getEffectiveUnitMp === "function" ? getEffectiveUnitMp(u) : u.mp;
+    mpEl.textContent = "MP " + effMp;
+  }
+
+  // Draw mini disk canvas
+  const cvEl = document.getElementById("fcc-canvas");
+  const segs = typeof getActiveWheel === "function" ? getActiveWheel(u) : (u.wheel || []);
+  drawCornerMiniDisk(cvEl, segs);
+
+  // Moves list (color, name, dmg / stars, effect)
+  const mvEl = document.getElementById("fcc-moves");
+  if (mvEl) {
+    const colMap = { white: "#f8fafc", gold: "#facc15", purple: "#c084fc", blue: "#38bdf8", red: "#ef4444" };
+    mvEl.innerHTML = segs.map(s => {
+      let val = "";
+      if (s.color === "purple") val = "★".repeat(s.stars || 1);
+      else if (s.dmg > 0) val = String(s.dmg);
+      else if (s.color === "blue") val = "Dodge";
+      else if (s.color === "red") val = "Miss";
+
+      let effBadge = "";
+      if (s.effect && FCC_EFFECT_LABELS[s.effect]) {
+        effBadge = `<span style="font-size:7px; color:#38bdf8; background:rgba(2,132,199,0.25); border-radius:2px; padding:0 3px;">${FCC_EFFECT_LABELS[s.effect]}</span>`;
+      }
+
+      return `
+        <div class="fcc-move-row">
+          <span style="display:flex; align-items:center; gap:4px; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+            <span style="width:7px; height:7px; border-radius:2px; background:${colMap[s.color] || '#fff'}; display:inline-block; flex-shrink:0;"></span>
+            <span style="color:#f1f5f9; font-weight:700;">${s.name}</span>
+            ${effBadge}
+          </span>
+          <span style="color:#fde047; font-weight:900; margin-left:3px; flex-shrink:0;">${val}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Passive ability description
+  const abEl = document.getElementById("fcc-ability-box");
+  if (abEl) {
+    const abText = (typeof FIGURE_ABILITIES_DB !== "undefined" && (FIGURE_ABILITIES_DB[u.baseId] || FIGURE_ABILITIES_DB[u.id]))
+      || u.ability || "Figura padrão Pokémon Duel.";
+    abEl.innerHTML = `<strong style="color:#facc15;">Passiva:</strong> ${abText}`;
+  }
+
+  card.classList.add("visible");
+}
+
+function hideCornerFigureCard() {
+  const card = document.getElementById("figure-corner-card");
+  if (card) card.classList.remove("visible");
+}
+
+function dismissFigureCornerCard(e) {
+  if (e) e.stopPropagation();
+  hideCornerFigureCard();
+  state.selectedUnitId = null;
+  state.reachableNodes = [];
+  state.reachablePaths = {};
+  if (state.postMoveAttackMode) finishPostMoveWithoutAttack();
+  playSfx("tick");
+}
+
+window.showCornerFigureCard = showCornerFigureCard;
+window.hideCornerFigureCard = hideCornerFigureCard;
+window.dismissFigureCornerCard = dismissFigureCornerCard;

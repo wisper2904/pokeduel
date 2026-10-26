@@ -22,6 +22,26 @@
 <div id="stage-container">
   <canvas id="board-canvas" width="1059" height="1590"></canvas>
   <div id="hub-hint-pill">👾 EDIÇÃO PIXEL ART 16-BIT · Toque numa miniatura do banco para entrar no campo!</div>
+
+  <!-- CORNER MINI DATA DISK & ABILITY CARD (Suave, Despercebido & Fiel à Aba Deck) -->
+  <div id="figure-corner-card" class="figure-corner-card">
+    <div class="fcc-header">
+      <div style="display:flex; align-items:center; gap:5px;">
+        <span id="fcc-rarity" class="ex-gold-badge">EX</span>
+        <strong id="fcc-name" style="font-size:12px; color:#ffffff;">Pokémon</strong>
+      </div>
+      <div style="display:flex; align-items:center; gap:5px;">
+        <span id="fcc-mp" style="background:#0284c7; color:#ffffff; font-size:9px; font-weight:900; padding:1px 5px; border-radius:3px;">MP 2</span>
+        <button onclick="dismissFigureCornerCard(event)" style="background:transparent; border:none; color:#94a3b8; font-size:13px; font-weight:900; cursor:pointer; padding:0 3px; line-height:1;">✕</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center; margin:5px 0;">
+      <canvas id="fcc-canvas" width="110" height="110" style="width:52px; height:52px; flex-shrink:0; border-radius:50%; box-shadow:0 0 10px rgba(0,0,0,0.8);"></canvas>
+      <div id="fcc-moves" style="flex:1; display:flex; flex-direction:column; gap:2.5px; font-size:8.5px;"></div>
+    </div>
+    <div id="fcc-ability-box" class="fcc-ability-box"></div>
+  </div>
+
 </div>
 
 <!-- AUTHENTIC POKÉMON DUEL BLACK METALLIC PLATE CARD MODAL (`03:34` IN VIDEO: MEADOW POWER + YELLOW `[ Use ]`) -->
@@ -96,7 +116,6 @@
 
 <!-- AUTHENTIC FULL-SCREEN POKÉMON DUEL 3D DATA DISK BATTLE SCREEN (1059x1590 Full HD!) -->
 <div id="wheel-overlay">
-  <div id="zmove-combat-banner" style="display:none; position:absolute; top:20px; left:50%; transform:translateX(-50%); width:90%; max-width:440px; background:linear-gradient(90deg,rgba(234,88,12,0.95),rgba(250,204,21,0.95),rgba(234,88,12,0.95)); border:2px solid #ffffff; box-shadow:0 0 35px rgba(250,204,21,0.85); border-radius:8px; padding:8px 12px; text-align:center; color:#090d16; font-weight:900; font-size:13px; letter-spacing:0.8px; z-index:260; pointer-events:none; animation:pulse 0.8s infinite alternate;"></div>
   <canvas id="datadisk-canvas" width="1059" height="1590"></canvas>
 </div>
 

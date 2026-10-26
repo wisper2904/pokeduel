@@ -425,47 +425,15 @@ ddCanvas.addEventListener("pointerdown", (e) => {
 });
 let ddCanClose = false;
 
-const Z_MOVE_BY_TYPE = {
-  Grass: "Bloom Doom", Fire: "Inferno Overdrive", Water: "Hydro Vortex",
-  Electric: "Gigavolt Havoc", Psychic: "Shattered Psyche", Ghost: "Never-Ending Nightmare",
-  Dragon: "Devastating Drake", Fighting: "All-Out Pummeling", Steel: "Corkscrew Crash",
-  Rock: "Continental Crush", Normal: "Breakneck Blitz"
-};
+// (Z-Move removido do jogo)
+
 
 function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
   const hasManualSpin = forcedSpins && forcedSpins.manualSpin;
   let atkSpin = (forcedSpins && forcedSpins.atkSpin) ? forcedSpins.atkSpin : spinWheelForUnit(atkUnit, true);
   let defSpin = (forcedSpins && forcedSpins.defSpin) ? forcedSpins.defSpin : spinWheelForUnit(defUnit, false);
 
-  // Check if Bot (owner === 'p2') should auto-trigger Z-Move when charged!
-  if (atkUnit.owner === "p2" && (state.zGaugeP2 || 0) >= 100) {
-    state.zMoveArmed = true;
-  }
-
-  // Check if Z-Move is armed (turns Defender's Blue slices into Miss and unleashes 200-DMG Z-Move!)
-  if (state.zMoveArmed) {
-    state.zMoveArmed = false;
-    if (atkUnit.owner === "p1") state.zGaugeP1 = 0; else state.zGaugeP2 = 0;
-    const primaryType = (atkUnit.type || "Normal").split("/")[0].trim();
-    const zName = Z_MOVE_BY_TYPE[primaryType] || "Breakneck Blitz";
-    atkSpin.chosen = { name: "⚡ " + zName, color: "gold", dmg: 200, stars: 0, size: 96 };
-    defSpin.segs.forEach(s => { if (s.color === "blue") { s.color = "red"; s.name = "Miss (Z-Break)"; s.dmg = 0; } });
-    if (defSpin.chosen.color === "blue") {
-      defSpin.chosen = { name: "Miss (Z-Break)", color: "red", dmg: 0, stars: 0, size: defSpin.chosen.size };
-    }
-    playSfx("portal");
-    setLogText(`⚡ Z-MOVE: [${zName}] ativado por ${atkUnit.name} (200 DANO)! Quebrou Blue do defensor em Miss!`);
-    const zb = document.getElementById("zmove-combat-banner");
-    if (zb) {
-      zb.textContent = `⚡ Z-MOVE: ${zName.toUpperCase()} (200 DANO · Z-BREAK BLUE)!`;
-      zb.style.display = "block";
-      setTimeout(() => { if (zb) zb.style.display = "none"; }, 2500);
-    }
-  } else {
-    state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 35);
-    state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 35);
-  }
-
+  // Z-Move removido a pedido do jogador
   const antiRespinOnField = state.units.some(u => u.location === "board" && (u.baseId === "dialga_o" || u.baseId === "metagross"));
   if (state.doubleChanceArmed && antiRespinOnField) {
     setLogText("🛡️ Re-Spin bloqueado pela passiva Hyper Sonic / Temporal Lock em campo!");

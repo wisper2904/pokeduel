@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokeduel-pwa-v630";
+const CACHE_NAME = "pokeduel-pwa-v631";
 const CORE_ASSETS = [
   "./",
   "./index.html",

@@ -5439,11 +5439,7 @@ renderPlatesTray = function() {
   if (cBdg)  cBdg.textContent = curP.badge || "+20";
   if (cName) cName.textContent = curP.name;
   if (cDesc) {
-    const zPct = Math.min(100, state.zGaugeP1 || 0);
-    const zNotice = zPct >= 100 
-      ? `<div style="margin-top:4px; padding:3px 6px; background:${state.zMoveArmed ? '#ca8a04' : '#1e1b4b'}; border:1px solid #facc15; border-radius:4px; color:${state.zMoveArmed ? '#090d16' : '#facc15'}; font-weight:900; cursor:pointer;" onclick="toggleZMoveFromTray(); event.stopPropagation();">⚡ Z-MOVE 100%: ${state.zMoveArmed ? 'ARMADO (200 DMG)!' : 'TOQUE PARA ATIVAR!'}</div>`
-      : `<div style="margin-top:2px; font-size:7.5px; color:#94a3b8;">⚡ Z-Gauge: ${zPct}% / 100%</div>`;
-    cDesc.innerHTML = `${curP.sub}${zNotice}`;
+    cDesc.innerHTML = curP.sub || "";
   }
   if (uBtn)  uBtn.style.opacity = curP.used ? "0.4" : "1.0";
 
