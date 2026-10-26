@@ -809,9 +809,6 @@ function openRankedMatchmakerModal() {
       }
     } catch (e) {}
   }
-      }
-    } catch (e) {}
-  }
 
   // 3. Start 30-Second Countdown Timer with Live Commentary
   clearInterval(rankedMatchmakerInterval);

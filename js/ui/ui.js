@@ -936,29 +936,37 @@ function renderHubAndCollection() {
   grid.innerHTML = "";
   FIGURES_DB.forEach((f, idx) => {
     if (figureCaseFilter !== "ALL" && f.rarity !== figureCaseFilter) return;
+    const unlocked = (typeof isFigureUnlocked === "function") ? isFigureUnlocked(idx) : (state.deckP1.includes(idx));
     const inDeck = state.deckP1.includes(idx);
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
     const card = document.createElement("div");
     card.className = "card";
     card.style.marginBottom = "0";
-    card.style.borderColor = inDeck ? "#facc15" : (f.rarity === "UX" ? "#c084fc" : "rgba(56,189,248,0.28)");
+    card.style.opacity = unlocked ? "1.0" : "0.78";
+    card.style.borderColor = inDeck ? "#facc15" : (unlocked ? (f.rarity === "UX" ? "#c084fc" : "rgba(56,189,248,0.28)") : "#334155");
     card.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong style="font-size:10px;">${f.name}</strong>
+        <strong style="font-size:10px; color:${unlocked ? '#fff' : '#94a3b8'};">${unlocked ? '' : '🔒 '}${f.name}</strong>
         <div style="display:flex; align-items:center; gap:3px;">
           ${getRarityBadgeHtml(f.rarity)}
           <span style="font-size:8px; color:#bae6fd; font-weight:900;">MP ${f.mp}</span>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:7px; margin:5px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
-        <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain;">
-        <div class="small-muted">Lv.${f.level}/10 · CLv+${f.clv}<br>${f.type}<br><span style="color:#38bdf8; font-weight:800;">ⓘ Ver Roleta & Ability</span></div>
+        <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain; ${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.55);'}">
+        <div class="small-muted">${unlocked ? `Lv.${f.level}/10 · CLv+${f.clv}` : '<span style="color:#facc15; font-weight:800;">🔒 Bloqueado</span>'}<br>${f.type}<br><span style="color:#38bdf8; font-weight:800;">ⓘ Ver Roleta & Ability</span></div>
       </div>
       <div style="display:flex; gap:4px;">
-        <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:8.5px; padding:4px;" onclick="toggleDeckEquip(${idx})">
-          ${inDeck ? '★ No Deck' : `➔ Slot #${currentEditingDeckSlot + 1}`}
-        </button>
-        <button class="btn purple" style="font-size:8.5px; padding:4px 6px;" onclick="fuseFigure(${idx})">+CLv</button>
+        ${unlocked ? `
+          <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:8.5px; padding:4px;" onclick="toggleDeckEquip(${idx})">
+            ${inDeck ? '★ No Deck' : `➔ Slot #${currentEditingDeckSlot + 1}`}
+          </button>
+          <button class="btn purple" style="font-size:8.5px; padding:4px 6px;" onclick="fuseFigure(${idx})">+CLv</button>
+        ` : `
+          <button class="btn secondary" style="flex:1; font-size:8.5px; padding:4px; color:#facc15; border-color:#ca8a04;" onclick="switchDrawerTab('shop')">
+            🔒 Desbloquear na Loja
+          </button>
+        `}
       </div>
     `;
     grid.appendChild(card);
@@ -4323,7 +4331,7 @@ function createBlankIndividualProfile(customNick) {
   const cleanNick = (customNick || "").trim() || "Treinador";
   return {
     version: "4.8.0",
-    isSetupDone: Boolean(customNick && customNick.trim()),
+    isSetupDone: true,
     trainerId: generateUniqueTrainerId(),
     nickname: cleanNick,
     titleBadge: "Treinador Iniciante",
@@ -4352,6 +4360,7 @@ function loadIndividualProfile() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.version === "4.8.0" && parsed.trainerId && parsed.duelStats) {
+        parsed.isSetupDone = true;
         return parsed;
       }
     }
@@ -4674,7 +4683,7 @@ showWinResultScreen = function(winner) {
 };
 
 syncIndividualProfileUI();
-if (!window.trainerProfileData.isSetupDone) {
+if (!window.trainerProfileData || (!window.trainerProfileData.isSetupDone && !window.trainerProfileData.nickname)) {
   setTimeout(() => {
     const wm = document.getElementById("welcome-profile-modal");
     if (wm) wm.style.display = "flex";
@@ -5621,6 +5630,7 @@ const BANANA_PLATE_SPRITES = {"hurdle": "data:image/png;base64,iVBORw0KGgoAAAANS
       gap: 6px !important;
     }
     #plates-tray {
+      display: none !important;
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
@@ -5643,6 +5653,9 @@ const BANANA_PLATE_SPRITES = {"hurdle": "data:image/png;base64,iVBORw0KGgoAAAANS
       justify-content: center !important;
       align-items: center !important;
       gap: 12px !important;
+    }
+    #plates-tray.show {
+      display: flex !important;
     }
     #plate-featured-card {
       width: 215px !important;
