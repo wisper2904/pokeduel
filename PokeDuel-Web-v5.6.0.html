@@ -413,6 +413,73 @@
     </div>
   </div>
 
+  <!-- MODAL DE FEEDBACK & RELATO DE BUGS -->
+  <div id="feedback-modal" style="display:none; position:fixed; inset:0; z-index:295; background:rgba(2,6,23,0.94); align-items:center; justify-content:center; padding:14px; backdrop-filter:blur(5px);">
+    <div style="width:100%; max-width:365px; max-height:90vh; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #38bdf8; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.3); color:#f8fafc;">
+      
+      <!-- Header -->
+      <div style="background:linear-gradient(90deg,#0284c7 0%,#2563eb 100%); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #38bdf8;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:20px; filter:drop-shadow(0 1px 2px #000);">💬</span>
+          <div>
+            <div style="font-size:13.5px; font-weight:900; color:#fff; letter-spacing:0.3px;">ENVIAR FEEDBACK</div>
+            <div style="font-size:9px; font-weight:700; color:#bae6fd;">Sugestões, Novas Ideias & Relato de Bugs</div>
+          </div>
+        </div>
+        <button onclick="closeFeedbackModal()" style="background:#0f172a; border:1px solid #38bdf8; color:#fff; border-radius:50%; width:26px; height:26px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+      </div>
+
+      <!-- Form Content -->
+      <div style="padding:12px 14px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:9px; font-size:11px; -webkit-overflow-scrolling:touch;">
+        
+        <div>
+          <label style="font-size:9.5px; font-weight:800; color:#93c5fd; display:block; margin-bottom:4px;">Tipo de Mensagem:</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+            <button type="button" class="fb-type-btn active" data-type="bug" onclick="selectFeedbackType('bug')" style="background:#1e293b; border:1.5px solid #ef4444; border-radius:6px; padding:6px; color:#fff; font-size:9.5px; font-weight:900; cursor:pointer;">
+              🐛 Relatar Bug
+            </button>
+            <button type="button" class="fb-type-btn" data-type="idea" onclick="selectFeedbackType('idea')" style="background:#0b1329; border:1.5px solid #334155; border-radius:6px; padding:6px; color:#94a3b8; font-size:9.5px; font-weight:800; cursor:pointer;">
+              💡 Nova Ideia
+            </button>
+            <button type="button" class="fb-type-btn" data-type="balance" onclick="selectFeedbackType('balance')" style="background:#0b1329; border:1.5px solid #334155; border-radius:6px; padding:6px; color:#94a3b8; font-size:9.5px; font-weight:800; cursor:pointer;">
+              ⚖️ Balanceamento
+            </button>
+            <button type="button" class="fb-type-btn" data-type="other" onclick="selectFeedbackType('other')" style="background:#0b1329; border:1.5px solid #334155; border-radius:6px; padding:6px; color:#94a3b8; font-size:9.5px; font-weight:800; cursor:pointer;">
+              ⭐ Elogio / Outro
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:9.5px; font-weight:800; color:#93c5fd; display:block; margin-bottom:3px;">Seu Nome de Treinador:</label>
+          <input id="feedback-trainer-name" type="text" maxlength="24" placeholder="Seu nome" style="width:100%; box-sizing:border-box; background:#071124; border:1px solid #1e3a8a; border-radius:6px; padding:7px 9px; color:#fff; font-size:11px; font-weight:700;">
+        </div>
+
+        <div>
+          <label style="font-size:9.5px; font-weight:800; color:#93c5fd; display:block; margin-bottom:3px;">Assunto:</label>
+          <input id="feedback-title" type="text" maxlength="60" placeholder="Ex: Problema com a placa ou Ideia de nova figura" style="width:100%; box-sizing:border-box; background:#071124; border:1px solid #1e3a8a; border-radius:6px; padding:7px 9px; color:#fff; font-size:11px; font-weight:700;">
+        </div>
+
+        <div>
+          <label style="font-size:9.5px; font-weight:800; color:#93c5fd; display:block; margin-bottom:3px;">Descreva em Detalhes:</label>
+          <textarea id="feedback-msg" rows="4" maxlength="1000" placeholder="Explique o que aconteceu, como reproduzir o bug ou detalhes da sua sugestão..." style="width:100%; box-sizing:border-box; background:#071124; border:1px solid #1e3a8a; border-radius:6px; padding:7px 9px; color:#fff; font-size:11px; font-weight:600; resize:none; line-height:1.4;"></textarea>
+          <div style="font-size:8px; color:#64748b; text-align:right; margin-top:2px;">Máx. 1000 caracteres</div>
+        </div>
+
+        <div id="feedback-status-msg" style="font-size:10px; font-weight:800; text-align:center; min-height:14px; line-height:1.35;"></div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div style="padding:10px 14px; background:#08142b; border-top:1.5px solid #1e3a8a; display:flex; flex-direction:column; gap:6px;">
+        <button id="feedback-submit-btn" onclick="submitUserFeedback()" style="background:linear-gradient(180deg,#22c55e 0%,#15803d 100%); border:1.5px solid #86efac; border-radius:8px; padding:10px; color:#fff; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 3px 8px rgba(34,197,94,0.4);">
+          <span>🚀</span> Enviar Feedback
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- SECTION 1: CLEAN INDIVIDUAL TRAINER PROFILE MODAL (v4.8.0) -->
   <div id="player-profile-modal" style="display:none; position:fixed; inset:0; z-index:270; background:rgba(3,7,18,0.92); align-items:center; justify-content:center; padding:12px;">
     <div style="width:100%; max-width:360px; max-height:90vh; overflow-y:auto; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #38bdf8; border-radius:12px; padding:14px; color:#f8fafc; box-shadow:0 10px 35px rgba(0,0,0,0.95);">
@@ -1023,9 +1090,13 @@
             <span id="key-frag-lbl">0</span><span style="color:#fff; font-size:9px;">/10</span>
           </div>
         </div>
-        <!-- NEW Training / Quests Dumbbell Button -->
-        <div onclick="switchDrawerTab('menu'); openMenuSection('quests');" style="width:66px; cursor:pointer; filter:drop-shadow(0 3px 6px rgba(0,0,0,0.75));">
-          <img id="home-training-btn-img" src="" style="width:100%; height:auto; display:block;">
+        <!-- Feedback & Bug Report Button -->
+        <div onclick="openFeedbackModal()" title="Enviar Ideia ou Relatar Bug" style="cursor:pointer; background:linear-gradient(180deg,#0284c7 0%,#0369a1 100%); border:1.5px solid #38bdf8; border-radius:8px; padding:5px 8px; display:flex; align-items:center; gap:5px; box-shadow:0 3px 8px rgba(0,0,0,0.7); width:fit-content; margin-top:2px;">
+          <span style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">💬</span>
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">FEEDBACK</span>
+            <span style="font-size:7.5px; font-weight:800; color:#bae6fd;">Ideias/Bugs</span>
+          </div>
         </div>
       </div>
 

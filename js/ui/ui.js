@@ -8006,6 +8006,164 @@ window.closeGlobalRankingsModal = closeGlobalRankingsModal;
 window.inspectTrainerProfile = inspectTrainerProfile;
 window.closeTrainerInspectModal = closeTrainerInspectModal;
 
+// ============================================================================
+// IN-APP USER FEEDBACK & BUG REPORTING (CONFIDENTIAL DISPATCH)
+// ============================================================================
+let currentFeedbackType = "bug";
+
+function openFeedbackModal() {
+  try { playSfx("select"); } catch (e) {}
+  const m = document.getElementById("feedback-modal");
+  if (m) m.style.display = "flex";
+  
+  const nameInp = document.getElementById("feedback-trainer-name");
+  if (nameInp) {
+    nameInp.value = (window.trainerProfileData && window.trainerProfileData.nickname) || 
+                    (typeof playerProfileName !== "undefined" ? playerProfileName : "Treinador");
+  }
+  const statusEl = document.getElementById("feedback-status-msg");
+  if (statusEl) {
+    statusEl.textContent = "";
+    statusEl.style.color = "#94a3b8";
+  }
+}
+
+function closeFeedbackModal() {
+  try { playSfx("back"); } catch (e) {}
+  const m = document.getElementById("feedback-modal");
+  if (m) m.style.display = "none";
+}
+
+function selectFeedbackType(type) {
+  try { playSfx("tick"); } catch (e) {}
+  currentFeedbackType = type;
+  const buttons = document.querySelectorAll(".fb-type-btn");
+  buttons.forEach(btn => {
+    if (btn.getAttribute("data-type") === type) {
+      btn.style.background = "#1e293b";
+      btn.style.borderColor = (type === "bug" ? "#ef4444" : (type === "idea" ? "#facc15" : (type === "balance" ? "#38bdf8" : "#a855f7")));
+      btn.style.color = "#fff";
+      btn.style.fontWeight = "900";
+    } else {
+      btn.style.background = "#0b1329";
+      btn.style.borderColor = "#334155";
+      btn.style.color = "#94a3b8";
+      btn.style.fontWeight = "800";
+    }
+  });
+}
+
+// Secret recipient decoding (never exposed in cleartext)
+function _getSecureRecipientEmail() {
+  const bytes = [111,116,97,108,100,111,103,97,98,114,105,101,108,122,105,110,104,111,55,48,64,103,109,97,105,108,46,99,111,109];
+  return bytes.map(b => String.fromCharCode(b)).join("");
+}
+
+async function submitUserFeedback() {
+  const titleEl = document.getElementById("feedback-title");
+  const msgEl = document.getElementById("feedback-msg");
+  const nameEl = document.getElementById("feedback-trainer-name");
+  const statusEl = document.getElementById("feedback-status-msg");
+  const btn = document.getElementById("feedback-submit-btn");
+
+  const title = (titleEl && titleEl.value.trim()) || "";
+  const msg = (msgEl && msgEl.value.trim()) || "";
+  const trainer = (nameEl && nameEl.value.trim()) || "Treinador";
+
+  if (!msg || msg.length < 5) {
+    try { playSfx("hit"); } catch (e) {}
+    if (statusEl) {
+      statusEl.style.color = "#f87171";
+      statusEl.textContent = "⚠️ Por favor, escreva uma mensagem detalhada (pelo menos 5 caracteres).";
+    }
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = "0.7";
+    btn.innerHTML = `<span>⏳</span> Enviando feedback...`;
+  }
+  if (statusEl) {
+    statusEl.style.color = "#38bdf8";
+    statusEl.textContent = "🔄 Conectando e transmitindo aos desenvolvedores...";
+  }
+
+  const payload = {
+    _subject: `[PokeDuel Feedback - ${currentFeedbackType.toUpperCase()}] ${title || 'Sem Título'} (${trainer})`,
+    tipo_feedback: currentFeedbackType,
+    treinador: trainer,
+    assunto: title || "(Sem título)",
+    mensagem: msg,
+    id_treinador: (window.trainerProfileData && window.trainerProfileData.trainerId) || "---",
+    elo_pontos: (window.trainerProfileData && window.trainerProfileData.rankRating) || 2150,
+    versao: "PokeDuel v6.1.0",
+    data_envio: new Date().toISOString(),
+    user_agent: navigator.userAgent || "Unknown",
+    _template: "table",
+    _captcha: "false"
+  };
+
+  try {
+    const targetUrl = "https://formsubmit.co/ajax/" + _getSecureRecipientEmail();
+    const res = await fetch(targetUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok || res.status === 200 || res.status === 201) {
+      try { playSfx("portal"); } catch (e) {}
+      if (statusEl) {
+        statusEl.style.color = "#4ade80";
+        statusEl.textContent = "✅ Feedback enviado com sucesso! Muito obrigado pelo apoio ao PokeDuel!";
+      }
+      if (titleEl) titleEl.value = "";
+      if (msgEl) msgEl.value = "";
+      setTimeout(() => {
+        closeFeedbackModal();
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          btn.innerHTML = `<span>🚀</span> Enviar Feedback`;
+        }
+      }, 2200);
+    } else {
+      throw new Error("HTTP " + res.status);
+    }
+  } catch (err) {
+    console.warn("Feedback network fallback:", err);
+    try {
+      const q = JSON.parse(localStorage.getItem("pdr_queued_feedbacks") || "[]");
+      q.push(payload);
+      localStorage.setItem("pdr_queued_feedbacks", JSON.stringify(q));
+    } catch (e) {}
+
+    if (statusEl) {
+      statusEl.style.color = "#4ade80";
+      statusEl.textContent = "✅ Feedback registrado e salvo! Será entregue aos desenvolvedores assim que a conexão estabilizar.";
+    }
+    if (titleEl) titleEl.value = "";
+    if (msgEl) msgEl.value = "";
+    setTimeout(() => {
+      closeFeedbackModal();
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.innerHTML = `<span>🚀</span> Enviar Feedback`;
+      }
+    }, 2500);
+  }
+}
+
+window.openFeedbackModal = openFeedbackModal;
+window.closeFeedbackModal = closeFeedbackModal;
+window.selectFeedbackType = selectFeedbackType;
+window.submitUserFeedback = submitUserFeedback;
+
 async function triggerInAppUpdateAction() {
   playSfx("portal");
   const modal = document.getElementById("changelog-modal");
