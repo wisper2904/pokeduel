@@ -3906,7 +3906,8 @@ showMenuPopup = function(kind) {
   const msgEl = document.getElementById("chest-reward-msg");
   if (!msgEl) return;
   if (kind === "rankings") {
-    msgEl.textContent = `🏆 Ranking Mensal: ${window.trainerProfileData ? window.trainerProfileData.rankRating : 2150} pts (${window.trainerProfileData ? window.trainerProfileData.leagueTier : 'Champion'} League)`;
+    openGlobalRankingsModal();
+    return;
   } else if (kind === "featured") {
     msgEl.textContent = "📺 Featured Duel: Vença partidas em [Play] para ganhar Caixas de Vitória, Moedas (🪙) e Gemas (🔻)!";
   } else if (kind === "missions") {
@@ -7566,6 +7567,444 @@ function filterTutorialCategory(cat) {
 window.openMiniTutorialModal = openMiniTutorialModal;
 window.closeMiniTutorialModal = closeMiniTutorialModal;
 window.filterTutorialCategory = filterTutorialCategory;
+
+// ============================================================================
+// GLOBAL LEADERBOARD (TOP 10) & TRAINER PROFILE INSPECTOR
+// ============================================================================
+const GLOBAL_LEADERBOARD_TRAINERS = [
+  {
+    id: "trainer_ash",
+    name: "Ash Ketchum",
+    title: "Monarca Mundial dos Campeões",
+    rating: 3120,
+    highestRating: 3250,
+    tier: "Grandmaster",
+    avatar: "pikachu",
+    trainerId: "001-982-104",
+    deck: [1, 28, 16, 14, 13, 25], // Pikachu, Mega Charizard X, Greninja, Lucario, Gengar, Snorlax
+    duelStats: {
+      totalDuels: 1480,
+      wins: 1145,
+      losses: 335,
+      winRate: "77.4%",
+      currentWinStreak: 12,
+      highestWinStreak: 28
+    },
+    trophies: ["World Monarch Trophy 🏆", "Masters Eight Champion", "Alola Champion", "Battle Frontier Symbol"],
+    badges: ["Thunder Master", "Bond Phenomenon", "Never Give Up"],
+    desc: "O Campeão Mundial! Avança com velocidade explosiva do Pikachu (3 MP), pressão tática com Greninja e alto impacto com Mega Charizard X."
+  },
+  {
+    id: "trainer_cynthia",
+    name: "Cynthia",
+    title: "Mestre de Sinnoh & Dragões",
+    rating: 2980,
+    highestRating: 3090,
+    tier: "Grandmaster",
+    avatar: "mega_rayquaza",
+    trainerId: "208-441-920",
+    deck: [15, 29, 14, 26, 13, 24], // Rayquaza, Mega Rayquaza, Lucario, Lunala, Gengar, Deoxys Attack
+    duelStats: {
+      totalDuels: 1230,
+      wins: 935,
+      losses: 295,
+      winRate: "76.0%",
+      currentWinStreak: 9,
+      highestWinStreak: 24
+    },
+    trophies: ["Sinnoh Champion Cup 🏆", "Grandmaster Season 1", "Carmonte Carnival S-Rank"],
+    badges: ["Dragon Master", "Spatial Rend", "Aura Guardian"],
+    desc: "Controle absoluto de tempo e espaço com Dialga e Palkia Origin, complementado pelo poder colossal de Mega Rayquaza."
+  },
+  {
+    id: "trainer_steven",
+    name: "Steven Stone",
+    title: "Especialista em Fósseis e Minerais",
+    rating: 2840,
+    highestRating: 2950,
+    tier: "Grandmaster",
+    avatar: "zapdos",
+    trainerId: "389-112-704",
+    deck: [8, 14, 21, 22, 20, 0], // Kabutops, Lucario, Articuno, Moltres, Zapdos, Charizard
+    duelStats: {
+      totalDuels: 1080,
+      wins: 790,
+      losses: 290,
+      winRate: "73.1%",
+      currentWinStreak: 7,
+      highestWinStreak: 21
+    },
+    trophies: ["Hoenn Champion Cup 🏆", "Steel Master Invitational", "Tournament Top 4"],
+    badges: ["Legendary Birds", "Soar Master", "Ancient Power"],
+    desc: "Aves Lendárias com a passiva Soar para voar por cima de qualquer figura terrestre do oponente e pressionar o Goal!"
+  },
+  {
+    id: "trainer_red",
+    name: "Red",
+    title: "Lenda do Monte Prata",
+    rating: 2750,
+    highestRating: 2890,
+    tier: "Master League",
+    avatar: "charizard",
+    trainerId: "151-000-001",
+    deck: [0, 1, 20, 25, 23, 7], // Charizard, Pikachu, Zapdos, Snorlax, Blastoise, Venusaur
+    duelStats: {
+      totalDuels: 990,
+      wins: 720,
+      losses: 270,
+      winRate: "72.7%",
+      currentWinStreak: 11,
+      highestWinStreak: 19
+    },
+    trophies: ["Indigo Plateau Champion 🏆", "Battle Tree Legend", "Kanto Grand Prix"],
+    badges: ["Silent Legend", "Kanto Starters", "Fire Spin Master"],
+    desc: "A lenda viva de Kanto! Equilíbrio perfeito entre ataque devastador com Charizard e uma defesa intransponível com Snorlax."
+  },
+  {
+    id: "trainer_lance",
+    name: "Lance",
+    title: "Campeão dos Dragões",
+    rating: 2680,
+    highestRating: 2780,
+    tier: "Master League",
+    avatar: "charizard",
+    trainerId: "149-883-201",
+    deck: [19, 0, 15, 8, 20, 22], // Gyarados, Charizard, Rayquaza, Kabutops, Zapdos, Moltres
+    duelStats: {
+      totalDuels: 890,
+      wins: 630,
+      losses: 260,
+      winRate: "70.8%",
+      currentWinStreak: 6,
+      highestWinStreak: 17
+    },
+    trophies: ["Dragon Master Trophy 🏆", "Johto League Champion", "Dragonite Gold Cup"],
+    badges: ["Dragon Outrage", "Hyper Beam", "Air Superiority"],
+    desc: "Força bruta incontrolável com roletas de dano astronômico para quebrar qualquer bloqueio inimigo no caminho."
+  },
+  {
+    id: "trainer_leon",
+    name: "Leon",
+    title: "O Campeão Invicto de Galar",
+    rating: 2610,
+    highestRating: 2720,
+    tier: "Master League",
+    avatar: "charizard",
+    trainerId: "888-001-777",
+    deck: [0, 28, 14, 16, 20, 1], // Charizard, Mega Charizard X, Lucario, Greninja, Zapdos, Pikachu
+    duelStats: {
+      totalDuels: 810,
+      wins: 580,
+      losses: 230,
+      winRate: "71.6%",
+      currentWinStreak: 8,
+      highestWinStreak: 22
+    },
+    trophies: ["Galar Champion Cup 🏆", "Battle Tower Champion", "Undefeated Streak Award"],
+    badges: ["Champion Time", "Max Flare", "Gigantamax Aura"],
+    desc: "Estilo dinâmico e ofensivo: busca o confronto direto e aplica pressão contínua no Goal inimigo desde o primeiro turno."
+  },
+  {
+    id: "trainer_blue",
+    name: "Blue",
+    title: "Lenda de Viridian",
+    rating: 2540,
+    highestRating: 2660,
+    tier: "Master League",
+    avatar: "blastoise",
+    trainerId: "002-151-999",
+    deck: [23, 19, 20, 14, 0, 7], // Blastoise, Gyarados, Zapdos, Lucario, Charizard, Venusaur
+    duelStats: {
+      totalDuels: 760,
+      wins: 530,
+      losses: 230,
+      winRate: "69.7%",
+      currentWinStreak: 5,
+      highestWinStreak: 16
+    },
+    trophies: ["Viridian Gym Master 🏆", "Indigo Champion", "Battle Legend Award"],
+    badges: ["Smell Ya Later", "Hydro Pump", "Psychic Blitz"],
+    desc: "Mestre da adaptação estratégica com respostas imediatas para qualquer composição tática do oponente."
+  },
+  {
+    id: "trainer_morty",
+    name: "Morty",
+    title: "O Místico dos Fantasmas",
+    rating: 2470,
+    highestRating: 2590,
+    tier: "Master League",
+    avatar: "mega_gengar",
+    trainerId: "094-666-412",
+    deck: [13, 27, 26, 17, 24, 6], // Gengar, Mega Gengar, Lunala, Mew, Deoxys Attack, Charmander
+    duelStats: {
+      totalDuels: 710,
+      wins: 490,
+      losses: 220,
+      winRate: "69.0%",
+      currentWinStreak: 4,
+      highestWinStreak: 15
+    },
+    trophies: ["Ecruteak Ghost Trophy 🏆", "Bell Tower Master", "Spooky Cup Top 4"],
+    badges: ["Shadow Tag", "Infiltration", "Hyper Sonic Shield"],
+    desc: "Mestre da infiltração! Fantasmas atravessam peças no tabuleiro para cercar ou pegar o Goal de surpresa."
+  },
+  {
+    id: "trainer_diantha",
+    name: "Diantha",
+    title: "Grande Duquesa de Kalos",
+    rating: 2390,
+    highestRating: 2510,
+    tier: "Master League",
+    avatar: "mew",
+    trainerId: "282-710-333",
+    deck: [17, 14, 5, 23, 16, 20], // Mew, Lucario, Lapras, Blastoise, Greninja, Zapdos
+    duelStats: {
+      totalDuels: 650,
+      wins: 440,
+      losses: 210,
+      winRate: "67.7%",
+      currentWinStreak: 5,
+      highestWinStreak: 14
+    },
+    trophies: ["Kalos Grand Duchess Cup 🏆", "Fairy Tale Champion", "Carmonte Elegance Top 8"],
+    badges: ["Fairy Mist", "Moonblast", "Mega Evolution Expert"],
+    desc: "Estratégia mágica baseada em efeitos de status (Sono e Congelamento com Lapras) e defesa sólida com Mew."
+  },
+  {
+    id: "trainer_misty",
+    name: "Misty",
+    title: "A Garota Moleca Toda-Água",
+    rating: 2310,
+    highestRating: 2440,
+    tier: "Champion League",
+    avatar: "gyarados",
+    trainerId: "121-042-888",
+    deck: [18, 19, 16, 5, 23, 2], // Magikarp, Gyarados, Greninja, Lapras, Blastoise, Squirtle
+    duelStats: {
+      totalDuels: 600,
+      wins: 405,
+      losses: 195,
+      winRate: "67.5%",
+      currentWinStreak: 6,
+      highestWinStreak: 13
+    },
+    trophies: ["Cerulean Water Trophy 🏆", "Gym Leader Cup Gold", "Hydro Pump Medal"],
+    badges: ["Water Shuriken", "Magikarp Evolution", "Sing & Sleep"],
+    desc: "Evolução em partida com Magikarp (+10 DMG permanente no Gyarados) e shuriken dourado de Greninja."
+  }
+];
+
+function getGlobalLeaderboardData() {
+  const p = window.trainerProfileData || {};
+  const currentPts = p.rankRating || (typeof playerProgression !== "undefined" && playerProgression.rating) || 2150;
+  const player = {
+    id: "player_self",
+    isSelf: true,
+    name: p.nickname || (typeof playerProfileName !== "undefined" ? playerProfileName : "Treinador"),
+    title: p.titleBadge || "Desafiante de Carmonte",
+    rating: currentPts,
+    highestRating: Math.max(currentPts, p.highestRating || currentPts),
+    tier: (p.leagueTier || "Champion") + " League",
+    avatar: (p.mainDisplayFigure) ? p.mainDisplayFigure.toLowerCase() : "pikachu",
+    trainerId: p.trainerId || "948-204-182",
+    deck: (state && state.deckP1 && state.deckP1.length === 6) ? [...state.deckP1] : [0, 1, 2, 3, 4, 5],
+    duelStats: p.duelStats || {
+      totalDuels: (typeof playerProgression !== "undefined" && playerProgression.matchesPlayed) || 120,
+      wins: (typeof playerProgression !== "undefined" && playerProgression.matchesWon) || 82,
+      losses: (typeof playerProgression !== "undefined" && playerProgression.matchesLost) || 38,
+      winRate: "68.3%",
+      currentWinStreak: 4,
+      highestWinStreak: 10
+    },
+    trophies: (p.trophies && p.trophies.length) ? p.trophies : ["Treinador de Carmonte 🏆", "Campeão de Batalhas"],
+    badges: (p.badges && p.badges.length) ? p.badges : ["Duelista Oficial", "Estrategista de Tabuleiro"],
+    desc: "Seu perfil de Treinador em Carmonte Island. Vença partidas ranqueadas para subir no ranking global e alcançar a Master League!"
+  };
+
+  const all = [...GLOBAL_LEADERBOARD_TRAINERS, player];
+  all.sort((a, b) => b.rating - a.rating);
+
+  let playerRank = 1;
+  all.forEach((t, idx) => {
+    t.rank = idx + 1;
+    if (t.isSelf) playerRank = idx + 1;
+  });
+
+  return { all, player, playerRank };
+}
+
+function openGlobalRankingsModal() {
+  try { playSfx("select"); } catch (e) {}
+  renderGlobalRankings();
+  const m = document.getElementById("global-ranking-modal");
+  if (m) m.style.display = "flex";
+}
+
+function closeGlobalRankingsModal() {
+  try { playSfx("back"); } catch (e) {}
+  const m = document.getElementById("global-ranking-modal");
+  if (m) m.style.display = "none";
+}
+
+function renderGlobalRankings() {
+  const container = document.getElementById("global-ranking-list");
+  const playerBar = document.getElementById("global-ranking-player-bar");
+  if (!container) return;
+
+  const { all, player, playerRank } = getGlobalLeaderboardData();
+  const top10 = all.slice(0, 10);
+
+  container.innerHTML = top10.map((t) => {
+    let rankBadge = `<span style="background:#1e293b; color:#94a3b8; font-weight:900; border-radius:5px; padding:2px 6px; font-size:10px; border:1px solid #334155;">#${t.rank}</span>`;
+    let borderStyle = "1px solid #1e3a8a";
+    let bgStyle = "#071124";
+
+    if (t.rank === 1) {
+      rankBadge = `<span style="background:linear-gradient(180deg,#fef08a,#eab308); color:#78350f; font-weight:900; border-radius:5px; padding:2px 6px; font-size:10px; border:1px solid #fde047; box-shadow:0 0 8px rgba(250,204,21,0.5);">🥇 #1</span>`;
+      borderStyle = "1.5px solid #facc15";
+      bgStyle = "linear-gradient(90deg, rgba(234,179,8,0.18) 0%, #071124 100%)";
+    } else if (t.rank === 2) {
+      rankBadge = `<span style="background:linear-gradient(180deg,#f8fafc,#cbd5e1); color:#334155; font-weight:900; border-radius:5px; padding:2px 6px; font-size:10px; border:1px solid #e2e8f0; box-shadow:0 0 6px rgba(203,213,225,0.4);">🥈 #2</span>`;
+      borderStyle = "1.5px solid #cbd5e1";
+      bgStyle = "linear-gradient(90deg, rgba(203,213,225,0.15) 0%, #071124 100%)";
+    } else if (t.rank === 3) {
+      rankBadge = `<span style="background:linear-gradient(180deg,#ffedd5,#fb923c); color:#7c2d12; font-weight:900; border-radius:5px; padding:2px 6px; font-size:10px; border:1px solid #fdba74; box-shadow:0 0 6px rgba(251,146,60,0.4);">🥉 #3</span>`;
+      borderStyle = "1.5px solid #fb923c";
+      bgStyle = "linear-gradient(90deg, rgba(251,146,60,0.15) 0%, #071124 100%)";
+    }
+
+    if (t.isSelf) {
+      borderStyle = "2px solid #38bdf8";
+      bgStyle = "linear-gradient(90deg, rgba(56,189,248,0.25) 0%, #071124 100%)";
+    }
+
+    let avSrc = "assets/sprites/pikachu.png";
+    if (typeof AUTHENTIC_FIG_SPRITES !== "undefined" && AUTHENTIC_FIG_SPRITES[t.avatar] && AUTHENTIC_FIG_SPRITES[t.avatar].uri) {
+      avSrc = AUTHENTIC_FIG_SPRITES[t.avatar].uri;
+    }
+
+    return `
+      <div onclick="inspectTrainerProfile('${t.id}')" style="background:${bgStyle}; border:${borderStyle}; border-radius:8px; padding:7px 9px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; gap:8px; transition:transform 0.15s ease;">
+        <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+          <div style="width:28px; text-align:center; flex-shrink:0;">${rankBadge}</div>
+          <img src="${avSrc}" style="width:34px; height:34px; border-radius:6px; border:1px solid #475569; object-fit:contain; background:#0f172a; flex-shrink:0;">
+          <div style="min-width:0;">
+            <div style="font-size:11px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:4px;">
+              <span>${t.name}</span>
+              ${t.isSelf ? '<span style="background:#38bdf8; color:#020617; font-size:7px; font-weight:900; padding:1px 3.5px; border-radius:2px;">VOCÊ</span>' : ''}
+            </div>
+            <div style="font-size:8px; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.title}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+          <div style="text-align:right;">
+            <div style="font-size:11.5px; font-weight:900; color:#38bdf8;">${t.rating.toLocaleString()} <span style="font-size:8px; color:#93c5fd;">pts</span></div>
+            <div style="font-size:7.5px; font-weight:700; color:#fde047;">${t.tier}</div>
+          </div>
+          <span style="font-size:12px; color:#64748b; font-weight:900;">❯</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  if (playerBar) {
+    playerBar.innerHTML = `
+      <div style="display:flex; align-items:center; gap:7px;">
+        <span style="font-size:14px;">⭐</span>
+        <div>
+          <div style="font-size:10px; font-weight:900; color:#fff;">Sua Classificação: <strong style="color:#38bdf8;">#${playerRank}</strong> (${player.rating.toLocaleString()} pts)</div>
+          <div style="font-size:8px; color:#94a3b8;">${player.name} · ${player.tier}</div>
+        </div>
+      </div>
+      <button onclick="event.stopPropagation(); inspectTrainerProfile('player_self');" style="background:linear-gradient(180deg,#0284c7 0%,#0369a1 100%); border:1px solid #38bdf8; border-radius:5px; padding:4px 8px; font-size:9px; font-weight:900; color:#fff; cursor:pointer;">
+        Ver Perfil ❯
+      </button>
+    `;
+  }
+}
+
+function inspectTrainerProfile(trainerId) {
+  try { playSfx("select"); } catch (e) {}
+  const { all } = getGlobalLeaderboardData();
+  const t = all.find(item => item.id === trainerId) || all[0];
+  if (!t) return;
+
+  const modal = document.getElementById("trainer-inspect-modal");
+  if (!modal) return;
+
+  let avSrc = "assets/sprites/pikachu.png";
+  if (typeof AUTHENTIC_FIG_SPRITES !== "undefined" && AUTHENTIC_FIG_SPRITES[t.avatar] && AUTHENTIC_FIG_SPRITES[t.avatar].uri) {
+    avSrc = AUTHENTIC_FIG_SPRITES[t.avatar].uri;
+  }
+
+  const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const avEl = document.getElementById("inspect-avatar-img");
+  if (avEl) avEl.src = avSrc;
+
+  setTxt("inspect-name-lbl", t.name + (t.isSelf ? " (Você)" : ""));
+  setTxt("inspect-id-lbl", t.trainerId || "---");
+  setTxt("inspect-title-lbl", t.title || "Treinador");
+  setTxt("inspect-rating-val", (t.rating || 0).toLocaleString() + " pts");
+  setTxt("inspect-tier-val", (t.tier || "Master") + ` · Pos. #${t.rank || 1}`);
+  setTxt("inspect-max-rating-val", (t.highestRating || t.rating || 0).toLocaleString() + " pts");
+
+  if (t.duelStats) {
+    setTxt("inspect-stat-total", t.duelStats.totalDuels || 0);
+    setTxt("inspect-stat-wins", t.duelStats.wins || 0);
+    setTxt("inspect-stat-losses", t.duelStats.losses || 0);
+    setTxt("inspect-stat-wr", t.duelStats.winRate || "0%");
+    setTxt("inspect-stat-streak", (t.duelStats.currentWinStreak || 0) + "🔥");
+    setTxt("inspect-stat-maxstreak", (t.duelStats.highestWinStreak || 0) + "🏆");
+  }
+
+  setTxt("inspect-desc-txt", t.desc || "Estrategista de tabuleiro em Carmonte Island.");
+
+  // Render Trophies
+  const trContainer = document.getElementById("inspect-trophies-container");
+  if (trContainer) {
+    const list = t.trophies || [];
+    trContainer.innerHTML = list.map(tr => `
+      <span style="background:#0f172a; border:1px solid #facc15; border-radius:4px; padding:2px 6px; font-size:8px; color:#fef08a; font-weight:bold; display:inline-flex; align-items:center; gap:3px;">
+        <span>🏆</span> ${tr}
+      </span>
+    `).join("");
+  }
+
+  // Render Deck of 6 Figures
+  const deckContainer = document.getElementById("inspect-deck-grid");
+  if (deckContainer) {
+    const deckFigures = (t.deck && t.deck.length === 6) ? t.deck : [0, 1, 2, 3, 4, 5];
+    deckContainer.innerHTML = deckFigures.map(figIdx => {
+      const f = (typeof FIGURES_DB !== "undefined" && FIGURES_DB[figIdx % FIGURES_DB.length]) ? FIGURES_DB[figIdx % FIGURES_DB.length] : { name:"Pokémon", rarity:"EX", mp:2 };
+      let figSprite = "assets/sprites/pikachu.png";
+      const key = f.spriteKey || f.id || "";
+      if (typeof AUTHENTIC_FIG_SPRITES !== "undefined" && AUTHENTIC_FIG_SPRITES[key] && AUTHENTIC_FIG_SPRITES[key].uri) {
+        figSprite = AUTHENTIC_FIG_SPRITES[key].uri;
+      }
+      return `
+        <div style="background:#0b1220; border:1px solid #1e3a8a; border-radius:6px; padding:4px 2px; display:flex; flex-direction:column; align-items:center; text-align:center;">
+          <span style="font-size:7px; font-weight:900; color:#facc15; line-height:1;">[${f.rarity || 'EX'}]</span>
+          <img src="${figSprite}" alt="${f.name}" style="width:30px; height:30px; object-fit:contain; margin:2px 0; filter:drop-shadow(0 1px 2px #000);">
+          <div style="font-size:7.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; max-width:44px; line-height:1.1;">${f.name}</div>
+          <span style="font-size:7px; font-weight:700; color:#38bdf8; margin-top:2px;">${f.mp || 2} MP</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  modal.style.display = "flex";
+}
+
+function closeTrainerInspectModal() {
+  try { playSfx("back"); } catch (e) {}
+  const m = document.getElementById("trainer-inspect-modal");
+  if (m) m.style.display = "none";
+}
+
+window.openGlobalRankingsModal = openGlobalRankingsModal;
+window.closeGlobalRankingsModal = closeGlobalRankingsModal;
+window.inspectTrainerProfile = inspectTrainerProfile;
+window.closeTrainerInspectModal = closeTrainerInspectModal;
 
 async function triggerInAppUpdateAction() {
   playSfx("portal");
