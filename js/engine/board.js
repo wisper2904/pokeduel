@@ -364,9 +364,16 @@ function demoFullMatchState() {
   if (tourHud) tourHud.style.display = "none";
 
   if (state.mode === "p2p" || state.gameMode === "p2p") {
-    state.matchKind = "p2p";
-    state.mode = "p2p";
-    state.gameMode = "p2p";
+    const hasLivePeer = (typeof peerConnObj !== "undefined" && peerConnObj) || (typeof broadcastChan !== "undefined" && broadcastChan);
+    if (hasLivePeer) {
+      state.matchKind = "p2p";
+      state.mode = "p2p";
+      state.gameMode = "p2p";
+    } else {
+      state.matchKind = "league";
+      state.mode = "ai";
+      state.gameMode = "ai";
+    }
   } else if (state.mode === "pass" || state.gameMode === "pass") {
     state.matchKind = "pass";
     state.mode = "pass";
@@ -478,9 +485,72 @@ function renderPlatesTray() {
   });
 }
 
+function executeGoalBlockWithUnit(candidate) {
+  state.pendingPlateAction = null;
+  const goalId = state.turn === "p1" ? 10 : 3;
+  if (unitAtNode(goalId)) {
+    setLogText("⚠️ Goal Block: Seu Goal Point já está ocupado!");
+    playSfx("hit");
+    return;
+  }
+  const p = (state.plates && state.plates.find(x => x.id === "goalblock" && !x.used))
+         || (state.plates && state.plates.find(x => x.id === "goalblock"));
+  if (p) p.used = true;
+  renderPlatesTray();
+
+  candidate.location = "board";
+  candidate.nodeId = goalId;
+  candidate.waitTurns = 2; // Decays to Wait 1 at end of turn!
+  activePieceAnim = null;
+
+  const gPos = getNodePos(goalId);
+  spawnPortalParticles(gPos.x, gPos.y, "#38bdf8");
+  playSfx("portal");
+  setLogText(`🛡️ Goal Block: ${candidate.name} teleportado para defender o Goal Point (Wait 1)!`);
+
+  checkSurroundKOs();
+
+  const nextT = state.turn === "p1" ? "p2" : "p1";
+  const nextC = Math.max(0, state.turnCounter - 1);
+
+  if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+    sendP2PPacket({
+      type: "P2P_PLATE",
+      plateId: "goalblock",
+      unitUid: candidate.uid,
+      targetNodeId: goalId,
+      turn: state.turn,
+      nextTurn: nextT,
+      nextTurnCounter: nextC
+    });
+  }
+  endTurn(false, nextT, nextC);
+}
+
 function confirmUseSelectedPlate() {
   const p = state.plates[state.selectedPlateIdx || 0];
   if (!p || !canControlTurn() || p.used || state.isAnimating) return;
+
+  if (p.id === "goalblock") {
+    const goalId = state.turn === "p1" ? 10 : 3;
+    if (unitAtNode(goalId)) {
+      setLogText("⚠️ Goal Block: Seu Goal Point já está ocupado!");
+      playSfx("hit");
+      return;
+    }
+    const selectedCandidate = state.units.find(u => u.owner === state.turn && u.uid === state.selectedUnitId && u.waitTurns === 0 && (u.location === "board" || u.location === "bench"));
+    if (selectedCandidate) {
+      togglePlatesTray(false);
+      executeGoalBlockWithUnit(selectedCandidate);
+    } else {
+      togglePlatesTray(false);
+      state.pendingPlateAction = "goalblock";
+      playSfx("portal");
+      setLogText("🛡️ Goal Block Ativado: Toque no Pokémon (em campo ou no banco) para defender o Goal Point!");
+    }
+    return;
+  }
+
   p.used = true;
   playSfx("portal");
   setLogText(p.log);
@@ -488,47 +558,44 @@ function confirmUseSelectedPlate() {
 
   if (p.id === "meadow") {
     state.meadowPowerActive = true;
+    if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+      sendP2PPacket({ type: "P2P_PLATE", plateId: "meadow", turn: state.turn });
+    }
   } else if (p.id === "xatk") {
     state.xAttackArmed = true;
     state.activePlate = "xatk";
     setLogText("⚔️ X Attack Ativado: +30 DMG em todos os ataques no combate deste turno!");
+    if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+      sendP2PPacket({ type: "P2P_PLATE", plateId: "xatk", turn: state.turn });
+    }
   } else if (p.id === "xspeed") {
     state.xSpeedArmed = true;
     state.activePlate = "xspeed";
     setLogText("⚡ X Speed Ativado: Todos os ataques Brancos convertidos para Dourados ⚡ neste turno!");
+    if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+      sendP2PPacket({ type: "P2P_PLATE", plateId: "xspeed", turn: state.turn });
+    }
   } else if (p.id === "double") {
     state.doubleChanceArmed = true;
     state.activePlate = "double";
     setLogText("🎲 Double Chance Ativado: Você poderá re-girar a roleta caso o resultado seja desfavorável!");
+    if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+      sendP2PPacket({ type: "P2P_PLATE", plateId: "double", turn: state.turn });
+    }
   } else if (p.id === "hurdle") {
     state.abilityJumpActive = true;
     state.activePlate = "hurdle";
     setLogText("🦘 Hurdle Jump Ativado: Selecione uma figura para saltar sobre um Pokémon adjacente!");
     if (state.selectedUnitId) selectUnit(state.selectedUnitId);
+    if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+      sendP2PPacket({ type: "P2P_PLATE", plateId: "hurdle", turn: state.turn });
+    }
   } else if (p.id === "longthrow") {
     state.longThrowActive = true;
     const bUnit = state.units.find(u => u.owner === state.turn && u.location === "bench" && u.waitTurns === 0);
     if (bUnit) selectUnit(bUnit.uid);
-  } else if (p.id === "goalblock") {
-    const goalId = state.turn === "p1" ? 10 : 3;
-    if (unitAtNode(goalId)) {
-      p.used = false;
-      setLogText("⚠️ Goal Block: Seu Goal Point já está ocupado!");
-    } else {
-      const candidate = state.units.find(u => u.owner === state.turn && u.uid === state.selectedUnitId && u.location === "board")
-                     || state.units.find(u => u.owner === state.turn && u.location === "board")
-                     || state.units.find(u => u.owner === state.turn && u.location === "bench" && u.waitTurns === 0);
-      if (candidate) {
-        candidate.location = "board";
-        candidate.nodeId = goalId;
-        candidate.waitTurns = 2; // Decays to Wait 1 at end of turn!
-        spawnPortalParticles(BOARD_NODES[goalId].x, BOARD_NODES[goalId].y, "#38bdf8");
-        setLogText(`🛡️ Goal Block: ${candidate.name} teleportado para defender o Goal Point (Wait 1)!`);
-        endTurn(true);
-      } else {
-        p.used = false;
-        setLogText("⚠️ Goal Block requer uma figura em campo ou no banco disponível!");
-      }
+    if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+      sendP2PPacket({ type: "P2P_PLATE", plateId: "longthrow", turn: state.turn });
     }
   } else if (p.id === "megaplate") {
     const targetUnit = state.units.find(u => u.owner === state.turn && u.uid === state.selectedUnitId)
@@ -539,9 +606,18 @@ function confirmUseSelectedPlate() {
       targetUnit.megaTurns = 7;
       targetUnit.mp = Math.min(3, (targetUnit.baseMp || targetUnit.mp) + 1);
       if (targetUnit.location === "board" && targetUnit.nodeId !== null) {
-        spawnPortalParticles(BOARD_NODES[targetUnit.nodeId].x, BOARD_NODES[targetUnit.nodeId].y, "#f472b6");
+        const nPos = getNodePos(targetUnit.nodeId);
+        spawnPortalParticles(nPos.x, nPos.y, "#f472b6");
       }
       setLogText(`🧬 ${targetUnit.name} [UX] ativado por 7 turnos (+20 DMG, +1★, MP ${targetUnit.mp})!`);
+      if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+        sendP2PPacket({
+          type: "P2P_PLATE",
+          plateId: "megaplate",
+          unitUid: targetUnit.uid,
+          turn: state.turn
+        });
+      }
     }
   } else if (p.id === "pkmswitch") {
     const fUnit = state.units.find(u => u.owner === state.turn && u.location === "board" && u.uid === state.selectedUnitId)
@@ -551,9 +627,25 @@ function confirmUseSelectedPlate() {
       const nid = fUnit.nodeId, bSlot = bUnit.benchSlot;
       fUnit.location = "bench"; fUnit.nodeId = null; fUnit.benchSlot = bSlot;
       bUnit.location = "board"; bUnit.nodeId = nid;
-      spawnPortalParticles(BOARD_NODES[nid].x, BOARD_NODES[nid].y, "#38bdf8");
+      const nPos = getNodePos(nid);
+      spawnPortalParticles(nPos.x, nPos.y, "#38bdf8");
       setLogText(`⇄ Pokémon Switch: ${fUnit.name} trocado por ${bUnit.name}!`);
-      endTurn(true);
+      const nextT = state.turn === "p1" ? "p2" : "p1";
+      const nextC = Math.max(0, state.turnCounter - 1);
+      if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+        sendP2PPacket({
+          type: "P2P_PLATE",
+          plateId: "pkmswitch",
+          unitUid: fUnit.uid,
+          swapUid: bUnit.uid,
+          targetNodeId: nid,
+          benchSlot: bSlot,
+          turn: state.turn,
+          nextTurn: nextT,
+          nextTurnCounter: nextC
+        });
+      }
+      endTurn(false, nextT, nextC);
     } else {
       p.used = false;
       setLogText("⚠️ Pokémon Switch precisa de 1 figura no campo e 1 figura livre no banco!");
@@ -572,7 +664,19 @@ function confirmUseSelectedPlate() {
       pcUnit.condition = PokemonCondition.Normal;
       playSfx("portal");
       setLogText(`💖 Max Revive: ${pcUnit.name} resgatado do P.C. direto para o Banco sem Wait!`);
-      endTurn(true);
+      const nextT = state.turn === "p1" ? "p2" : "p1";
+      const nextC = Math.max(0, state.turnCounter - 1);
+      if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+        sendP2PPacket({
+          type: "P2P_PLATE",
+          plateId: "revive",
+          unitUid: pcUnit.uid,
+          turn: state.turn,
+          nextTurn: nextT,
+          nextTurnCounter: nextC
+        });
+      }
+      endTurn(false, nextT, nextC);
     } else {
       p.used = false;
       setLogText("⚠️ Max Revive requer pelo menos 1 Pokémon no P.C.!");
@@ -1976,6 +2080,12 @@ function showWinResultScreen(winner) {
 function closeWinResultOverlay() {
   const ov = document.getElementById("win-result-overlay");
   if (ov) ov.style.display = "none";
+  if (typeof cleanupActiveP2PSession === "function") {
+    cleanupActiveP2PSession("Win Result Overlay Closed");
+  }
+  state.mode = "ai";
+  state.gameMode = "ai";
+  state.matchKind = "league";
   demoFullMatchState();
   openDrawer("hub");
 }
@@ -2142,6 +2252,19 @@ function selectUnit(uid) {
       const isP1 = (state.myRole === "p1");
       setLogText(`⏳ Vez do ${isP1 ? "Jogador 2 (Vermelho)" : "Jogador 1 (Azul)"}! Aguarde o oponente jogar.`);
     }
+    return;
+  }
+  if (state.pendingPlateAction === "goalblock") {
+    const candidate = state.units.find(x => x.uid === uid);
+    if (!candidate || candidate.owner !== state.turn || candidate.location === "pc" || candidate.location === "ultra_space") {
+      setLogText("⚠️ Selecione um Pokémon seu em campo ou no banco para o Goal Block!");
+      return;
+    }
+    if (candidate.waitTurns > 0) {
+      setLogText(`⚠️ ${candidate.name} possui Wait ${candidate.waitTurns} e não pode defender o Goal!`);
+      return;
+    }
+    executeGoalBlockWithUnit(candidate);
     return;
   }
   if (state.postMoveAttackMode) {

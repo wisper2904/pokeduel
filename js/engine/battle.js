@@ -1171,6 +1171,7 @@ function applyExplicitTurn(nextTurn, nextCounter) {
   state.doubleChanceArmed = false;
   state.abilityJumpActive = false;
   state.activePlate = null;
+  state.pendingPlateAction = null;
   state.turn = nextTurn;
   state.turnBannerAnim = { turn: nextTurn, t0: performance.now() };
   if (typeof nextCounter === "number") state.turnCounter = nextCounter;

@@ -124,6 +124,7 @@ function handleP2PPacket(raw) {
     lastPeerSignalTs = performance.now();
     if (msg.type === "P2P_FORFEIT") {
       const w = msg.winner || (state.myRole || "p1");
+      if (p2pPingTimer) { clearInterval(p2pPingTimer); p2pPingTimer = null; }
       setLogText("🏆 O adversário desistiu (Forfeit)! Vitória por W.O.!");
       state.winCelebrationAnim = { winner: w, t0: performance.now() };
       return;
@@ -157,6 +158,8 @@ function handleP2PPacket(raw) {
       if (msg.seed) setSharedSeed(msg.seed);
       appendTcpLog(`< P2P_MOVE uid=${msg.uid} dest=${msg.targetNodeId}`);
       executeMove(msg.uid, msg.targetNodeId, false, msg.segs, msg);
+    } else if (msg.type === "P2P_PLATE") {
+      handleRemotePlatePacket(msg);
     } else if (msg.type === "Record") {
       const atk = state.units.find(u => u.uid === msg.atkUid);
       const def = state.units.find(u => u.uid === msg.defUid);
@@ -181,6 +184,123 @@ function handleP2PPacket(raw) {
   } catch (e) {}
 }
 
+function handleRemotePlatePacket(msg) {
+  if (!msg || !msg.plateId) return;
+  if (state.plates) {
+    const oppPlate = state.plates.find(p => p.id === msg.plateId && !p.used);
+    if (oppPlate) oppPlate.used = true;
+    if (typeof renderPlatesTray === "function") renderPlatesTray();
+  }
+
+  if (msg.plateId === "goalblock") {
+    const targetUnit = state.units.find(u => u.uid === msg.unitUid);
+    if (targetUnit) {
+      targetUnit.location = "board";
+      targetUnit.nodeId = msg.targetNodeId;
+      targetUnit.waitTurns = 1;
+      const nPos = getNodePos(msg.targetNodeId);
+      spawnPortalParticles(nPos.x, nPos.y, "#38bdf8");
+      playSfx("portal");
+      setLogText(`🛡️ Oponente usou Goal Block: ${targetUnit.name} teleportado para defender o Goal Point (Wait 1)!`);
+    }
+    applyExplicitTurn(msg.nextTurn, msg.nextTurnCounter);
+  } else if (msg.plateId === "pkmswitch") {
+    const fUnit = state.units.find(u => u.uid === msg.unitUid);
+    const bUnit = state.units.find(u => u.uid === msg.swapUid);
+    if (fUnit && bUnit) {
+      fUnit.location = "bench";
+      fUnit.nodeId = null;
+      if (typeof msg.benchSlot === "number") fUnit.benchSlot = msg.benchSlot;
+      bUnit.location = "board";
+      bUnit.nodeId = msg.targetNodeId;
+      const nPos = getNodePos(msg.targetNodeId);
+      spawnPortalParticles(nPos.x, nPos.y, "#38bdf8");
+      playSfx("portal");
+      setLogText(`⇄ Oponente usou Pokémon Switch: ${fUnit.name} trocado por ${bUnit.name}!`);
+    }
+    applyExplicitTurn(msg.nextTurn, msg.nextTurnCounter);
+  } else if (msg.plateId === "revive") {
+    const pcUnit = state.units.find(u => u.uid === msg.unitUid);
+    if (pcUnit) {
+      pcUnit.location = "bench";
+      pcUnit.nodeId = null;
+      pcUnit.waitTurns = 0;
+      pcUnit.condition = PokemonCondition.Normal;
+      playSfx("portal");
+      setLogText(`💖 Oponente usou Max Revive: ${pcUnit.name} resgatado do P.C.!`);
+    }
+    applyExplicitTurn(msg.nextTurn, msg.nextTurnCounter);
+  } else if (msg.plateId === "megaplate") {
+    const unit = state.units.find(u => u.uid === msg.unitUid);
+    if (unit) {
+      if (!unit.name.startsWith("Mega ")) unit.name = "Mega " + unit.name;
+      unit.megaTurns = 7;
+      unit.mp = Math.min(3, (unit.baseMp || unit.mp) + 1);
+      if (unit.location === "board" && unit.nodeId !== null) {
+        const nPos = getNodePos(unit.nodeId);
+        spawnPortalParticles(nPos.x, nPos.y, "#f472b6");
+      }
+      playSfx("portal");
+      setLogText(`🧬 Oponente ativou Mega Plate: ${unit.name} [UX] (+20 DMG, +1★, MP ${unit.mp})!`);
+    }
+  } else if (msg.plateId === "xatk") {
+    state.xAttackArmed = true;
+    state.activePlate = "xatk";
+    setLogText("⚔️ Oponente ativou X Attack (+30 DMG no combate deste turno)!");
+  } else if (msg.plateId === "xspeed") {
+    state.xSpeedArmed = true;
+    state.activePlate = "xspeed";
+    setLogText("⚡ Oponente ativou X Speed (White ➔ Gold neste combate)!");
+  } else if (msg.plateId === "double") {
+    state.doubleChanceArmed = true;
+    state.activePlate = "double";
+    setLogText("🎲 Oponente ativou Double Chance!");
+  } else if (msg.plateId === "hurdle") {
+    state.abilityJumpActive = true;
+    state.activePlate = "hurdle";
+    setLogText("🦘 Oponente ativou Hurdle Jump!");
+  }
+}
+window.handleRemotePlatePacket = handleRemotePlatePacket;
+
+function cleanupActiveP2PSession(reason) {
+  if (p2pPingTimer) {
+    clearInterval(p2pPingTimer);
+    p2pPingTimer = null;
+  }
+  if (peerConnObj) {
+    try { peerConnObj.close(); } catch(e) {}
+    peerConnObj = null;
+  }
+  if (dataChannel) {
+    try { dataChannel.close(); } catch(e) {}
+    dataChannel = null;
+  }
+  if (peerConn) {
+    try { peerConn.close(); } catch(e) {}
+    peerConn = null;
+  }
+  if (peerInstance) {
+    try { peerInstance.destroy(); } catch(e) {}
+    peerInstance = null;
+  }
+  if (broadcastChan) {
+    try { broadcastChan.close(); } catch(e) {}
+    broadcastChan = null;
+  }
+  state.mode = "ai";
+  state.gameMode = "ai";
+  state.matchKind = "league";
+  state.myRole = "p1";
+  state.viewSeatOverride = null;
+  state.p2pLatency = null;
+  state.winCelebrationAnim = null;
+  state.pendingPlateAction = null;
+  updateP2PStatusUI("⚪ SALA FECHADA", "Nenhuma sala ativa. Crie ou entre em uma sala para jogar online.", "OFFLINE", "#94a3b8");
+  if (reason) appendTcpLog(`[P2P] Sessão encerrada: ${reason}`);
+}
+window.cleanupActiveP2PSession = cleanupActiveP2PSession;
+
 let lastPeerSignalTs = performance.now();
 
 function triggerVoluntaryForfeit() {
@@ -191,6 +311,7 @@ function triggerVoluntaryForfeit() {
   if (state.mode === "p2p") {
     sendP2PPacket({ type: "P2P_FORFEIT", loser: forfeiter, winner });
   }
+  if (p2pPingTimer) { clearInterval(p2pPingTimer); p2pPingTimer = null; }
   setLogText(`🏳️ Desistência (Forfeit)! Vitória por W.O. para ${winner.toUpperCase()}!`);
   state.winCelebrationAnim = { winner, t0: performance.now() };
 }
@@ -199,15 +320,23 @@ function startP2PHeartbeat() {
   lastPeerSignalTs = performance.now();
   if (p2pPingTimer) clearInterval(p2pPingTimer);
   p2pPingTimer = setInterval(() => {
+    if (state.mode !== "p2p") {
+      clearInterval(p2pPingTimer);
+      p2pPingTimer = null;
+      return;
+    }
     const now = performance.now();
     lastPingSent = now;
     sendP2PPacket({ type: "PING", ts: lastPingSent });
-    // Section 9: 30-second WebRTC signal loss detection -> automatic W.O. victory for connected player!
-    if (state.mode === "p2p" && !state.winCelebrationAnim && (now - lastPeerSignalTs > 30000)) {
+    // 30-second WebRTC signal loss detection -> automatic W.O. victory for connected player!
+    if (!state.winCelebrationAnim && (now - lastPeerSignalTs > 30000)) {
       const woWinner = state.myRole || "p1";
       setLogText("🏆 VITÓRIA POR W.O.! Sinal WebRTC do adversário perdido por >30s!");
+      if (p2pPingTimer) { clearInterval(p2pPingTimer); p2pPingTimer = null; }
       state.winCelebrationAnim = { winner: woWinner, t0: now };
-      clearInterval(p2pPingTimer);
+      if (peerConnObj) { try { peerConnObj.close(); } catch(e){} peerConnObj = null; }
+      if (dataChannel) { try { dataChannel.close(); } catch(e){} dataChannel = null; }
+      if (broadcastChan) { try { broadcastChan.close(); } catch(e){} broadcastChan = null; }
     }
   }, 2000);
 }
@@ -406,12 +535,7 @@ let rankedActiveQueueSlot = null;
 const GIT_P2P_QUEUE_SLOTS = [
   "pdr-git-p2p-s0",
   "pdr-git-p2p-s1",
-  "pdr-git-p2p-s2",
-  "pdr-git-p2p-s3",
-  "pdr-git-p2p-s4",
-  "pdr-git-p2p-s5",
-  "pdr-git-p2p-s6",
-  "pdr-git-p2p-s7"
+  "pdr-git-p2p-s2"
 ];
 
 function cleanupRankedMatchmaker(preserveActiveConn) {
@@ -438,6 +562,7 @@ function cleanupRankedMatchmaker(preserveActiveConn) {
 
 window.addEventListener("beforeunload", () => {
   cleanupRankedMatchmaker(false);
+  cleanupActiveP2PSession("Página fechada");
 });
 
 function openRankedMatchmakerModal() {
@@ -527,7 +652,7 @@ function openRankedMatchmakerModal() {
     }
   } catch (e) {}
 
-  // 2. Global Internet Git P2P Swarm Probing (Google STUN Direct Mesh)
+  // 2. Global Internet Fast Rendezvous Swarm (Google STUN Direct Mesh)
   if (window.Peer) {
     try {
       const probePeer = new Peer(undefined, { config: PEER_ICE_CONFIG, debug: 0 });
@@ -535,10 +660,10 @@ function openRankedMatchmakerModal() {
 
       probePeer.on("open", () => {
         if (rankedMatchmakerMatched) return;
-        probeNextQueueSlot(0);
+        attemptFastQueueMatch(0);
       });
 
-      function probeNextQueueSlot(slotIdx) {
+      function attemptFastQueueMatch(slotIdx) {
         if (rankedMatchmakerMatched || !rankedMatchmakerProbePeer || rankedMatchmakerProbePeer.destroyed) return;
         if (slotIdx >= GIT_P2P_QUEUE_SLOTS.length) {
           claimFreeQueueSlot(0);
@@ -546,7 +671,7 @@ function openRankedMatchmakerModal() {
         }
 
         const slotId = GIT_P2P_QUEUE_SLOTS[slotIdx];
-        if (lLog) lLog.textContent = `🔍 Sondando Slot Git P2P [${slotIdx + 1}/${GIT_P2P_QUEUE_SLOTS.length}]...`;
+        if (lLog) lLog.textContent = `🔍 Conectando à fila da Liga [Slot ${slotIdx + 1}]...`;
 
         let conn = null;
         let slotHandled = false;
@@ -554,8 +679,12 @@ function openRankedMatchmakerModal() {
           if (slotHandled) return;
           slotHandled = true;
           try { if (conn) conn.close(); } catch(e) {}
-          probeNextQueueSlot(slotIdx + 1);
-        }, 1100);
+          if (slotIdx === 0) {
+            claimFreeQueueSlot(0);
+          } else {
+            attemptFastQueueMatch(slotIdx + 1);
+          }
+        }, 650);
 
         try {
           conn = probePeer.connect(slotId, { reliable: true });
@@ -602,11 +731,15 @@ function openRankedMatchmakerModal() {
             if (slotHandled) return;
             slotHandled = true;
             clearTimeout(timer);
-            probeNextQueueSlot(slotIdx + 1);
+            if (slotIdx === 0) {
+              claimFreeQueueSlot(0);
+            } else {
+              attemptFastQueueMatch(slotIdx + 1);
+            }
           });
         } catch (e) {
           clearTimeout(timer);
-          probeNextQueueSlot(slotIdx + 1);
+          claimFreeQueueSlot(0);
         }
       }
 
@@ -625,7 +758,7 @@ function openRankedMatchmakerModal() {
 
           hostPeer.on("open", () => {
             if (lLog && !rankedMatchmakerMatched) {
-              lLog.textContent = `🟢 Hospedando Slot Git P2P [${claimIdx + 1}/${GIT_P2P_QUEUE_SLOTS.length}] — Aguardando...`;
+              lLog.textContent = `🟢 Aguardando adversário online (Slot de Duelo Ativo)...`;
             }
           });
 
@@ -673,6 +806,9 @@ function openRankedMatchmakerModal() {
             }
           });
         } catch (e) {}
+      }
+    } catch (e) {}
+  }
       }
     } catch (e) {}
   }
