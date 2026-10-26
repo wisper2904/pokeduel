@@ -208,38 +208,39 @@
 </div>
 
 <div id="drawer-modal" class="show">
-  <!-- PLAY / DUEL MODE SELECTOR MODAL (Section 7.1: League Match, Room Match P2P, Quests, Training) -->
-  <div id="play-mode-modal" style="display:none; position:fixed; inset:0; z-index:275; background:rgba(3,7,18,0.86); align-items:center; justify-content:center; padding:14px;">
-    <div style="width:100%; max-width:340px; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #facc15; border-radius:12px; padding:14px; color:#f8fafc; box-shadow:0 10px 35px rgba(0,0,0,0.92);">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(250,204,21,0.35); padding-bottom:8px; margin-bottom:10px;">
-        <div>
-          <div style="font-size:14px; font-weight:900; color:#facc15;">⚔️ SELECIONAR MODO DE DUELO</div>
-          <div style="font-size:9.5px; color:#bae6fd;">Escolha o formato oficial para entrar em campo</div>
+  <!-- PLAY / DUEL MODE SELECTOR MODAL (Outros Modos: Room Match P2P, Gym Cup, Quests, Training) -->
+  <div id="play-mode-modal" style="display:none; position:fixed; inset:0; z-index:275; background:rgba(3,7,18,0.86); align-items:center; justify-content:center; padding:14px; backdrop-filter:blur(4px);">
+    <div style="width:100%; max-width:340px; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #38bdf8; border-radius:12px; padding:14px; color:#f8fafc; box-shadow:0 10px 35px rgba(0,0,0,0.92);">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(56,189,248,0.35); padding-bottom:8px; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:18px;">🎮</span>
+          <div>
+            <div style="font-size:14px; font-weight:900; color:#38bdf8;">OUTROS MODOS DE DUELO</div>
+            <div style="font-size:9.5px; color:#bae6fd;">Multiplayer por Convite, Ginásio, Quests & Treino</div>
+          </div>
         </div>
         <button onclick="closePlayModeSelectorModal()" style="background:#1e293b; border:1px solid #94a3b8; color:#fff; border-radius:5px; width:28px; height:28px; font-weight:900; cursor:pointer;">✕</button>
       </div>
       <div style="display:flex; flex-direction:column; gap:7px;">
-        <button class="btn gold" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;" onclick="closePlayModeSelectorModal(); startLeagueRankedMatch();">
-          <span>🏆 <strong>League Match (Ranqueado)</strong><br><span style="font-size:9px; font-weight:700; color:#451a03;">Partida Oficial · Vale Pontos ELO, Chaves e Time Boosters</span></span>
-          <span>▶</span>
+        <button class="btn" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(180deg,#0284c7 0%,#0369a1 100%); border:1.5px solid #38bdf8;" onclick="closePlayModeSelectorModal(); switchDrawerTab('p2p');">
+          <span>🌐 <strong>Room Match (Multiplayer por Convite P2P)</strong><br><span style="font-size:9px; font-weight:700; color:#e0f2fe;">Conecte 2 celulares por código de 4 dígitos ou jogue 2P local</span></span>
+          <span style="font-size:16px;">▶</span>
         </button>
         <button class="btn gold" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(180deg,#854d0e 0%,#713f12 50%,#451a03 100%); border:1.5px solid #facc15;" onclick="closePlayModeSelectorModal(); startGymCupMatch();">
           <span>🏆 <strong>Gym Cup (Copa de Ginásio Temática)</strong><br><span style="font-size:9px; font-weight:800; color:#fef08a;">🌿 Copa de Grama & Fogo · Grama (+1 MP) · Fogo (+20 DMG) · Vale Troféus!</span></span>
           <span style="font-size:16px;">🏆</span>
         </button>
-        <button class="btn" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;" onclick="closePlayModeSelectorModal(); switchDrawerTab('p2p');">
-          <span>🌐 <strong>Room Match (Multiplayer P2P 180°)</strong><br><span style="font-size:9px; font-weight:700; color:#e0f2fe;">Conecte 2 celulares por código de 4 dígitos (Mesa Oposta)</span></span>
-          <span>▶</span>
-        </button>
         <button class="btn purple" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;" onclick="closePlayModeSelectorModal(); openCarmonteQuestsModal();">
           <span>🗺️ <strong>Quests (Campanha Carmonte Island · ⚡15)</strong><br><span style="font-size:9px; font-weight:700; color:#f3e8ff;">Usa 15⚡ da Barra Verde · Hotéis Ulex, Rosa, Atlantis, Elysium</span></span>
-          <span>▶</span>
+          <span style="font-size:16px;">▶</span>
         </button>
         <button class="btn green" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;" onclick="closePlayModeSelectorModal(); startTrainingCenterMatch();">
           <span>🏋️ <strong>Training Center (Treino Tático Livre)</strong><br><span style="font-size:9px; font-weight:700; color:#dcfce7;">Treino sem risco: 0 Pontos ELO e Sem Recompensas/Caixas</span></span>
-          <span>▶</span>
+          <span style="font-size:16px;">▶</span>
         </button>
-
+        <div style="font-size:9.5px; color:#fde047; text-align:center; margin-top:2px; background:rgba(15,23,42,0.6); padding:4px 6px; border-radius:6px; border:1px dashed rgba(250,204,21,0.4);">
+          ⚡ Para jogar <strong>Ranqueada (League Match)</strong>, toque no botão principal <strong>Play</strong>!
+        </div>
       </div>
     </div>
   </div>
@@ -980,13 +981,13 @@
             ⓘ
           </button>
 
-          <!-- Center Wide Glossy Yellow `[ Play ]` Button (`1001314047.jpg` — Opens Play Mode Selector or Starts Match!) -->
-          <button onclick="openPlayModeSelectorModal()" style="width:138px; height:50px; border-radius:8px; background:linear-gradient(180deg,#fff04d 0%,#f5d000 52%,#d9a700 100%); border:2.5px solid #ffffff; outline:2px solid #ca8a04; color:#2b1900; font-size:20px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,255,255,0.8);">
+          <!-- Center Wide Glossy Yellow `[ Play ]` Button (Inicia Diretamente a Partida Ranqueada / League Match) -->
+          <button onclick="startLeagueRankedMatch()" title="Iniciar Partida Ranqueada (League Match)" style="width:138px; height:50px; border-radius:8px; background:linear-gradient(180deg,#fff04d 0%,#f5d000 52%,#d9a700 100%); border:2.5px solid #ffffff; outline:2px solid #ca8a04; color:#2b1900; font-size:20px; font-weight:900; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,255,255,0.8);">
             Play
           </button>
 
-          <!-- Right Cyan `[ ⠿ ]` (6-grid Room Match P2P) Button (`1001314047.jpg`) -->
-          <button onclick="switchDrawerTab('p2p')" title="Room Match P2P Online" style="width:48px; height:44px; border-radius:7px; background:linear-gradient(180deg,#22d3ee 0%,#0284c7 100%); border:2px solid #ffffff; color:#ffffff; cursor:pointer; position:relative; box-shadow:0 3px 8px rgba(0,0,0,0.55); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:6px;">
+          <!-- Right Cyan `[ ⠿ ]` Button (Abre Outros Modos: Multiplayer por Convite, Ginásio, Quests e Treino) -->
+          <button onclick="openPlayModeSelectorModal()" title="Outros Modos de Jogo (Multiplayer por Convite, Copa de Ginásio, Quests, Treino)" style="width:48px; height:44px; border-radius:7px; background:linear-gradient(180deg,#22d3ee 0%,#0284c7 100%); border:2px solid #ffffff; color:#ffffff; cursor:pointer; position:relative; box-shadow:0 3px 8px rgba(0,0,0,0.55); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:6px;">
             <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:2.5px;">
               <span style="width:6px; height:6px; border:1.5px solid #fff; border-radius:1.5px; display:block;"></span>
               <span style="width:6px; height:6px; border:1.5px solid #fff; border-radius:1.5px; display:block;"></span>
