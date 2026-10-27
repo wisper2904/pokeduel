@@ -2,69 +2,69 @@
 // POKÉMON FIGURES DATABASE (30 META FIGURES + 202 EXPANSION FIGURES)
 // ============================================================================
 const FIGURES_DB = [
-  { id:"charizard", spriteKey:"charizard", name:"Charizard", rarity:"EX", type:"Fire/Flying", mp:2, level:4, clv:3, c1:"#ea580c",
+  { id:"charizard", spriteKey:"charizard", name:"Charizard", rarity:"EX", type:"Fire/Flying", mp:2, level:4, clv:3, c1:"#ea580c", canPassThrough:true,
     wheel:[{name:"Fire Spin 50x",color:"white",dmg:50,multiHit:true,stars:0,size:44},{name:"Dragon Claw",color:"gold",dmg:80,stars:0,size:24},{name:"Roar",color:"purple",dmg:0,stars:2,size:16,effect:"push"},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12},{name:"Miss",color:"red",dmg:0,stars:0,size:4}] },
-  { id:"pikachu", spriteKey:"pikachu", name:"Pikachu", rarity:"EX", type:"Electric", mp:3, level:10, clv:2, c1:"#facc15",
+  { id:"pikachu", spriteKey:"pikachu", name:"Pikachu", rarity:"EX", type:"Electric", mp:3, level:10, clv:2, c1:"#facc15", canPassThrough:false,
     wheel:[{name:"Thunderbolt",color:"white",dmg:110,stars:0,size:38},{name:"Quick Attack",color:"gold",dmg:70,stars:0,size:30},{name:"Thunder Wave",color:"purple",dmg:0,stars:2,size:16,effect:"paralyze"},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12},{name:"Miss",color:"red",dmg:0,stars:0,size:4}] },
-  { id:"squirtle", spriteKey:"squirtle", name:"Squirtle", rarity:"UC", type:"Water", mp:3, level:9, clv:2, c1:"#38bdf8",
+  { id:"squirtle", spriteKey:"squirtle", name:"Squirtle", rarity:"UC", type:"Water", mp:3, level:9, clv:2, c1:"#38bdf8", canPassThrough:false,
     wheel:[{name:"Withdraw",color:"blue",dmg:0,stars:0,size:36},{name:"Rapid Spin 30x",color:"gold",dmg:30,multiHit:true,stars:0,size:36},{name:"Bubble",color:"white",dmg:60,stars:0,size:20},{name:"Miss",color:"red",dmg:0,stars:0,size:4}] },
-  { id:"bulbasaur", spriteKey:"bulbasaur", name:"Bulbasaur", rarity:"UC", type:"Grass/Poison", mp:3, level:4, clv:2, c1:"#22c55e",
+  { id:"bulbasaur", spriteKey:"bulbasaur", name:"Bulbasaur", rarity:"UC", type:"Grass/Poison", mp:3, level:4, clv:2, c1:"#22c55e", canPassThrough:false,
     wheel:[{name:"Sleep Powder",color:"purple",dmg:0,stars:2,size:36,effect:"sleep"},{name:"Vine Whip 40x",color:"white",dmg:40,multiHit:true,stars:0,size:40},{name:"Dodge",color:"blue",dmg:0,stars:0,size:20},{name:"Miss",color:"red",dmg:0,stars:0,size:4}] },
-  { id:"eevee", spriteKey:"eevee", name:"Eevee", rarity:"UC", type:"Normal", mp:3, level:9, clv:1, c1:"#d97706",
+  { id:"eevee", spriteKey:"eevee", name:"Eevee", rarity:"UC", type:"Normal", mp:3, level:9, clv:1, c1:"#d97706", canPassThrough:false,
     wheel:[{name:"Quick Attack",color:"gold",dmg:60,stars:0,size:40},{name:"Tackle",color:"white",dmg:70,stars:0,size:36},{name:"Focus Energy",color:"purple",dmg:0,stars:1,size:12,effect:"push"},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"lapras", spriteKey:"lapras", name:"Lapras", rarity:"EX", type:"Water/Ice", mp:2, level:10, clv:2, c1:"#0284c7",
+  { id:"lapras", spriteKey:"lapras", name:"Lapras", rarity:"EX", type:"Water/Ice", mp:2, level:10, clv:2, c1:"#0284c7", canPassThrough:false,
     wheel:[{name:"Hydro Pump",color:"white",dmg:110,stars:0,size:42},{name:"Sing",color:"purple",dmg:0,stars:2,size:30,effect:"sleep"},{name:"Ice Shard",color:"gold",dmg:70,stars:0,size:16},{name:"Protect",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"charmander", spriteKey:"charmander", name:"Charmander", rarity:"UC", type:"Fire", mp:3, level:8, clv:1, c1:"#f97316",
+  { id:"charmander", spriteKey:"charmander", name:"Charmander", rarity:"UC", type:"Fire", mp:3, level:8, clv:1, c1:"#f97316", canPassThrough:false,
     wheel:[{name:"Flamethrower",color:"white",dmg:70,stars:0,size:44},{name:"Scratch",color:"white",dmg:50,stars:0,size:28},{name:"Smokescreen",color:"purple",dmg:0,stars:1,size:16,effect:"panic"},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"venusaur", spriteKey:"venusaur", name:"Venusaur", rarity:"EX", type:"Grass/Poison", mp:1, level:10, clv:3, c1:"#15803d",
+  { id:"venusaur", spriteKey:"venusaur", name:"Venusaur", rarity:"EX", type:"Grass/Poison", mp:1, level:10, clv:3, c1:"#15803d", canPassThrough:false,
     wheel:[{name:"Solar Beam",color:"white",dmg:140,stars:0,size:46},{name:"Sleep Powder",color:"purple",dmg:0,stars:3,size:30,effect:"sleep"},{name:"Toxic",color:"purple",dmg:0,stars:2,size:12,effect:"badpoison"},{name:"Protect",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"kabutops", spriteKey:"kabutops", name:"Kabutops", rarity:"EX", type:"Rock/Water", mp:2, level:10, clv:2, c1:"#b45309",
+  { id:"kabutops", spriteKey:"kabutops", name:"Kabutops", rarity:"EX", type:"Rock/Water", mp:2, level:10, clv:2, c1:"#b45309", canPassThrough:false,
     wheel:[{name:"Fury Cutter 40x",color:"white",dmg:40,multiHit:true,stars:0,size:42},{name:"Aqua Jet",color:"gold",dmg:80,stars:0,size:32},{name:"Ancient Power",color:"purple",dmg:0,stars:2,size:12,effect:"push"},{name:"Protect",color:"blue",dmg:0,stars:0,size:14}] },
-  { id:"megastarmie", spriteKey:"megastarmie", name:"Mega Starmie", rarity:"UX", type:"Water/Psychic", mp:3, level:10, clv:3, c1:"#a855f7",
+  { id:"megastarmie", spriteKey:"megastarmie", name:"Mega Starmie", rarity:"UX", type:"Water/Psychic", mp:3, level:10, clv:3, c1:"#a855f7", canPassThrough:true,
     wheel:[{name:"Psychic Spin 50x",color:"gold",dmg:50,multiHit:true,stars:0,size:40},{name:"Confuse Ray",color:"purple",dmg:0,stars:3,size:30,effect:"panic"},{name:"Hydro Cannon",color:"white",dmg:130,stars:0,size:18},{name:"Recover",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"staryu", spriteKey:"starmie", name:"Staryu", rarity:"C", type:"Water", mp:3, level:5, clv:1, c1:"#b45309", c2:"#38bdf8", arch:"aquatic", dex:120, ability:"Natural Cure",
+  { id:"staryu", spriteKey:"starmie", name:"Staryu", rarity:"C", type:"Water", mp:3, level:5, clv:1, c1:"#b45309", c2:"#38bdf8", arch:"aquatic", dex:120, ability:"Natural Cure", canPassThrough:false,
     wheel:[{name:"Swift",color:"white",dmg:40,stars:0,size:40},{name:"Water Gun",color:"white",dmg:30,stars:0,size:32},{name:"Harden",color:"blue",dmg:0,stars:0,size:16},{name:"Miss",color:"red",dmg:0,stars:0,size:8}] },
-  { id:"megalopunny", spriteKey:"megalopunny", name:"Mega Lopunny", rarity:"UX", type:"Normal/Fighting", mp:3, level:10, clv:3, c1:"#eab308",
+  { id:"megalopunny", spriteKey:"megalopunny", name:"Mega Lopunny", rarity:"UX", type:"Normal/Fighting", mp:3, level:10, clv:3, c1:"#eab308", canPassThrough:true,
     wheel:[{name:"Triple Kick 50x",color:"white",dmg:50,multiHit:true,stars:0,size:46},{name:"Mach Punch",color:"gold",dmg:90,stars:0,size:28},{name:"Bounce",color:"blue",dmg:0,stars:0,size:26}] },
-  { id:"lopunny", spriteKey:"megalopunny", name:"Lopunny", rarity:"R", type:"Normal", mp:2, level:5, clv:1, c1:"#78350f", c2:"#fef08a", arch:"biped", dex:428, ability:"Cute Charm",
+  { id:"lopunny", spriteKey:"megalopunny", name:"Lopunny", rarity:"R", type:"Normal", mp:2, level:5, clv:1, c1:"#78350f", c2:"#fef08a", arch:"biped", dex:428, ability:"Cute Charm", canPassThrough:false,
     wheel:[{name:"High Jump Kick",color:"white",dmg:80,stars:0,size:36},{name:"Dizzy Punch",color:"purple",dmg:0,stars:2,size:28,effect:"panic"},{name:"Quick Attack",color:"gold",dmg:50,stars:0,size:20},{name:"Miss",color:"red",dmg:0,stars:0,size:12}] },
-  { id:"palkia_o", spriteKey:"palkia_o", name:"Palkia (Origin)", rarity:"UX", type:"Water/Dragon", mp:2, level:10, clv:4, c1:"#db2777",
+  { id:"palkia_o", spriteKey:"palkia_o", name:"Palkia (Origin)", rarity:"UX", type:"Water/Dragon", mp:2, level:10, clv:4, c1:"#db2777", canPassThrough:false,
     wheel:[{name:"Spacial Rend",color:"white",dmg:150,stars:0,size:48},{name:"Aqua Tail",color:"gold",dmg:90,stars:0,size:24},{name:"Dimensional Warp",color:"purple",dmg:0,stars:3,size:16,effect:"push"},{name:"Protect",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"dialga_o", spriteKey:"dialga_o", name:"Dialga (Origin)", rarity:"UX", type:"Steel/Dragon", mp:2, level:10, clv:4, c1:"#1d4ed8",
+  { id:"dialga_o", spriteKey:"dialga_o", name:"Dialga (Origin)", rarity:"UX", type:"Steel/Dragon", mp:2, level:10, clv:4, c1:"#1d4ed8", canPassThrough:false,
     wheel:[{name:"Roar of Time",color:"white",dmg:160,stars:0,size:46},{name:"Flash Cannon",color:"gold",dmg:90,stars:0,size:26},{name:"Time Distortion",color:"purple",dmg:0,stars:3,size:18,effect:"ko"},{name:"Iron Defense",color:"blue",dmg:0,stars:0,size:10}] },
-  { id:"gengar", spriteKey:"gengar", name:"Gengar", rarity:"EX", type:"Ghost/Poison", mp:3, level:10, clv:2, c1:"#6b21a8",
+  { id:"gengar", spriteKey:"gengar", name:"Gengar", rarity:"EX", type:"Ghost/Poison", mp:3, level:10, clv:2, c1:"#6b21a8", canPassThrough:true,
     wheel:[{name:"Shadow Ball",color:"white",dmg:110,stars:0,size:44},{name:"Toxic Night",color:"purple",dmg:0,stars:2,size:28,effect:"poison"},{name:"Sucker Punch",color:"gold",dmg:75,stars:0,size:16},{name:"Abyssal Grip",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"lucario", spriteKey:"lucario", name:"Lucario", rarity:"EX", type:"Fighting/Steel", mp:2, level:10, clv:3, c1:"#2563eb",
+  { id:"lucario", spriteKey:"lucario", name:"Lucario", rarity:"EX", type:"Fighting/Steel", mp:2, level:10, clv:3, c1:"#2563eb", canPassThrough:false,
     wheel:[{name:"Aura Sphere",color:"purple",dmg:0,stars:2,size:36,effect:"ko"},{name:"Metal Claw",color:"white",dmg:100,stars:0,size:34},{name:"Extreme Speed",color:"gold",dmg:75,stars:0,size:18},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"rayquaza", spriteKey:"rayquaza", name:"Rayquaza", rarity:"EX", type:"Dragon/Flying", mp:2, level:10, clv:4, c1:"#16a34a",
+  { id:"rayquaza", spriteKey:"rayquaza", name:"Rayquaza", rarity:"EX", type:"Dragon/Flying", mp:2, level:10, clv:4, c1:"#16a34a", canPassThrough:true,
     wheel:[{name:"Extreme Speed",color:"gold",dmg:140,stars:0,size:44},{name:"Fly",color:"purple",dmg:0,stars:3,size:26,effect:"push"},{name:"Break Energy",color:"white",dmg:90,stars:0,size:18},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"greninja", spriteKey:"greninja", name:"Greninja", rarity:"EX", type:"Water/Dark", mp:3, level:10, clv:5, c1:"#0284c7",
+  { id:"greninja", spriteKey:"greninja", name:"Greninja", rarity:"EX", type:"Water/Dark", mp:3, level:10, clv:5, c1:"#0284c7", canPassThrough:false,
     wheel:[{name:"Water Shuriken 20x",color:"gold",dmg:20,multiHit:true,stars:0,size:44},{name:"Hydro Pump",color:"white",dmg:110,stars:0,size:28},{name:"Substitute",color:"purple",dmg:0,stars:2,size:12,effect:"swap"},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12}] },
-  { id:"mew", spriteKey:"mew", name:"Mew", rarity:"EX", type:"Psychic", mp:3, level:5, clv:1, c1:"#f472b6", c2:"#ec4899", arch:"levitate", dex:151, ability:"Hyper Sonic Shield",
+  { id:"mew", spriteKey:"mew", name:"Mew", rarity:"EX", type:"Psychic", mp:3, level:5, clv:1, c1:"#f472b6", c2:"#ec4899", arch:"levitate", dex:151, ability:"Hyper Sonic Shield", canPassThrough:false,
     wheel:[{name:"Hyper Sonic",color:"gold",dmg:50,stars:0,size:36},{name:"Psychic",color:"white",dmg:50,stars:0,size:24},{name:"Vanish",color:"purple",dmg:0,stars:1,size:16,effect:"vanish"},{name:"Shuttle Flip",color:"blue",dmg:0,stars:0,size:16,effect:"dodge"},{name:"Miss",color:"red",dmg:0,stars:0,size:4}] },
-  { id:"magikarp", spriteKey:"magikarp", name:"Magikarp", rarity:"UC", type:"Water", mp:1, level:5, clv:1, c1:"#f97316", c2:"#fbbf24", arch:"swim", dex:129, ability:"Rapid Evolution",
+  { id:"magikarp", spriteKey:"magikarp", name:"Magikarp", rarity:"UC", type:"Water", mp:1, level:5, clv:1, c1:"#f97316", c2:"#fbbf24", arch:"swim", dex:129, ability:"Rapid Evolution", canPassThrough:false,
     wheel:[{name:"Splash",color:"red",dmg:0,stars:0,size:48},{name:"Flail",color:"white",dmg:10,stars:0,size:40},{name:"Miss",color:"red",dmg:0,stars:0,size:8}] },
-  { id:"gyarados", spriteKey:"gyarados", name:"Gyarados", rarity:"R", type:"Water/Flying", mp:2, level:5, clv:2, c1:"#0284c7", c2:"#38bdf8", arch:"serpent", dex:130,
+  { id:"gyarados", spriteKey:"gyarados", name:"Gyarados", rarity:"R", type:"Water/Flying", mp:2, level:5, clv:2, c1:"#0284c7", c2:"#38bdf8", arch:"serpent", dex:130, canPassThrough:false,
     wheel:[{name:"Hyper Beam",color:"white",dmg:110,stars:0,size:44},{name:"Dragon Dance",color:"purple",dmg:0,stars:2,size:24,effect:"wait"},{name:"Storm",color:"purple",dmg:0,stars:2,size:20,effect:"push"},{name:"Miss",color:"red",dmg:0,stars:0,size:8}] },
-  { id:"zapdos", spriteKey:"zapdos", name:"Zapdos", rarity:"EX", type:"Electric/Flying", mp:2, level:5, clv:3, c1:"#eab308", c2:"#fde047", arch:"avian", dex:145, ability:"Soar",
+  { id:"zapdos", spriteKey:"zapdos", name:"Zapdos", rarity:"EX", type:"Electric/Flying", mp:2, level:5, clv:3, c1:"#eab308", c2:"#fde047", arch:"avian", dex:145, ability:"Soar", canPassThrough:true,
     wheel:[{name:"Thunder Crash",color:"gold",dmg:100,stars:0,size:36},{name:"Steel Wing",color:"white",dmg:50,stars:0,size:28},{name:"Roost",color:"purple",dmg:0,stars:2,size:20,effect:"roost"},{name:"Miss",color:"red",dmg:0,stars:0,size:12}] },
-  { id:"articuno", spriteKey:"articuno", name:"Articuno", rarity:"EX", type:"Ice/Flying", mp:2, level:5, clv:2, c1:"#38bdf8", c2:"#bae6fd", arch:"avian", dex:144, ability:"Soar",
+  { id:"articuno", spriteKey:"articuno", name:"Articuno", rarity:"EX", type:"Ice/Flying", mp:2, level:5, clv:2, c1:"#38bdf8", c2:"#bae6fd", arch:"avian", dex:144, ability:"Soar", canPassThrough:true,
     wheel:[{name:"Ice Beam",color:"white",dmg:90,stars:0,size:36,effect:"freeze"},{name:"Cold Crush",color:"purple",dmg:0,stars:2,size:28,effect:"freeze"},{name:"Steel Wing",color:"white",dmg:40,stars:0,size:20},{name:"Miss",color:"red",dmg:0,stars:0,size:12}] },
-  { id:"moltres", spriteKey:"moltres", name:"Moltres", rarity:"EX", type:"Fire/Flying", mp:2, level:5, clv:2, c1:"#ef4444", c2:"#f97316", arch:"avian", dex:146, ability:"Soar",
+  { id:"moltres", spriteKey:"moltres", name:"Moltres", rarity:"EX", type:"Fire/Flying", mp:2, level:5, clv:2, c1:"#ef4444", c2:"#f97316", arch:"avian", dex:146, ability:"Soar", canPassThrough:true,
     wheel:[{name:"Fire Spin",color:"white",dmg:110,stars:0,size:40,effect:"burn"},{name:"Flame Charge",color:"purple",dmg:0,stars:2,size:24,effect:"burn"},{name:"Steel Wing",color:"white",dmg:40,stars:0,size:20},{name:"Miss",color:"red",dmg:0,stars:0,size:12}] },
-  { id:"blastoise", spriteKey:"blastoise", name:"Blastoise", rarity:"EX", type:"Water", mp:2, level:5, clv:2, c1:"#0284c7", c2:"#38bdf8", arch:"biped", dex:9,
+  { id:"blastoise", spriteKey:"blastoise", name:"Blastoise", rarity:"EX", type:"Water", mp:2, level:5, clv:2, c1:"#0284c7", c2:"#38bdf8", arch:"biped", dex:9, canPassThrough:false,
     wheel:[{name:"Hydro Pump",color:"white",dmg:100,stars:0,size:44},{name:"Mirror Coat",color:"purple",dmg:0,stars:2,size:28,effect:"mirror"},{name:"Dodge",color:"blue",dmg:0,stars:0,size:16},{name:"Miss",color:"red",dmg:0,stars:0,size:8}] },
-  { id:"deoxys_a", spriteKey:"deoxys_a", name:"Deoxys Attack", rarity:"EX", type:"Psychic", mp:1, level:5, clv:4, c1:"#ea580c", c2:"#f97316", arch:"biped", dex:386,
+  { id:"deoxys_a", spriteKey:"deoxys_a", name:"Deoxys Attack", rarity:"EX", type:"Psychic", mp:1, level:5, clv:4, c1:"#ea580c", c2:"#f97316", arch:"biped", dex:386, canPassThrough:false,
     wheel:[{name:"Psycho Boost",color:"white",dmg:130,stars:0,size:56},{name:"Dimensional Slip",color:"purple",dmg:0,stars:2,size:28,effect:"bench"},{name:"Miss",color:"red",dmg:0,stars:0,size:12}] },
-  { id:"snorlax", spriteKey:"snorlax", name:"Snorlax", rarity:"R", type:"Normal", mp:1, level:5, clv:1, c1:"#0f766e", c2:"#14b8a6", arch:"biped", dex:143, ability:"Big Eater",
+  { id:"snorlax", spriteKey:"snorlax", name:"Snorlax", rarity:"R", type:"Normal", mp:1, level:5, clv:1, c1:"#0f766e", c2:"#14b8a6", arch:"biped", dex:143, ability:"Big Eater", canPassThrough:false,
     wheel:[{name:"Body Slam",color:"white",dmg:100,stars:0,size:44},{name:"Rest",color:"blue",dmg:0,stars:0,size:28,effect:"sleep"},{name:"Big Yawn",color:"purple",dmg:0,stars:2,size:16,effect:"sleep"},{name:"Miss",color:"red",dmg:0,stars:0,size:8}] },
-  { id:"lunala", spriteKey:"lunala", name:"Lunala", rarity:"UX", type:"Psychic/Ghost", mp:2, level:5, clv:2, c1:"#6366f1", c2:"#818cf8", arch:"levitate", dex:792,
+  { id:"lunala", spriteKey:"lunala", name:"Lunala", rarity:"UX", type:"Psychic/Ghost", mp:2, level:5, clv:2, c1:"#6366f1", c2:"#818cf8", arch:"levitate", dex:792, canPassThrough:true,
     wheel:[{name:"Moongeist Beam",color:"white",dmg:100,stars:0,size:48,effect:"ko_pass"},{name:"Psychic",color:"white",dmg:60,stars:0,size:24},{name:"Moon's Grace",color:"purple",dmg:0,stars:3,size:16,effect:"move_swap"},{name:"Miss",color:"red",dmg:0,stars:0,size:8}] },
-  { id:"mega_gengar", spriteKey:"mega_gengar", name:"Mega Gengar", rarity:"UX", type:"Ghost/Poison", mp:3, level:5, clv:3, c1:"#7c3aed", c2:"#c084fc", arch:"levitate", dex:94, ability:"Shadow Tag",
+  { id:"mega_gengar", spriteKey:"mega_gengar", name:"Mega Gengar", rarity:"UX", type:"Ghost/Poison", mp:3, level:5, clv:3, c1:"#7c3aed", c2:"#c084fc", arch:"levitate", dex:94, ability:"Shadow Tag", canPassThrough:true,
     wheel:[{name:"Abyssal Hunter",color:"white",dmg:140,stars:0,size:48},{name:"Toxic Night",color:"purple",dmg:0,stars:3,size:28,effect:"poison"},{name:"Miss",color:"red",dmg:0,stars:0,size:20}] },
-  { id:"mega_charizard_x", spriteKey:"mega_charizard_x", name:"Mega Charizard X", rarity:"UX", type:"Fire/Dragon", mp:3, level:5, clv:3, c1:"#1e293b", c2:"#38bdf8", arch:"biped", dex:6,
+  { id:"mega_charizard_x", spriteKey:"mega_charizard_x", name:"Mega Charizard X", rarity:"UX", type:"Fire/Dragon", mp:3, level:5, clv:3, c1:"#1e293b", c2:"#38bdf8", arch:"biped", dex:6, canPassThrough:true,
     wheel:[{name:"Crimson Flame",color:"white",dmg:150,stars:0,size:52},{name:"Dragon Wing",color:"purple",dmg:0,stars:3,size:28,effect:"fly"},{name:"Miss",color:"red",dmg:0,stars:0,size:16}] },
-  { id:"mega_rayquaza", spriteKey:"mega_rayquaza", name:"Mega Rayquaza", rarity:"UX", type:"Dragon/Flying", mp:2, level:5, clv:3, c1:"#059669", c2:"#fbbf24", arch:"serpent", dex:384, ability:"Delta Stream",
+  { id:"mega_rayquaza", spriteKey:"mega_rayquaza", name:"Mega Rayquaza", rarity:"UX", type:"Dragon/Flying", mp:2, level:5, clv:3, c1:"#059669", c2:"#fbbf24", arch:"serpent", dex:384, ability:"Delta Stream", canPassThrough:true,
     wheel:[{name:"Dragon Ascent",color:"gold",dmg:150,stars:0,size:48},{name:"Extreme Speed",color:"gold",dmg:100,stars:0,size:36},{name:"Miss",color:"red",dmg:0,stars:0,size:12}] }
 ];
 
@@ -157,6 +157,51 @@ function findFigureByName(name) {
     });
   }
   return f || null;
+}
+
+function isFigurePassThroughOrJumper(f) {
+  if (!f) return false;
+  if (f.canPassThrough === true) return true;
+  if (f.megaTurns && f.megaTurns > 0) return true;
+  const id = String(f.id || f.baseId || "").toLowerCase().replace(/[\s\-_]/g, "");
+  const name = String(f.name || "").toLowerCase();
+  const jumpIds = new Set([
+    "gengar", "megagengar", "gastly", "haunter",
+    "megalopunny", "megastarmie",
+    "rayquaza", "megarayquaza",
+    "charizard", "megacharizardx", "megacharizardy",
+    "zapdos", "articuno", "moltres",
+    "latios", "latias", "megalatios", "megalatias",
+    "shuppet", "banette", "megabanette",
+    "phantump", "trevenant", "shedinja", "sableye", "megasableye",
+    "mismagius", "spiritomb", "froslass", "rotom",
+    "giratina", "giratinao", "marshadow", "lunala", "darkrai",
+    "hooh", "lugia", "aerodactyl", "megaaerodactyl",
+    "pidgeot", "megapidgeot", "butterfree",
+    "golbat", "crobat", "salamence", "megasalamence",
+    "dragonite", "shaymins", "shaymin_s", "celebi", "deoxysspeed", "deoxys_s", "mimikyu", "megavenusaur"
+  ]);
+  if (jumpIds.has(id)) return true;
+  if (name.startsWith("mega ") || name.startsWith("mega_")) return true;
+  return false;
+}
+if (typeof window !== "undefined") {
+  window.isFigurePassThroughOrJumper = isFigurePassThroughOrJumper;
+}
+
+function getFigureAbilityDescription(f) {
+  if (!f) return "Figura padrão Pokémon Duel.";
+  const fid = f.id || f.baseId || "";
+  let baseDesc = (typeof FIGURE_ABILITIES_DB !== "undefined" && (FIGURE_ABILITIES_DB[fid] || FIGURE_ABILITIES_DB[f.id] || FIGURE_ABILITIES_DB[f.baseId]))
+    || f.ability || "Habilidade padrão Pokémon Duel.";
+  const canJump = isFigurePassThroughOrJumper(f);
+  const jumpTag = canJump
+    ? `<span style="color:#4ade80; font-weight:800;">[🦘 Pula Figuras]</span>`
+    : `<span style="color:#94a3b8; font-weight:700;">[🚫 Não Pula Figuras]</span>`;
+  return `${jumpTag} ${baseDesc}`;
+}
+if (typeof window !== "undefined") {
+  window.getFigureAbilityDescription = getFigureAbilityDescription;
 }
 
 const FIGURE_ABILITIES_DB = {

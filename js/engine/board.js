@@ -785,20 +785,23 @@ function checkSurroundKOs() {
   let goalSurroundWinner = null;
   state.units.filter(u => u.location === "board").forEach(u => {
     const neighbors = ADJ[u.nodeId] || [];
-    if (neighbors.length > 0 && neighbors.every(nid => unitAtNode(nid) !== null)) {
-      const hasEnemy = neighbors.some(nid => {
-        const occ = unitAtNode(nid);
-        return occ && occ.owner !== u.owner;
-      });
-      if (hasEnemy) {
-        // Section 9: Goal Surround Win — surrounding an enemy standing on its own Goal Point wins immediately!
-        if (u.owner === "p2" && u.nodeId === 3) goalSurroundWinner = "p1";
-        if (u.owner === "p1" && u.nodeId === 10) goalSurroundWinner = "p2";
-        toKO.push(u);
-      }
+    // Strict Pokémon Duel Surround KO Rule:
+    // A figure is surrounded IF AND ONLY IF EVERY adjacent neighbor is occupied by an OPPONENT'S figure!
+    // If ANY neighbor is empty or occupied by a friendly piece (same owner), the figure is PROTECTED and NOT surrounded!
+    if (neighbors.length > 0 && neighbors.every(nid => {
+      const occ = unitAtNode(nid);
+      return occ !== null && occ.owner !== u.owner;
+    })) {
+      // Section 9: Goal Surround Win — surrounding an enemy standing on its own Goal Point wins immediately!
+      if (u.owner === "p2" && u.nodeId === 3) goalSurroundWinner = "p1";
+      if (u.owner === "p1" && u.nodeId === 10) goalSurroundWinner = "p2";
+      toKO.push(u);
     }
   });
-  toKO.forEach(u => sendToPC(u));
+  toKO.forEach(u => {
+    setLogText(`☠️ SURROUND KO! ${u.name} (${u.owner.toUpperCase()}) foi encurralado por Pokémon rivais!`);
+    sendToPC(u);
+  });
   if (goalSurroundWinner && !state.winCelebrationAnim) {
     setLogText("🏆 GOAL SURROUND WIN! Defensor do Goal foi cercado!");
     spawnPortalParticles(176, goalSurroundWinner === "p1" ? 185 : 343, "#facc15");
@@ -1069,8 +1072,8 @@ function computeReachableWithPaths(unit) {
   if (unit.condition === PokemonCondition.Sleep || unit.condition === PokemonCondition.Freeze || unit.waitTurns > 0) {
     return { nodes: [], paths: {} };
   }
-  const fig = FIGURES_DB[unit.baseIdx];
-  const canJumpOver = fig.id === "gengar" || fig.id === "megalopunny" || fig.id === "megastarmie" || fig.id === "rayquaza" || (unit.megaTurns && unit.megaTurns > 0) || state.abilityJumpActive;
+  const fig = (typeof FIGURES_DB !== "undefined" && FIGURES_DB[unit.baseIdx]) || unit;
+  const canJumpOver = (typeof isFigurePassThroughOrJumper === "function" ? (isFigurePassThroughOrJumper(fig) || isFigurePassThroughOrJumper(unit)) : Boolean(fig && fig.canPassThrough)) || (unit.megaTurns && unit.megaTurns > 0) || state.abilityJumpActive;
   const mp = getEffectiveUnitMp(unit);
   const visited = new Map(), paths = {}, queue = [];
 
@@ -2325,7 +2328,9 @@ function selectUnit(uid) {
     playSfx("tick");
     showCornerFigureCard(u);
     const ownerLbl = (u.owner === state.myRole) ? "Seu Pokémon" : "Rival";
-    setLogText(`Inspecionando ${u.name} (${ownerLbl}).`);
+    const canJ = typeof isFigurePassThroughOrJumper === "function" && isFigurePassThroughOrJumper(u);
+    const jInfo = canJ ? " · 🦘 Pula Figuras" : " · 🚫 Não Pula";
+    setLogText(`Inspecionando ${u.name} (${ownerLbl}${jInfo}).`);
     return;
   }
 
@@ -2349,7 +2354,9 @@ function selectUnit(uid) {
     } else if (u.owner !== state.turn) {
       playSfx("tick");
       showCornerFigureCard(u);
-      setLogText(`Inspecionando ${u.name} (Rival).`);
+      const canJ = typeof isFigurePassThroughOrJumper === "function" && isFigurePassThroughOrJumper(u);
+      const jInfo = canJ ? " · 🦘 Pula Figuras" : " · 🚫 Não Pula";
+      setLogText(`Inspecionando ${u.name} (Rival${jInfo}).`);
     }
     return;
   }
@@ -2358,7 +2365,9 @@ function selectUnit(uid) {
   if (u.owner !== state.turn) {
     playSfx("tick");
     showCornerFigureCard(u);
-    setLogText(`Inspecionando ${u.name} (Rival).`);
+    const canJ = typeof isFigurePassThroughOrJumper === "function" && isFigurePassThroughOrJumper(u);
+    const jInfo = canJ ? " · 🦘 Pula Figuras" : " · 🚫 Não Pula";
+    setLogText(`Inspecionando ${u.name} (Rival${jInfo}).`);
     state.selectedUnitId = null;
     state.reachableNodes = [];
     state.reachablePaths = {};
@@ -2387,7 +2396,9 @@ function selectUnit(uid) {
     });
   }
   const effMp = getEffectiveUnitMp(u);
-  setLogText(`${u.name} (MP ${effMp}) selected.`);
+  const canJ = typeof isFigurePassThroughOrJumper === "function" && isFigurePassThroughOrJumper(u);
+  const jInfo = canJ ? " · 🦘 Pula Figuras" : " · 🚫 Não Pula";
+  setLogText(`${u.name} (MP ${effMp}${jInfo}) selecionado.`);
   showCornerFigureCard(u);
 }
 
@@ -2582,12 +2593,12 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
   u.nodeId = targetNodeId;
 
   // Section 1.3: Check if landing on targetNodeId immediately Surround-KOs any adjacent enemy (or u itself)!
-  // Surrounded figures are knocked out BEFORE any combat wheel spin!
+  // Strict rule: A figure is surrounded IF AND ONLY IF EVERY adjacent neighbor is an enemy!
   const willBeSurrounded = (candUnit) => {
     const nbs = ADJ[candUnit.nodeId] || [];
-    return nbs.length > 0 && nbs.every(nid => unitAtNode(nid) !== null) && nbs.some(nid => {
+    return nbs.length > 0 && nbs.every(nid => {
       const o = unitAtNode(nid);
-      return o && o.owner !== candUnit.owner;
+      return o !== null && o.owner !== candUnit.owner;
     });
   };
   const selfSurrounded = willBeSurrounded(u);
@@ -2782,7 +2793,12 @@ function triggerPlayerAIMove() {
         const occ = unitAtNode(adjId);
         if (occ && occ.owner !== owner) {
           // Would moving to `nid` complete a Surround Kill on `occ`?
-          const otherNeighborsFilled = (ADJ[adjId] || []).every(nn => nn === nid || unitAtNode(nn) !== null);
+          // All neighbors of `occ` must be occupied by an enemy of `occ` (i.e. ally to `owner`)
+          const otherNeighborsFilled = (ADJ[adjId] || []).every(nn => {
+            if (nn === nid) return true;
+            const o = unitAtNode(nn);
+            return o !== null && o.owner === owner;
+          });
           if (otherNeighborsFilled) score += 1800;
           const odds = computeDuelDbOdds(u, occ);
           score += (odds.win - odds.loss) * 2.2;
@@ -2887,6 +2903,14 @@ function showCornerFigureCard(u) {
     mpEl.textContent = "MP " + effMp;
   }
 
+  const canJump = typeof isFigurePassThroughOrJumper === "function" && isFigurePassThroughOrJumper(u);
+  const jEl = document.getElementById("fcc-jump-badge");
+  if (jEl) {
+    jEl.style.background = canJump ? "#16a34a" : "#475569";
+    jEl.style.color = canJump ? "#ffffff" : "#cbd5e1";
+    jEl.textContent = canJump ? "🦘 PULA" : "🚫 NÃO PULA";
+  }
+
   // Draw mini disk canvas
   const cvEl = document.getElementById("fcc-canvas");
   const segs = typeof getActiveWheel === "function" ? getActiveWheel(u) : (u.wheel || []);
@@ -2924,9 +2948,12 @@ function showCornerFigureCard(u) {
   // Passive ability description
   const abEl = document.getElementById("fcc-ability-box");
   if (abEl) {
+    const jumpNotice = canJump
+      ? `<div style="margin-bottom:2px; font-weight:900; color:#4ade80; font-size:7.5px;">🦘 PULA FIGURAS: Pode saltar por cima de outros Pokémon gastando 2 MP por salto.</div>`
+      : `<div style="margin-bottom:2px; font-weight:800; color:#94a3b8; font-size:7.5px;">🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (bloqueado por peças adjacentes).</div>`;
     const abText = (typeof FIGURE_ABILITIES_DB !== "undefined" && (FIGURE_ABILITIES_DB[u.baseId] || FIGURE_ABILITIES_DB[u.id]))
       || u.ability || "Figura padrão Pokémon Duel.";
-    abEl.innerHTML = `<strong style="color:#facc15;">Passiva:</strong> ${abText}`;
+    abEl.innerHTML = `${jumpNotice}<strong style="color:#facc15;">Passiva:</strong> ${abText}`;
   }
 
   card.classList.add("visible");

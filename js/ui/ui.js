@@ -167,10 +167,21 @@ function openFigureDetailsModal(figIdx, liveUnit) {
   const clvDots = "●".repeat(Math.min(10, f.clv)) + "○".repeat(Math.max(0, 5 - f.clv));
   if (lvlEl) lvlEl.textContent = `Lv.${f.level}/10 · CLv+${f.clv} (${clvDots})`;
 
+  const canJump = typeof isFigurePassThroughOrJumper === "function" ? isFigurePassThroughOrJumper(liveUnit || f) : false;
+  const jEl = document.getElementById("fdet-jump");
+  if (jEl) {
+    jEl.style.background = canJump ? "#16a34a" : "#475569";
+    jEl.style.borderColor = canJump ? "#86efac" : "#64748b";
+    jEl.textContent = canJump ? "🦘 PULA FIGURAS" : "🚫 NÃO PULA";
+  }
+
   const abEl = document.getElementById("fdet-ability");
   const chain = EVO_CHAIN_NAMES[f.id] || ["Mega " + f.name];
   if (abEl) {
-    abEl.innerHTML = `${FIGURE_ABILITIES_DB[f.id] || "Standard PFG Figure Ability."}<br><strong style="color:#facc15;">Evolution / [UX] Line:</strong> ${f.name} ➔ ${chain.join(" ➔ ")}`;
+    const jumpNotice = canJump
+      ? `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(22,163,74,0.18); border:1px solid #22c55e; border-radius:4px; color:#86efac; font-size:10px; font-weight:700;">🦘 <strong>Pula Figuras:</strong> Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.</div>`
+      : `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(71,85,105,0.22); border:1px solid #64748b; border-radius:4px; color:#cbd5e1; font-size:10px;">🚫 <strong>Movimento Terrestre:</strong> Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).</div>`;
+    abEl.innerHTML = `${jumpNotice}${FIGURE_ABILITIES_DB[f.id] || "Standard PFG Figure Ability."}<br><strong style="color:#facc15;">Evolution / [UX] Line:</strong> ${f.name} ➔ ${chain.join(" ➔ ")}`;
   }
 
   // Workshop Points Info Header

@@ -417,26 +417,33 @@ triggerPlayerAIMove = function() {
     };
 
     // Check if `movingUnit` itself would be surrounded at `destNid`!
+    // Strict rule: surrounded if and only if EVERY neighbor is occupied by an enemy!
     const destNbs = ADJ[destNid] || [];
     const selfSurrounded = destNbs.length > 0 &&
-      destNbs.every(nb => getOccSim(nb) !== null) &&
-      destNbs.some(nb => { const o = getOccSim(nb); return o && o.owner !== owner; });
+      destNbs.every(nb => {
+        const o = getOccSim(nb);
+        return o !== null && o.owner !== owner;
+      });
     if (selfSurrounded) {
       return { selfSurrounded: true, enemyKOs: [], allyVulnerableCount: 0 };
     }
 
     // Check which enemy units get Surround-KO'd when `movingUnit` lands on `destNid`
+    // All neighbors of eu must be occupied by pieces friendly to `owner` (enemies to eu)
     const enemyKOs = [];
     enemyBoardUnits.forEach(eu => {
       const nbs = ADJ[eu.nodeId] || [];
-      if (nbs.length > 0 && nbs.every(nb => getOccSim(nb) !== null)) {
+      if (nbs.length > 0 && nbs.every(nb => {
+        const o = getOccSim(nb);
+        return o !== null && o.owner === owner;
+      })) {
         enemyKOs.push(eu);
       }
     });
 
     // Check 1-turn Lookahead Surround Vulnerability:
     // After `movingUnit` lands on `destNid`, does `movingUnit` (or any friendly board unit) have ONLY 1 open neighbor
-    // while at least 1 enemy is already adjacent AND the opponent can reach that last open neighbor next turn?
+    // while all other neighbors are ALREADY occupied by enemies AND the opponent can reach that last open neighbor next turn?
     let allyVulnerableCount = 0;
     const allMyBoard = state.units.filter(u => u.owner === owner && (u.location === "board" || u.uid === movingUnit.uid));
     allMyBoard.forEach(au => {
@@ -444,11 +451,12 @@ triggerPlayerAIMove = function() {
       if (typeof curNid !== "number") return;
       const nbs = ADJ[curNid] || [];
       const openNbs = nbs.filter(nb => getOccSim(nb) === null || enemyKOs.some(ko => ko.nodeId === nb));
-      const hasAdjEnemy = nbs.some(nb => {
+      const enemyNbs = nbs.filter(nb => {
         const o = getOccSim(nb);
         return o && o.owner !== owner && !enemyKOs.includes(o);
       });
-      if (hasAdjEnemy && openNbs.length === 1) {
+      // Can only be surrounded next turn if ALL other occupied neighbors are enemies!
+      if (openNbs.length === 1 && enemyNbs.length === (nbs.length - 1)) {
         const emptyEscapeNode = openNbs[0];
         if (canSideReachNodeNextTurn(enemyRole, emptyEscapeNode, null)) {
           allyVulnerableCount++;
@@ -476,8 +484,8 @@ triggerPlayerAIMove = function() {
     if (u.location === "board" && typeof u.nodeId === "number") {
       const curNbs = ADJ[u.nodeId] || [];
       const openCur = curNbs.filter(nb => unitAtNode(nb) === null);
-      const adjEn = curNbs.some(nb => { const o = unitAtNode(nb); return o && o.owner !== owner; });
-      if (adjEn && openCur.length === 1 && canSideReachNodeNextTurn(enemyRole, openCur[0], null)) {
+      const enCur = curNbs.filter(nb => { const o = unitAtNode(nb); return o && o.owner !== owner; });
+      if (openCur.length === 1 && enCur.length === (curNbs.length - 1) && canSideReachNodeNextTurn(enemyRole, openCur[0], null)) {
         currentlyInSurroundTrap = true;
       }
     }
@@ -987,7 +995,7 @@ function canEnemyReachNodeInSim(enemyRole, targetNodeId, getOccSimFn, includeHur
 
   for (const eu of enemyUnits) {
     const mp = Math.max(1, eu.mp - (eu.condition === PokemonCondition.Paralyze ? 1 : 0));
-    const canJump = Boolean(eu.canPassThrough || p1HasUnusedHurdle);
+    const canJump = Boolean((typeof isFigurePassThroughOrJumper === "function" ? isFigurePassThroughOrJumper(eu) : eu.canPassThrough) || p1HasUnusedHurdle);
     const visited = new Map();
     const queue = [];
 
@@ -1152,8 +1160,10 @@ triggerPlayerAIMove = function() {
     // 1) Does `movingUnit` Surround-KO itself at `destNid`?
     const destNbs = ADJ[destNid] || [];
     const selfSurrounded = destNbs.length > 0 &&
-      destNbs.every(nb => getOccAfterMove(nb) !== null) &&
-      destNbs.some(nb => { const o = getOccAfterMove(nb); return o && o.owner !== owner; });
+      destNbs.every(nb => {
+        const o = getOccAfterMove(nb);
+        return o !== null && o.owner !== owner;
+      });
     if (selfSurrounded) {
       return { selfSurrounded: true };
     }
@@ -1162,7 +1172,10 @@ triggerPlayerAIMove = function() {
     const enemyKOs = [];
     enemyBoardUnits.forEach(eu => {
       const nbs = ADJ[eu.nodeId] || [];
-      if (nbs.length > 0 && nbs.every(nb => getOccAfterMove(nb) !== null)) {
+      if (nbs.length > 0 && nbs.every(nb => {
+        const o = getOccAfterMove(nb);
+        return o !== null && o.owner === owner;
+      })) {
         enemyKOs.push(eu);
       }
     });
@@ -1186,10 +1199,10 @@ triggerPlayerAIMove = function() {
     if (goalOccupantAfter && goalOccupantAfter.owner === owner) {
       const gNbs = ADJ[myGoalId] || []; // [2, 4]
       const openGNbs = gNbs.filter(nb => getOccPostKO(nb) === null);
-      const hasEnemyOnGNb = gNbs.some(nb => { const o = getOccPostKO(nb); return o && o.owner !== owner; });
-      if (openGNbs.length === 1 && canEnemyReachNodeInSim(enemyRole, openGNbs[0], getOccPostKO, true)) {
+      const enemyGNbs = gNbs.filter(nb => { const o = getOccPostKO(nb); return o && o.owner !== owner; });
+      if (openGNbs.length === 1 && enemyGNbs.length === (gNbs.length - 1) && canEnemyReachNodeInSim(enemyRole, openGNbs[0], getOccPostKO, true)) {
         enemyCanSurroundMyGoalNextTurn = true;
-      } else if (openGNbs.length === 0 && hasEnemyOnGNb) {
+      } else if (openGNbs.length === 0 && enemyGNbs.length === gNbs.length) {
         enemyCanSurroundMyGoalNextTurn = true;
       }
     }
@@ -1202,13 +1215,13 @@ triggerPlayerAIMove = function() {
       if (typeof curNid !== "number") return;
       const nbs = ADJ[curNid] || [];
       const openNbs = nbs.filter(nb => getOccPostKO(nb) === null);
-      const hasAdjEnemy = nbs.some(nb => {
+      const enemyNbs = nbs.filter(nb => {
         const o = getOccPostKO(nb);
         return o && o.owner !== owner;
       });
-      if (openNbs.length === 1) {
+      if (openNbs.length === 1 && enemyNbs.length === (nbs.length - 1)) {
         if (canEnemyReachNodeInSim(enemyRole, openNbs[0], getOccPostKO, true)) {
-          allySurroundTrapsNextTurn += (hasAdjEnemy ? 2 : 1);
+          allySurroundTrapsNextTurn += 2;
         }
       }
     });
@@ -1219,11 +1232,11 @@ triggerPlayerAIMove = function() {
       if (enemyKOs.includes(eu)) return;
       const nbs = ADJ[eu.nodeId] || [];
       const openNbs = nbs.filter(nb => getOccPostKO(nb) === null);
-      const hasMyAdj = nbs.some(nb => {
+      const myNbs = nbs.filter(nb => {
         const o = getOccPostKO(nb);
         return o && o.owner === owner;
       });
-      if (hasMyAdj && openNbs.length === 1) {
+      if (openNbs.length === 1 && myNbs.length === (nbs.length - 1)) {
         enemyPinnedCount++;
       }
     });
@@ -1261,7 +1274,8 @@ triggerPlayerAIMove = function() {
     if (u.location === "board" && typeof u.nodeId === "number") {
       const curNbs = ADJ[u.nodeId] || [];
       const openCur = curNbs.filter(nb => unitAtNode(nb) === null);
-      if (openCur.length === 1 && canEnemyReachNodeInSim(enemyRole, openCur[0], (nid) => unitAtNode(nid), true)) {
+      const enCur = curNbs.filter(nb => { const o = unitAtNode(nb); return o && o.owner !== owner; });
+      if (openCur.length === 1 && enCur.length === (curNbs.length - 1) && canEnemyReachNodeInSim(enemyRole, openCur[0], (nid) => unitAtNode(nid), true)) {
         currentlyTrapped = true;
       }
     }
