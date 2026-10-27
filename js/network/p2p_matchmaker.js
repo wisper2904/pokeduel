@@ -691,12 +691,17 @@ function updateSalaoCountUI() {
 
 function sendSalaoPresencePing() {
   const p = window.trainerProfileData || {};
+  const sess = typeof getSavedCloudSession === "function" ? getSavedCloudSession() : null;
+  const pubProf = (sess && sess.username && typeof buildRegisteredAccountPublicProfile === "function")
+    ? buildRegisteredAccountPublicProfile(sess.username)
+    : null;
   publishSalaoPacket({
     type: "SALAO_PRESENCE",
     trainerId: p.trainerId || "guest",
-    nickname: p.nickname || "Treinador",
-    avatar: p.avatar || "pikachu",
+    nickname: (pubProf && pubProf.name) || p.nickname || "Treinador",
+    avatar: (pubProf && pubProf.avatar) || p.avatar || "pikachu",
     rating: p.rankRating || 1000,
+    publicProfile: pubProf,
     time: Date.now()
   });
 }
@@ -781,6 +786,9 @@ function handleIncomingSalaoMessage(msg) {
         avatar: msg.avatar,
         lastSeen: Date.now()
       });
+      if (msg.publicProfile && typeof recordRealPlayerEncounter === "function") {
+        try { recordRealPlayerEncounter(msg.publicProfile); } catch (e) {}
+      }
       updateSalaoCountUI();
     }
     return;

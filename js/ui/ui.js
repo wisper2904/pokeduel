@@ -4505,6 +4505,12 @@ savePlayerProfileSettings = function() {
   }
   saveIndividualProfile();
   syncIndividualProfileUI();
+  try {
+    const sess = typeof getSavedCloudSession === "function" ? getSavedCloudSession() : null;
+    if (sess && sess.username && typeof publishRegisteredAccountToGlobalCloud === "function") {
+      publishRegisteredAccountToGlobalCloud(buildRegisteredAccountPublicProfile(sess.username));
+    }
+  } catch (e) {}
   playSfx("portal");
 };
 
@@ -6696,17 +6702,30 @@ async function cloudAuthSaveNow(silent = false) {
     setCloudStatusMsg(`⏳ Criptografando e salvando progresso de @${creds.username} na nuvem...`, "#38bdf8");
   }
 
+  if (window.trainerProfileData && (!window.trainerProfileData.nickname || window.trainerProfileData.nickname === "Treinador" || window.trainerProfileData.nickname === "Serebii")) {
+    window.trainerProfileData.nickname = rawUser.trim().slice(0, 16);
+    saveIndividualProfile();
+    syncIndividualProfileUI();
+  }
+
   const payload = buildCrossSavePayload();
   const envelope = encryptCloudPayload(payload, creds.cipherKey, creds.verifier);
+  const pubProf = typeof buildRegisteredAccountPublicProfile === "function"
+    ? buildRegisteredAccountPublicProfile(creds.username)
+    : null;
 
   // 1. Save in local multi-account vault
   vault[creds.userHash] = {
     username: creds.username,
     verifier: creds.verifier,
     envelope,
+    publicProfile: pubProf,
     updatedAt: envelope.updatedAt
   };
   saveLocalAccountsVault(vault);
+  if (pubProf && typeof publishRegisteredAccountToGlobalCloud === "function") {
+    publishRegisteredAccountToGlobalCloud(pubProf);
+  }
 
   // 2. Save active session
   const timeStr = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -6803,6 +6822,14 @@ async function cloudAuthLoginAndLoad() {
   try {
     const decrypted = decryptCloudPayload(best.env, creds.cipherKey, creds.verifier);
     restoreStorageFromPayloadObject(decrypted);
+    window.trainerProfileData = loadIndividualProfile();
+    if (window.trainerProfileData && (!window.trainerProfileData.nickname || window.trainerProfileData.nickname === "Treinador" || window.trainerProfileData.nickname === "Serebii")) {
+      window.trainerProfileData.nickname = rawUser.trim().slice(0, 16);
+      saveIndividualProfile();
+    }
+    const pubProf = typeof buildRegisteredAccountPublicProfile === "function"
+      ? buildRegisteredAccountPublicProfile(creds.username)
+      : null;
     const timeStr = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     saveCloudSession({
       username: creds.username,
@@ -6815,9 +6842,13 @@ async function cloudAuthLoginAndLoad() {
       username: creds.username,
       verifier: creds.verifier,
       envelope: best.env,
+      publicProfile: pubProf,
       updatedAt: best.env.updatedAt || Date.now()
     };
     saveLocalAccountsVault(vault);
+    if (pubProf && typeof publishRegisteredAccountToGlobalCloud === "function") {
+      publishRegisteredAccountToGlobalCloud(pubProf);
+    }
     const summary = decrypted.summary || {};
     setCloudStatusMsg(
       `✅ Login efetuado em @${creds.username} (${best.src})! Restaurando ${summary.unlockedCount || ""} Pokémon e ${summary.elo || 1000} ELO...`,
@@ -7586,321 +7617,268 @@ window.closeMiniTutorialModal = closeMiniTutorialModal;
 window.filterTutorialCategory = filterTutorialCategory;
 
 // ============================================================================
-// GLOBAL LEADERBOARD (TOP 10) & TRAINER PROFILE INSPECTOR (100% REAL PLAYERS)
+// GLOBAL LEADERBOARD (TOP 10) & TRAINER PROFILE INSPECTOR (ONLY REGISTERED ACCOUNTS)
 // ============================================================================
-const COMMUNITY_REAL_PLAYERS_ROSTER = [
-  {
-    id: 'player_wisper',
-    name: 'wisper2904',
-    title: 'Desenvolvedor & Criador do PokeDuel',
-    rating: 2850,
-    highestRating: 2980,
-    tier: 'Master League',
-    avatar: 'mega_charizard_x',
-    trainerId: '001-290-400',
-    deck: [0, 28, 16, 14, 20, 1], // Charizard, Mega Charizard X, Greninja, Lucario, Zapdos, Pikachu
-    duelStats: {
-      totalDuels: 940,
-      wins: 712,
-      losses: 228,
-      winRate: '75.7%',
-      currentWinStreak: 8,
-      highestWinStreak: 24
-    },
-    trophies: ['PokeDuel Creator 🏆', 'Master League S1', 'P2P WebRTC Architect'],
-    badges: ['Dev Oficial', 'Mega Evolução', 'Full Dex 233'],
-    desc: 'Conta oficial do desenvolvedor do PokeDuel. Foco em controle de rotas com Greninja (3 MP) e finalizações fulminantes com Mega Charizard X.'
-  },
-  {
-    id: 'player_gabrielzinho',
-    name: 'Gabrielzinho',
-    title: 'Mestre Ranqueado de Carmonte',
-    rating: 2790,
-    highestRating: 2880,
-    tier: 'Master League',
-    avatar: 'greninja',
-    trainerId: '070-412-389',
-    deck: [16, 14, 28, 20, 25, 1], // Greninja, Lucario, Mega Charizard X, Zapdos, Snorlax, Pikachu
-    duelStats: {
-      totalDuels: 820,
-      wins: 624,
-      losses: 196,
-      winRate: '76.1%',
-      currentWinStreak: 9,
-      highestWinStreak: 21
-    },
-    trophies: ['Carmonte Champion Cup 🏆', 'Top Ranker Ouro', 'Invicto 15 Vitórias'],
-    badges: ['Duelista Veterano', 'Pressão no Goal', 'Mestre das Placas'],
-    desc: 'Duelista veterano de Carmonte Island. Especialista em avanços táticos pelas pontas, interceptações de corredores e bloqueio de Goal.'
-  },
-  {
-    id: 'player_lucas',
-    name: 'Lucas_Duelist',
-    title: 'Estrategista Tático Carmonte',
-    rating: 2680,
-    highestRating: 2750,
-    tier: 'Master League',
-    avatar: 'lucario',
-    trainerId: '104-582-991',
-    deck: [14, 20, 16, 23, 19, 0], // Lucario, Zapdos, Greninja, Blastoise, Gyarados, Charizard
-    duelStats: {
-      totalDuels: 730,
-      wins: 532,
-      losses: 198,
-      winRate: '72.9%',
-      currentWinStreak: 7,
-      highestWinStreak: 18
-    },
-    trophies: ['Mestre de Batalhas 🏆', 'Copa de Ginásio Top 4', 'Liga Master Carmonte'],
-    badges: ['Aura Sphere', 'Soar Wings', 'Defesa Sólida'],
-    desc: 'Focado em duelos de alta precisão com Lucario e Zapdos, mantendo pressão contínua nas rotas de flanco.'
-  },
-  {
-    id: 'player_matheus',
-    name: 'Matheus_Ace',
-    title: 'Campeão da Liga Aberta',
-    rating: 2590,
-    highestRating: 2680,
-    tier: 'Master League',
-    avatar: 'zapdos',
-    trainerId: '219-338-701',
-    deck: [20, 16, 1, 25, 23, 14], // Zapdos, Greninja, Pikachu, Snorlax, Blastoise, Lucario
-    duelStats: {
-      totalDuels: 660,
-      wins: 478,
-      losses: 182,
-      winRate: '72.4%',
-      currentWinStreak: 6,
-      highestWinStreak: 16
-    },
-    trophies: ['Troféu Asas Douradas 🏆', 'Top 10 Mensal', 'Torneio Comunitário Ouro'],
-    badges: ['Thunder Crash', 'Corredor Rápido', 'P2P Veteran'],
-    desc: 'Velocidade e mobilidade com Zapdos Soar (3 MP), pulando por cima de figuras terrestres e travando pontos de entrada.'
-  },
-  {
-    id: 'player_vitor',
-    name: 'Vitor_BR',
-    title: 'Mestre dos Fantasmas',
-    rating: 2510,
-    highestRating: 2600,
-    tier: 'Master League',
-    avatar: 'mega_gengar',
-    trainerId: '334-119-042',
-    deck: [13, 27, 14, 16, 20, 0], // Gengar, Mega Gengar, Lucario, Greninja, Zapdos, Charizard
-    duelStats: {
-      totalDuels: 590,
-      wins: 420,
-      losses: 170,
-      winRate: '71.2%',
-      currentWinStreak: 5,
-      highestWinStreak: 15
-    },
-    trophies: ['Copa Carmonte Prata 🏆', 'Gengar Master Cup', 'Liga dos Campeões'],
-    badges: ['Pass-Through', 'Sombra Noturna', 'Finalizador'],
-    desc: 'Estratégia ofensiva com Mega Gengar atravessando as linhas de defesa inimigas para capturar o Goal de surpresa.'
-  },
-  {
-    id: 'player_kaiser',
-    name: 'Kaiser_Duel',
-    title: 'Comandante de Carmonte',
-    rating: 2440,
-    highestRating: 2530,
-    tier: 'Master League',
-    avatar: 'deoxys_a',
-    trainerId: '412-880-165',
-    deck: [24, 14, 20, 25, 16, 1], // Deoxys Attack, Lucario, Zapdos, Snorlax, Greninja, Pikachu
-    duelStats: {
-      totalDuels: 520,
-      wins: 368,
-      losses: 152,
-      winRate: '70.8%',
-      currentWinStreak: 6,
-      highestWinStreak: 14
-    },
-    trophies: ['Troféu Força Bruta 🏆', 'Torneio Ranqueado Carmonte'],
-    badges: ['Psycho Boost', 'Destruidor de Barreiras', 'Duelista Elite'],
-    desc: 'Dano maciço e quebra de barreiras com Deoxys Attack, forçando vitórias rápidas no meio de campo.'
-  },
-  {
-    id: 'player_felipe',
-    name: 'Felipe_Duelist',
-    title: 'Mestre dos Corredores 3MP',
-    rating: 2380,
-    highestRating: 2460,
-    tier: 'Champion League',
-    avatar: 'pikachu',
-    trainerId: '559-204-718',
-    deck: [1, 16, 20, 14, 25, 0], // Pikachu, Greninja, Zapdos, Lucario, Snorlax, Charizard
-    duelStats: {
-      totalDuels: 470,
-      wins: 330,
-      losses: 140,
-      winRate: '70.2%',
-      currentWinStreak: 4,
-      highestWinStreak: 13
-    },
-    trophies: ['Troféu Velocidade 🏆', 'Sprint Carmonte'],
-    badges: ['Volt Tackle', 'Goal Rusher', 'Top Runner'],
-    desc: 'Pressão ultra-rápida no Goal adversário nos primeiros turnos usando 3 corredores de alta mobilidade.'
-  },
-  {
-    id: 'player_rodrigo',
-    name: 'Rodrigo_99',
-    title: 'Guardião da Liga Carmonte',
-    rating: 2320,
-    highestRating: 2410,
-    tier: 'Champion League',
-    avatar: 'snorlax',
-    trainerId: '671-490-223',
-    deck: [25, 23, 14, 20, 16, 0], // Snorlax, Blastoise, Lucario, Zapdos, Greninja, Charizard
-    duelStats: {
-      totalDuels: 430,
-      wins: 298,
-      losses: 132,
-      winRate: '69.3%',
-      currentWinStreak: 5,
-      highestWinStreak: 12
-    },
-    trophies: ['Muralha de Ferro 🏆', 'Escudo Carmonte'],
-    badges: ['Goal Defender', 'Body Slam', 'Impenetrável'],
-    desc: 'Defesa impenetrável posicionada no Goal com Snorlax e Blastoise, punindo erros de avanço do oponente.'
-  },
-  {
-    id: 'player_thiago',
-    name: 'Thiago_Master',
-    title: 'Competidor Ranqueado',
-    rating: 2260,
-    highestRating: 2350,
-    tier: 'Champion League',
-    avatar: 'blastoise',
-    trainerId: '780-315-992',
-    deck: [23, 19, 14, 20, 16, 1], // Blastoise, Gyarados, Lucario, Zapdos, Greninja, Pikachu
-    duelStats: {
-      totalDuels: 390,
-      wins: 268,
-      losses: 122,
-      winRate: '68.7%',
-      currentWinStreak: 4,
-      highestWinStreak: 11
-    },
-    trophies: ['Torrente Carmonte 🏆', 'Membro Oficial da Liga'],
-    badges: ['Hydro Pump', 'Mirror Coat', 'Duelista Pro'],
-    desc: 'Linha de batalha aquática com Blastoise e suporte versátil, alternando entre defesa e ataques calculados.'
-  },
-  {
-    id: 'player_bruno',
-    name: 'Bruno_PKM',
-    title: 'Desafiante da Liga Carmonte',
-    rating: 2180,
-    highestRating: 2280,
-    tier: 'Champion League',
-    avatar: 'charizard',
-    trainerId: '891-620-447',
-    deck: [0, 14, 1, 20, 23, 25], // Charizard, Lucario, Pikachu, Zapdos, Blastoise, Snorlax
-    duelStats: {
-      totalDuels: 350,
-      wins: 240,
-      losses: 110,
-      winRate: '68.6%',
-      currentWinStreak: 3,
-      highestWinStreak: 10
-    },
-    trophies: ['Fogo & Garra 🏆', 'Liga Carmonte Bronze'],
-    badges: ['Fire Spin', 'Iniciação Tática', 'Competidor Ativo'],
-    desc: 'Combinação equilibrada entre poder ofensivo e presença de tabuleiro, sempre buscando duelos favoráveis.'
-  }
-];
+const REGISTERED_LEADERBOARD_STORAGE_KEY = 'pdr_registered_leaderboard_v650';
+const GLOBAL_RANK_NTFY_TOPIC = 'pokeduel_registered_rank_v650';
 
-const REAL_PLAYERS_STORAGE_KEY = 'pdr_real_players_leaderboard_v600';
+// Clean up any legacy fake/mock leaderboard storage
+try {
+  localStorage.removeItem('pdr_real_players_leaderboard_v600');
+} catch (e) {}
 
-function getStoredRealPlayers() {
+function getStoredRegisteredPlayers() {
   try {
-    const raw = localStorage.getItem(REAL_PLAYERS_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const raw = localStorage.getItem(REGISTERED_LEADERBOARD_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     return [];
   }
 }
 
-function recordRealPlayerEncounter(oppData) {
-  if (!oppData || oppData.isBot) return;
-  const oppNick = String(oppData.nickname || '').trim();
-  if (!oppNick || oppNick.startsWith('Bot ') || oppNick === 'Ash Ketchum' || oppNick === 'Cynthia' || oppNick === 'Red') return;
-
+function saveStoredRegisteredPlayers(list) {
   try {
-    const stored = getStoredRealPlayers();
-    const existingIdx = stored.findIndex(p => p.trainerId === oppData.trainerId || p.name.toLowerCase() === oppNick.toLowerCase());
-    const entry = {
-      id: 'real_' + (oppData.trainerId || oppNick.toLowerCase().replace(/\s+/g, '_')),
-      name: oppNick,
-      title: oppData.title || 'Duelista Online da Liga',
-      rating: Number(oppData.rankRating) || 1800,
-      highestRating: Math.max(Number(oppData.rankRating) || 1800, 2000),
-      tier: (oppData.leagueTier || getTierForRating(Number(oppData.rankRating) || 1800)) + ' League',
-      avatar: (oppData.avatar || 'pikachu').toLowerCase(),
-      trainerId: oppData.trainerId || ('P2P-' + Math.floor(1000 + Math.random() * 9000)),
-      deck: Array.isArray(oppData.deck) ? oppData.deck : [0, 1, 2, 3, 4, 5],
-      duelStats: oppData.duelStats || {
-        totalDuels: Math.floor(150 + Math.random() * 300),
-        wins: Math.floor(100 + Math.random() * 200),
-        losses: Math.floor(40 + Math.random() * 80),
-        winRate: '68.5%',
-        currentWinStreak: Math.floor(1 + Math.random() * 6),
-        highestWinStreak: Math.floor(7 + Math.random() * 12)
-      },
-      trophies: oppData.trophies || ['Desafiante Online 🌐', 'Liga Carmonte P2P'],
-      badges: oppData.badges || ['Jogador Real', 'Conexão P2P'],
-      desc: 'Jogador real conectado através do sistema Multiplayer P2P WebRTC da Liga Carmonte.'
-    };
-    if (existingIdx !== -1) {
-      stored[existingIdx] = Object.assign(stored[existingIdx], entry);
-    } else {
-      stored.push(entry);
-    }
-    localStorage.setItem(REAL_PLAYERS_STORAGE_KEY, JSON.stringify(stored));
+    localStorage.setItem(REGISTERED_LEADERBOARD_STORAGE_KEY, JSON.stringify(list));
   } catch (e) {}
 }
 
-window.recordRealPlayerEncounter = recordRealPlayerEncounter;
-
-function getGlobalLeaderboardData() {
+function buildRegisteredAccountPublicProfile(overrideUsername) {
+  const sess = typeof getSavedCloudSession === 'function' ? getSavedCloudSession() : null;
   const p = window.trainerProfileData || {};
-  const currentPts = p.rankRating || (typeof playerProgression !== 'undefined' && playerProgression.rating) || 1000;
-  const player = {
-    id: 'player_self',
-    isSelf: true,
-    name: p.nickname || (typeof playerProfileName !== 'undefined' ? playerProfileName : 'Treinador'),
-    title: p.titleBadge || 'Desafiante de Carmonte',
+  const uname = String(overrideUsername || (sess && sess.username) || '').trim();
+  const displayNick = (p.nickname && p.nickname !== 'Treinador' && p.nickname !== 'Serebii')
+    ? p.nickname
+    : (uname || p.nickname || 'Treinador');
+  const currentPts = Number(p.rankRating) || (typeof playerProgression !== 'undefined' && Number(playerProgression.rating)) || 1000;
+
+  let avatarKey = (p.mainDisplayFigure || 'pikachu').toLowerCase().replace(/\s+/g, '_');
+  if (typeof AUTHENTIC_FIG_SPRITES !== 'undefined' && !AUTHENTIC_FIG_SPRITES[avatarKey]) {
+    if (typeof state !== 'undefined' && Array.isArray(state.deckP1) && state.deckP1.length > 0 && typeof FIGURES_DB !== 'undefined') {
+      const f0 = FIGURES_DB[state.deckP1[0] % FIGURES_DB.length];
+      if (f0) avatarKey = String(f0.spriteKey || f0.id || 'pikachu').toLowerCase();
+    } else {
+      avatarKey = 'pikachu';
+    }
+  }
+
+  const wins = (p.duelStats && Number(p.duelStats.wins)) || (typeof playerProgression !== 'undefined' && Number(playerProgression.matchesWon)) || 0;
+  const losses = (p.duelStats && Number(p.duelStats.losses)) || (typeof playerProgression !== 'undefined' && Number(playerProgression.matchesLost)) || 0;
+  const totalDuels = (p.duelStats && Number(p.duelStats.totalDuels)) || (wins + losses);
+  const winRate = totalDuels > 0 ? ((wins / totalDuels) * 100).toFixed(1) + '%' : '0.0%';
+
+  return {
+    id: 'acct_' + (uname || displayNick).toLowerCase().replace(/\s+/g, '_'),
+    username: uname.toLowerCase(),
+    name: displayNick,
+    title: p.titleBadge || 'Treinador Registrado',
     rating: currentPts,
-    highestRating: Math.max(currentPts, p.highestRating || currentPts),
+    highestRating: Math.max(currentPts, Number(p.highestRating) || currentPts),
     tier: (p.leagueTier || getTierForRating(currentPts)) + ' League',
-    avatar: (p.mainDisplayFigure) ? p.mainDisplayFigure.toLowerCase() : 'pikachu',
+    avatar: avatarKey,
     trainerId: p.trainerId || '948-204-182',
-    deck: (state && state.deckP1 && state.deckP1.length === 6) ? [...state.deckP1] : [0, 1, 2, 3, 4, 5],
-    duelStats: p.duelStats || {
-      totalDuels: (typeof playerProgression !== 'undefined' && playerProgression.matchesPlayed) || 0,
-      wins: (typeof playerProgression !== 'undefined' && playerProgression.matchesWon) || 0,
-      losses: (typeof playerProgression !== 'undefined' && playerProgression.matchesLost) || 0,
-      winRate: (p.duelStats && p.duelStats.winRate) ? p.duelStats.winRate : '0.0%',
-      currentWinStreak: (p.duelStats && p.duelStats.currentWinStreak) ? p.duelStats.currentWinStreak : 0,
-      highestWinStreak: (p.duelStats && p.duelStats.highestWinStreak) ? p.duelStats.highestWinStreak : 0
+    deck: (typeof state !== 'undefined' && Array.isArray(state.deckP1) && state.deckP1.length === 6) ? [...state.deckP1] : [0, 1, 2, 3, 4, 5],
+    duelStats: {
+      totalDuels,
+      wins,
+      losses,
+      winRate,
+      currentWinStreak: (p.duelStats && Number(p.duelStats.currentWinStreak)) || 0,
+      highestWinStreak: (p.duelStats && Number(p.duelStats.highestWinStreak)) || 0
     },
-    trophies: (p.trophies && p.trophies.length) ? p.trophies : ['Treinador de Carmonte 🏆', 'Duelista Oficial'],
-    badges: (p.badges && p.badges.length) ? p.badges : ['Jogador Real', 'Estrategista de Tabuleiro'],
-    desc: 'Seu perfil oficial de Treinador em Carmonte Island. Vença partidas ranqueadas online contra outros jogadores para subir de posição no Ranking Mundial!'
+    trophies: (Array.isArray(p.trophies) && p.trophies.length) ? p.trophies : ['Conta Registrada 🏆'],
+    badges: (Array.isArray(p.badges) && p.badges.length) ? p.badges : ['Jogador Oficial'],
+    desc: uname
+      ? `Conta oficial cadastrada (@${uname.toLowerCase()}) na Liga Carmonte.`
+      : 'Perfil oficial de Treinador em Carmonte Island.',
+    isRegistered: true,
+    updatedAt: Date.now()
+  };
+}
+
+function upsertRegisteredPlayerEntry(entryData) {
+  if (!entryData || entryData.isBot) return;
+  const rawName = String(entryData.name || entryData.nickname || entryData.username || '').trim();
+  if (!rawName || rawName.startsWith('Bot ')) return;
+  const uname = String(entryData.username || rawName).trim().toLowerCase();
+  const ratingVal = Number(entryData.rating || entryData.rankRating) || 1000;
+  const wins = (entryData.duelStats && Number(entryData.duelStats.wins)) || 0;
+  const losses = (entryData.duelStats && Number(entryData.duelStats.losses)) || 0;
+  const totalDuels = (entryData.duelStats && Number(entryData.duelStats.totalDuels)) || (wins + losses);
+  const winRate = (entryData.duelStats && entryData.duelStats.winRate)
+    ? entryData.duelStats.winRate
+    : (totalDuels > 0 ? ((wins / totalDuels) * 100).toFixed(1) + '%' : '0.0%');
+
+  const normalized = {
+    id: 'acct_' + uname.replace(/\s+/g, '_'),
+    username: uname,
+    name: rawName,
+    title: entryData.title || entryData.titleBadge || 'Treinador Registrado',
+    rating: ratingVal,
+    highestRating: Math.max(ratingVal, Number(entryData.highestRating) || ratingVal),
+    tier: String(entryData.tier || entryData.leagueTier || getTierForRating(ratingVal)).includes('League')
+      ? String(entryData.tier || entryData.leagueTier)
+      : (entryData.leagueTier || getTierForRating(ratingVal)) + ' League',
+    avatar: String(entryData.avatar || 'pikachu').toLowerCase().replace(/\s+/g, '_'),
+    trainerId: entryData.trainerId || '---',
+    deck: (Array.isArray(entryData.deck) && entryData.deck.length === 6) ? entryData.deck : [0, 1, 2, 3, 4, 5],
+    duelStats: {
+      totalDuels,
+      wins,
+      losses,
+      winRate,
+      currentWinStreak: (entryData.duelStats && Number(entryData.duelStats.currentWinStreak)) || 0,
+      highestWinStreak: (entryData.duelStats && Number(entryData.duelStats.highestWinStreak)) || 0
+    },
+    trophies: (Array.isArray(entryData.trophies) && entryData.trophies.length) ? entryData.trophies : ['Conta Registrada 🏆'],
+    badges: (Array.isArray(entryData.badges) && entryData.badges.length) ? entryData.badges : ['Jogador Oficial'],
+    desc: entryData.desc || `Conta oficial cadastrada (@${uname}) na Liga Carmonte.`,
+    isRegistered: true,
+    updatedAt: Number(entryData.updatedAt) || Date.now()
   };
 
-  const storedRealPlayers = getStoredRealPlayers();
-  
-  // Merge base real players roster + dynamically stored real players (100% human players, zero bots!)
+  const stored = getStoredRegisteredPlayers();
+  const idx = stored.findIndex(item =>
+    (item.username && item.username === uname) ||
+    (item.name && item.name.toLowerCase() === rawName.toLowerCase()) ||
+    (item.trainerId && item.trainerId !== '---' && item.trainerId === normalized.trainerId)
+  );
+  if (idx !== -1) {
+    if ((normalized.updatedAt || 0) >= (stored[idx].updatedAt || 0)) {
+      stored[idx] = Object.assign({}, stored[idx], normalized);
+    }
+  } else {
+    stored.push(normalized);
+  }
+  saveStoredRegisteredPlayers(stored);
+}
+
+function recordRealPlayerEncounter(oppData) {
+  if (!oppData || oppData.isBot) return;
+  if (!oppData.isRegistered && !oppData.username && (!oppData.nickname || oppData.nickname === 'Treinador')) return;
+  upsertRegisteredPlayerEntry(oppData);
+}
+window.recordRealPlayerEncounter = recordRealPlayerEncounter;
+
+async function publishRegisteredAccountToGlobalCloud(profileObj) {
+  try {
+    const pub = profileObj || buildRegisteredAccountPublicProfile();
+    if (!pub || !pub.name) return;
+    upsertRegisteredPlayerEntry(pub);
+    await fetch(`https://ntfy.sh/${GLOBAL_RANK_NTFY_TOPIC}`, {
+      method: 'POST',
+      body: JSON.stringify({ type: 'REGISTERED_ACCOUNT_SYNC', profile: pub, ts: Date.now() })
+    }).catch(() => {});
+  } catch (e) {}
+}
+window.publishRegisteredAccountToGlobalCloud = publishRegisteredAccountToGlobalCloud;
+
+let _lastGlobalRankCloudFetch = 0;
+async function syncGlobalRegisteredAccountsFromCloud(force = false) {
+  const now = Date.now();
+  if (!force && now - _lastGlobalRankCloudFetch < 8000) return;
+  _lastGlobalRankCloudFetch = now;
+  try {
+    const resp = await fetch(`https://ntfy.sh/${GLOBAL_RANK_NTFY_TOPIC}/json?poll=1`);
+    if (!resp.ok) return;
+    const text = await resp.text();
+    const lines = text.trim().split('\n').filter(Boolean);
+    for (const line of lines) {
+      try {
+        const msg = JSON.parse(line);
+        if (msg && msg.event === 'message' && msg.message) {
+          const pkt = JSON.parse(msg.message);
+          if (pkt && pkt.type === 'REGISTERED_ACCOUNT_SYNC' && pkt.profile) {
+            upsertRegisteredPlayerEntry(pkt.profile);
+          }
+        }
+      } catch (e) {}
+    }
+    const modal = document.getElementById('global-ranking-modal');
+    if (modal && modal.style.display === 'flex') {
+      renderGlobalRankings();
+    }
+  } catch (e) {}
+}
+window.syncGlobalRegisteredAccountsFromCloud = syncGlobalRegisteredAccountsFromCloud;
+
+function getGlobalLeaderboardData() {
+  const sess = typeof getSavedCloudSession === 'function' ? getSavedCloudSession() : null;
+  const selfProf = buildRegisteredAccountPublicProfile(sess ? sess.username : '');
+  const player = Object.assign({}, selfProf, {
+    id: 'player_self',
+    isSelf: true
+  });
+
+  // Also ensure active logged-in account has its latest publicProfile saved in local vault
+  try {
+    const vault = typeof getLocalAccountsVault === 'function' ? getLocalAccountsVault() : {};
+    let vaultChanged = false;
+    if (sess && sess.userHash && vault[sess.userHash]) {
+      vault[sess.userHash].publicProfile = selfProf;
+      vaultChanged = true;
+    }
+    if (vaultChanged && typeof saveLocalAccountsVault === 'function') {
+      saveLocalAccountsVault(vault);
+    }
+  } catch (e) {}
+
   const realMap = new Map();
-  COMMUNITY_REAL_PLAYERS_ROSTER.forEach(t => realMap.set(t.name.toLowerCase(), { ...t }));
-  storedRealPlayers.forEach(t => realMap.set(t.name.toLowerCase(), { ...t }));
 
-  // Never duplicate player self if their nickname matches one of the leaderboard players
-  const playerCleanName = String(player.name || '').trim().toLowerCase();
-  realMap.delete(playerCleanName);
+  // 1. Include all registered accounts from the local multi-account vault (pdr_accounts_vault_v560)
+  try {
+    const vault = typeof getLocalAccountsVault === 'function' ? getLocalAccountsVault() : {};
+    Object.keys(vault).forEach(hash => {
+      const item = vault[hash];
+      if (!item || !item.username) return;
+      const uname = String(item.username).trim().toLowerCase();
+      if (item.publicProfile && item.publicProfile.name) {
+        realMap.set(uname, Object.assign({}, item.publicProfile, { id: 'acct_' + uname, username: uname }));
+      } else {
+        realMap.set(uname, {
+          id: 'acct_' + uname,
+          username: uname,
+          name: item.username,
+          title: 'Conta Cadastrada',
+          rating: 1000,
+          highestRating: 1000,
+          tier: 'Beginner League',
+          avatar: 'pikachu',
+          trainerId: '---',
+          deck: [0, 1, 2, 3, 4, 5],
+          duelStats: { totalDuels: 0, wins: 0, losses: 0, winRate: '0.0%', currentWinStreak: 0, highestWinStreak: 0 },
+          trophies: ['Conta Registrada 🏆'],
+          badges: ['Jogador Oficial'],
+          desc: `Conta oficial cadastrada (@${uname}) na Liga Carmonte.`,
+          isRegistered: true
+        });
+      }
+    });
+  } catch (e) {}
 
+  // 2. Merge all registered accounts synced from Cloud / Salão Global
+  const storedRegistered = getStoredRegisteredPlayers();
+  storedRegistered.forEach(t => {
+    if (!t || !t.name) return;
+    const key = String(t.username || t.name).trim().toLowerCase();
+    const existing = realMap.get(key);
+    if (!existing || (t.updatedAt || 0) >= (existing.updatedAt || 0) || existing.trainerId === '---') {
+      realMap.set(key, Object.assign({}, existing || {}, t, { id: 'acct_' + key }));
+    }
+  });
+
+  // 3. Deduplicate current player so they don't appear twice
+  const selfUname = String(player.username || '').trim().toLowerCase();
+  const selfName = String(player.name || '').trim().toLowerCase();
+  if (selfUname) realMap.delete(selfUname);
+  if (selfName) realMap.delete(selfName);
+  for (const [k, v] of realMap.entries()) {
+    if ((v.name && v.name.toLowerCase() === selfName) || (v.trainerId && v.trainerId !== '---' && v.trainerId === player.trainerId)) {
+      realMap.delete(k);
+    }
+  }
+
+  // Only include self in the list if logged in OR if no other accounts exist yet
   const all = [...realMap.values(), player];
   all.sort((a, b) => b.rating - a.rating);
 
@@ -7912,9 +7890,15 @@ function getGlobalLeaderboardData() {
 
   return { all, player, playerRank };
 }
+
 function openGlobalRankingsModal() {
   try { playSfx("select"); } catch (e) {}
+  const sess = typeof getSavedCloudSession === 'function' ? getSavedCloudSession() : null;
+  if (sess && sess.username) {
+    publishRegisteredAccountToGlobalCloud(buildRegisteredAccountPublicProfile(sess.username));
+  }
   renderGlobalRankings();
+  syncGlobalRegisteredAccountsFromCloud(true);
   const m = document.getElementById("global-ranking-modal");
   if (m) m.style.display = "flex";
 }
