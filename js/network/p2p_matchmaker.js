@@ -7,6 +7,25 @@
 let peerInstance = null, peerConnObj = null, peerConn = null, dataChannel = null, broadcastChan = null;
 let currentHostRoomCode = String(Math.floor(1000 + Math.random() * 9000));
 let p2pPingTimer = null, lastPingSent = 0;
+let activeP2PRoomId = null;
+let isSalaoMatchActive = false;
+let pendingSalaoSeed = null;
+let pendingSalaoRoomId = null;
+const seenP2PPacketIds = new Set();
+
+function getPlayerOwnDeckCopy() {
+  try {
+    if (typeof playerProgression !== "undefined" && playerProgression && Array.isArray(playerProgression.teams) && playerProgression.teams.length > 0) {
+      const idx = Math.max(0, Math.min(playerProgression.teams.length - 1, playerProgression.activeTeamIdx || 0));
+      const slots = playerProgression.teams[idx] && playerProgression.teams[idx].slots;
+      if (Array.isArray(slots) && slots.length === 6) return [...slots];
+    }
+  } catch (e) {}
+  if (typeof state !== "undefined" && Array.isArray(state.deckP1) && state.deckP1.length === 6) {
+    return [...state.deckP1];
+  }
+  return [1, 2, 3, 4, 6, 0];
+}
 
 const PEER_ICE_CONFIG = {
   iceServers: [
@@ -53,6 +72,20 @@ function appendTcpLog(line) {
 }
 
 function sendP2PPacket(payload) {
+  if (!payload || typeof payload !== "object") return;
+  if (!payload._pktId) {
+    payload._pktId = Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+  }
+  payload._fromPeer = getMyUniquePeerId();
+  if (activeP2PRoomId && !payload._roomId) {
+    payload._roomId = activeP2PRoomId;
+  }
+  seenP2PPacketIds.add(payload._pktId);
+  if (seenP2PPacketIds.size > 600) {
+    const first = seenP2PPacketIds.values().next().value;
+    seenP2PPacketIds.delete(first);
+  }
+
   const raw = JSON.stringify(payload);
   if (peerConnObj && peerConnObj.open) {
     try { peerConnObj.send(raw); } catch (e) {}
@@ -62,6 +95,16 @@ function sendP2PPacket(payload) {
   }
   if (broadcastChan) {
     try { broadcastChan.postMessage(raw); } catch (e) {}
+  }
+  if (activeP2PRoomId && typeof publishSalaoPacket === "function") {
+    try {
+      publishSalaoPacket({
+        type: "SALAO_P2P_RELAY",
+        roomId: activeP2PRoomId,
+        fromPeer: payload._fromPeer,
+        packet: payload
+      });
+    } catch (e) {}
   }
 }
 
@@ -125,6 +168,15 @@ function handleP2PPacket(raw) {
       try { msg = JSON.parse(raw); } catch (e) { return; }
     }
     if (!msg || typeof msg !== "object" || !msg.type) return;
+    if (msg._fromPeer && msg._fromPeer === getMyUniquePeerId()) return;
+    if (msg._pktId) {
+      if (seenP2PPacketIds.has(msg._pktId)) return;
+      seenP2PPacketIds.add(msg._pktId);
+      if (seenP2PPacketIds.size > 600) {
+        const first = seenP2PPacketIds.values().next().value;
+        seenP2PPacketIds.delete(first);
+      }
+    }
     lastPeerSignalTs = performance.now();
     if (msg.type === "P2P_FORFEIT") {
       const w = msg.winner || (state.myRole || "p1");
@@ -139,9 +191,20 @@ function handleP2PPacket(raw) {
       if (msg.profile && typeof recordRealPlayerEncounter === "function") {
         try { recordRealPlayerEncounter(msg.profile); } catch (e) {}
       }
+      if (isSalaoMatchActive) return;
       if (state.myRole === "p1") {
+        state.deckP1 = getPlayerOwnDeckCopy();
         if (Array.isArray(msg.deckP2) && msg.deckP2.length === 6) {
-          state.deckP2 = msg.deckP2;
+          state.deckP2 = [...msg.deckP2];
+        }
+        if (msg.profile) {
+          remoteOpponentProfile = {
+            nickname: msg.profile.nickname || msg.trainer || "Treinador P2",
+            rankRating: msg.profile.rankRating || 1000,
+            leagueTier: msg.profile.leagueTier || "Beginner",
+            trainerId: msg.profile.trainerId || "---",
+            isBot: false
+          };
         }
         const syncSeed = generateFreshSeed32();
         setSharedSeed(syncSeed);
@@ -153,13 +216,14 @@ function handleP2PPacket(raw) {
           deckP2: state.deckP2,
           profile: {
             nickname: hostProf.nickname || "Treinador P1",
-            rankRating: hostProf.rankRating || 1200,
-            leagueTier: hostProf.leagueTier || "Prata",
+            rankRating: hostProf.rankRating || 1000,
+            leagueTier: hostProf.leagueTier || "Beginner",
             trainerId: hostProf.trainerId || "100-200-300",
             deck: state.deckP1
           }
         });
         startP2PMatch("p1");
+        startP2PHeartbeat();
         updateP2PStatusUI("🟢 CONECTADO AO JOGADOR 2!", "Partida iniciada! Você é o Jogador 1 (Azul · Embaixo).", "ONLINE P1", "#4ade80");
       }
     } else if (msg.type === "P2P_START" || msg.type === "@enter") {
@@ -167,10 +231,21 @@ function handleP2PPacket(raw) {
       if (msg.profile && typeof recordRealPlayerEncounter === "function") {
         try { recordRealPlayerEncounter(msg.profile); } catch (e) {}
       }
+      if (isSalaoMatchActive) return;
+      if (msg.profile) {
+        remoteOpponentProfile = {
+          nickname: msg.profile.nickname || "Treinador P1",
+          rankRating: msg.profile.rankRating || 1000,
+          leagueTier: msg.profile.leagueTier || "Beginner",
+          trainerId: msg.profile.trainerId || "---",
+          isBot: false
+        };
+      }
       if (msg.seed) setSharedSeed(msg.seed);
-      if (Array.isArray(msg.deckP1) && msg.deckP1.length === 6) state.deckP1 = msg.deckP1;
-      if (Array.isArray(msg.deckP2) && msg.deckP2.length === 6) state.deckP2 = msg.deckP2;
+      if (Array.isArray(msg.deckP1) && msg.deckP1.length === 6) state.deckP1 = [...msg.deckP1];
+      if (Array.isArray(msg.deckP2) && msg.deckP2.length === 6) state.deckP2 = [...msg.deckP2];
       startP2PMatch("p2");
+      startP2PHeartbeat();
       updateP2PStatusUI("🟢 CONECTADO AO HOST (P1)!", "Partida iniciada! Visão de Mesa Oposta (180°): seu time P2 está EMBAIXO olhando P1 de frente!", "ONLINE P2", "#4ade80");
     } else if (msg.type === "P2P_MOVE" || msg.type === "DoMove") {
       if (msg.seed) setSharedSeed(msg.seed);
@@ -316,6 +391,10 @@ function cleanupActiveP2PSession(reason) {
   }
   state.isMatchActive = false;
   state.matchFinished = true;
+  isSalaoMatchActive = false;
+  activeP2PRoomId = null;
+  pendingSalaoSeed = null;
+  pendingSalaoRoomId = null;
   state.mode = "ai";
   state.gameMode = "ai";
   state.matchKind = "league";
@@ -325,6 +404,9 @@ function cleanupActiveP2PSession(reason) {
   state.winCelebrationAnim = null;
   state.pendingPlateAction = null;
   remoteOpponentProfile = null;
+  if (typeof syncProgressionToDeckState === "function") {
+    try { syncProgressionToDeckState(); } catch (e) {}
+  }
   updateP2PStatusUI("⚪ SALA FECHADA", "Nenhuma sala ativa. Crie ou entre em uma sala para jogar online.", "OFFLINE", "#94a3b8");
   if (reason) appendTcpLog(`[P2P] Sessão encerrada: ${reason}`);
 }
@@ -380,8 +462,12 @@ function createIntuitiveP2PRoom() {
     ? generateNewRoomCode()
     : document.getElementById("host-room-code-display").textContent.trim();
 
+  isSalaoMatchActive = false;
+  activeP2PRoomId = "room_" + code.toLowerCase();
   state.myRole = "p1";
   state.mode = "p2p";
+  state.deckP1 = getPlayerOwnDeckCopy();
+  connectToGlobalSalao();
   updateP2PStatusUI(
     `🟡 ABRINDO SALA [ ${code} ]...`,
     `Peça para o Celular 2 digitar ${code} em "Celular 2 (Entrar)" e tocar em Conectar!`,
@@ -437,8 +523,13 @@ function joinIntuitiveP2PRoom() {
     return;
   }
 
+  isSalaoMatchActive = false;
+  activeP2PRoomId = "room_" + code.toLowerCase();
   state.myRole = "p2";
   state.mode = "p2p";
+  const myDeck = getPlayerOwnDeckCopy();
+  const guestProf = window.trainerProfileData || {};
+  connectToGlobalSalao();
   updateP2PStatusUI(
     `🟡 CONECTANDO À SALA [ ${code} ]...`,
     `Localizando o Celular 1 e sincronizando tabuleiro...`,
@@ -446,13 +537,33 @@ function joinIntuitiveP2PRoom() {
     "#facc15"
   );
 
-  // 1. BroadcastChannel link (if testing across tabs/windows)
+  const joinPayload = {
+    type: "P2P_JOIN",
+    deckP2: myDeck,
+    trainer: guestProf.nickname || "Luca",
+    profile: {
+      nickname: guestProf.nickname || "Treinador P2",
+      rankRating: guestProf.rankRating || 1000,
+      leagueTier: guestProf.leagueTier || "Beginner",
+      trainerId: guestProf.trainerId || "200-300-400",
+      deck: myDeck
+    }
+  };
+
+  // 1. BroadcastChannel + Salão MQTT Relay instant link
   if ("BroadcastChannel" in window) {
     if (broadcastChan) broadcastChan.close();
     broadcastChan = new BroadcastChannel("monaco_p2p_" + code);
     broadcastChan.onmessage = e => handleP2PPacket(e.data);
-    sendP2PPacket({ type: "P2P_JOIN", deckP2: state.deckP1, trainer: "Luca" });
   }
+  sendP2PPacket(Object.assign({}, joinPayload));
+
+  // Retry once after 700ms in case MQTT WebSocket was still opening
+  setTimeout(() => {
+    if (state.mode === "p2p" && state.myRole === "p2" && !state.isMatchActive) {
+      sendP2PPacket(Object.assign({}, joinPayload));
+    }
+  }, 700);
 
   // 2. PeerJS Cloud connection to `pdr-duel-room-<code>`
   if (window.Peer) {
@@ -466,13 +577,7 @@ function joinIntuitiveP2PRoom() {
         attachPeerJSConn(c);
       });
       peerInstance.on("error", err => {
-        appendTcpLog(`[PeerJS Erro] ${err.type || err.message}`);
-        updateP2PStatusUI(
-          `❌ Não encontrou a Sala [ ${code} ]`,
-          `Verifique se o Celular 1 já tocou em "1. ABRIR SALA P2P" e se os dois estão com internet ativa.`,
-          `ERRO`,
-          "#f87171"
-        );
+        appendTcpLog(`[PeerJS Status] ${err.type || err.message}`);
       });
     } catch (e) {}
   }
@@ -484,19 +589,20 @@ function attachPeerJSConn(c) {
   c.on("open", () => {
     appendTcpLog(`[P2P] Canal WebRTC aberto (${state.myRole.toUpperCase()})!`);
     startP2PHeartbeat();
-    if (state.myRole === "p2") {
+    if (state.myRole === "p2" && !isSalaoMatchActive && !state.isMatchActive) {
       // Guest immediately announces join with their deck and profile!
       const guestProf = window.trainerProfileData || {};
+      const myDeck = getPlayerOwnDeckCopy();
       sendP2PPacket({
         type: "P2P_JOIN",
-        deckP2: state.deckP1,
+        deckP2: myDeck,
         trainer: guestProf.nickname || "Luca",
         profile: {
           nickname: guestProf.nickname || "Treinador P2",
-          rankRating: guestProf.rankRating || 1200,
-          leagueTier: guestProf.leagueTier || "Prata",
+          rankRating: guestProf.rankRating || 1000,
+          leagueTier: guestProf.leagueTier || "Beginner",
           trainerId: guestProf.trainerId || "200-300-400",
-          deck: state.deckP1
+          deck: myDeck
         }
       });
     }
@@ -699,12 +805,14 @@ function updateSalaoCountUI() {
 
 function sendSalaoPresencePing() {
   const p = window.trainerProfileData || {};
+  const myClientId = getMyUniquePeerId();
   const sess = typeof getSavedCloudSession === "function" ? getSavedCloudSession() : null;
   const pubProf = (sess && sess.username && typeof buildRegisteredAccountPublicProfile === "function")
     ? buildRegisteredAccountPublicProfile(sess.username)
     : null;
   publishSalaoPacket({
     type: "SALAO_PRESENCE",
+    clientId: myClientId,
     trainerId: p.trainerId || "guest",
     nickname: (pubProf && pubProf.name) || p.nickname || "Treinador",
     avatar: (pubProf && pubProf.avatar) || p.avatar || "pikachu",
@@ -783,12 +891,22 @@ function connectToGlobalSalao() {
 
 function handleIncomingSalaoMessage(msg) {
   if (!msg || typeof msg !== "object" || !msg.type) return;
+  const myClientId = getMyUniquePeerId();
   const p = window.trainerProfileData || { trainerId: "948-204-182", nickname: "Treinador", rankRating: 1000, leagueTier: "Beginner" };
 
+  // 0. Real-time P2P Packet Relay over Salão (guarantees 100% move/combat/plate delivery even across strict NAT/4G/5G)
+  if (msg.type === "SALAO_P2P_RELAY") {
+    if (msg.roomId && activeP2PRoomId && msg.roomId === activeP2PRoomId && msg.fromPeer !== myClientId && msg.packet) {
+      handleP2PPacket(msg.packet);
+    }
+    return;
+  }
+
   // 1. Presence Heartbeat
-  if (msg.type === "SALAO_PRESENCE" && msg.trainerId) {
-    if (msg.trainerId !== p.trainerId) {
-      salaoKnownTrainers.set(msg.trainerId, {
+  if (msg.type === "SALAO_PRESENCE" && (msg.clientId || msg.trainerId)) {
+    const peerKey = msg.clientId || msg.trainerId;
+    if (peerKey !== myClientId) {
+      salaoKnownTrainers.set(peerKey, {
         nickname: msg.nickname,
         rating: msg.rating,
         avatar: msg.avatar,
@@ -804,8 +922,9 @@ function handleIncomingSalaoMessage(msg) {
 
   // 2. Queue Search (Someone looking for a match)
   if (msg.type === "SALAO_QUEUE_PING") {
-    if (msg.fromTrainerId && msg.fromTrainerId !== p.trainerId) {
-      salaoKnownTrainers.set(msg.fromTrainerId, {
+    const oppClientId = msg.fromPeerId || msg.fromClientId || msg.fromTrainerId;
+    if (oppClientId && oppClientId !== myClientId) {
+      salaoKnownTrainers.set(oppClientId, {
         nickname: msg.nickname,
         rating: msg.rankRating,
         lastSeen: Date.now()
@@ -813,22 +932,28 @@ function handleIncomingSalaoMessage(msg) {
       updateSalaoCountUI();
 
       if (isSearchingRankedQueue && !rankedMatchmakerMatched) {
-        const myKey = String(p.trainerId || "") + String(salaoQueueSessionId || "");
-        const oppKey = String(msg.fromTrainerId || "") + String(msg.queueSession || "");
+        const myKey = String(salaoQueueSessionId || "") + "_" + String(myClientId);
+        const oppKey = String(msg.queueSession || "") + "_" + String(oppClientId);
 
-        // Deterministic role: smaller ID acts as Host (P1) and offers match
+        // Deterministic role: smaller key acts as Host (P1) and offers match with authoritative seed & room ID
         if (myKey < oppKey) {
-          const myPeerId = getMyUniquePeerId();
           ensureMyPeerInstance();
+          if (!pendingSalaoSeed) pendingSalaoSeed = generateFreshSeed32();
+          if (!pendingSalaoRoomId) pendingSalaoRoomId = "salao_" + String(salaoQueueSessionId || "h") + "_" + String(msg.queueSession || "g");
+          const myDeck = getPlayerOwnDeckCopy();
           publishSalaoPacket({
             type: "SALAO_MATCH_OFFER",
+            toClientId: oppClientId,
             toTrainerId: msg.fromTrainerId,
+            fromClientId: myClientId,
             fromTrainerId: p.trainerId,
-            hostPeerId: myPeerId,
+            matchRoomId: pendingSalaoRoomId,
+            seed: pendingSalaoSeed,
+            hostPeerId: myClientId,
             hostNickname: p.nickname || "Você",
             hostRating: p.rankRating || 1000,
             hostTier: p.leagueTier || "Liga Carmonte",
-            hostDeck: state.deckP1
+            hostDeck: myDeck
           });
         }
       }
@@ -837,21 +962,27 @@ function handleIncomingSalaoMessage(msg) {
   }
 
   // 3. Match Offer (Guest receives offer from Host)
-  if (msg.type === "SALAO_MATCH_OFFER" && msg.toTrainerId === p.trainerId) {
+  if (msg.type === "SALAO_MATCH_OFFER" && (msg.toClientId === myClientId || (!msg.toClientId && msg.toTrainerId === p.trainerId))) {
     if (isSearchingRankedQueue && !rankedMatchmakerMatched) {
       rankedMatchmakerMatched = true;
       isSearchingRankedQueue = false;
+      isSalaoMatchActive = true;
+      activeP2PRoomId = msg.matchRoomId || ("salao_" + Date.now().toString(36));
 
-      const myPeerId = getMyUniquePeerId();
+      const myDeck = getPlayerOwnDeckCopy();
       publishSalaoPacket({
         type: "SALAO_MATCH_ACCEPT",
+        toClientId: msg.fromClientId || msg.hostPeerId,
         toTrainerId: msg.fromTrainerId,
+        fromClientId: myClientId,
         fromTrainerId: p.trainerId,
-        guestPeerId: myPeerId,
+        matchRoomId: activeP2PRoomId,
+        seed: msg.seed,
+        guestPeerId: myClientId,
         guestNickname: p.nickname || "Você",
         guestRating: p.rankRating || 1000,
         guestTier: p.leagueTier || "Liga Carmonte",
-        guestDeck: state.deckP1
+        guestDeck: myDeck
       });
 
       // Connect via PeerJS to Host
@@ -867,6 +998,10 @@ function handleIncomingSalaoMessage(msg) {
         rankRating: msg.hostRating,
         leagueTier: msg.hostTier,
         deck: msg.hostDeck,
+        hostDeck: msg.hostDeck,
+        guestDeck: myDeck,
+        seed: msg.seed,
+        matchRoomId: activeP2PRoomId,
         role: "p2"
       });
     }
@@ -874,16 +1009,24 @@ function handleIncomingSalaoMessage(msg) {
   }
 
   // 4. Match Accept (Host receives accept from Guest)
-  if (msg.type === "SALAO_MATCH_ACCEPT" && msg.toTrainerId === p.trainerId) {
+  if (msg.type === "SALAO_MATCH_ACCEPT" && (msg.toClientId === myClientId || (!msg.toClientId && msg.toTrainerId === p.trainerId))) {
     if (isSearchingRankedQueue && !rankedMatchmakerMatched) {
       rankedMatchmakerMatched = true;
       isSearchingRankedQueue = false;
+      isSalaoMatchActive = true;
+      activeP2PRoomId = msg.matchRoomId || pendingSalaoRoomId || ("salao_" + Date.now().toString(36));
+      const finalSeed = msg.seed || pendingSalaoSeed || generateFreshSeed32();
+      const myDeck = getPlayerOwnDeckCopy();
 
       onHumanMatchFound({
         nickname: msg.guestNickname,
         rankRating: msg.guestRating,
         leagueTier: msg.guestTier,
         deck: msg.guestDeck,
+        hostDeck: myDeck,
+        guestDeck: msg.guestDeck,
+        seed: finalSeed,
+        matchRoomId: activeP2PRoomId,
         role: "p1"
       });
     }
@@ -892,7 +1035,6 @@ function handleIncomingSalaoMessage(msg) {
 
   // 5. Queue Leave
   if (msg.type === "SALAO_QUEUE_LEAVE") {
-    // A player left the queue
     return;
   }
 }
@@ -907,7 +1049,7 @@ function cleanupRankedMatchmaker(preserveActiveConn) {
     clearInterval(salaoQueueTimer);
     salaoQueueTimer = null;
   }
-  if (rankedMatchmakerChannel) {
+  if (!preserveActiveConn && rankedMatchmakerChannel) {
     try { rankedMatchmakerChannel.close(); } catch (e) {}
     rankedMatchmakerChannel = null;
   }
@@ -924,6 +1066,8 @@ function openRankedMatchmakerModal() {
   rankedMatchmakerMatched = false;
   rankedMatchmakerElapsed = 0;
   isSearchingRankedQueue = true;
+  pendingSalaoSeed = null;
+  pendingSalaoRoomId = null;
   salaoQueueSessionId = Math.random().toString(36).slice(2, 8);
 
   const modal = document.getElementById("ranked-matchmaker-modal");
@@ -976,14 +1120,16 @@ function openRankedMatchmakerModal() {
   function sendQueuePing() {
     if (!isSearchingRankedQueue || rankedMatchmakerMatched) return;
     const myPeerId = getMyUniquePeerId();
+    const myDeck = getPlayerOwnDeckCopy();
     publishSalaoPacket({
       type: "SALAO_QUEUE_PING",
+      fromClientId: myPeerId,
       fromTrainerId: p.trainerId,
       fromPeerId: myPeerId,
       nickname: p.nickname,
       rankRating: p.rankRating || 1000,
       leagueTier: p.leagueTier || "Liga Carmonte",
-      deck: state.deckP1,
+      deck: myDeck,
       queueSession: salaoQueueSessionId,
       time: Date.now()
     });
@@ -1065,9 +1211,23 @@ function onHumanMatchFound(oppData) {
     leagueTier: oppData.leagueTier,
     isBot: false
   };
-  state.deckP2 = oppData.deck || state.deckP2;
-  state.mode = "p2p";
+  if (oppData.matchRoomId) activeP2PRoomId = oppData.matchRoomId;
+  if (oppData.seed) setSharedSeed(oppData.seed);
+
+  const myOwnDeck = getPlayerOwnDeckCopy();
   state.myRole = oppData.role || "p1";
+  if (state.myRole === "p1") {
+    state.deckP1 = Array.isArray(oppData.hostDeck) && oppData.hostDeck.length === 6 ? [...oppData.hostDeck] : myOwnDeck;
+    state.deckP2 = Array.isArray(oppData.guestDeck) && oppData.guestDeck.length === 6
+      ? [...oppData.guestDeck]
+      : (Array.isArray(oppData.deck) && oppData.deck.length === 6 ? [...oppData.deck] : state.deckP2);
+  } else {
+    state.deckP1 = Array.isArray(oppData.hostDeck) && oppData.hostDeck.length === 6
+      ? [...oppData.hostDeck]
+      : (Array.isArray(oppData.deck) && oppData.deck.length === 6 ? [...oppData.deck] : state.deckP1);
+    state.deckP2 = Array.isArray(oppData.guestDeck) && oppData.guestDeck.length === 6 ? [...oppData.guestDeck] : myOwnDeck;
+  }
+  state.mode = "p2p";
 
   setTimeout(() => {
     launchMatchFromMatchmaker(false);
@@ -1143,6 +1303,9 @@ function launchMatchFromMatchmaker(isBot) {
   state.clockMsP2 = 300000;
 
   if (isBot) {
+    isSalaoMatchActive = false;
+    activeP2PRoomId = null;
+    state.deckP1 = getPlayerOwnDeckCopy();
     state.mode = "ai";
     state.gameMode = "ai";
     state.p2pLatency = Math.floor(8 + Math.random() * 8); // Simulated ultra-low latency (8-15ms)
@@ -1152,6 +1315,7 @@ function launchMatchFromMatchmaker(isBot) {
     state.gameMode = "p2p";
     state.p2pLatency = 14;
     startP2PMatch(state.myRole || "p1");
+    startP2PHeartbeat();
   }
   setLogText(`🏆 PARTIDA DA LIGA INICIADA! Você vs ${remoteOpponentProfile ? remoteOpponentProfile.nickname : "Rival"} (${remoteOpponentProfile ? remoteOpponentProfile.rankRating : 1000} ELO)!`);
 }

@@ -6452,10 +6452,60 @@ function restoreStorageFromPayloadObject(parsed) {
     throw new Error("Formato de save inválido");
   }
   Object.keys(parsed.storage).forEach(k => {
-    if (!CLOUD_EXCLUDED_KEYS.has(k)) {
+    if (!CLOUD_EXCLUDED_KEYS.has(k) && k !== "pdr_active_season_v656") {
       try { localStorage.setItem(k, parsed.storage[k]); } catch (e) {}
     }
   });
+  try { localStorage.removeItem("pdr_active_season_v656"); } catch (e) {}
+}
+
+function scoreDecryptedSavePayload(dec) {
+  if (!dec || typeof dec.storage !== "object") return -1;
+  let unlockedCount = 6;
+  let boxesOpened = 0;
+  let matchesWon = 0;
+  let rankRating = 1000;
+  let highestRating = 1000;
+  let wins = 0;
+  let upgradesCount = 0;
+  try {
+    if (dec.storage["pdr_progression_v560"]) {
+      const prog = JSON.parse(dec.storage["pdr_progression_v560"]);
+      if (Array.isArray(prog.unlockedFigures)) unlockedCount = prog.unlockedFigures.length;
+      boxesOpened = Number(prog.totalBoxesOpened) || 0;
+      matchesWon = Number(prog.matchesWon) || 0;
+    }
+  } catch (e) {}
+  try {
+    if (dec.storage["pdr_trainer_profile_v560"]) {
+      const prof = JSON.parse(dec.storage["pdr_trainer_profile_v560"]);
+      rankRating = Number(prof.rankRating) || 1000;
+      highestRating = Number(prof.highestRating) || rankRating;
+      wins = (prof.duelStats && Number(prof.duelStats.wins)) || 0;
+    }
+  } catch (e) {}
+  try {
+    if (dec.storage["pokeduel_economy_v555"]) {
+      const eco = JSON.parse(dec.storage["pokeduel_economy_v555"]);
+      if (eco && eco.upgrades) {
+        upgradesCount = Object.values(eco.upgrades).filter(u => (u.level || 1) > 1 || (u.clv || 0) > 0).length;
+      }
+    }
+  } catch (e) {}
+
+  const hadV656ResetFlag = Boolean(dec.storage["pdr_active_season_v656"]);
+  let score =
+    (unlockedCount * 100000) +
+    (upgradesCount * 25000) +
+    (boxesOpened * 5000) +
+    (Math.max(matchesWon, wins) * 2000) +
+    (Math.max(0, highestRating - 1000) * 100) +
+    (Math.abs(rankRating - 1000) * 50);
+
+  if (hadV656ResetFlag && unlockedCount <= 6 && rankRating === 1000) {
+    score -= 500000;
+  }
+  return score;
 }
 
 function applyCrossSaveString(rawInput) {
@@ -6773,10 +6823,28 @@ async function fetchEnvelopeFromNtfyCloud(creds) {
   const completeBatches = Object.values(batches).filter(b => Object.keys(b.parts).length === b.total);
   if (!completeBatches.length) return { status: "not_found" };
   completeBatches.sort((a, b) => b.ts - a.ts);
-  const latest = completeBatches[0];
-  let fullJson = "";
-  for (let i = 0; i < latest.total; i++) fullJson += latest.parts[i];
-  return { status: "ok", envelope: JSON.parse(fullJson) };
+
+  // Evaluate all complete batches in ntfy history so that if the latest batch was an accidental
+  // v656 season reset (6 figures, 1000 ELO), we automatically recover the richest pre-reset save!
+  let bestEnv = null;
+  let bestScore = -Infinity;
+  for (const batch of completeBatches) {
+    try {
+      let fullJson = "";
+      for (let i = 0; i < batch.total; i++) fullJson += batch.parts[i];
+      const env = JSON.parse(fullJson);
+      if (!bestEnv) bestEnv = env;
+      const dec = decryptCloudPayload(env, creds.cipherKey, creds.verifier);
+      const sc = scoreDecryptedSavePayload(dec);
+      if (sc > bestScore) {
+        bestScore = sc;
+        bestEnv = env;
+      }
+    } catch (e) {}
+  }
+
+  if (!bestEnv) return { status: "not_found" };
+  return { status: "ok", envelope: bestEnv };
 }
 
 // Optional Permanent GitHub Repository / Gist Cloud Storage (works automatically if token is configured, and public raw read works WITHOUT token!)
@@ -6979,7 +7047,18 @@ async function cloudAuthLoginAndLoad() {
     return;
   }
 
-  candidates.sort((a, b) => (b.env.updatedAt || 0) - (a.env.updatedAt || 0));
+  candidates.forEach(c => {
+    try {
+      const dec = decryptCloudPayload(c.env, creds.cipherKey, creds.verifier);
+      c.score = scoreDecryptedSavePayload(dec);
+    } catch (e) {
+      c.score = -Infinity;
+    }
+  });
+  candidates.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return (b.env.updatedAt || 0) - (a.env.updatedAt || 0);
+  });
   const best = candidates[0];
 
   try {
@@ -6987,9 +7066,6 @@ async function cloudAuthLoginAndLoad() {
     restoreStorageFromPayloadObject(decrypted);
     window.trainerProfileData = loadIndividualProfile();
     playerProgression = loadProgressionState();
-    if (typeof checkAndApplyMonthlySeasonReset === "function") {
-      checkAndApplyMonthlySeasonReset(true);
-    }
     if (window.trainerProfileData && (!window.trainerProfileData.nickname || window.trainerProfileData.nickname === "Treinador" || window.trainerProfileData.nickname === "Serebii")) {
       window.trainerProfileData.nickname = rawUser.trim().slice(0, 16);
       saveIndividualProfile();
@@ -7106,10 +7182,12 @@ function refreshCloudAccountUI() {
 // Auto-sync hook: whenever localStorage changes on an active logged-in session, debounce cloud sync!
 let _cloudAutoSyncTimer = null;
 function scheduleAutoCloudSync() {
+  if (window._isRecoveringSaveV657) return;
   const sess = getSavedCloudSession();
   if (!sess || !sess.username || !sess.password || !sess.autoSync) return;
   if (_cloudAutoSyncTimer) clearTimeout(_cloudAutoSyncTimer);
   _cloudAutoSyncTimer = setTimeout(() => {
+    if (window._isRecoveringSaveV657) return;
     cloudAuthSaveNow(true).catch(() => {});
   }, 4500);
 }
@@ -7536,15 +7614,23 @@ async function handleWelcomeAuthSubmit() {
       if (localEntry && localEntry.envelope) candidates.push({ src: "Cofre Local", env: localEntry.envelope });
 
       if (candidates.length > 0) {
-        candidates.sort((a, b) => (b.env.updatedAt || 0) - (a.env.updatedAt || 0));
+        candidates.forEach(c => {
+          try {
+            const dec = decryptCloudPayload(c.env, creds.cipherKey, creds.verifier);
+            c.score = scoreDecryptedSavePayload(dec);
+          } catch (e) {
+            c.score = -Infinity;
+          }
+        });
+        candidates.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return (b.env.updatedAt || 0) - (a.env.updatedAt || 0);
+        });
         const best = candidates[0];
         const decrypted = decryptCloudPayload(best.env, creds.cipherKey, creds.verifier);
         restoreStorageFromPayloadObject(decrypted);
         window.trainerProfileData = loadIndividualProfile();
         playerProgression = loadProgressionState();
-        if (typeof checkAndApplyMonthlySeasonReset === "function") {
-          checkAndApplyMonthlySeasonReset(true);
-        }
 
         const timeStr = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
         saveCloudSession({
@@ -7789,138 +7875,34 @@ window.closeMiniTutorialModal = closeMiniTutorialModal;
 window.filterTutorialCategory = filterTutorialCategory;
 
 // ============================================================================
-// MONTHLY SEASON SYSTEM (1-MONTH CYCLE: RESET TO 1000 PTS & STARTER TEAM)
-// & GLOBAL LEADERBOARD (ONLY REGISTERED ACCOUNTS)
+// GLOBAL LEADERBOARD (ONLY REGISTERED ACCOUNTS) & PRE-v656 SAVE RECOVERY
 // ============================================================================
-const SEASON_STORAGE_KEY = 'pdr_active_season_v656';
-const MONTH_NAMES_PT = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-];
+const REGISTERED_LEADERBOARD_STORAGE_KEY = 'pdr_registered_leaderboard_v650';
+const GLOBAL_RANK_NTFY_TOPIC = 'pokeduel_registered_rank_v650';
 
-function getCurrentSeasonInfo() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const monthIdx = now.getMonth();
-  const monthNum = monthIdx + 1;
-  const seasonKey = `${year}-${String(monthNum).padStart(2, '0')}`;
-  const seasonNumber = Math.max(1, (year - 2026) * 12 + (monthNum - 10) + 1);
-  const nextMonthStart = new Date(year, monthIdx + 1, 1, 0, 0, 0, 0);
-  const msRemaining = Math.max(0, nextMonthStart.getTime() - now.getTime());
-  const daysRemaining = Math.floor(msRemaining / (1000 * 60 * 60 * 24));
-  const hoursRemaining = Math.floor((msRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const monthLabel = `${MONTH_NAMES_PT[monthIdx]}/${year}`;
-  return {
-    seasonKey,
-    seasonNumber,
-    monthLabel,
-    seasonTitle: `Temporada #${seasonNumber} (${monthLabel})`,
-    daysRemaining,
-    hoursRemaining,
-    countdownLabel: `${daysRemaining}d ${hoursRemaining}h`
-  };
-}
-window.getCurrentSeasonInfo = getCurrentSeasonInfo;
-
-function normalizeAccountProfileForCurrentSeason(entry) {
-  if (!entry) return entry;
-  const curSeason = getCurrentSeasonInfo();
-  if (entry.seasonKey !== curSeason.seasonKey) {
-    entry.rating = 1000;
-    entry.highestRating = 1000;
-    entry.tier = 'Beginner League';
-    entry.deck = [...STARTER_TEAM_INDICES];
-    entry.seasonKey = curSeason.seasonKey;
-  }
-  return entry;
-}
-
-function checkAndApplyMonthlySeasonReset(syncCloudAfterReset = false) {
-  const curSeason = getCurrentSeasonInfo();
-  let storedSeason = '';
-  try {
-    storedSeason = localStorage.getItem(SEASON_STORAGE_KEY) || '';
-  } catch (e) {}
-
-  const p = window.trainerProfileData || {};
-  const progSeason = (typeof playerProgression !== 'undefined' && playerProgression) ? (playerProgression.seasonKey || '') : '';
-
-  const needsReset = (storedSeason !== curSeason.seasonKey) ||
-                     (p.seasonKey !== curSeason.seasonKey) ||
-                     (progSeason !== curSeason.seasonKey);
-
-  if (!needsReset) return false;
-
-  // 1. Reset Points to 1000 for the new Monthly Season
-  if (window.trainerProfileData) {
-    window.trainerProfileData.rankRating = 1000;
-    window.trainerProfileData.highestRating = 1000;
-    window.trainerProfileData.leagueTier = 'Beginner';
-    window.trainerProfileData.seasonKey = curSeason.seasonKey;
-    saveIndividualProfile();
-  }
-
-  // 2. Reset all Pokémon back to the Starter Team ([1, 2, 3, 4, 6, 0])
-  playerProgression = createFreshProgressionState();
-  playerProgression.seasonKey = curSeason.seasonKey;
-  saveProgressionState();
-
-  if (typeof FIGURES_DB !== 'undefined' && Array.isArray(FIGURES_DB)) {
-    FIGURES_DB.forEach(f => {
-      f.level = 1;
-      f.clv = 0;
-      f.diskPointsSpent = 0;
-      if (f.baseWheelLv1) f.wheel = f.baseWheelLv1.map(w => ({ ...w }));
-      if (f.wheel) f.clvAlloc = f.wheel.map(() => 0);
-    });
-  }
-  if (typeof saveEconomyAndUpgrades === 'function') saveEconomyAndUpgrades();
-  if (typeof syncProgressionToDeckState === 'function') syncProgressionToDeckState();
-  if (typeof syncAllCurrencyLabels === 'function') syncAllCurrencyLabels();
-  if (typeof syncIndividualProfileUI === 'function') syncIndividualProfileUI();
-  if (typeof renderHubAndCollection === 'function') renderHubAndCollection();
-  if (typeof renderShopExchange === 'function') renderShopExchange();
-
-  // 3. Normalize any cached accounts in the local vault and leaderboard for the new season
-  try {
-    const vault = typeof getLocalAccountsVault === 'function' ? getLocalAccountsVault() : {};
-    let vChanged = false;
-    Object.keys(vault).forEach(h => {
-      if (vault[h] && vault[h].publicProfile && vault[h].publicProfile.seasonKey !== curSeason.seasonKey) {
-        normalizeAccountProfileForCurrentSeason(vault[h].publicProfile);
-        vChanged = true;
-      }
-    });
-    if (vChanged && typeof saveLocalAccountsVault === 'function') {
-      saveLocalAccountsVault(vault);
-    }
-  } catch (e) {}
-
-  try {
-    localStorage.setItem(SEASON_STORAGE_KEY, curSeason.seasonKey);
-  } catch (e) {}
-
-  if (syncCloudAfterReset && typeof cloudAuthSaveNow === 'function') {
-    setTimeout(() => { cloudAuthSaveNow(true).catch(() => {}); }, 200);
-  }
-  return true;
-}
-window.checkAndApplyMonthlySeasonReset = checkAndApplyMonthlySeasonReset;
-
-const REGISTERED_LEADERBOARD_STORAGE_KEY = 'pdr_registered_leaderboard_v656';
-const GLOBAL_RANK_NTFY_TOPIC = 'pokeduel_registered_rank_v656_' + getCurrentSeasonInfo().seasonKey.replace('-', '');
-
-// Clean up any legacy fake/mock leaderboard storage
+// Clean up any legacy fake/mock leaderboard storage & v656 season key
 try {
   localStorage.removeItem('pdr_real_players_leaderboard_v600');
-  localStorage.removeItem('pdr_registered_leaderboard_v650');
+  localStorage.removeItem('pdr_active_season_v656');
 } catch (e) {}
 
 function getStoredRegisteredPlayers() {
   try {
     const raw = localStorage.getItem(REGISTERED_LEADERBOARD_STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    const list = Array.isArray(parsed) ? parsed : [];
+    const raw656 = localStorage.getItem('pdr_registered_leaderboard_v656');
+    if (raw656) {
+      const parsed656 = JSON.parse(raw656);
+      if (Array.isArray(parsed656)) {
+        parsed656.forEach(item => {
+          if (item && item.name && !list.some(x => x.username === item.username || x.name === item.name)) {
+            list.push(item);
+          }
+        });
+      }
+    }
+    return list;
   } catch (e) {
     return [];
   }
@@ -7979,8 +7961,6 @@ function buildRegisteredAccountPublicProfile(overrideUsername) {
     ? computeEarnedAchievements(p).map(b => b.label)
     : [];
 
-  const curSeason = getCurrentSeasonInfo();
-
   return decorateCreatorLeaderboardEntry({
     id: 'acct_' + (uname || displayNick).toLowerCase().replace(/\s+/g, '_'),
     username: uname.toLowerCase(),
@@ -8003,9 +7983,8 @@ function buildRegisteredAccountPublicProfile(overrideUsername) {
     trophies: earnedBadges.length ? earnedBadges : ((Array.isArray(p.trophies) && p.trophies.length) ? p.trophies : ['Conta Registrada 🏆']),
     badges: (Array.isArray(p.badges) && p.badges.length) ? p.badges : ['Jogador Oficial'],
     desc: uname
-      ? `Conta oficial cadastrada (@${uname.toLowerCase()}) na Liga Carmonte · ${curSeason.seasonTitle}.`
-      : `Perfil oficial de Treinador em Carmonte Island · ${curSeason.seasonTitle}.`,
-    seasonKey: curSeason.seasonKey,
+      ? `Conta oficial cadastrada (@${uname.toLowerCase()}) na Liga Carmonte.`
+      : `Perfil oficial de Treinador em Carmonte Island.`,
     isRegistered: true,
     updatedAt: Date.now()
   });
@@ -8024,24 +8003,17 @@ function upsertRegisteredPlayerEntry(entryData) {
     ? entryData.duelStats.winRate
     : (totalDuels > 0 ? ((wins / totalDuels) * 100).toFixed(1) + '%' : '0.0%');
 
-  const curSeason = getCurrentSeasonInfo();
-  const isCurrentSeason = !entryData.seasonKey || entryData.seasonKey === curSeason.seasonKey;
-  const effectiveRating = isCurrentSeason ? ratingVal : 1000;
-  const effectiveDeck = (isCurrentSeason && Array.isArray(entryData.deck) && entryData.deck.length === 6)
-    ? entryData.deck
-    : [...STARTER_TEAM_INDICES];
-
   const normalized = decorateCreatorLeaderboardEntry({
     id: 'acct_' + uname.replace(/\s+/g, '_'),
     username: uname,
     name: rawName,
     title: entryData.title || entryData.titleBadge || 'Treinador Registrado',
-    rating: effectiveRating,
-    highestRating: Math.max(effectiveRating, isCurrentSeason ? (Number(entryData.highestRating) || effectiveRating) : 1000),
-    tier: getTierForRating(effectiveRating) + ' League',
+    rating: ratingVal,
+    highestRating: Math.max(ratingVal, Number(entryData.highestRating) || ratingVal),
+    tier: (entryData.tier && String(entryData.tier).includes('League')) ? entryData.tier : (getTierForRating(ratingVal) + ' League'),
     avatar: String(entryData.avatar || 'pikachu').toLowerCase().replace(/\s+/g, '_'),
     trainerId: entryData.trainerId || '---',
-    deck: effectiveDeck,
+    deck: (Array.isArray(entryData.deck) && entryData.deck.length === 6) ? entryData.deck : [...STARTER_TEAM_INDICES],
     duelStats: {
       totalDuels,
       wins,
@@ -8053,7 +8025,6 @@ function upsertRegisteredPlayerEntry(entryData) {
     trophies: (Array.isArray(entryData.trophies) && entryData.trophies.length) ? entryData.trophies : ['Conta Registrada 🏆'],
     badges: (Array.isArray(entryData.badges) && entryData.badges.length) ? entryData.badges : ['Jogador Oficial'],
     desc: entryData.desc || `Conta oficial cadastrada (@${uname}) na Liga Carmonte.`,
-    seasonKey: curSeason.seasonKey,
     isRegistered: true,
     updatedAt: Number(entryData.updatedAt) || Date.now()
   });
@@ -8065,8 +8036,17 @@ function upsertRegisteredPlayerEntry(entryData) {
     (item.trainerId && item.trainerId !== '---' && item.trainerId === normalized.trainerId)
   );
   if (idx !== -1) {
-    if ((normalized.updatedAt || 0) >= (stored[idx].updatedAt || 0)) {
-      stored[idx] = Object.assign({}, stored[idx], normalized);
+    // Keep highest rating & richest deck if the newer entry was an accidental v656 reset
+    const prev = stored[idx];
+    const isNormalizedV656Reset = Boolean(entryData.seasonKey) && normalized.rating === 1000 && (prev.rating > 1000 || prev.highestRating > 1000);
+    if (isNormalizedV656Reset) {
+      normalized.rating = prev.rating;
+      normalized.highestRating = Math.max(prev.highestRating || 1000, prev.rating || 1000);
+      normalized.tier = getTierForRating(normalized.rating) + ' League';
+      if (Array.isArray(prev.deck) && prev.deck.length === 6) normalized.deck = prev.deck;
+    }
+    if ((normalized.updatedAt || 0) >= (prev.updatedAt || 0)) {
+      stored[idx] = Object.assign({}, prev, normalized);
     }
   } else {
     stored.push(normalized);
@@ -8082,6 +8062,7 @@ function recordRealPlayerEncounter(oppData) {
 window.recordRealPlayerEncounter = recordRealPlayerEncounter;
 
 async function publishRegisteredAccountToGlobalCloud(profileObj) {
+  if (window._isRecoveringSaveV657) return;
   try {
     const pub = profileObj || buildRegisteredAccountPublicProfile();
     if (!pub || !pub.name) return;
@@ -8099,33 +8080,34 @@ async function syncGlobalRegisteredAccountsFromCloud(force = false) {
   const now = Date.now();
   if (!force && now - _lastGlobalRankCloudFetch < 8000) return;
   _lastGlobalRankCloudFetch = now;
-  try {
-    const resp = await fetch(`https://ntfy.sh/${GLOBAL_RANK_NTFY_TOPIC}/json?poll=1`);
-    if (!resp.ok) return;
-    const text = await resp.text();
-    const lines = text.trim().split('\n').filter(Boolean);
-    for (const line of lines) {
-      try {
-        const msg = JSON.parse(line);
-        if (msg && msg.event === 'message' && msg.message) {
-          const pkt = JSON.parse(msg.message);
-          if (pkt && pkt.type === 'REGISTERED_ACCOUNT_SYNC' && pkt.profile) {
-            upsertRegisteredPlayerEntry(pkt.profile);
+  const topics = [GLOBAL_RANK_NTFY_TOPIC, 'pokeduel_registered_rank_v656_202610'];
+  for (const topic of topics) {
+    try {
+      const resp = await fetch(`https://ntfy.sh/${topic}/json?poll=1`);
+      if (!resp.ok) continue;
+      const text = await resp.text();
+      const lines = text.trim().split('\n').filter(Boolean);
+      for (const line of lines) {
+        try {
+          const msg = JSON.parse(line);
+          if (msg && msg.event === 'message' && msg.message) {
+            const pkt = JSON.parse(msg.message);
+            if (pkt && pkt.type === 'REGISTERED_ACCOUNT_SYNC' && pkt.profile) {
+              upsertRegisteredPlayerEntry(pkt.profile);
+            }
           }
-        }
-      } catch (e) {}
-    }
-    const modal = document.getElementById('global-ranking-modal');
-    if (modal && modal.style.display === 'flex') {
-      renderGlobalRankings();
-    }
-  } catch (e) {}
+        } catch (e) {}
+      }
+    } catch (e) {}
+  }
+  const modal = document.getElementById('global-ranking-modal');
+  if (modal && modal.style.display === 'flex') {
+    renderGlobalRankings();
+  }
 }
 window.syncGlobalRegisteredAccountsFromCloud = syncGlobalRegisteredAccountsFromCloud;
 
 function getGlobalLeaderboardData() {
-  checkAndApplyMonthlySeasonReset(false);
-  const curSeason = getCurrentSeasonInfo();
   const sess = typeof getSavedCloudSession === 'function' ? getSavedCloudSession() : null;
   const selfProf = buildRegisteredAccountPublicProfile(sess ? sess.username : '');
   const player = Object.assign({}, selfProf, {
@@ -8137,7 +8119,7 @@ function getGlobalLeaderboardData() {
   try {
     const vault = typeof getLocalAccountsVault === 'function' ? getLocalAccountsVault() : {};
     let vaultChanged = false;
-    if (sess && sess.userHash && vault[sess.userHash]) {
+    if (sess && sess.userHash && vault[sess.userHash] && !window._isRecoveringSaveV657) {
       vault[sess.userHash].publicProfile = selfProf;
       vaultChanged = true;
     }
@@ -8156,8 +8138,7 @@ function getGlobalLeaderboardData() {
       if (!item || !item.username) return;
       const uname = String(item.username).trim().toLowerCase();
       if (item.publicProfile && item.publicProfile.name) {
-        const profCopy = normalizeAccountProfileForCurrentSeason(Object.assign({}, item.publicProfile));
-        realMap.set(uname, Object.assign(profCopy, { id: 'acct_' + uname, username: uname }));
+        realMap.set(uname, Object.assign({}, item.publicProfile, { id: 'acct_' + uname, username: uname }));
       } else {
         realMap.set(uname, {
           id: 'acct_' + uname,
@@ -8173,8 +8154,7 @@ function getGlobalLeaderboardData() {
           duelStats: { totalDuels: 0, wins: 0, losses: 0, winRate: '0.0%', currentWinStreak: 0, highestWinStreak: 0 },
           trophies: ['Conta Registrada 🏆'],
           badges: ['Jogador Oficial'],
-          desc: `Conta oficial cadastrada (@${uname}) na Liga Carmonte · ${curSeason.seasonTitle}.`,
-          seasonKey: curSeason.seasonKey,
+          desc: `Conta oficial cadastrada (@${uname}) na Liga Carmonte.`,
           isRegistered: true
         });
       }
@@ -8186,10 +8166,9 @@ function getGlobalLeaderboardData() {
   storedRegistered.forEach(t => {
     if (!t || !t.name) return;
     const key = String(t.username || t.name).trim().toLowerCase();
-    const normT = normalizeAccountProfileForCurrentSeason(Object.assign({}, t));
     const existing = realMap.get(key);
-    if (!existing || (normT.updatedAt || 0) >= (existing.updatedAt || 0) || existing.trainerId === '---') {
-      realMap.set(key, Object.assign({}, existing || {}, normT, { id: 'acct_' + key }));
+    if (!existing || (t.updatedAt || 0) >= (existing.updatedAt || 0) || existing.trainerId === '---') {
+      realMap.set(key, Object.assign({}, existing || {}, t, { id: 'acct_' + key }));
     }
   });
 
@@ -8239,12 +8218,6 @@ function renderGlobalRankings() {
   const container = document.getElementById("global-ranking-list");
   const playerBar = document.getElementById("global-ranking-player-bar");
   if (!container) return;
-
-  const curSeason = getCurrentSeasonInfo();
-  const sTitleEl = document.getElementById("season-banner-title");
-  const sTimerEl = document.getElementById("season-banner-timer");
-  if (sTitleEl) sTitleEl.textContent = `📅 ${curSeason.seasonTitle}`;
-  if (sTimerEl) sTimerEl.textContent = `⏳ Reset em ${curSeason.countdownLabel} (1000 pts + Time Inicial)`;
 
   const { all, player, playerRank } = getGlobalLeaderboardData();
   const top10 = all.slice(0, 10);
@@ -8402,10 +8375,107 @@ window.closeGlobalRankingsModal = closeGlobalRankingsModal;
 window.inspectTrainerProfile = inspectTrainerProfile;
 window.closeTrainerInspectModal = closeTrainerInspectModal;
 
-// Execute Monthly Season Check on Startup
-try {
-  checkAndApplyMonthlySeasonReset(true);
-} catch (e) {}
+// Automatic Recovery of Pre-v656 Save (Restores Pokémon, ELO, Gems & Upgrades from Cloud Batch History)
+async function autoRecoverPreV656Save() {
+  try {
+    if (localStorage.getItem("pdr_recovered_v657_done") === "true") return;
+    window._isRecoveringSaveV657 = true;
+
+    const sess = typeof getSavedCloudSession === "function" ? getSavedCloudSession() : null;
+    const curPayload = typeof buildCrossSavePayload === "function" ? buildCrossSavePayload() : null;
+    let curScore = scoreDecryptedSavePayload(curPayload);
+
+    let bestDecrypted = null;
+    let bestEnv = null;
+
+    if (sess && sess.username && sess.password) {
+      const creds = deriveCloudCredentials(sess.username, sess.password);
+      const [ghRes, ntfyRes] = await Promise.all([
+        fetchEnvelopeFromGitHubVault(creds).catch(() => ({ status: "not_found" })),
+        fetchEnvelopeFromNtfyCloud(creds).catch(() => ({ status: "not_found" }))
+      ]);
+      const vault = getLocalAccountsVault();
+      const localEntry = vault[creds.userHash];
+      const candidates = [];
+      if (ntfyRes.status === "ok" && ntfyRes.envelope) candidates.push(ntfyRes.envelope);
+      if (ghRes.status === "ok" && ghRes.envelope) candidates.push(ghRes.envelope);
+      if (localEntry && localEntry.envelope) candidates.push(localEntry.envelope);
+
+      for (const env of candidates) {
+        try {
+          const dec = decryptCloudPayload(env, creds.cipherKey, creds.verifier);
+          const sc = scoreDecryptedSavePayload(dec);
+          if (sc > curScore) {
+            curScore = sc;
+            bestDecrypted = dec;
+            bestEnv = env;
+          }
+        } catch (e) {}
+      }
+
+      if (bestDecrypted) {
+        restoreStorageFromPayloadObject(bestDecrypted);
+        window.trainerProfileData = loadIndividualProfile();
+        playerProgression = loadProgressionState();
+        if (typeof loadEconomyAndUpgrades === "function") loadEconomyAndUpgrades();
+        if (typeof syncProgressionToDeckState === "function") syncProgressionToDeckState();
+        if (typeof syncIndividualProfileUI === "function") syncIndividualProfileUI();
+        if (typeof syncAllCurrencyLabels === "function") syncAllCurrencyLabels();
+        if (typeof renderHubAndCollection === "function") renderHubAndCollection();
+        if (typeof renderShopExchange === "function") renderShopExchange();
+        if (typeof demoFullMatchState === "function" && (!state.turn || state.gameOver)) demoFullMatchState();
+      }
+    }
+
+    // Also check Global Leaderboard history (pokeduel_registered_rank_v650) for pre-reset rating/deck snapshot
+    await syncGlobalRegisteredAccountsFromCloud(true).catch(() => {});
+    const p = window.trainerProfileData || {};
+    const myUname = String((sess && sess.username) || p.nickname || "").trim().toLowerCase();
+    const storedList = getStoredRegisteredPlayers();
+    const mySnap = storedList.find(item =>
+      (myUname && ((item.username && item.username.toLowerCase() === myUname) || (item.name && item.name.toLowerCase() === myUname))) ||
+      (p.trainerId && item.trainerId === p.trainerId)
+    );
+    if (mySnap) {
+      let updatedLocal = false;
+      if ((Number(mySnap.rating) || 1000) > (Number(p.rankRating) || 1000)) {
+        p.rankRating = Number(mySnap.rating);
+        p.highestRating = Math.max(Number(p.highestRating) || 1000, Number(mySnap.highestRating) || p.rankRating);
+        p.leagueTier = getTierForRating(p.rankRating);
+        updatedLocal = true;
+      }
+      if (Array.isArray(mySnap.deck) && mySnap.deck.length === 6 && typeof playerProgression !== "undefined" && playerProgression) {
+        mySnap.deck.forEach(figIdx => {
+          if (!playerProgression.unlockedFigures.includes(figIdx)) {
+            playerProgression.unlockedFigures.push(figIdx);
+            updatedLocal = true;
+          }
+        });
+        if (playerProgression.unlockedFigures.length <= 6 || JSON.stringify(playerProgression.equippedDeck) === JSON.stringify(STARTER_TEAM_INDICES)) {
+          playerProgression.equippedDeck = [...mySnap.deck];
+          updatedLocal = true;
+        }
+      }
+      if (updatedLocal) {
+        saveIndividualProfile();
+        saveProgressionState();
+        if (typeof syncProgressionToDeckState === "function") syncProgressionToDeckState();
+        if (typeof syncIndividualProfileUI === "function") syncIndividualProfileUI();
+        if (typeof renderHubAndCollection === "function") renderHubAndCollection();
+      }
+    }
+
+    localStorage.setItem("pdr_recovered_v657_done", "true");
+    window._isRecoveringSaveV657 = false;
+
+    if (sess && sess.username && sess.password && (bestDecrypted || mySnap)) {
+      cloudAuthSaveNow(true).catch(() => {});
+    }
+  } catch (e) {
+    window._isRecoveringSaveV657 = false;
+  }
+}
+setTimeout(() => { autoRecoverPreV656Save(); }, 100);
 
 // ============================================================================
 // IN-APP USER FEEDBACK & BUG REPORTING (CONFIDENTIAL DISPATCH)

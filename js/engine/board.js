@@ -2543,6 +2543,7 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
       segs,
       seed: sharedPrngState,
       combat: null,
+      awaitingPostMoveChoice: (adjEnemiesAfter.length > 0 && !capturedGoal),
       nextTurn: nextTurnVal,
       nextTurnCounter: nextCounterVal
     });
@@ -2616,6 +2617,10 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
     }
 
     if (remotePacket) {
+      if (remotePacket.awaitingPostMoveChoice && liveAdjEnemies.length > 0) {
+        setLogText("⏳ Oponente posicionou peça e está decidindo o ataque...");
+        return;
+      }
       applyExplicitTurn(remotePacket.nextTurn, remotePacket.nextTurnCounter);
     } else {
       endTurn(false, nextTurnVal, nextCounterVal);

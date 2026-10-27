@@ -441,7 +441,14 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     setLogText("🛡️ Re-Spin bloqueado pela passiva Hyper Sonic / Temporal Lock em campo!");
     state.doubleChanceArmed = false;
   }
-  const canInteractiveDoubleChance = state.doubleChanceArmed && !antiRespinOnField && (atkUnit.owner === getBottomRole()) && (!forcedSpins || hasManualSpin);
+  if (state.mode === "p2p" && state.doubleChanceArmed && !antiRespinOnField && !(forcedSpins && forcedSpins.atkSpin)) {
+    const firstTry = evaluateCombat(atkUnit, defUnit, atkSpin, defSpin);
+    if (firstTry.winner !== "atk") {
+      atkSpin = spinWheelForUnit(atkUnit, true);
+    }
+    state.doubleChanceArmed = false;
+  }
+  const canInteractiveDoubleChance = (state.mode !== "p2p") && state.doubleChanceArmed && !antiRespinOnField && (atkUnit.owner === getBottomRole()) && (!forcedSpins || hasManualSpin);
   state.doubleChanceArmed = false;
   state.doubleChanceWaitingChoice = false;
   state.activePlate = null;
