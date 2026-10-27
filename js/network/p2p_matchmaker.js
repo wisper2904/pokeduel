@@ -11,6 +11,7 @@ let activeP2PRoomId = null;
 let isSalaoMatchActive = false;
 let pendingSalaoSeed = null;
 let pendingSalaoRoomId = null;
+let pendingSalaoFirstWinner = null;
 const seenP2PPacketIds = new Set();
 
 function getPlayerOwnDeckCopy() {
@@ -108,13 +109,17 @@ function sendP2PPacket(payload) {
   }
 }
 
-function startP2PMatch(role) {
+function startP2PMatch(role, firstWinner) {
   state.mode = "p2p";
   state.gameMode = "p2p";
   state.matchKind = "p2p";
   state.myRole = role; // "p1" (Host) or "p2" (Guest)
   state.viewSeatOverride = null;
-  state.turn = "p1";
+
+  const winner = (firstWinner === "p1" || firstWinner === "p2")
+    ? firstWinner
+    : ((state.sharedSeed && Math.abs(state.sharedSeed) % 2 === 0) ? "p1" : "p2");
+  state.turn = winner;
   state.turnCounter = 300;
   state.isMatchActive = true;
   state.matchFinished = false;
@@ -132,10 +137,20 @@ function startP2PMatch(role) {
   playSfx("portal");
   closeDrawer();
 
-  const isMine = (state.myRole === "p1");
-  const sideLbl = isMine ? "P1 Azul · Sua Mesa Embaixo" : "P2 Vermelho · Sua Mesa Embaixo (Visão Oposta 180°)";
-  setLogText(isMine ? `🟢 SUA VEZ! (${sideLbl}) Selecione uma figura no Banco.` : `⏳ Vez do Oponente P1... (${sideLbl}) Aguarde a jogada.`);
-  state.turnBannerAnim = { turn: "p1", t0: performance.now() };
+  // Dynamic 50/50 First-Turn Roulette animation (same as single player authentic matches!)
+  state.preMatchAnim = {
+    t0: performance.now(),
+    firstWinner: winner,
+    aiFired: false
+  };
+
+  const isMine = (state.myRole === winner);
+  const oppNick = (remoteOpponentProfile && remoteOpponentProfile.nickname) ? remoteOpponentProfile.nickname : "Rival";
+  if (isMine) {
+    setLogText(`🎲 Roleta de 1º Turno: VOCÊ começa o duelo (-1 MP)!`);
+  } else {
+    setLogText(`🎲 Roleta de 1º Turno: ${oppNick} começa o duelo (-1 MP)!`);
+  }
 }
 
 function startLocalPassAndPlayMatch() {
@@ -208,10 +223,12 @@ function handleP2PPacket(raw) {
         }
         const syncSeed = generateFreshSeed32();
         setSharedSeed(syncSeed);
+        const firstWinner = Math.random() < 0.5 ? "p1" : "p2";
         const hostProf = window.trainerProfileData || {};
         sendP2PPacket({
           type: "P2P_START",
           seed: syncSeed,
+          firstWinner: firstWinner,
           deckP1: state.deckP1,
           deckP2: state.deckP2,
           profile: {
@@ -222,7 +239,7 @@ function handleP2PPacket(raw) {
             deck: state.deckP1
           }
         });
-        startP2PMatch("p1");
+        startP2PMatch("p1", firstWinner);
         startP2PHeartbeat();
         updateP2PStatusUI("🟢 CONECTADO AO JOGADOR 2!", "Partida iniciada! Você é o Jogador 1 (Azul · Embaixo).", "ONLINE P1", "#4ade80");
       }
@@ -244,7 +261,8 @@ function handleP2PPacket(raw) {
       if (msg.seed) setSharedSeed(msg.seed);
       if (Array.isArray(msg.deckP1) && msg.deckP1.length === 6) state.deckP1 = [...msg.deckP1];
       if (Array.isArray(msg.deckP2) && msg.deckP2.length === 6) state.deckP2 = [...msg.deckP2];
-      startP2PMatch("p2");
+      const firstWinner = msg.firstWinner || ((msg.seed && Math.abs(msg.seed) % 2 === 0) ? "p1" : "p2");
+      startP2PMatch("p2", firstWinner);
       startP2PHeartbeat();
       updateP2PStatusUI("🟢 CONECTADO AO HOST (P1)!", "Partida iniciada! Visão de Mesa Oposta (180°): seu time P2 está EMBAIXO olhando P1 de frente!", "ONLINE P2", "#4ade80");
     } else if (msg.type === "P2P_MOVE" || msg.type === "DoMove") {
@@ -395,6 +413,8 @@ function cleanupActiveP2PSession(reason) {
   activeP2PRoomId = null;
   pendingSalaoSeed = null;
   pendingSalaoRoomId = null;
+  pendingSalaoFirstWinner = null;
+  state.initialTurnWinner = null;
   state.mode = "ai";
   state.gameMode = "ai";
   state.matchKind = "league";
@@ -939,6 +959,7 @@ function handleIncomingSalaoMessage(msg) {
         if (myKey < oppKey) {
           ensureMyPeerInstance();
           if (!pendingSalaoSeed) pendingSalaoSeed = generateFreshSeed32();
+          if (!pendingSalaoFirstWinner) pendingSalaoFirstWinner = Math.random() < 0.5 ? "p1" : "p2";
           if (!pendingSalaoRoomId) pendingSalaoRoomId = "salao_" + String(salaoQueueSessionId || "h") + "_" + String(msg.queueSession || "g");
           const myDeck = getPlayerOwnDeckCopy();
           publishSalaoPacket({
@@ -949,6 +970,7 @@ function handleIncomingSalaoMessage(msg) {
             fromTrainerId: p.trainerId,
             matchRoomId: pendingSalaoRoomId,
             seed: pendingSalaoSeed,
+            firstWinner: pendingSalaoFirstWinner,
             hostPeerId: myClientId,
             hostNickname: p.nickname || "Você",
             hostRating: p.rankRating || 1000,
@@ -968,6 +990,7 @@ function handleIncomingSalaoMessage(msg) {
       isSearchingRankedQueue = false;
       isSalaoMatchActive = true;
       activeP2PRoomId = msg.matchRoomId || ("salao_" + Date.now().toString(36));
+      const chosenFirstWinner = msg.firstWinner || ((Math.abs(msg.seed || 1) % 2 === 0) ? "p1" : "p2");
 
       const myDeck = getPlayerOwnDeckCopy();
       publishSalaoPacket({
@@ -978,6 +1001,7 @@ function handleIncomingSalaoMessage(msg) {
         fromTrainerId: p.trainerId,
         matchRoomId: activeP2PRoomId,
         seed: msg.seed,
+        firstWinner: chosenFirstWinner,
         guestPeerId: myClientId,
         guestNickname: p.nickname || "Você",
         guestRating: p.rankRating || 1000,
@@ -1001,6 +1025,7 @@ function handleIncomingSalaoMessage(msg) {
         hostDeck: msg.hostDeck,
         guestDeck: myDeck,
         seed: msg.seed,
+        firstWinner: chosenFirstWinner,
         matchRoomId: activeP2PRoomId,
         role: "p2"
       });
@@ -1016,6 +1041,7 @@ function handleIncomingSalaoMessage(msg) {
       isSalaoMatchActive = true;
       activeP2PRoomId = msg.matchRoomId || pendingSalaoRoomId || ("salao_" + Date.now().toString(36));
       const finalSeed = msg.seed || pendingSalaoSeed || generateFreshSeed32();
+      const finalFirstWinner = msg.firstWinner || pendingSalaoFirstWinner || "p1";
       const myDeck = getPlayerOwnDeckCopy();
 
       onHumanMatchFound({
@@ -1026,6 +1052,7 @@ function handleIncomingSalaoMessage(msg) {
         hostDeck: myDeck,
         guestDeck: msg.guestDeck,
         seed: finalSeed,
+        firstWinner: finalFirstWinner,
         matchRoomId: activeP2PRoomId,
         role: "p1"
       });
@@ -1049,9 +1076,12 @@ function cleanupRankedMatchmaker(preserveActiveConn) {
     clearInterval(salaoQueueTimer);
     salaoQueueTimer = null;
   }
-  if (!preserveActiveConn && rankedMatchmakerChannel) {
-    try { rankedMatchmakerChannel.close(); } catch (e) {}
-    rankedMatchmakerChannel = null;
+  if (!preserveActiveConn) {
+    if (rankedMatchmakerChannel) {
+      try { rankedMatchmakerChannel.close(); } catch (e) {}
+      rankedMatchmakerChannel = null;
+    }
+    pendingSalaoFirstWinner = null;
   }
 }
 
@@ -1068,6 +1098,8 @@ function openRankedMatchmakerModal() {
   isSearchingRankedQueue = true;
   pendingSalaoSeed = null;
   pendingSalaoRoomId = null;
+  pendingSalaoFirstWinner = null;
+  state.initialTurnWinner = null;
   salaoQueueSessionId = Math.random().toString(36).slice(2, 8);
 
   const modal = document.getElementById("ranked-matchmaker-modal");
@@ -1213,6 +1245,7 @@ function onHumanMatchFound(oppData) {
   };
   if (oppData.matchRoomId) activeP2PRoomId = oppData.matchRoomId;
   if (oppData.seed) setSharedSeed(oppData.seed);
+  if (oppData.firstWinner) state.initialTurnWinner = oppData.firstWinner;
 
   const myOwnDeck = getPlayerOwnDeckCopy();
   state.myRole = oppData.role || "p1";
@@ -1314,7 +1347,8 @@ function launchMatchFromMatchmaker(isBot) {
     state.mode = "p2p";
     state.gameMode = "p2p";
     state.p2pLatency = 14;
-    startP2PMatch(state.myRole || "p1");
+    const firstWinner = state.initialTurnWinner || ((state.sharedSeed && Math.abs(state.sharedSeed) % 2 === 0) ? "p1" : "p2");
+    startP2PMatch(state.myRole || "p1", firstWinner);
     startP2PHeartbeat();
   }
   setLogText(`🏆 PARTIDA DA LIGA INICIADA! Você vs ${remoteOpponentProfile ? remoteOpponentProfile.nickname : "Rival"} (${remoteOpponentProfile ? remoteOpponentProfile.rankRating : 1000} ELO)!`);

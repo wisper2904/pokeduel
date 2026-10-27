@@ -2040,6 +2040,9 @@ function drawVideoMatchOverlays() {
           }
         }, 320);
       }
+      if (state.mode === "p2p" || state.mode === "pass") {
+        state.turnBannerAnim = { turn: state.turn, t0: performance.now() };
+      }
     }
   }
 
@@ -2203,7 +2206,7 @@ function boardRenderLoop() {
 // 8. EXACT TOUCH INTERACTION (MAPPED TO LOGICAL `353x530` STAGE)
 // ============================================================================
 canvas.addEventListener("pointerdown", e => {
-  if (state.isAnimating) return;
+  if (state.isAnimating || state.preMatchAnim) return;
   const rect = canvas.getBoundingClientRect();
   const sx = (e.clientX - rect.left) * (LOGICAL_W / rect.width);
   const sy = (e.clientY - rect.top) * (LOGICAL_H / rect.height);
@@ -2278,7 +2281,19 @@ canvas.addEventListener("pointerdown", e => {
     const d = Math.hypot(pos.x - sx, pos.y - sy);
     if (d < bestDist) { bestDist = d; bestNode = n; }
   });
-  if (bestNode) onNodeClicked(bestNode.id);
+  if (bestNode) {
+    onNodeClicked(bestNode.id);
+  } else {
+    // Clicked outside any node / empty space: deselect friendly piece
+    if (state.selectedUnitId && !state.postMoveAttackMode) {
+      state.selectedUnitId = null;
+      state.reachableNodes = [];
+      state.reachablePaths = {};
+      state.attackTargets = [];
+      state.lastClickedAttackTargetId = null;
+      hideCornerFigureCard();
+    }
+  }
 });
 
 function canControlTurn() {
@@ -2295,20 +2310,25 @@ function finishPostMoveWithoutAttack() {
   state.postMoveAttackMode = false;
   state.attackTargets = [];
   state.selectedUnitId = null;
+  state.lastClickedAttackTargetId = null;
   const info = state.pendingPostMoveTurn || { nextTurn: state.turn === "p1" ? "p2" : "p1", nextTurnCounter: Math.max(0, state.turnCounter - 1) };
   state.pendingPostMoveTurn = null;
   endTurn(true, info.nextTurn, info.nextTurnCounter);
 }
 
 function selectUnit(uid) {
+  const u = state.units.find(x => x.uid === uid);
+  if (!u || u.location === "pc" || u.location === "ultra_space") return;
+
+  // If not active turn controller, allow inspecting any figure on the board or bench!
   if (!canControlTurn()) {
-    if (state.mode === "p2p") {
-      playSfx("tick");
-      const isP1 = (state.myRole === "p1");
-      setLogText(`⏳ Vez do ${isP1 ? "Jogador 2 (Vermelho)" : "Jogador 1 (Azul)"}! Aguarde o oponente jogar.`);
-    }
+    playSfx("tick");
+    showCornerFigureCard(u);
+    const ownerLbl = (u.owner === state.myRole) ? "Seu Pokémon" : "Rival";
+    setLogText(`Inspecionando ${u.name} (${ownerLbl}).`);
     return;
   }
+
   if (state.pendingPlateAction === "goalblock") {
     const candidate = state.units.find(x => x.uid === uid);
     if (!candidate || candidate.owner !== state.turn || candidate.location === "pc" || candidate.location === "ultra_space") {
@@ -2322,24 +2342,40 @@ function selectUnit(uid) {
     executeGoalBlockWithUnit(candidate);
     return;
   }
+
   if (state.postMoveAttackMode) {
-    if (uid === state.selectedUnitId) { finishPostMoveWithoutAttack(); }
+    if (uid === state.selectedUnitId) {
+      finishPostMoveWithoutAttack();
+    } else if (u.owner !== state.turn) {
+      playSfx("tick");
+      showCornerFigureCard(u);
+      setLogText(`Inspecionando ${u.name} (Rival).`);
+    }
     return;
   }
-  const u = state.units.find(x => x.uid === uid);
-  if (!u || u.location === "pc" || u.location === "ultra_space") return;
+
+  // Tapping an opponent's figure on bench or board: inspect their wheel card and clear friendly selection
   if (u.owner !== state.turn) {
     playSfx("tick");
     showCornerFigureCard(u);
     setLogText(`Inspecionando ${u.name} (Rival).`);
+    state.selectedUnitId = null;
+    state.reachableNodes = [];
+    state.reachablePaths = {};
+    state.attackTargets = [];
+    state.lastClickedAttackTargetId = null;
     return;
   }
+
   if (u.waitTurns > 0) {
     setLogText(`${u.name} has Wait ${u.waitTurns}.`);
+    showCornerFigureCard(u);
     return;
   }
+
   playSfx("tick");
   state.selectedUnitId = uid;
+  state.lastClickedAttackTargetId = null;
   const res = computeReachableWithPaths(u);
   state.reachableNodes = res.nodes;
   state.reachablePaths = res.paths;
@@ -2356,9 +2392,21 @@ function selectUnit(uid) {
 }
 
 function onNodeClicked(nodeId) {
-  if (!canControlTurn()) return;
   const occ = unitAtNode(nodeId);
   const sel = state.units.find(x => x.uid === state.selectedUnitId);
+
+  // If not active turn controller, allow inspecting any figure on the clicked node!
+  if (!canControlTurn()) {
+    if (occ) {
+      playSfx("tick");
+      showCornerFigureCard(occ);
+      const ownerLbl = (occ.owner === state.myRole) ? "Seu Pokémon" : "Rival";
+      setLogText(`Inspecionando ${occ.name} (${ownerLbl}).`);
+    } else {
+      hideCornerFigureCard();
+    }
+    return;
+  }
 
   if (state.postMoveAttackMode) {
     if (sel && state.attackTargets.includes(nodeId) && occ && occ.owner !== sel.owner) {
@@ -2366,16 +2414,23 @@ function onNodeClicked(nodeId) {
       const pInfo = state.pendingPostMoveTurn;
       state.pendingPostMoveTurn = null;
       triggerCombat(sel, occ, true, pInfo ? { nextTurn: pInfo.nextTurn, nextTurnCounter: pInfo.nextTurnCounter, manualSpin: true } : null);
+    } else if (occ && occ.owner !== sel.owner) {
+      playSfx("tick");
+      showCornerFigureCard(occ);
+      setLogText(`Inspecionando ${occ.name} (Rival).`);
     } else {
       finishPostMoveWithoutAttack();
     }
     return;
   }
 
+  // 1. If clicked a friendly unit on the board, select it!
   if (occ && occ.owner === state.turn) {
     selectUnit(occ.uid);
     return;
   }
+
+  // 2. If NO unit was currently selected:
   if (!sel) {
     if (occ) {
       playSfx("tick");
@@ -2387,14 +2442,52 @@ function onNodeClicked(nodeId) {
     return;
   }
 
+  // 3. If a friendly unit WAS currently selected:
+  // 3A. Moving to a reachable node:
   if (state.reachableNodes.includes(nodeId)) {
+    state.lastClickedAttackTargetId = null;
     const pathSegs = state.reachablePaths[nodeId] || [];
     executeMove(sel.uid, nodeId, true, pathSegs);
     return;
   }
+
+  // 3B. Attacking an adjacent enemy:
   if (state.attackTargets.includes(nodeId) && occ && occ.owner !== sel.owner) {
-    triggerCombat(sel, occ, true);
+    if (state.lastClickedAttackTargetId === occ.uid) {
+      // Second tap on the adjacent enemy confirms the battle!
+      state.lastClickedAttackTargetId = null;
+      triggerCombat(sel, occ, true);
+    } else {
+      // First tap shows the enemy's wheel and instructions!
+      state.lastClickedAttackTargetId = occ.uid;
+      playSfx("tick");
+      showCornerFigureCard(occ);
+      setLogText(`🎯 Alvo Adjacente: ${occ.name}! Toque novamente nele para ATACAR ou toque em outro local.`);
+    }
+    return;
   }
+
+  // 3C. Clicking on ANY opponent unit on the board:
+  // Shows the opponent's wheel and clears friendly movement!
+  if (occ && occ.owner !== state.turn) {
+    playSfx("tick");
+    showCornerFigureCard(occ);
+    setLogText(`Inspecionando ${occ.name} (Rival).`);
+    state.selectedUnitId = null;
+    state.reachableNodes = [];
+    state.reachablePaths = {};
+    state.attackTargets = [];
+    state.lastClickedAttackTargetId = null;
+    return;
+  }
+
+  // 3D. Clicked an empty unreachable board node: deselect friendly piece
+  state.selectedUnitId = null;
+  state.reachableNodes = [];
+  state.reachablePaths = {};
+  state.attackTargets = [];
+  state.lastClickedAttackTargetId = null;
+  hideCornerFigureCard();
 }
 
 function animatePieceAlongSegments(unit, segments, onComplete) {
