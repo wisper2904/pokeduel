@@ -10,7 +10,7 @@ const FIRST_TURN_HIST_KEY  = "pdr_first_turn_hist_v530";
 
 function loadAdaptiveAIBrain() {
   const defaultBrain = {
-    version: "5.3.0",
+    version: "5.6.0",
     matchesAnalyzed: 0,
     aiWins: 0,
     playerWins: 0,
@@ -19,12 +19,13 @@ function loadAdaptiveAIBrain() {
     playerEntryBlockMoves: 0,
     playerSurroundKOs: 0,
     playerPlateUses: 0,
+    playerAttacks: 0,
     playerFavBaseIds: {},
     weights: {
-      goalDefense: 1.15,
-      antiSurround: 1.20,
-      entryLockdown: 1.10,
-      combatAggression: 1.05
+      goalDefense: 1.20,
+      antiSurround: 1.25,
+      entryLockdown: 1.15,
+      combatAggression: 1.10
     }
   };
   try {
@@ -216,6 +217,14 @@ function initAITacticalPlates() {
 // Hook startVideoAuthenticMatch so every AI match builds the adaptive counter-team and rolls the 50/50 First-Turn Roulette!
 const _v521StartVideoAuthenticMatch = startVideoAuthenticMatch;
 startVideoAuthenticMatch = function() {
+  state.currentMatchTelemetry = {
+    playerGoalRushes: 0,
+    playerEntryThreats: 0,
+    playerSurroundThreats: 0,
+    playerAttacks: 0,
+    laneMoves: { left: 0, center: 0, right: 0 }
+  };
+
   const meta = analyzePlayerDeckAndBuildCounterTeam();
   _v521StartVideoAuthenticMatch();
   initAITacticalPlates();
@@ -253,15 +262,31 @@ const _v521ExecuteMove = executeMove;
 executeMove = function(uid, targetNodeId, broadcast, customSegments, remotePacket) {
   const u = state.units.find(x => x.uid === uid);
   if (u && u.owner === "p1" && state.matchKind !== "tutorial" && typeof targetNodeId === "number") {
+    if (!state.currentMatchTelemetry) {
+      state.currentMatchTelemetry = {
+        playerGoalRushes: 0,
+        playerEntryThreats: 0,
+        playerSurroundThreats: 0,
+        playerAttacks: 0,
+        laneMoves: { left: 0, center: 0, right: 0 }
+      };
+    }
     const lane = getNodeLaneCategory(targetNodeId);
     adaptiveAIBrain.laneHeatmap[lane] = (adaptiveAIBrain.laneHeatmap[lane] || 0) + 1;
-    if (NODE_BFS_DIST[targetNodeId][3] <= 2) {
+    state.currentMatchTelemetry.laneMoves[lane] = (state.currentMatchTelemetry.laneMoves[lane] || 0) + 1;
+
+    // Detect Goal Rush: player moves within 3 steps of AI goal (node 3)
+    if (NODE_BFS_DIST[targetNodeId][3] <= 3) {
       adaptiveAIBrain.playerGoalRushMoves = (adaptiveAIBrain.playerGoalRushMoves || 0) + 1;
-      adaptiveAIBrain.weights.goalDefense = Math.min(2.5, (adaptiveAIBrain.weights.goalDefense || 1.15) + 0.06);
+      adaptiveAIBrain.weights.goalDefense = Math.min(2.8, (adaptiveAIBrain.weights.goalDefense || 1.20) + 0.08);
+      state.currentMatchTelemetry.playerGoalRushes += 1;
     }
-    if (targetNodeId === 0 || targetNodeId === 6) {
+
+    // Detect Entry Block Threat: player moves onto or adjacent to nodes 0 or 6
+    if (targetNodeId === 0 || targetNodeId === 6 || NODE_BFS_DIST[targetNodeId][0] <= 1 || NODE_BFS_DIST[targetNodeId][6] <= 1) {
       adaptiveAIBrain.playerEntryBlockMoves = (adaptiveAIBrain.playerEntryBlockMoves || 0) + 1;
-      adaptiveAIBrain.weights.entryLockdown = Math.min(2.4, (adaptiveAIBrain.weights.entryLockdown || 1.10) + 0.06);
+      adaptiveAIBrain.weights.entryLockdown = Math.min(2.6, (adaptiveAIBrain.weights.entryLockdown || 1.15) + 0.07);
+      state.currentMatchTelemetry.playerEntryThreats += 1;
     }
     saveAdaptiveAIBrain();
   }
@@ -275,12 +300,31 @@ sendToPC = function(unit) {
     state.questEnemyKOs = (state.questEnemyKOs || 0) + 1;
     if (state.matchKind !== "tutorial") {
       adaptiveAIBrain.playerSurroundKOs = (adaptiveAIBrain.playerSurroundKOs || 0) + 1;
-      adaptiveAIBrain.weights.antiSurround = Math.min(2.6, (adaptiveAIBrain.weights.antiSurround || 1.20) + 0.05);
+      adaptiveAIBrain.weights.antiSurround = Math.min(2.8, (adaptiveAIBrain.weights.antiSurround || 1.25) + 0.08);
+      if (state.currentMatchTelemetry) {
+        state.currentMatchTelemetry.playerSurroundThreats = (state.currentMatchTelemetry.playerSurroundThreats || 0) + 1;
+      }
       saveAdaptiveAIBrain();
     }
   }
   return _v521SendToPC(unit);
 };
+
+// Track human player attacks in combat to adapt AI aggression and counter-blocking
+if (typeof triggerCombat === "function") {
+  const _v560TriggerCombat = triggerCombat;
+  triggerCombat = function(atkUnit, defUnit, broadcast, forcedSpins) {
+    if (atkUnit && atkUnit.owner === "p1" && state.matchKind !== "tutorial") {
+      adaptiveAIBrain.playerAttacks = (adaptiveAIBrain.playerAttacks || 0) + 1;
+      adaptiveAIBrain.weights.combatAggression = Math.min(2.6, (adaptiveAIBrain.weights.combatAggression || 1.10) + 0.05);
+      if (state.currentMatchTelemetry) {
+        state.currentMatchTelemetry.playerAttacks = (state.currentMatchTelemetry.playerAttacks || 0) + 1;
+      }
+      saveAdaptiveAIBrain();
+    }
+    return _v560TriggerCombat(atkUnit, defUnit, broadcast, forcedSpins);
+  };
+}
 
 // Helper: Check if a given player ('p1' or 'p2') can reach `targetNodeId` in 1 turn from the current board/bench
 function canSideReachNodeNextTurn(sideOwner, targetNodeId, ignoreUnitUid) {
@@ -745,19 +789,20 @@ triggerPlayerAIMove = function() {
   }
 };
 
-// Update adaptive learning weights at the end of every Ranked match!
+// Update adaptive learning weights at the end of every Ranked or AI match!
 const _v521ShowWinResultScreen = showWinResultScreen;
 showWinResultScreen = function(winner) {
-  if (state.matchKind === "league") {
+  if (state.matchKind === "league" || state.mode === "ai") {
     adaptiveAIBrain.matchesAnalyzed = (adaptiveAIBrain.matchesAnalyzed || 0) + 1;
     if (winner === "p1") {
       adaptiveAIBrain.playerWins = (adaptiveAIBrain.playerWins || 0) + 1;
-      // When the player beats the AI, the AI sharpens its defense and anti-surround weights for the next match!
-      adaptiveAIBrain.weights.goalDefense  = Math.min(2.6, (adaptiveAIBrain.weights.goalDefense || 1.15) + 0.10);
-      adaptiveAIBrain.weights.antiSurround = Math.min(2.6, (adaptiveAIBrain.weights.antiSurround || 1.20) + 0.10);
-      adaptiveAIBrain.weights.entryLockdown = Math.min(2.5, (adaptiveAIBrain.weights.entryLockdown || 1.10) + 0.08);
+      // When the player beats the AI, the AI sharpens its defense, anti-surround and entry lockdown weights!
+      adaptiveAIBrain.weights.goalDefense  = Math.min(2.8, (adaptiveAIBrain.weights.goalDefense || 1.20) + 0.12);
+      adaptiveAIBrain.weights.antiSurround = Math.min(2.8, (adaptiveAIBrain.weights.antiSurround || 1.25) + 0.12);
+      adaptiveAIBrain.weights.entryLockdown = Math.min(2.6, (adaptiveAIBrain.weights.entryLockdown || 1.15) + 0.10);
     } else {
       adaptiveAIBrain.aiWins = (adaptiveAIBrain.aiWins || 0) + 1;
+      adaptiveAIBrain.weights.combatAggression = Math.min(2.6, (adaptiveAIBrain.weights.combatAggression || 1.10) + 0.06);
     }
     saveAdaptiveAIBrain();
   }
@@ -913,27 +958,38 @@ analyzePlayerDeckAndBuildCounterTeam = function() {
   // 2) 2 Heavy EX/UX Bruisers (130–160+ DMG + Gold/Purple)
   // 3) 1 3-Star Purple / Status Controller
   // 4) 1 Impenetrable Goal Guardian / Anchor (High DMG + Blue Dodge / Purple)
-  const chosenIndices = [];
-  const pickWhere = (pred) => {
-    for (const cand of scoredCandidates) {
-      if (!chosenIndices.includes(cand.idx) && pred(cand)) {
-        chosenIndices.push(cand.idx);
-        return;
-      }
+  let chosenIndices = [];
+  if (state.isBotDeckLocked && Array.isArray(state.deckP2) && state.deckP2.length === 6) {
+    chosenIndices = [...state.deckP2];
+    state.isBotDeckLocked = false;
+  } else if (typeof generateAdaptiveCompetitiveBotDeck === "function") {
+    const gen = generateAdaptiveCompetitiveBotDeck(pElo, p1Indices);
+    chosenIndices = [...gen.deck];
+    state.deckP2 = chosenIndices.slice(0, 6);
+    if (gen.trainer) {
+      window.adaptiveAIOpponentName = gen.trainer.name;
     }
-  };
+  } else {
+    const pickWhere = (pred) => {
+      for (const cand of scoredCandidates) {
+        if (!chosenIndices.includes(cand.idx) && pred(cand)) {
+          chosenIndices.push(cand.idx);
+          return;
+        }
+      }
+    };
 
-  pickWhere(c => c.mp >= 3 && (c.pass || c.goldSize >= 20));
-  pickWhere(c => c.mp >= 3 && (c.maxDmg >= 90 || c.purpleSize >= 20 || c.goldSize >= 16));
-  pickWhere(c => c.mp === 2 && c.maxDmg >= 130 && c.goldSize >= 16);
-  pickWhere(c => c.mp === 2 && c.maxDmg >= 135);
-  pickWhere(c => c.maxStars >= 2 && c.purpleSize >= 24 && c.mp >= 2);
-  pickWhere(c => c.mp >= 2 && (c.blueSize >= 16 || c.maxDmg >= 130));
-  while (chosenIndices.length < 6) {
-    pickWhere(() => true);
+    pickWhere(c => c.mp >= 3 && (c.pass || c.goldSize >= 20));
+    pickWhere(c => c.mp >= 3 && (c.maxDmg >= 90 || c.purpleSize >= 20 || c.goldSize >= 16));
+    pickWhere(c => c.mp === 2 && c.maxDmg >= 130 && c.goldSize >= 16);
+    pickWhere(c => c.mp === 2 && c.maxDmg >= 135);
+    pickWhere(c => c.maxStars >= 2 && c.purpleSize >= 24 && c.mp >= 2);
+    pickWhere(c => c.mp >= 2 && (c.blueSize >= 16 || c.maxDmg >= 130));
+    while (chosenIndices.length < 6) {
+      pickWhere(() => true);
+    }
+    state.deckP2 = chosenIndices.slice(0, 6);
   }
-
-  state.deckP2 = chosenIndices.slice(0, 6);
 
   const prefLane = getPlayerPreferredLane();
   const laneNames = { left: "Anti-Flanco Esq.", right: "Anti-Flanco Dir.", center: "Tranca Central" };
@@ -1148,6 +1204,25 @@ triggerPlayerAIMove = function() {
   const myGoalOccupant = unitAtNode(myGoalId);
   const prefPlayerLane = getPlayerPreferredLane();
 
+  // Dynamic Real-Time Adaptive Weights: cross-match learning memory blended with in-match telemetry
+  const tel = state.currentMatchTelemetry || {
+    playerGoalRushes: 0,
+    playerEntryThreats: 0,
+    playerSurroundThreats: 0,
+    playerAttacks: 0,
+    laneMoves: { left: 0, center: 0, right: 0 }
+  };
+
+  const liveGoalMult     = (tel.playerGoalRushes >= 2) ? 1.40 : (tel.playerGoalRushes >= 1 ? 1.20 : 1.0);
+  const liveSurroundMult = (tel.playerSurroundThreats >= 1) ? 1.35 : 1.0;
+  const liveEntryMult    = (tel.playerEntryThreats >= 1) ? 1.30 : 1.0;
+  const liveCombatMult   = (tel.playerAttacks >= 3) ? 1.25 : 1.0;
+
+  const wGoalDef   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)   || 1.20) * liveGoalMult);
+  const wAntiSur   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)  || 1.25) * liveSurroundMult);
+  const wEntryLk   = Math.min(3.0, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown) || 1.15) * liveEntryMult);
+  const wCombatAgg = Math.min(2.8, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.combatAggression) || 1.10) * liveCombatMult);
+
   // Helper: Full 2-Ply Simulation when AI moves `movingUnit` to `destNid`
   function simulate2PlyAfterAIMove(movingUnit, destNid) {
     const getOccAfterMove = (nid) => {
@@ -1301,36 +1376,36 @@ triggerPlayerAIMove = function() {
 
       // 1. ABSOLUTE 2-PLY GOAL SAFETY: If this move allows the player to capture or surround our Goal next turn, massive penalty!
       if (sim.enemyCanCaptureMyGoalNextTurn) {
-        moveScore -= 85000;
+        moveScore -= 85000 * wGoalDef;
       }
       if (sim.enemyCanSurroundMyGoalNextTurn) {
-        moveScore -= 65000;
+        moveScore -= 65000 * wGoalDef;
       }
 
       // 2. SURROUND KOs ACHIEVED!
       if (!isStandingAttack && sim.enemyKOs.length > 0) {
         sim.enemyKOs.forEach(koUnit => {
-          moveScore += 14500;
+          moveScore += 14500 * wCombatAgg;
           if (koUnit.nodeId === oppGoalId) moveScore += 90000; // Goal Surround Win!
-          if (threateningEnemies.includes(koUnit)) moveScore += 12000;
-          if (myEntryIds.includes(koUnit.nodeId)) moveScore += 7500;
-          if (oppEntryIds.includes(koUnit.nodeId)) moveScore += 5500;
+          if (threateningEnemies.includes(koUnit)) moveScore += 12000 * wGoalDef;
+          if (myEntryIds.includes(koUnit.nodeId)) moveScore += 7500 * wEntryLk;
+          if (oppEntryIds.includes(koUnit.nodeId)) moveScore += 5500 * wEntryLk;
         });
         reasonTag = `Cerco Letal (Surround KO em ${sim.enemyKOs[0].name})`;
       }
 
       // 3. 2-PLY ANTI-SURROUND DISCIPLINE
       if (sim.allySurroundTrapsNextTurn > 0) {
-        moveScore -= 6200 * sim.allySurroundTrapsNextTurn;
+        moveScore -= 6500 * sim.allySurroundTrapsNextTurn * wAntiSur;
       }
       if (currentlyTrapped && !isStandingAttack && sim.allySurroundTrapsNextTurn === 0) {
-        moveScore += 7200;
+        moveScore += 7500 * wAntiSur;
         reasonTag = `Fuga de Pinça com ${u.name}`;
       }
 
       // 4. OFFENSIVE PINCER / SURROUND TRAP SETUP (2-Turn Surround!)
       if (!isStandingAttack && sim.enemyPinnedCount > 0) {
-        moveScore += 2900 * sim.enemyPinnedCount;
+        moveScore += 3000 * sim.enemyPinnedCount * wCombatAgg;
         if (sim.enemyKOs.length === 0) {
           reasonTag = `Armadilha de Pinça com ${u.name}`;
         }
@@ -1342,7 +1417,7 @@ triggerPlayerAIMove = function() {
 
       // Never abandon `myGoalId` if enemies are within 4 steps!
       if (u.location === "board" && u.nodeId === myGoalId && nid !== myGoalId && minEnemyStepsToMyGoal <= 4) {
-        moveScore -= 70000;
+        moveScore -= 70000 * wGoalDef;
       }
 
       if (goalInDanger && !sim.enemyCanCaptureMyGoalNextTurn) {
@@ -1350,21 +1425,21 @@ triggerPlayerAIMove = function() {
           // Prefer high-damage / Blue-dodge guardian on the Goal Point!
           const wList = getActiveWheel(u);
           const maxD = wList.reduce((m, s) => Math.max(m, s.dmg || 0), 0);
-          moveScore += 28000 + maxD * 15;
+          moveScore += (28000 + maxD * 15) * wGoalDef;
           reasonTag = `Guardião do Goal Point (${u.name})`;
         } else if (nid === 21 || nid === 2 || nid === 4) {
-          moveScore += 9500;
+          moveScore += 9500 * wGoalDef;
           reasonTag = `Escudo de Acesso ao Goal (${u.name})`;
         }
         // Body-blocking directly in front of the threatening enemy
         threateningEnemies.forEach(te => {
           if (NODE_BFS_DIST[nid][myGoalId] < NODE_BFS_DIST[te.nodeId][myGoalId] && NODE_BFS_DIST[nid][te.nodeId] === 1) {
-            moveScore += 8800;
+            moveScore += 8800 * wGoalDef;
           }
         });
-      } else if (!myGoalOccupant && minEnemyStepsToMyGoal <= 4 && (nid === 21 || nid === myGoalId)) {
-        // Proactive Goal Sentry before the player even gets close!
-        moveScore += 3400;
+      } else if (!myGoalOccupant && (minEnemyStepsToMyGoal <= 4 || wGoalDef >= 1.4) && (nid === 21 || nid === myGoalId)) {
+        // Proactive Goal Sentry when player demonstrates goal rush playstyle!
+        moveScore += 3800 * wGoalDef;
       }
 
       // 6. ENTRY POINT ASPHYXIATION (`Nó 7` and `Nó 13`) & GOAL PRESSURE (`Nó 10`)
@@ -1380,7 +1455,7 @@ triggerPlayerAIMove = function() {
         const otherEntry = oppEntryIds.find(id => id !== nid);
         const otherOcc = otherEntry !== undefined ? unitAtNode(otherEntry) : null;
         const otherTakenByAI = Boolean(otherOcc && otherOcc.owner === owner);
-        moveScore += otherTakenByAI ? 16000 : 5400;
+        moveScore += (otherTakenByAI ? 16000 : 5400) * wEntryLk;
         reasonTag = otherTakenByAI
           ? `Asfixia Dupla dos Entry Points (${u.name}) — Pressão de Wait Win!`
           : `Tomada do Entry Point Inimigo com ${u.name}!`;
@@ -1394,7 +1469,7 @@ triggerPlayerAIMove = function() {
 
       // 7. DEPLOYMENT CADENCE & LANE COUNTERING
       if (getNodeLaneCategory(nid) === prefPlayerLane) {
-        moveScore += 420;
+        moveScore += 450 * (tel.laneMoves[prefPlayerLane] >= 2 ? 1.6 : 1.1);
       }
       if (u.location === "bench") {
         const myBoardCount = state.units.filter(x => x.owner === owner && x.location === "board").length;
@@ -1430,8 +1505,9 @@ triggerPlayerAIMove = function() {
         // Option A: Move to `nid` and HOLD POSITION without attacking (crucial when setting up a Surround or blocking with a defender!)
         if (!isStandingAttack) {
           let holdScore = moveScore + 350;
-          if (sim.enemyPinnedCount > 0) holdScore += 1800; // Don't risk a bad spin when you just pinned the enemy for a Surround next turn!
-          if (nid === myGoalId) holdScore += 2500;         // Goal defender prefers holding the Goal if attack isn't guaranteed!
+          if (sim.enemyPinnedCount > 0) holdScore += 1800 * wAntiSur; // Don't risk a bad spin when you just pinned the enemy for a Surround next turn!
+          if (nid === myGoalId) holdScore += 2500 * wGoalDef;         // Goal defender prefers holding the Goal if attack isn't guaranteed!
+          if (tel.playerAttacks >= 2) holdScore += 600;               // Counter-defense against over-aggressive player
           if (holdScore > bestScore) {
             bestScore = holdScore;
             bestAction = {
@@ -1497,10 +1573,10 @@ triggerPlayerAIMove = function() {
           // If this move already pinned the enemy for a guaranteed Surround KO next turn, only attack if effectiveWin >= 68%!
           if (!isStandingAttack && sim.enemyPinnedCount > 0 && effectiveWin < 68 && !isCriticalTarget) return;
 
-          if (effectiveNet >= 6 || (isCriticalTarget && effectiveWin >= 42)) {
-            let atkScore = moveScore + effectiveNet * 28 + effectiveWin * 14;
-            if (isCriticalTarget) atkScore += 5200;
-            if (eu.nodeId === oppGoalId && effectiveWin >= 45) atkScore += 14000; // Attack the enemy Goal Defender to clear the Goal!
+          if (effectiveNet >= 6 || (isCriticalTarget && effectiveWin >= 40)) {
+            let atkScore = moveScore + (effectiveNet * 28 + effectiveWin * 14) * wCombatAgg;
+            if (isCriticalTarget) atkScore += 5200 * wGoalDef;
+            if (eu.nodeId === oppGoalId && effectiveWin >= 42) atkScore += 14000; // Attack the enemy Goal Defender to clear the Goal!
             if (atkScore > bestScore) {
               bestScore = atkScore;
               bestAction = {

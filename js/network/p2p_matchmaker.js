@@ -1281,9 +1281,11 @@ function triggerBotFallbackNow() {
   const p = window.trainerProfileData || { rankRating: 1000 };
   const pRating = p.rankRating || 1000;
   
-  const sorted = [...RANKED_BOT_TRAINERS].sort((a, b) => Math.abs(a.rating - pRating) - Math.abs(b.rating - pRating));
-  const botCandidates = sorted.slice(0, 3);
-  const selectedBot = botCandidates[Math.floor(Math.random() * botCandidates.length)] || RANKED_BOT_TRAINERS[0];
+  // Procedural competitive bot deck with zero repetition and balanced MP curve
+  const botResult = (typeof generateAdaptiveCompetitiveBotDeck === "function")
+    ? generateAdaptiveCompetitiveBotDeck(pRating, state.deckP1)
+    : { trainer: RANKED_BOT_TRAINERS[0], deck: RANKED_BOT_TRAINERS[0].deck };
+  const selectedBot = botResult.trainer || RANKED_BOT_TRAINERS[0];
   windowCurrentSelectedBot = selectedBot;
 
   playSfx("level_up");
@@ -1309,7 +1311,8 @@ function triggerBotFallbackNow() {
     avatar: selectedBot.avatar,
     isBot: true
   };
-  state.deckP2 = [...selectedBot.deck];
+  state.deckP2 = [...botResult.deck];
+  state.isBotDeckLocked = true;
   window.adaptiveAIOpponentName = selectedBot.name;
 
   setTimeout(() => {
