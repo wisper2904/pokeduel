@@ -1475,18 +1475,32 @@
     <!-- TAB 6: `MENU` (CLEAN, UNCLUTTERED SETTINGS, PROFILE & GAME MODES - v4.8.0) -->
     <div id="dtab-menu" class="dtab-content" style="display:none; padding:10px; overflow-y:auto;">
 
+      <!-- CARD 0: IDIOMA / LANGUAGE / IDIOMA -->
+      <div class="card" style="background:linear-gradient(180deg,#10264a,#071124); border:1.5px solid #38bdf8; margin-bottom:8px; padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="color:#facc15; font-size:12px;" data-i18n="settings.language_title">🌐 IDIOMA / LANGUAGE / IDIOMA</strong>
+          <span style="font-size:8.5px; background:#082f63; border:1px solid #38bdf8; color:#bae6fd; padding:2px 6px; border-radius:99px; font-weight:900;" id="current-lang-pill">PT-BR</span>
+        </div>
+        <div style="font-size:9px; color:#bae6fd; font-weight:700; margin-bottom:7px;" data-i18n="settings.language_subtitle">Selecione o idioma de exibição do jogo:</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+          <button class="btn" id="lang-btn-pt" style="font-size:10px; padding:7px 4px;" onclick="setAppLanguage('pt')">🇧🇷 Português</button>
+          <button class="btn" id="lang-btn-en" style="font-size:10px; padding:7px 4px;" onclick="setAppLanguage('en')">🇺🇸 English</button>
+          <button class="btn" id="lang-btn-es" style="font-size:10px; padding:7px 4px;" onclick="setAppLanguage('es')">🇪🇸 Español</button>
+        </div>
+      </div>
+
       <!-- CARD 1: MEU PERFIL INDIVIDUAL -->
       <div class="card" style="background:linear-gradient(180deg,#10264a,#071124); border:1.5px solid #38bdf8; margin-bottom:8px; padding:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
-            <strong style="color:#facc15; font-size:12px;">👤 MEU PERFIL DE TREINADOR</strong>
+            <strong style="color:#facc15; font-size:12px;" data-i18n="settings.profile_title">👤 MEU PERFIL DE TREINADOR</strong>
             <div style="font-size:9.5px; color:#bae6fd; font-weight:800; margin-top:2px;" id="menu-profile-summary-lbl">Treinador · 1000 Pts (Beginner) · 0V / 0D</div>
           </div>
           <span style="font-size:8.5px; background:#082f63; border:1px solid #38bdf8; color:#e0f2fe; padding:2px 6px; border-radius:99px; font-weight:900;" id="menu-profile-id-pill">ID: ---</span>
         </div>
         <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:6px;">
-          <button class="btn gold" style="font-size:9.5px; padding:6px;" onclick="openPlayerProfileModal()">✏️ Editar Perfil & Avatar</button>
-          <button class="btn secondary" style="font-size:9px; padding:6px; color:#fca5a5; border-color:#ef4444;" onclick="confirmResetIndividualProfile()">🔄 Resetar Perfil (Zerar)</button>
+          <button class="btn gold" style="font-size:9.5px; padding:6px;" data-i18n="settings.edit_profile" onclick="openPlayerProfileModal()">✏️ Editar Perfil & Avatar</button>
+          <button class="btn secondary" style="font-size:9px; padding:6px; color:#fca5a5; border-color:#ef4444;" data-i18n="settings.reset_profile" onclick="confirmResetIndividualProfile()">🔄 Resetar Perfil (Zerar)</button>
         </div>
       </div>
 
@@ -1494,30 +1508,30 @@
       <div class="card" style="background:linear-gradient(180deg,#0a2540,#051329); border:1.5px solid #38bdf8; margin-bottom:8px; padding:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <div>
-            <strong style="color:#38bdf8; font-size:11.5px;">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
+            <strong style="color:#38bdf8; font-size:11.5px;" data-i18n="settings.version_title">📢 VERSÃO DO JOGO & ATUALIZAÇÃO</strong>
             <div style="font-size:9.5px; color:#93c5fd; font-weight:800; margin-top:2px;">Versão v6.1.0 · Estável</div>
           </div>
           <span style="font-size:8.5px; background:#0284c7; border:1px solid #38bdf8; color:#fff; padding:2px 7px; border-radius:99px; font-weight:900;">ONLINE</span>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-          <button class="btn gold" style="font-size:9.5px; padding:6px;" onclick="openChangelogModal()">📢 Ver Notas da Atualização</button>
-          <button class="btn" style="font-size:9.5px; padding:6px; background:linear-gradient(180deg,#22c55e,#15803d); border-color:#86efac; color:#fff;" onclick="triggerInAppUpdateAction()">🔄 Atualizar Agora (1-Toque)</button>
+          <button class="btn gold" style="font-size:9.5px; padding:6px;" data-i18n="settings.patch_notes" onclick="openChangelogModal()">📢 Ver Notas da Atualização</button>
+          <button class="btn" style="font-size:9.5px; padding:6px; background:linear-gradient(180deg,#22c55e,#15803d); border-color:#86efac; color:#fff;" data-i18n="settings.update_now" onclick="triggerInAppUpdateAction()">🔄 Atualizar Agora (1-Toque)</button>
         </div>
       </div>
 
       <!-- CARD 2: SOM, GRÁFICOS & ARENA DO TABULEIRO -->
       <div class="card" style="margin-bottom:8px; padding:10px;">
-        <strong style="color:#38bdf8; font-size:11.5px; display:block; margin-bottom:6px;">🔊 ÁUDIO, VISUAL & ARENA DE BATALHA</strong>
+        <strong style="color:#38bdf8; font-size:11.5px; display:block; margin-bottom:6px;" data-i18n="settings.audio_title">🔊 ÁUDIO, VISUAL & ARENA DE BATALHA</strong>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
           <button class="btn gold" id="menu-bgm-btn" style="font-size:9.5px; padding:6px;" onclick="toggleWebAudioBgm()">🎵 Música (BGM): ON</button>
           <button class="btn secondary" id="menu-bgm-source-btn" style="font-size:9.5px; padding:6px;" onclick="if (typeof BgmEngine !== 'undefined') BgmEngine.cycleAudioSource()">💿 Fonte: YouTube OST</button>
         </div>
-        <div style="font-size:8.5px; color:#38bdf8; font-weight:800; margin-bottom:8px;">🎶 Trilha Sonora Oficial de Pokémon Duel (Shota Kageyama OST) com reprodução da Playlist oficial!</div>
+        <div style="font-size:8.5px; color:#38bdf8; font-weight:800; margin-bottom:8px;" data-i18n="settings.bgm_desc">🎶 Trilha Sonora Oficial de Pokémon Duel (Shota Kageyama OST) com reprodução da Playlist oficial!</div>
         <div style="display:grid; grid-template-columns:1fr; gap:6px; margin-bottom:8px;">
           <button class="btn secondary" id="pixel-mode-btn" style="font-size:9.5px; padding:6px;" onclick="cyclePixelArtMode()">✨ Gráficos: 3D HD</button>
         </div>
 
-        <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;">Proporção & Modo de Exibição da Tela:</div>
+        <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;" data-i18n="settings.screen_mode_label">Proporção & Modo de Exibição da Tela:</div>
         <div style="display:grid; grid-template-columns:1fr; margin-bottom:4px;">
           <button class="btn secondary" id="menu-layout-mode-btn" style="font-size:9.5px; padding:6px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="cycleDeviceLayoutMode()">
             📱 Modo de Tela: Auto (Detectando...)
@@ -1525,33 +1539,33 @@
         </div>
         <div id="menu-layout-msg" style="font-size:9px; color:#4ade80; font-weight:800; min-height:12px; margin-bottom:6px;"></div>
 
-        <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;">Tema do Tabuleiro de Duelo:</div>
+        <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;" data-i18n="settings.arena_theme_label">Tema do Tabuleiro de Duelo:</div>
         <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:5px;">
-          <button class="btn secondary" id="surf-btn-crystal" style="font-size:8.5px; padding:5px;" onclick="selectArenaThemeFromMenu('crystal')">💎 Cristal</button>
-          <button class="btn secondary" id="surf-btn-banana" style="font-size:8.5px; padding:5px;" onclick="selectArenaThemeFromMenu('banana')">🍌 Dourada</button>
-          <button class="btn secondary" id="surf-btn-marble" style="font-size:8.5px; padding:5px;" onclick="selectArenaThemeFromMenu('marble')">🏛️ Mármore</button>
-          <button class="btn secondary" id="surf-btn-wood" style="font-size:8.5px; padding:5px;" onclick="selectArenaThemeFromMenu('wood')">🪵 Madeira</button>
-          <button class="btn secondary" id="surf-btn-stone" style="font-size:8.5px; padding:5px;" onclick="selectArenaThemeFromMenu('stone')">🪨 Vulcão</button>
-          <button class="btn secondary" id="surf-btn-habitats" style="font-size:8.5px; padding:5px;" onclick="selectArenaThemeFromMenu('habitats')">🌿 Habitats</button>
+          <button class="btn secondary" id="surf-btn-crystal" style="font-size:8.5px; padding:5px;" data-i18n="settings.theme_crystal" onclick="selectArenaThemeFromMenu('crystal')">💎 Cristal</button>
+          <button class="btn secondary" id="surf-btn-banana" style="font-size:8.5px; padding:5px;" data-i18n="settings.theme_banana" onclick="selectArenaThemeFromMenu('banana')">🍌 Dourada</button>
+          <button class="btn secondary" id="surf-btn-marble" style="font-size:8.5px; padding:5px;" data-i18n="settings.theme_marble" onclick="selectArenaThemeFromMenu('marble')">🏛️ Mármore</button>
+          <button class="btn secondary" id="surf-btn-wood" style="font-size:8.5px; padding:5px;" data-i18n="settings.theme_wood" onclick="selectArenaThemeFromMenu('wood')">🪵 Madeira</button>
+          <button class="btn secondary" id="surf-btn-stone" style="font-size:8.5px; padding:5px;" data-i18n="settings.theme_stone" onclick="selectArenaThemeFromMenu('stone')">🪨 Vulcão</button>
+          <button class="btn secondary" id="surf-btn-habitats" style="font-size:8.5px; padding:5px;" data-i18n="settings.theme_habitats" onclick="selectArenaThemeFromMenu('habitats')">🌿 Habitats</button>
         </div>
         <div id="menu-arena-msg" style="font-size:9px; color:#4ade80; font-weight:800; margin-top:5px;"></div>
       </div>
 
       <!-- CARD 3: MODOS DE JOGO & CAMPANHA DOS HOTÉIS -->
       <div class="card" style="margin-bottom:8px; padding:10px;" id="msec-quests">
-        <strong style="color:#facc15; font-size:11.5px; display:block; margin-bottom:6px;">🎮 MODOS DE JOGO & HOTÉIS DA CAMPANHA</strong>
+        <strong style="color:#facc15; font-size:11.5px; display:block; margin-bottom:6px;" data-i18n="settings.modes_title">🎮 MODOS DE JOGO & HOTÉIS DA CAMPANHA</strong>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px;">
-          <button class="btn purple" style="font-size:9.5px; padding:7px;" onclick="switchDrawerTab('p2p')">🌐 Multiplayer Online (P2P)</button>
-          <button class="btn" style="font-size:9.5px; padding:7px;" onclick="startLocalPassAndPlayMatch()">👥 2 Jogadores (Local)</button>
+          <button class="btn purple" style="font-size:9.5px; padding:7px;" data-i18n="settings.multiplayer_btn" onclick="switchDrawerTab('p2p')">🌐 Multiplayer Online (P2P)</button>
+          <button class="btn" style="font-size:9.5px; padding:7px;" data-i18n="settings.pass_btn" onclick="startLocalPassAndPlayMatch()">👥 2 Jogadores (Local)</button>
         </div>
-        <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;">Desafie os Chefes dos Hotéis (Vitória = +1 Caixa de Pokémon + 3.500🪙):</div>
+        <div style="font-size:9px; color:#94a3b8; font-weight:800; margin-bottom:4px;" data-i18n="settings.hotel_desc">Desafie os Chefes dos Hotéis (Vitória = +1 Caixa de Pokémon + 3.500🪙):</div>
         <div class="grid-cards" id="hub-quests-list"></div>
       </div>
 
       <!-- CARD 4: CUSTOMIZAR SPRITES (OPCIONAL) & SAIR DO JOGO -->
       <div class="card" style="padding:10px;">
         <details style="margin-bottom:8px;">
-          <summary style="cursor:pointer; font-size:10px; font-weight:900; color:#7dd3fc;">🎨 Personalizar Sprites / Textura do Tabuleiro (Opcional)</summary>
+          <summary style="cursor:pointer; font-size:10px; font-weight:900; color:#7dd3fc;" data-i18n="settings.sprites_title">🎨 Personalizar Sprites / Textura do Tabuleiro (Opcional)</summary>
           <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(56,189,248,0.25);">
             <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:6px;">
               <select id="live-sprite-target" style="flex:1; font-weight:800; font-size:9.5px; padding:4px; background:#050912; color:#fff; border:1px solid #38bdf8; border-radius:4px;"></select>
@@ -1568,7 +1582,7 @@
           </div>
         </details>
 
-        <button onclick="openExitGameModal()" class="btn" style="width:100%; padding:8px; font-size:11px; font-weight:900; background:linear-gradient(180deg,#dc2626,#991b1b); border-color:#fca5a5; color:#ffffff;">
+        <button onclick="openExitGameModal()" class="btn" style="width:100%; padding:8px; font-size:11px; font-weight:900; background:linear-gradient(180deg,#dc2626,#991b1b); border-color:#fca5a5; color:#ffffff;" data-i18n="settings.exit_game">
           🚪 Sair do Jogo
         </button>
       </div>
@@ -1605,6 +1619,7 @@
 
 <!-- POKÉMON DUEL MODULAR WEB ARCHITECTURE (v6.3.0) -->
 <script src="vendor/peerjs-1.5.5.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js';document.head.appendChild(s);"></script>
+<script src="js/data/i18n.js"></script>
 <script src="js/data/sprites.js"></script>
 <script src="js/data/figures.js"></script>
 <script src="js/data/bots.js"></script>

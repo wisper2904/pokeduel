@@ -498,16 +498,22 @@ function renderPlatesTray() {
   const cName = document.getElementById("pcard-name");
   const cDesc = document.getElementById("pcard-desc");
   const uBtn  = document.getElementById("plate-use-btn");
+  const curPlateName = (typeof t === "function") ? t("plate." + curP.id + ".name", curP.name) : curP.name;
+  const curPlateDesc = (typeof t === "function") ? t("plate." + curP.id + ".sub", curP.sub || "") : (curP.sub || "");
   if (cCost) cCost.textContent = "COST " + "◆".repeat(curP.cost);
   if (cRar)  cRar.textContent = curP.rarity || "C";
   if (cBdg)  cBdg.textContent = curP.badge || "+20";
-  if (cName) cName.textContent = curP.name;
+  if (cName) cName.textContent = curPlateName;
   if (cDesc) {
-    cDesc.innerHTML = curP.sub || "";
+    cDesc.innerHTML = curPlateDesc;
   }
-  if (uBtn)  uBtn.style.opacity = curP.used ? "0.4" : "1.0";
+  if (uBtn) {
+    uBtn.style.opacity = curP.used ? "0.4" : "1.0";
+    uBtn.textContent = (typeof t === "function") ? t("plate.use_btn", "USAR CARTA") : "USAR CARTA";
+  }
 
   state.plates.forEach((p, idx) => {
+    const itemPlateName = (typeof t === "function") ? t("plate." + p.id + ".name", p.name) : p.name;
     const div = document.createElement("div");
     div.className = `plate-card ${p.used ? "used" : ""} ${selIdx === idx ? "active" : ""}`;
     div.style.minWidth = "78px";
@@ -515,7 +521,7 @@ function renderPlatesTray() {
     div.innerHTML = `
       <span class="p-cost">${p.rarity || "C"}</span>
       <div style="font-size:12px; font-weight:900; color:#f97316; margin:2px 0;">${p.badge || "+20"}</div>
-      <div class="p-title" style="font-size:8.5px;">${p.name}</div>
+      <div class="p-title" style="font-size:8.5px;">${itemPlateName}</div>
     `;
     div.onclick = () => {
       state.selectedPlateIdx = idx;
@@ -1415,16 +1421,18 @@ function drawHDVectorBoardAndChrome() {
   ctx.lineWidth = isMyTurn ? 1.8 : 0.8;
   ctx.strokeRect(66, 36, 52, 16);
 
+  const youWord = (typeof t === "function") ? t("battle.you", "VOCÊ") : "VOCÊ";
   ctx.fillStyle = isMyTurn ? "#facc15" : (isP2Viewer ? "#fca5a5" : "#93c5fd");
   ctx.font = "900 6.5px sans-serif"; ctx.textAlign = "left";
-  ctx.fillText(isP2Viewer ? "🔴 VOCÊ (P2)" : "🔵 VOCÊ (P1)", 68, 41.5);
+  ctx.fillText(isP2Viewer ? `🔴 ${youWord} (P2)` : `🔵 ${youWord} (P1)`, 68, 41.5);
 
   ctx.fillStyle = myClock < 60000 ? "#ef4444" : (isP2Viewer ? "#fecdd3" : "#bae6fd");
   ctx.font = "900 9.5px monospace"; ctx.textAlign = "left";
   ctx.fillText(fmtClk(myClock), 68, 50);
 
   // Right Clock Box: ALWAYS the opponent's clock (RIVAL / IA)
-  const oppRoleLbl = isP2Viewer ? "🔵 RIVAL (P1)" : (state.mode === "p2p" ? "🔴 RIVAL (P2)" : "🔴 IA (P2)");
+  const rivWord = (typeof t === "function") ? t("battle.rival", "RIVAL") : "RIVAL";
+  const oppRoleLbl = isP2Viewer ? `🔵 ${rivWord} (P1)` : (state.mode === "p2p" ? `🔴 ${rivWord} (P2)` : "🔴 IA (P2)");
   ctx.fillStyle = isP2Viewer ? "#061838" : "#3b0714";
   ctx.fillRect(235, 36, 52, 16);
   ctx.strokeStyle = !isMyTurn ? "#facc15" : (isP2Viewer ? "#38bdf8" : "#f43f5e");
@@ -1441,10 +1449,11 @@ function drawHDVectorBoardAndChrome() {
 
   // 7c. First-Turn -1 MP Indicator Badge when turnCounter === 300
   if (state.turnCounter === 300) {
+    const firstTurnBadge = (typeof t === "function") ? t("battle.first_turn_badge", "1st TURN: -1 MP") : "1st TURN: -1 MP";
     ctx.fillStyle = "rgba(234, 179, 8, 0.92)";
     ctx.beginPath(); ctx.roundRect(136, 51, 81, 12, 3); ctx.fill();
     ctx.fillStyle = "#090d16"; ctx.font = "900 7px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("1st TURN: -1 MP", 176.5, 57.5);
+    ctx.fillText(firstTurnBadge, 176.5, 57.5);
   }
 
   // 7d. Ultra Space Wormholes (`v5.0.6` Exclusion Zone) & Z-Move Gauge (`v7.0.0`)
@@ -1484,7 +1493,8 @@ function drawHDVectorBoardAndChrome() {
   ctx.font = state.postMoveAttackMode ? "900 12.5px sans-serif" : "800 15px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(state.postMoveAttackMode ? "End Turn ⏭️" : "AI", 176.5, 460.5);
+  const endTurnLbl = (typeof t === "function") ? t("battle.end_turn", "End Turn ⏭️") : "End Turn ⏭️";
+  ctx.fillText(state.postMoveAttackMode ? endTurnLbl : "AI", 176.5, 460.5);
 
   // 9. Crisp 1080p Bottom 2-Button Bar ([Forfeit] · [Activate Ability]) - Rewind removed!
   const drawBotBtn = (x, y, w, h, lbl, isBlue, hasDot) => {
@@ -1522,8 +1532,10 @@ function drawHDVectorBoardAndChrome() {
 
   if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();
   const unUsedPlates = (state.plates || []).filter(p => !p.disabledInDeck && !p.used).length;
-  drawBotBtn(16, 497, 72, 26, "🏳️ Forfeit", false, false);
-  drawBotBtn(94, 497, 114, 26, `🎴 Plates (${unUsedPlates})`, true, unUsedPlates > 0);
+  const forfeitLbl = (typeof t === "function") ? t("battle.forfeit", "🏳️ Desistir") : "🏳️ Desistir";
+  const platesWord = (typeof t === "function") ? t("battle.plates", "🎴 Cartas") : "🎴 Cartas";
+  drawBotBtn(16, 497, 72, 26, forfeitLbl, false, false);
+  drawBotBtn(94, 497, 114, 26, `${platesWord} (${unUsedPlates})`, true, unUsedPlates > 0);
 
   ctx.restore();
 }
@@ -2004,12 +2016,15 @@ function drawVideoMatchOverlays() {
       // Header title above roulette
       ctx.fillStyle = "#fde047"; ctx.font = "900 11px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("🎲 ROLETA DE 1º TURNO (50% / 50%)", bx + bw / 2, by - 10);
+      const rouletteTitle = (typeof t === "function") ? t("battle.roulette_title", "🎲 ROLETA DE 1º TURNO (50% / 50%)") : "🎲 ROLETA DE 1º TURNO (50% / 50%)";
+      ctx.fillText(rouletteTitle, bx + bw / 2, by - 10);
 
       // Names inside corners - Consistent with internal P1 (Blue) and P2 (Red)
       ctx.fillStyle = "#ffffff"; ctx.font = "900 11px sans-serif";
-      const p2Label = "🔴 " + p2Nick + (state.myRole === "p2" ? " (Você · P2)" : (state.mode === "p2p" ? " (Rival · P2)" : " (IA · P2)"));
-      const p1Label = "🔵 " + p1Nick + (state.myRole === "p1" ? " (Você · P1)" : " (Rival · P1)");
+      const youLbl = (typeof t === "function") ? t("battle.you", "Você") : "Você";
+      const rivLbl = (typeof t === "function") ? t("battle.rival", "Rival") : "Rival";
+      const p2Label = "🔴 " + p2Nick + (state.myRole === "p2" ? ` (${youLbl} · P2)` : (state.mode === "p2p" ? ` (${rivLbl} · P2)` : " (IA · P2)"));
+      const p1Label = "🔵 " + p1Nick + (state.myRole === "p1" ? ` (${youLbl} · P1)` : ` (${rivLbl} · P1)`);
       ctx.textAlign = "right"; ctx.fillText(p2Label, bx + bw - 12, by + 22);
       ctx.textAlign = "left";  ctx.fillText(p1Label, bx + 12, by + bh - 12);
 
@@ -2036,24 +2051,27 @@ function drawVideoMatchOverlays() {
       ctx.fillStyle = "#090d16"; ctx.fill(); ctx.strokeStyle = "#fde047"; ctx.lineWidth = 2.8; ctx.stroke();
       ctx.restore();
 
+      const youStartTxt = (typeof t === "function") ? t("battle.roulette_you_start", "Você começa (-1 MP)") : "Você começa (-1 MP)";
+      const startsSuffix = (typeof t === "function") ? t("battle.roulette_starts", "começa (-1 MP)") : "começa (-1 MP)";
       if (landed) {
         ctx.fillStyle = "#fde047"; ctx.font = "900 20px sans-serif";
         ctx.textAlign = "center"; ctx.shadowColor = "#000000"; ctx.shadowBlur = 8;
         if (isP1First) {
           ctx.fillText("FIRST!", cx - 50, cy + 44);
           ctx.font = "900 10px sans-serif"; ctx.fillStyle = "#bae6fd";
-          const startTxt = (state.myRole === "p1") ? "Você começa (-1 MP)" : (p1Nick + " começa (-1 MP)");
+          const startTxt = (state.myRole === "p1") ? youStartTxt : (p1Nick + " " + startsSuffix);
           ctx.fillText(startTxt + " · P1", cx - 50, cy + 60);
         } else {
           ctx.fillText("FIRST!", cx + 50, cy - 36);
           ctx.font = "900 10px sans-serif"; ctx.fillStyle = "#fecaca";
-          const startTxt = (state.myRole === "p2") ? "Você começa (-1 MP)" : (p2Nick + " começa (-1 MP)");
+          const startTxt = (state.myRole === "p2") ? youStartTxt : (p2Nick + " " + startsSuffix);
           ctx.fillText(startTxt + " · P2", cx + 50, cy - 20);
         }
       } else {
         ctx.fillStyle = "#ffffff"; ctx.font = "900 18px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("SORTEANDO...", cx, cy + 38);
+        const sortingTxt = (typeof t === "function") ? t("battle.roulette_sorting", "SORTEANDO...") : "SORTEANDO...";
+        ctx.fillText(sortingTxt, cx, cy + 38);
       }
       ctx.restore();
     } else if (elapsed < 2250) {
@@ -2940,7 +2958,9 @@ function showCornerFigureCard(u) {
   if (jEl) {
     jEl.style.background = canJump ? "#16a34a" : "#475569";
     jEl.style.color = canJump ? "#ffffff" : "#cbd5e1";
-    jEl.textContent = canJump ? "🦘 PULA" : "🚫 NÃO PULA";
+    const jumpsLbl = (typeof t === "function") ? t("jump.jumps", "🦘 PULA") : "🦘 PULA";
+    const noJumpLbl = (typeof t === "function") ? t("jump.no_jump", "🚫 NÃO PULA") : "🚫 NÃO PULA";
+    jEl.textContent = canJump ? jumpsLbl : noJumpLbl;
   }
 
   // Draw mini disk canvas
@@ -2980,9 +3000,11 @@ function showCornerFigureCard(u) {
   // Passive ability description
   const abEl = document.getElementById("fcc-ability-box");
   if (abEl) {
+    const jumpDesc = (typeof t === "function") ? t("jump.jumps_desc", "🦘 PULA FIGURAS: Pode saltar por cima de outros Pokémon gastando 2 MP por salto.") : "🦘 PULA FIGURAS: Pode saltar por cima de outros Pokémon gastando 2 MP por salto.";
+    const noJumpDesc = (typeof t === "function") ? t("jump.no_jump_desc", "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (bloqueado por peças adjacentes).") : "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (bloqueado por peças adjacentes).";
     const jumpNotice = canJump
-      ? `<div style="margin-bottom:2px; font-weight:900; color:#4ade80; font-size:7.5px;">🦘 PULA FIGURAS: Pode saltar por cima de outros Pokémon gastando 2 MP por salto.</div>`
-      : `<div style="margin-bottom:2px; font-weight:800; color:#94a3b8; font-size:7.5px;">🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (bloqueado por peças adjacentes).</div>`;
+      ? `<div style="margin-bottom:2px; font-weight:900; color:#4ade80; font-size:7.5px;">${jumpDesc}</div>`
+      : `<div style="margin-bottom:2px; font-weight:800; color:#94a3b8; font-size:7.5px;">${noJumpDesc}</div>`;
     const abText = (typeof FIGURE_ABILITIES_DB !== "undefined" && (FIGURE_ABILITIES_DB[u.baseId] || FIGURE_ABILITIES_DB[u.id]))
       || u.ability || "Figura padrão Pokémon Duel.";
     abEl.innerHTML = `${jumpNotice}<strong style="color:#facc15;">Passiva:</strong> ${abText}`;

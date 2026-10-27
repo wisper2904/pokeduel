@@ -74,6 +74,7 @@ if ("serviceWorker" in navigator) {
 window.addEventListener("DOMContentLoaded", () => {
   console.log("⚡ [PokeDuel] Sistema Modular v6.3.0 Inicializado!");
   try {
+    if (typeof updateAllLocalizedUI === "function") updateAllLocalizedUI();
     if (typeof initVerbatimCodeViewer === "function") initVerbatimCodeViewer();
     if (typeof renderHubAndCollection === "function") renderHubAndCollection();
     if (typeof updateDailyBonusButtonUI === "function") updateDailyBonusButtonUI();

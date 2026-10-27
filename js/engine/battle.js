@@ -959,24 +959,28 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
         ddCtx.strokeStyle = "#facc15"; ddCtx.lineWidth = 1.5;
         ddCtx.strokeRect(18, 466, 317, 56);
         ddCtx.fillStyle = "#fde047"; ddCtx.font = "900 10px sans-serif"; ddCtx.textAlign = "center";
-        ddCtx.fillText("DOUBLE CHANCE — Aceitar giro atual ou Re-girar?", 176.5, 479);
+        const dcTitle = (typeof t === "function") ? t("battle.double_chance_title", "DOUBLE CHANCE — Aceitar giro atual ou Re-girar?") : "DOUBLE CHANCE — Aceitar giro atual ou Re-girar?";
+        ddCtx.fillText(dcTitle, 176.5, 479);
 
         ddCtx.fillStyle = "#15803d"; ddCtx.strokeStyle = "#86efac"; ddCtx.lineWidth = 1.5;
         ddCtx.beginPath(); ddCtx.roundRect(28, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
         ddCtx.fillStyle = "#ffffff"; ddCtx.font = "900 11px sans-serif";
-        ddCtx.fillText("✓ Manter", 97, 501.5);
+        const keepTxt = (typeof t === "function") ? t("battle.keep", "✓ Manter") : "✓ Manter";
+        ddCtx.fillText(keepTxt, 97, 501.5);
 
         ddCtx.fillStyle = "#b45309"; ddCtx.strokeStyle = "#fde047"; ddCtx.lineWidth = 1.5;
         ddCtx.beginPath(); ddCtx.roundRect(186, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
         ddCtx.fillStyle = "#fef08a"; ddCtx.font = "900 11px sans-serif";
-        ddCtx.fillText("↻ Re-Girar", 255, 501.5);
+        const respinTxt = (typeof t === "function") ? t("battle.respin", "↻ Re-Girar") : "↻ Re-Girar";
+        ddCtx.fillText(respinTxt, 255, 501.5);
       } else {
         ddCtx.fillStyle = "rgba(9, 13, 22, 0.94)";
         ddCtx.fillRect(18, 474, 317, 38);
         ddCtx.strokeStyle = "#38bdf8"; ddCtx.lineWidth = 1.5;
         ddCtx.strokeRect(18, 474, 317, 38);
         ddCtx.fillStyle = "#38bdf8"; ddCtx.font = "900 11px sans-serif"; ddCtx.textAlign = "center";
-        ddCtx.fillText("⏳ Oponente avaliando Double Chance...", 176.5, 497);
+        const oppEvalTxt = (typeof t === "function") ? t("battle.opp_evaluating", "⏳ Oponente avaliando Double Chance...") : "⏳ Oponente avaliando Double Chance...";
+        ddCtx.fillText(oppEvalTxt, 176.5, 497);
       }
       ddCtx.restore();
     }
