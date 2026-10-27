@@ -8073,9 +8073,14 @@ window.closeTrainerInspectModal = closeTrainerInspectModal;
 // IN-APP USER FEEDBACK & BUG REPORTING (CONFIDENTIAL DISPATCH)
 // ============================================================================
 let currentFeedbackType = "bug";
+let _feedbackCloseTimer = null;
 
 function openFeedbackModal() {
   try { playSfx("select"); } catch (e) {}
+  if (_feedbackCloseTimer) {
+    clearTimeout(_feedbackCloseTimer);
+    _feedbackCloseTimer = null;
+  }
   const m = document.getElementById("feedback-modal");
   if (m) m.style.display = "flex";
   
@@ -8089,10 +8094,20 @@ function openFeedbackModal() {
     statusEl.textContent = "";
     statusEl.style.color = "#94a3b8";
   }
+  const btn = document.getElementById("feedback-submit-btn");
+  if (btn) {
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.innerHTML = `<span>🚀</span> Enviar Feedback`;
+  }
 }
 
 function closeFeedbackModal() {
   try { playSfx("back"); } catch (e) {}
+  if (_feedbackCloseTimer) {
+    clearTimeout(_feedbackCloseTimer);
+    _feedbackCloseTimer = null;
+  }
   const m = document.getElementById("feedback-modal");
   if (m) m.style.display = "none";
 }
@@ -8122,6 +8137,61 @@ function _getSecureRecipientEmail() {
   return bytes.map(b => String.fromCharCode(b)).join("");
 }
 
+async function _dispatchFeedbackPayload(payload) {
+  const recipient = _getSecureRecipientEmail();
+  let delivered = false;
+
+  // 1. Primary Method: Multipart FormData to FormSubmit.co AJAX endpoint (standard fields + unique ticket ID)
+  try {
+    const fd = new FormData();
+    Object.keys(payload).forEach(k => fd.append(k, String(payload[k])));
+    const res = await fetch("https://formsubmit.co/ajax/" + recipient, {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      body: fd
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data && data.success !== "false" && data.success !== false) {
+      delivered = true;
+    }
+  } catch (e) {}
+
+  // 2. Fallback Method: URLSearchParams direct POST to FormSubmit.co standard endpoint (bypasses AJAX rate-limits)
+  if (!delivered) {
+    try {
+      const params = new URLSearchParams();
+      Object.keys(payload).forEach(k => params.append(k, String(payload[k])));
+      await fetch("https://formsubmit.co/" + recipient, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params.toString()
+      });
+      delivered = true;
+    } catch (e) {}
+  }
+
+  return delivered;
+}
+
+async function flushQueuedFeedbacks() {
+  try {
+    const q = JSON.parse(localStorage.getItem("pdr_queued_feedbacks") || "[]");
+    if (!Array.isArray(q) || q.length === 0) return;
+    const remaining = [];
+    for (const item of q) {
+      const ok = await _dispatchFeedbackPayload(item);
+      if (!ok) remaining.push(item);
+    }
+    localStorage.setItem("pdr_queued_feedbacks", JSON.stringify(remaining));
+  } catch (e) {}
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => { flushQueuedFeedbacks(); });
+  setTimeout(() => { flushQueuedFeedbacks(); }, 3500);
+}
+
 async function submitUserFeedback() {
   const titleEl = document.getElementById("feedback-title");
   const msgEl = document.getElementById("feedback-msg");
@@ -8132,12 +8202,13 @@ async function submitUserFeedback() {
   const title = (titleEl && titleEl.value.trim()) || "";
   const msg = (msgEl && msgEl.value.trim()) || "";
   const trainer = (nameEl && nameEl.value.trim()) || "Treinador";
+  const finalBody = msg || title;
 
-  if (!msg || msg.length < 5) {
+  if (!finalBody) {
     try { playSfx("hit"); } catch (e) {}
     if (statusEl) {
       statusEl.style.color = "#f87171";
-      statusEl.textContent = "⚠️ Por favor, escreva uma mensagem detalhada (pelo menos 5 caracteres).";
+      statusEl.textContent = "⚠️ Escreva seu feedback, ideia ou bug antes de enviar.";
     }
     return;
   }
@@ -8152,74 +8223,62 @@ async function submitUserFeedback() {
     statusEl.textContent = "🔄 Conectando e transmitindo aos desenvolvedores...";
   }
 
+  const ticketId = Date.now().toString(36).toUpperCase().slice(-5) + Math.random().toString(36).slice(2, 4).toUpperCase();
+  const sess = typeof getSavedCloudSession === "function" ? getSavedCloudSession() : null;
+  const trainerIdVal = (window.trainerProfileData && window.trainerProfileData.trainerId) || "---";
+  const eloVal = (window.trainerProfileData && window.trainerProfileData.rankRating) || 1000;
+
   const payload = {
-    _subject: `[PokeDuel Feedback - ${currentFeedbackType.toUpperCase()}] ${title || 'Sem Título'} (${trainer})`,
+    _subject: `[PokeDuel ${currentFeedbackType.toUpperCase()} #${ticketId}] ${title || finalBody.slice(0, 36)} (${trainer})`,
+    name: `${trainer} (${sess && sess.username ? '@' + sess.username : trainerIdVal})`,
+    email: "noreply@pokeduel.app",
+    message: `[${currentFeedbackType.toUpperCase()}] ${title ? title + ' — ' : ''}${finalBody}`,
     tipo_feedback: currentFeedbackType,
     treinador: trainer,
-    assunto: title || "(Sem título)",
-    mensagem: msg,
-    id_treinador: (window.trainerProfileData && window.trainerProfileData.trainerId) || "---",
-    elo_pontos: (window.trainerProfileData && window.trainerProfileData.rankRating) || 2150,
-    versao: "PokeDuel v6.1.0",
-    data_envio: new Date().toISOString(),
-    user_agent: navigator.userAgent || "Unknown",
+    conta: (sess && sess.username) ? `@${sess.username}` : "Visitante",
+    assunto: title || "(Sem assunto)",
+    mensagem: finalBody,
+    id_treinador: trainerIdVal,
+    elo_pontos: eloVal,
+    versao: "PokeDuel v6.5.2",
+    horario_envio: new Date().toLocaleString("pt-BR"),
     _template: "table",
-    _captcha: "false"
+    _captcha: "false",
+    _honey: ""
   };
 
-  try {
-    const targetUrl = "https://formsubmit.co/ajax/" + _getSecureRecipientEmail();
-    const res = await fetch(targetUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
+  const ok = await _dispatchFeedbackPayload(payload);
 
-    if (res.ok || res.status === 200 || res.status === 201) {
-      try { playSfx("portal"); } catch (e) {}
-      if (statusEl) {
-        statusEl.style.color = "#4ade80";
-        statusEl.textContent = "✅ Feedback enviado com sucesso! Muito obrigado pelo apoio ao PokeDuel!";
-      }
-      if (titleEl) titleEl.value = "";
-      if (msgEl) msgEl.value = "";
-      setTimeout(() => {
-        closeFeedbackModal();
-        if (btn) {
-          btn.disabled = false;
-          btn.style.opacity = "1";
-          btn.innerHTML = `<span>🚀</span> Enviar Feedback`;
-        }
-      }, 2200);
-    } else {
-      throw new Error("HTTP " + res.status);
+  if (ok) {
+    try { playSfx("portal"); } catch (e) {}
+    if (statusEl) {
+      statusEl.style.color = "#4ade80";
+      statusEl.textContent = `✅ Feedback #${ticketId} enviado com sucesso! Muito obrigado pelo apoio!`;
     }
-  } catch (err) {
-    console.warn("Feedback network fallback:", err);
+  } else {
     try {
       const q = JSON.parse(localStorage.getItem("pdr_queued_feedbacks") || "[]");
       q.push(payload);
       localStorage.setItem("pdr_queued_feedbacks", JSON.stringify(q));
     } catch (e) {}
-
     if (statusEl) {
-      statusEl.style.color = "#4ade80";
-      statusEl.textContent = "✅ Feedback registrado e salvo! Será entregue aos desenvolvedores assim que a conexão estabilizar.";
+      statusEl.style.color = "#fde047";
+      statusEl.textContent = `💾 Feedback #${ticketId} salvo na fila! Será reenviado automaticamente assim que houver conexão.`;
     }
-    if (titleEl) titleEl.value = "";
-    if (msgEl) msgEl.value = "";
-    setTimeout(() => {
-      closeFeedbackModal();
-      if (btn) {
-        btn.disabled = false;
-        btn.style.opacity = "1";
-        btn.innerHTML = `<span>🚀</span> Enviar Feedback`;
-      }
-    }, 2500);
   }
+
+  if (titleEl) titleEl.value = "";
+  if (msgEl) msgEl.value = "";
+  if (btn) {
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.innerHTML = `<span>🚀</span> Enviar Feedback`;
+  }
+
+  if (_feedbackCloseTimer) clearTimeout(_feedbackCloseTimer);
+  _feedbackCloseTimer = setTimeout(() => {
+    closeFeedbackModal();
+  }, 2000);
 }
 
 window.openFeedbackModal = openFeedbackModal;
