@@ -15,11 +15,11 @@ function ensureAudio() {
   }
   if (sfxCtx && sfxCtx.state === "suspended") {
     sfxCtx.resume().then(() => {
-      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && (!BgmEngine.stepTimer || !BgmEngine.isPlaying)) {
+      if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying) {
         BgmEngine.start();
       }
     }).catch(() => {});
-  } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && (!BgmEngine.stepTimer || !BgmEngine.isPlaying) && sfxCtx && sfxCtx.state === "running") {
+  } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && !BgmEngine.isPlaying && sfxCtx && sfxCtx.state === "running") {
     BgmEngine.start();
   }
 }

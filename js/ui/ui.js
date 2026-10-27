@@ -2209,6 +2209,30 @@ const BgmEngine = {
     try {
       if (typeof this.ytPlayer.unMute === "function") this.ytPlayer.unMute();
       if (typeof this.ytPlayer.setVolume === "function") this.ytPlayer.setVolume(85);
+
+      let currentIdx = -1;
+      let playerState = -1;
+      try {
+        if (typeof this.ytPlayer.getPlaylistIndex === "function") currentIdx = this.ytPlayer.getPlaylistIndex();
+        if (typeof this.ytPlayer.getPlayerState === "function") playerState = this.ytPlayer.getPlayerState();
+      } catch (e) {}
+
+      // If already set on this track:
+      if (currentIdx === targetIdx) {
+        this.currentTrack = targetTrack;
+        // If already playing (1) or buffering (3), do NOT touch or restart playback!
+        if (playerState === 1 || playerState === 3) {
+          this.ytPlaying = true;
+          return;
+        }
+        // If paused (2) or cued (5), just un-pause without resetting timeline
+        if (typeof this.ytPlayer.playVideo === "function") {
+          this.ytPlayer.playVideo();
+        }
+        return;
+      }
+
+      this.currentTrack = targetTrack;
       const pl = (typeof this.ytPlayer.getPlaylist === "function") ? this.ytPlayer.getPlaylist() : null;
       if (!pl || !Array.isArray(pl) || pl.length === 0) {
         if (typeof this.ytPlayer.loadPlaylist === "function") {
@@ -2591,6 +2615,20 @@ const BgmEngine = {
 
   start() {
     if (!this.enabled) return;
+    if (this.isPlaying) {
+      if (this.audioSource === "youtube") {
+        if (this.ytPlaying) return;
+        if (this.ytPlayer && typeof this.ytPlayer.getPlayerState === "function") {
+          const s = this.ytPlayer.getPlayerState();
+          if (s === 1 || s === 3) {
+            this.ytPlaying = true;
+            return;
+          }
+        }
+      } else if (this.audioSource === "webaudio" && this.stepTimer) {
+        return;
+      }
+    }
     this.initNodes();
     this.isPlaying = true;
     if (this.audioSource === "youtube" && this.ytReady && this.ytPlayer) {

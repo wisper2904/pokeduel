@@ -32,29 +32,31 @@ if ("serviceWorker" in navigator) {
     BgmEngine.syncUi();
   }
 
+  const userUnlockEvents = ["pointerdown", "touchstart", "click", "mousedown", "keydown"];
+  let audioUnlocked = false;
+
   const unlockAndPlayBgm = () => {
     ensureAudio();
-    if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && BgmEngine.audioSource === "youtube") {
-      if (!BgmEngine.ytPlaying) {
-        BgmEngine.syncYouTubeTrack(BgmEngine.currentTrack || "lobby");
-      }
+    if (!audioUnlocked) {
+      audioUnlocked = true;
+      userUnlockEvents.forEach(evt => {
+        window.removeEventListener(evt, unlockAndPlayBgm);
+      });
     }
-    if (typeof sfxCtx !== "undefined" && sfxCtx && sfxCtx.state === "suspended") {
-      sfxCtx.resume().then(() => {
-        if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {
-          if (!BgmEngine.stepTimer || !BgmEngine.isPlaying) {
-            BgmEngine.start();
-          }
+    if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {
+      if (BgmEngine.audioSource === "youtube") {
+        if (!BgmEngine.ytPlaying && !BgmEngine.isPlaying) {
+          BgmEngine.start();
         }
-      }).catch(() => {});
-    } else if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {
-      if (!BgmEngine.stepTimer || !BgmEngine.isPlaying) {
-        BgmEngine.start();
+      } else {
+        if (!BgmEngine.isPlaying) {
+          BgmEngine.start();
+        }
       }
     }
   };
 
-  ["pointerdown", "touchstart", "click", "mousedown", "keydown"].forEach(evt => {
+  userUnlockEvents.forEach(evt => {
     window.addEventListener(evt, unlockAndPlayBgm, { passive: true });
   });
 
@@ -62,7 +64,7 @@ if ("serviceWorker" in navigator) {
     try {
       ensureAudio();
       if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {
-        if (!BgmEngine.stepTimer || !BgmEngine.isPlaying) {
+        if (!BgmEngine.isPlaying) {
           BgmEngine.start();
         }
       }
