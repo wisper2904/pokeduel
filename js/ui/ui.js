@@ -6986,6 +6986,10 @@ async function cloudAuthLoginAndLoad() {
     const decrypted = decryptCloudPayload(best.env, creds.cipherKey, creds.verifier);
     restoreStorageFromPayloadObject(decrypted);
     window.trainerProfileData = loadIndividualProfile();
+    playerProgression = loadProgressionState();
+    if (typeof checkAndApplyMonthlySeasonReset === "function") {
+      checkAndApplyMonthlySeasonReset(true);
+    }
     if (window.trainerProfileData && (!window.trainerProfileData.nickname || window.trainerProfileData.nickname === "Treinador" || window.trainerProfileData.nickname === "Serebii")) {
       window.trainerProfileData.nickname = rawUser.trim().slice(0, 16);
       saveIndividualProfile();
@@ -7536,6 +7540,11 @@ async function handleWelcomeAuthSubmit() {
         const best = candidates[0];
         const decrypted = decryptCloudPayload(best.env, creds.cipherKey, creds.verifier);
         restoreStorageFromPayloadObject(decrypted);
+        window.trainerProfileData = loadIndividualProfile();
+        playerProgression = loadProgressionState();
+        if (typeof checkAndApplyMonthlySeasonReset === "function") {
+          checkAndApplyMonthlySeasonReset(true);
+        }
 
         const timeStr = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
         saveCloudSession({
@@ -7780,14 +7789,131 @@ window.closeMiniTutorialModal = closeMiniTutorialModal;
 window.filterTutorialCategory = filterTutorialCategory;
 
 // ============================================================================
-// GLOBAL LEADERBOARD (TOP 10) & TRAINER PROFILE INSPECTOR (ONLY REGISTERED ACCOUNTS)
+// MONTHLY SEASON SYSTEM (1-MONTH CYCLE: RESET TO 1000 PTS & STARTER TEAM)
+// & GLOBAL LEADERBOARD (ONLY REGISTERED ACCOUNTS)
 // ============================================================================
-const REGISTERED_LEADERBOARD_STORAGE_KEY = 'pdr_registered_leaderboard_v650';
-const GLOBAL_RANK_NTFY_TOPIC = 'pokeduel_registered_rank_v650';
+const SEASON_STORAGE_KEY = 'pdr_active_season_v656';
+const MONTH_NAMES_PT = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+function getCurrentSeasonInfo() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const monthIdx = now.getMonth();
+  const monthNum = monthIdx + 1;
+  const seasonKey = `${year}-${String(monthNum).padStart(2, '0')}`;
+  const seasonNumber = Math.max(1, (year - 2026) * 12 + (monthNum - 10) + 1);
+  const nextMonthStart = new Date(year, monthIdx + 1, 1, 0, 0, 0, 0);
+  const msRemaining = Math.max(0, nextMonthStart.getTime() - now.getTime());
+  const daysRemaining = Math.floor(msRemaining / (1000 * 60 * 60 * 24));
+  const hoursRemaining = Math.floor((msRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const monthLabel = `${MONTH_NAMES_PT[monthIdx]}/${year}`;
+  return {
+    seasonKey,
+    seasonNumber,
+    monthLabel,
+    seasonTitle: `Temporada #${seasonNumber} (${monthLabel})`,
+    daysRemaining,
+    hoursRemaining,
+    countdownLabel: `${daysRemaining}d ${hoursRemaining}h`
+  };
+}
+window.getCurrentSeasonInfo = getCurrentSeasonInfo;
+
+function normalizeAccountProfileForCurrentSeason(entry) {
+  if (!entry) return entry;
+  const curSeason = getCurrentSeasonInfo();
+  if (entry.seasonKey !== curSeason.seasonKey) {
+    entry.rating = 1000;
+    entry.highestRating = 1000;
+    entry.tier = 'Beginner League';
+    entry.deck = [...STARTER_TEAM_INDICES];
+    entry.seasonKey = curSeason.seasonKey;
+  }
+  return entry;
+}
+
+function checkAndApplyMonthlySeasonReset(syncCloudAfterReset = false) {
+  const curSeason = getCurrentSeasonInfo();
+  let storedSeason = '';
+  try {
+    storedSeason = localStorage.getItem(SEASON_STORAGE_KEY) || '';
+  } catch (e) {}
+
+  const p = window.trainerProfileData || {};
+  const progSeason = (typeof playerProgression !== 'undefined' && playerProgression) ? (playerProgression.seasonKey || '') : '';
+
+  const needsReset = (storedSeason !== curSeason.seasonKey) ||
+                     (p.seasonKey !== curSeason.seasonKey) ||
+                     (progSeason !== curSeason.seasonKey);
+
+  if (!needsReset) return false;
+
+  // 1. Reset Points to 1000 for the new Monthly Season
+  if (window.trainerProfileData) {
+    window.trainerProfileData.rankRating = 1000;
+    window.trainerProfileData.highestRating = 1000;
+    window.trainerProfileData.leagueTier = 'Beginner';
+    window.trainerProfileData.seasonKey = curSeason.seasonKey;
+    saveIndividualProfile();
+  }
+
+  // 2. Reset all Pokémon back to the Starter Team ([1, 2, 3, 4, 6, 0])
+  playerProgression = createFreshProgressionState();
+  playerProgression.seasonKey = curSeason.seasonKey;
+  saveProgressionState();
+
+  if (typeof FIGURES_DB !== 'undefined' && Array.isArray(FIGURES_DB)) {
+    FIGURES_DB.forEach(f => {
+      f.level = 1;
+      f.clv = 0;
+      f.diskPointsSpent = 0;
+      if (f.baseWheelLv1) f.wheel = f.baseWheelLv1.map(w => ({ ...w }));
+      if (f.wheel) f.clvAlloc = f.wheel.map(() => 0);
+    });
+  }
+  if (typeof saveEconomyAndUpgrades === 'function') saveEconomyAndUpgrades();
+  if (typeof syncProgressionToDeckState === 'function') syncProgressionToDeckState();
+  if (typeof syncAllCurrencyLabels === 'function') syncAllCurrencyLabels();
+  if (typeof syncIndividualProfileUI === 'function') syncIndividualProfileUI();
+  if (typeof renderHubAndCollection === 'function') renderHubAndCollection();
+  if (typeof renderShopExchange === 'function') renderShopExchange();
+
+  // 3. Normalize any cached accounts in the local vault and leaderboard for the new season
+  try {
+    const vault = typeof getLocalAccountsVault === 'function' ? getLocalAccountsVault() : {};
+    let vChanged = false;
+    Object.keys(vault).forEach(h => {
+      if (vault[h] && vault[h].publicProfile && vault[h].publicProfile.seasonKey !== curSeason.seasonKey) {
+        normalizeAccountProfileForCurrentSeason(vault[h].publicProfile);
+        vChanged = true;
+      }
+    });
+    if (vChanged && typeof saveLocalAccountsVault === 'function') {
+      saveLocalAccountsVault(vault);
+    }
+  } catch (e) {}
+
+  try {
+    localStorage.setItem(SEASON_STORAGE_KEY, curSeason.seasonKey);
+  } catch (e) {}
+
+  if (syncCloudAfterReset && typeof cloudAuthSaveNow === 'function') {
+    setTimeout(() => { cloudAuthSaveNow(true).catch(() => {}); }, 200);
+  }
+  return true;
+}
+window.checkAndApplyMonthlySeasonReset = checkAndApplyMonthlySeasonReset;
+
+const REGISTERED_LEADERBOARD_STORAGE_KEY = 'pdr_registered_leaderboard_v656';
+const GLOBAL_RANK_NTFY_TOPIC = 'pokeduel_registered_rank_v656_' + getCurrentSeasonInfo().seasonKey.replace('-', '');
 
 // Clean up any legacy fake/mock leaderboard storage
 try {
   localStorage.removeItem('pdr_real_players_leaderboard_v600');
+  localStorage.removeItem('pdr_registered_leaderboard_v650');
 } catch (e) {}
 
 function getStoredRegisteredPlayers() {
@@ -7853,6 +7979,8 @@ function buildRegisteredAccountPublicProfile(overrideUsername) {
     ? computeEarnedAchievements(p).map(b => b.label)
     : [];
 
+  const curSeason = getCurrentSeasonInfo();
+
   return decorateCreatorLeaderboardEntry({
     id: 'acct_' + (uname || displayNick).toLowerCase().replace(/\s+/g, '_'),
     username: uname.toLowerCase(),
@@ -7863,7 +7991,7 @@ function buildRegisteredAccountPublicProfile(overrideUsername) {
     tier: (p.leagueTier || getTierForRating(currentPts)) + ' League',
     avatar: avatarKey,
     trainerId: p.trainerId || '948-204-182',
-    deck: (typeof state !== 'undefined' && Array.isArray(state.deckP1) && state.deckP1.length === 6) ? [...state.deckP1] : [0, 1, 2, 3, 4, 5],
+    deck: (typeof state !== 'undefined' && Array.isArray(state.deckP1) && state.deckP1.length === 6) ? [...state.deckP1] : [...STARTER_TEAM_INDICES],
     duelStats: {
       totalDuels,
       wins,
@@ -7875,8 +8003,9 @@ function buildRegisteredAccountPublicProfile(overrideUsername) {
     trophies: earnedBadges.length ? earnedBadges : ((Array.isArray(p.trophies) && p.trophies.length) ? p.trophies : ['Conta Registrada 🏆']),
     badges: (Array.isArray(p.badges) && p.badges.length) ? p.badges : ['Jogador Oficial'],
     desc: uname
-      ? `Conta oficial cadastrada (@${uname.toLowerCase()}) na Liga Carmonte.`
-      : 'Perfil oficial de Treinador em Carmonte Island.',
+      ? `Conta oficial cadastrada (@${uname.toLowerCase()}) na Liga Carmonte · ${curSeason.seasonTitle}.`
+      : `Perfil oficial de Treinador em Carmonte Island · ${curSeason.seasonTitle}.`,
+    seasonKey: curSeason.seasonKey,
     isRegistered: true,
     updatedAt: Date.now()
   });
@@ -7895,19 +8024,24 @@ function upsertRegisteredPlayerEntry(entryData) {
     ? entryData.duelStats.winRate
     : (totalDuels > 0 ? ((wins / totalDuels) * 100).toFixed(1) + '%' : '0.0%');
 
+  const curSeason = getCurrentSeasonInfo();
+  const isCurrentSeason = !entryData.seasonKey || entryData.seasonKey === curSeason.seasonKey;
+  const effectiveRating = isCurrentSeason ? ratingVal : 1000;
+  const effectiveDeck = (isCurrentSeason && Array.isArray(entryData.deck) && entryData.deck.length === 6)
+    ? entryData.deck
+    : [...STARTER_TEAM_INDICES];
+
   const normalized = decorateCreatorLeaderboardEntry({
     id: 'acct_' + uname.replace(/\s+/g, '_'),
     username: uname,
     name: rawName,
     title: entryData.title || entryData.titleBadge || 'Treinador Registrado',
-    rating: ratingVal,
-    highestRating: Math.max(ratingVal, Number(entryData.highestRating) || ratingVal),
-    tier: String(entryData.tier || entryData.leagueTier || getTierForRating(ratingVal)).includes('League')
-      ? String(entryData.tier || entryData.leagueTier)
-      : (entryData.leagueTier || getTierForRating(ratingVal)) + ' League',
+    rating: effectiveRating,
+    highestRating: Math.max(effectiveRating, isCurrentSeason ? (Number(entryData.highestRating) || effectiveRating) : 1000),
+    tier: getTierForRating(effectiveRating) + ' League',
     avatar: String(entryData.avatar || 'pikachu').toLowerCase().replace(/\s+/g, '_'),
     trainerId: entryData.trainerId || '---',
-    deck: (Array.isArray(entryData.deck) && entryData.deck.length === 6) ? entryData.deck : [0, 1, 2, 3, 4, 5],
+    deck: effectiveDeck,
     duelStats: {
       totalDuels,
       wins,
@@ -7919,6 +8053,7 @@ function upsertRegisteredPlayerEntry(entryData) {
     trophies: (Array.isArray(entryData.trophies) && entryData.trophies.length) ? entryData.trophies : ['Conta Registrada 🏆'],
     badges: (Array.isArray(entryData.badges) && entryData.badges.length) ? entryData.badges : ['Jogador Oficial'],
     desc: entryData.desc || `Conta oficial cadastrada (@${uname}) na Liga Carmonte.`,
+    seasonKey: curSeason.seasonKey,
     isRegistered: true,
     updatedAt: Number(entryData.updatedAt) || Date.now()
   });
@@ -7989,6 +8124,8 @@ async function syncGlobalRegisteredAccountsFromCloud(force = false) {
 window.syncGlobalRegisteredAccountsFromCloud = syncGlobalRegisteredAccountsFromCloud;
 
 function getGlobalLeaderboardData() {
+  checkAndApplyMonthlySeasonReset(false);
+  const curSeason = getCurrentSeasonInfo();
   const sess = typeof getSavedCloudSession === 'function' ? getSavedCloudSession() : null;
   const selfProf = buildRegisteredAccountPublicProfile(sess ? sess.username : '');
   const player = Object.assign({}, selfProf, {
@@ -8019,7 +8156,8 @@ function getGlobalLeaderboardData() {
       if (!item || !item.username) return;
       const uname = String(item.username).trim().toLowerCase();
       if (item.publicProfile && item.publicProfile.name) {
-        realMap.set(uname, Object.assign({}, item.publicProfile, { id: 'acct_' + uname, username: uname }));
+        const profCopy = normalizeAccountProfileForCurrentSeason(Object.assign({}, item.publicProfile));
+        realMap.set(uname, Object.assign(profCopy, { id: 'acct_' + uname, username: uname }));
       } else {
         realMap.set(uname, {
           id: 'acct_' + uname,
@@ -8031,11 +8169,12 @@ function getGlobalLeaderboardData() {
           tier: 'Beginner League',
           avatar: 'pikachu',
           trainerId: '---',
-          deck: [0, 1, 2, 3, 4, 5],
+          deck: [...STARTER_TEAM_INDICES],
           duelStats: { totalDuels: 0, wins: 0, losses: 0, winRate: '0.0%', currentWinStreak: 0, highestWinStreak: 0 },
           trophies: ['Conta Registrada 🏆'],
           badges: ['Jogador Oficial'],
-          desc: `Conta oficial cadastrada (@${uname}) na Liga Carmonte.`,
+          desc: `Conta oficial cadastrada (@${uname}) na Liga Carmonte · ${curSeason.seasonTitle}.`,
+          seasonKey: curSeason.seasonKey,
           isRegistered: true
         });
       }
@@ -8047,9 +8186,10 @@ function getGlobalLeaderboardData() {
   storedRegistered.forEach(t => {
     if (!t || !t.name) return;
     const key = String(t.username || t.name).trim().toLowerCase();
+    const normT = normalizeAccountProfileForCurrentSeason(Object.assign({}, t));
     const existing = realMap.get(key);
-    if (!existing || (t.updatedAt || 0) >= (existing.updatedAt || 0) || existing.trainerId === '---') {
-      realMap.set(key, Object.assign({}, existing || {}, t, { id: 'acct_' + key }));
+    if (!existing || (normT.updatedAt || 0) >= (existing.updatedAt || 0) || existing.trainerId === '---') {
+      realMap.set(key, Object.assign({}, existing || {}, normT, { id: 'acct_' + key }));
     }
   });
 
@@ -8099,6 +8239,12 @@ function renderGlobalRankings() {
   const container = document.getElementById("global-ranking-list");
   const playerBar = document.getElementById("global-ranking-player-bar");
   if (!container) return;
+
+  const curSeason = getCurrentSeasonInfo();
+  const sTitleEl = document.getElementById("season-banner-title");
+  const sTimerEl = document.getElementById("season-banner-timer");
+  if (sTitleEl) sTitleEl.textContent = `📅 ${curSeason.seasonTitle}`;
+  if (sTimerEl) sTimerEl.textContent = `⏳ Reset em ${curSeason.countdownLabel} (1000 pts + Time Inicial)`;
 
   const { all, player, playerRank } = getGlobalLeaderboardData();
   const top10 = all.slice(0, 10);
@@ -8255,6 +8401,11 @@ window.openGlobalRankingsModal = openGlobalRankingsModal;
 window.closeGlobalRankingsModal = closeGlobalRankingsModal;
 window.inspectTrainerProfile = inspectTrainerProfile;
 window.closeTrainerInspectModal = closeTrainerInspectModal;
+
+// Execute Monthly Season Check on Startup
+try {
+  checkAndApplyMonthlySeasonReset(true);
+} catch (e) {}
 
 // ============================================================================
 // IN-APP USER FEEDBACK & BUG REPORTING (CONFIDENTIAL DISPATCH)
