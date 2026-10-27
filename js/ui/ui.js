@@ -5434,7 +5434,11 @@ const _v500DemoFullMatchState = demoFullMatchState;
 demoFullMatchState = function() {
   _v500DemoFullMatchState();
   enforceStrict6CostPlates();
-  state.plates.forEach(p => { p.used = false; });
+  state.plates.forEach(p => {
+    p.used = false;
+    p.usedP1 = false;
+    p.usedP2 = false;
+  });
   state.isAnimating = false;
   activePieceAnim = null;
   state.preMatchAnim = null;
@@ -5554,6 +5558,7 @@ renderHubAndCollection = function() {
 
 // Override renderPlatesTray so ONLY equipped plates (`!p.disabledInDeck`, max 6 cost) appear in the match!
 renderPlatesTray = function() {
+  if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();
   const grid = document.getElementById("plates-grid");
   if (!grid) return;
   grid.innerHTML = "";

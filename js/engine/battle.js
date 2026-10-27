@@ -1173,6 +1173,8 @@ function applyExplicitTurn(nextTurn, nextCounter) {
   state.activePlate = null;
   state.pendingPlateAction = null;
   state.turn = nextTurn;
+  if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();
+  if (typeof renderPlatesTray === "function") renderPlatesTray();
   state.turnBannerAnim = { turn: nextTurn, t0: performance.now() };
   if (typeof nextCounter === "number") state.turnCounter = nextCounter;
 

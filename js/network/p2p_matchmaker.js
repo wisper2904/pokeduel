@@ -205,8 +205,16 @@ function handleP2PPacket(raw) {
 function handleRemotePlatePacket(msg) {
   if (!msg || !msg.plateId) return;
   if (state.plates) {
-    const oppPlate = state.plates.find(p => p.id === msg.plateId && !p.used);
-    if (oppPlate) oppPlate.used = true;
+    const oppRole = (state.myRole === "p1") ? "p2" : "p1";
+    const oppPlate = state.plates.find(p => p.id === msg.plateId && !(oppRole === "p2" ? p.usedP2 : p.usedP1));
+    if (oppPlate) {
+      if (oppRole === "p2") {
+        oppPlate.usedP2 = true;
+      } else {
+        oppPlate.usedP1 = true;
+      }
+    }
+    if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();
     if (typeof renderPlatesTray === "function") renderPlatesTray();
   }
 

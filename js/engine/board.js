@@ -402,7 +402,11 @@ function demoFullMatchState() {
   state.reviverQueueP2 = [];
   state.excludedP1 = [];
   state.excludedP2 = [];
-  state.plates.forEach(p => p.used = false);
+  state.plates.forEach(p => {
+    p.used = false;
+    p.usedP1 = false;
+    p.usedP2 = false;
+  });
   state.activePlate = null;
   state.abilityJumpActive = false;
   state.longThrowActive = false;
@@ -435,9 +439,43 @@ function demoFullMatchState() {
 function setLogText(txt) { state.logText = txt; }
 function unitAtNode(nodeId) { return state.units.find(u => u.location === "board" && u.nodeId === nodeId) || null; }
 
+function getActivePlateOwner() {
+  if (state.mode === "p2p") return state.myRole || "p1";
+  if (state.mode === "pass") return state.turn || "p1";
+  return "p1";
+}
+
+function syncActivePlayerPlates() {
+  if (!state.plates || !Array.isArray(state.plates)) return;
+  const owner = getActivePlateOwner();
+  state.plates.forEach(p => {
+    if (typeof p.usedP1 !== "boolean") p.usedP1 = false;
+    if (typeof p.usedP2 !== "boolean") p.usedP2 = false;
+    if (state.mode === "p2p" || state.mode === "pass") {
+      p.used = (owner === "p2") ? p.usedP2 : p.usedP1;
+    }
+  });
+}
+
+function markPlateUsedForCurrentOwner(p, val = true) {
+  if (!p) return;
+  const owner = getActivePlateOwner();
+  if (owner === "p2") {
+    p.usedP2 = Boolean(val);
+  } else {
+    p.usedP1 = Boolean(val);
+  }
+  p.used = Boolean(val);
+}
+
+window.getActivePlateOwner = getActivePlateOwner;
+window.syncActivePlayerPlates = syncActivePlayerPlates;
+window.markPlateUsedForCurrentOwner = markPlateUsedForCurrentOwner;
+
 function togglePlatesTray(force) {
   const el = document.getElementById("plates-tray");
   if (!el) return;
+  syncActivePlayerPlates();
   const show = (typeof force === "boolean") ? force : !el.classList.contains("show");
   el.classList.toggle("show", show);
   if (show) renderPlatesTray();
@@ -446,6 +484,7 @@ function togglePlatesTray(force) {
 function toggleZMoveFromTray() {}
 
 function renderPlatesTray() {
+  syncActivePlayerPlates();
   const grid = document.getElementById("plates-grid");
   if (!grid) return;
   grid.innerHTML = "";
@@ -495,9 +534,10 @@ function executeGoalBlockWithUnit(candidate) {
     playSfx("hit");
     return;
   }
+  syncActivePlayerPlates();
   const p = (state.plates && state.plates.find(x => x.id === "goalblock" && !x.used))
          || (state.plates && state.plates.find(x => x.id === "goalblock"));
-  if (p) p.used = true;
+  if (p) markPlateUsedForCurrentOwner(p, true);
   renderPlatesTray();
 
   candidate.location = "board";
@@ -530,6 +570,7 @@ function executeGoalBlockWithUnit(candidate) {
 }
 
 function confirmUseSelectedPlate() {
+  syncActivePlayerPlates();
   const p = state.plates[state.selectedPlateIdx || 0];
   if (!p || !canControlTurn() || p.used || state.isAnimating) return;
 
@@ -553,7 +594,7 @@ function confirmUseSelectedPlate() {
     return;
   }
 
-  p.used = true;
+  markPlateUsedForCurrentOwner(p, true);
   playSfx("portal");
   setLogText(p.log);
   togglePlatesTray(false);
@@ -649,7 +690,7 @@ function confirmUseSelectedPlate() {
       }
       endTurn(false, nextT, nextC);
     } else {
-      p.used = false;
+      markPlateUsedForCurrentOwner(p, false);
       setLogText("⚠️ Pokémon Switch precisa de 1 figura no campo e 1 figura livre no banco!");
     }
   } else if (p.id === "revive") {
@@ -680,7 +721,7 @@ function confirmUseSelectedPlate() {
       }
       endTurn(false, nextT, nextC);
     } else {
-      p.used = false;
+      markPlateUsedForCurrentOwner(p, false);
       setLogText("⚠️ Max Revive requer pelo menos 1 Pokémon no P.C.!");
     }
   } else {
@@ -1447,7 +1488,8 @@ function drawHDVectorBoardAndChrome() {
   ctx.fill();
   ctx.restore();
 
-  const unUsedPlates = (state.plates || []).filter(p => !p.used).length;
+  if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();
+  const unUsedPlates = (state.plates || []).filter(p => !p.disabledInDeck && !p.used).length;
   drawBotBtn(16, 497, 72, 26, "🏳️ Forfeit", false, false);
   drawBotBtn(94, 497, 114, 26, `🎴 Plates (${unUsedPlates})`, true, unUsedPlates > 0);
 
