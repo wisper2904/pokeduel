@@ -1384,12 +1384,14 @@ function drawHDVectorBoardAndChrome() {
     if (state.turn === "p1") state.clockMsP1 = Math.max(0, state.clockMsP1 - dtClk);
     else state.clockMsP2 = Math.max(0, state.clockMsP2 - dtClk);
     if (state.clockMsP1 <= 0 && !state.winCelebrationAnim) {
-      setLogText("⏰ TIME UP! Opponent wins on clock!");
+      const p1Lost = (state.myRole === "p1" || state.mode !== "p2p");
+      setLogText(p1Lost ? "⏰ TEMPO ESGOTADO! Oponente venceu por tempo!" : "⏰ TEMPO ESGOTADO! Você venceu por tempo!");
       state.isMatchActive = false;
       state.matchFinished = true;
       state.winCelebrationAnim = { winner: "p2", t0: nowClk };
     } else if (state.clockMsP2 <= 0 && !state.winCelebrationAnim) {
-      setLogText("⏰ TIME UP! You win on clock!");
+      const p2Lost = (state.myRole === "p2");
+      setLogText(p2Lost ? "⏰ TEMPO ESGOTADO! Oponente venceu por tempo!" : "⏰ TEMPO ESGOTADO! Você venceu por tempo!");
       state.isMatchActive = false;
       state.matchFinished = true;
       state.winCelebrationAnim = { winner: "p1", t0: nowClk };
@@ -1400,15 +1402,42 @@ function drawHDVectorBoardAndChrome() {
     const s = Math.ceil(ms / 1000);
     return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
   };
-  ctx.fillStyle = "#061838"; ctx.fillRect(68, 38, 46, 13);
-  ctx.fillStyle = state.clockMsP1 < 60000 ? "#f87171" : "#bae6fd";
-  ctx.font = "900 10px monospace"; ctx.textAlign = "left";
-  ctx.fillText(fmtClk(state.clockMsP1), 70, 45.5);
 
-  ctx.fillStyle = "#3b0714"; ctx.fillRect(238, 38, 46, 13);
-  ctx.fillStyle = state.clockMsP2 < 60000 ? "#fde047" : "#fecdd3";
-  ctx.textAlign = "right";
-  ctx.fillText(fmtClk(state.clockMsP2), 282, 45.5);
+  const isP2Viewer = (getBottomRole() === "p2");
+  const myClock = isP2Viewer ? state.clockMsP2 : state.clockMsP1;
+  const oppClock = isP2Viewer ? state.clockMsP1 : state.clockMsP2;
+  const isMyTurn = (state.turn === (isP2Viewer ? "p2" : "p1"));
+
+  // Left Clock Box: ALWAYS the viewer's clock (VOCÊ)
+  ctx.fillStyle = isP2Viewer ? "#3b0714" : "#061838";
+  ctx.fillRect(66, 36, 52, 16);
+  ctx.strokeStyle = isMyTurn ? "#facc15" : (isP2Viewer ? "#f43f5e" : "#38bdf8");
+  ctx.lineWidth = isMyTurn ? 1.8 : 0.8;
+  ctx.strokeRect(66, 36, 52, 16);
+
+  ctx.fillStyle = isMyTurn ? "#facc15" : (isP2Viewer ? "#fca5a5" : "#93c5fd");
+  ctx.font = "900 6.5px sans-serif"; ctx.textAlign = "left";
+  ctx.fillText(isP2Viewer ? "🔴 VOCÊ (P2)" : "🔵 VOCÊ (P1)", 68, 41.5);
+
+  ctx.fillStyle = myClock < 60000 ? "#ef4444" : (isP2Viewer ? "#fecdd3" : "#bae6fd");
+  ctx.font = "900 9.5px monospace"; ctx.textAlign = "left";
+  ctx.fillText(fmtClk(myClock), 68, 50);
+
+  // Right Clock Box: ALWAYS the opponent's clock (RIVAL / IA)
+  const oppRoleLbl = isP2Viewer ? "🔵 RIVAL (P1)" : (state.mode === "p2p" ? "🔴 RIVAL (P2)" : "🔴 IA (P2)");
+  ctx.fillStyle = isP2Viewer ? "#061838" : "#3b0714";
+  ctx.fillRect(235, 36, 52, 16);
+  ctx.strokeStyle = !isMyTurn ? "#facc15" : (isP2Viewer ? "#38bdf8" : "#f43f5e");
+  ctx.lineWidth = !isMyTurn ? 1.8 : 0.8;
+  ctx.strokeRect(235, 36, 52, 16);
+
+  ctx.fillStyle = !isMyTurn ? "#facc15" : (isP2Viewer ? "#93c5fd" : "#fca5a5");
+  ctx.font = "900 6.5px sans-serif"; ctx.textAlign = "right";
+  ctx.fillText(oppRoleLbl, 285, 41.5);
+
+  ctx.fillStyle = oppClock < 60000 ? "#ef4444" : (isP2Viewer ? "#bae6fd" : "#fecdd3");
+  ctx.font = "900 9.5px monospace"; ctx.textAlign = "right";
+  ctx.fillText(fmtClk(oppClock), 285, 50);
 
   // 7c. First-Turn -1 MP Indicator Badge when turnCounter === 300
   if (state.turnCounter === 300) {
@@ -1924,11 +1953,14 @@ function drawVideoMatchOverlays() {
   if (state.preMatchAnim) {
     const elapsed = now - state.preMatchAnim.t0;
     const firstWinner = state.preMatchAnim.firstWinner || state.turn || "p1";
-    const isBottomFirst = (firstWinner === getBottomRole());
     const myNick = (window.trainerProfileData && window.trainerProfileData.nickname) ? window.trainerProfileData.nickname : "Você";
     const oppNick = (state.mode === "p2p" && remoteOpponentProfile && remoteOpponentProfile.nickname)
       ? remoteOpponentProfile.nickname
       : (window.adaptiveAIOpponentName || "IA Estratégica");
+
+    const p1Nick = (state.myRole === "p2") ? oppNick : myNick;
+    const p2Nick = (state.myRole === "p2") ? myNick : oppNick;
+    const isP1First = (firstWinner === "p1");
 
     if (elapsed < 1550) {
       ctx.save();
@@ -1938,12 +1970,12 @@ function drawVideoMatchOverlays() {
       const bx = 52, by = 140, bw = 249, bh = 249;
       const landed = (elapsed > 980);
 
-      // Top-Right Red Triangle (Opponent / AI)
-      ctx.fillStyle = (landed && !isBottomFirst) ? "#b91c1c" : "#651515";
+      // Top-Right Red Triangle (Player 2 / Vermelho / IA)
+      ctx.fillStyle = (landed && !isP1First) ? "#b91c1c" : "#651515";
       ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, by + bh); ctx.closePath(); ctx.fill();
 
-      // Bottom-Left Blue Triangle (Local Player)
-      ctx.fillStyle = (landed && isBottomFirst) ? "#1d4ed8" : "#152c69";
+      // Bottom-Left Blue Triangle (Player 1 / Azul / Host)
+      ctx.fillStyle = (landed && isP1First) ? "#1d4ed8" : "#152c69";
       ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.closePath(); ctx.fill();
 
       // Highlight glow on winning half once landed
@@ -1951,7 +1983,7 @@ function drawVideoMatchOverlays() {
         ctx.strokeStyle = "#fde047";
         ctx.lineWidth = 3;
         ctx.beginPath();
-        if (isBottomFirst) {
+        if (isP1First) {
           ctx.moveTo(bx, by); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.closePath();
         } else {
           ctx.moveTo(bx, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, by + bh); ctx.closePath();
@@ -1974,17 +2006,19 @@ function drawVideoMatchOverlays() {
       ctx.textAlign = "center";
       ctx.fillText("🎲 ROLETA DE 1º TURNO (50% / 50%)", bx + bw / 2, by - 10);
 
-      // Names inside corners
-      ctx.fillStyle = "#ffffff"; ctx.font = "900 12px sans-serif";
-      ctx.textAlign = "right"; ctx.fillText("🔴 " + oppNick, bx + bw - 12, by + 22);
-      ctx.textAlign = "left";  ctx.fillText("🔵 " + myNick, bx + 12, by + bh - 12);
+      // Names inside corners - Consistent with internal P1 (Blue) and P2 (Red)
+      ctx.fillStyle = "#ffffff"; ctx.font = "900 11px sans-serif";
+      const p2Label = "🔴 " + p2Nick + (state.myRole === "p2" ? " (Você · P2)" : (state.mode === "p2p" ? " (Rival · P2)" : " (IA · P2)"));
+      const p1Label = "🔵 " + p1Nick + (state.myRole === "p1" ? " (Você · P1)" : " (Rival · P1)");
+      ctx.textAlign = "right"; ctx.fillText(p2Label, bx + bw - 12, by + 22);
+      ctx.textAlign = "left";  ctx.fillText(p1Label, bx + 12, by + bh - 12);
 
       // Center spinner needle with true target angle:
-      // At ang = 0, needle (0, -42) points UP.
+      // At ang = 0, needle points UP.
       // Top-Right Red triangle center is +45 deg (Math.PI * 0.25).
       // Bottom-Left Blue triangle center is +225 deg (Math.PI * 1.25).
       const cx = bx + bw / 2, cy = by + bh / 2;
-      const targetAngle = isBottomFirst ? (Math.PI * 8 + Math.PI * 1.25) : (Math.PI * 8 + Math.PI * 0.25);
+      const targetAngle = isP1First ? (Math.PI * 8 + Math.PI * 1.25) : (Math.PI * 8 + Math.PI * 0.25);
       const spinP = Math.min(1, elapsed / 980);
       const easeOut = 1 - Math.pow(1 - spinP, 3.5);
       const ang = easeOut * targetAngle;
@@ -2005,14 +2039,16 @@ function drawVideoMatchOverlays() {
       if (landed) {
         ctx.fillStyle = "#fde047"; ctx.font = "900 20px sans-serif";
         ctx.textAlign = "center"; ctx.shadowColor = "#000000"; ctx.shadowBlur = 8;
-        if (isBottomFirst) {
+        if (isP1First) {
           ctx.fillText("FIRST!", cx - 50, cy + 44);
           ctx.font = "900 10px sans-serif"; ctx.fillStyle = "#bae6fd";
-          ctx.fillText("Você começa (-1 MP)", cx - 50, cy + 60);
+          const startTxt = (state.myRole === "p1") ? "Você começa (-1 MP)" : (p1Nick + " começa (-1 MP)");
+          ctx.fillText(startTxt + " · P1", cx - 50, cy + 60);
         } else {
           ctx.fillText("FIRST!", cx + 50, cy - 36);
           ctx.font = "900 10px sans-serif"; ctx.fillStyle = "#fecaca";
-          ctx.fillText(oppNick + " começa (-1 MP)", cx + 50, cy - 20);
+          const startTxt = (state.myRole === "p2") ? "Você começa (-1 MP)" : (p2Nick + " começa (-1 MP)");
+          ctx.fillText(startTxt + " · P2", cx + 50, cy - 20);
         }
       } else {
         ctx.fillStyle = "#ffffff"; ctx.font = "900 18px sans-serif";
@@ -2628,12 +2664,8 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
     }
     const enemy = chosenEnemyNode !== null ? unitAtNode(chosenEnemyNode) : null;
     if (enemy) {
-      let atkSpin = spinWheelForUnit(u, true);
+      const atkSpin = spinWheelForUnit(u, true);
       const defSpin = spinWheelForUnit(enemy, false);
-      if (state.activePlate === "double") {
-        const prev = evaluateCombat(u, enemy, atkSpin, defSpin);
-        if (prev.winner !== "atk") atkSpin = spinWheelForUnit(u, true);
-      }
       precomputedCombat = { atkUid: u.uid, defUid: enemy.uid, atkSpin, defSpin };
     }
   }

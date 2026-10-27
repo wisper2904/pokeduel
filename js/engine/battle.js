@@ -409,19 +409,30 @@ const ddCtx = ddCanvas.getContext("2d");
 
 let activeBattleRespinFn = null;
 let activeBattleAcceptFn = null;
+let pendingP2PDoubleChanceMsg = null;
+let currentCombatDoubleChanceHandler = null;
+
+window.handleP2PDoubleChanceChoice = function(msg) {
+  if (typeof currentCombatDoubleChanceHandler === "function") {
+    currentCombatDoubleChanceHandler(msg);
+  } else {
+    pendingP2PDoubleChanceMsg = msg;
+  }
+};
 ddCanvas.addEventListener("pointerdown", (e) => {
   const rect = ddCanvas.getBoundingClientRect();
   const sx = (e.clientX - rect.left) * (LOGICAL_W / rect.width);
   const sy = (e.clientY - rect.top) * (LOGICAL_H / rect.height);
-  if (state.doubleChanceWaitingChoice) {
-    if (sx >= 180 && sy >= 460 && sy <= 525 && activeBattleRespinFn) {
+  if (state.doubleChanceWaitingChoice && activeBattleRespinFn) {
+    if (sx >= 180 && sy >= 460 && sy <= 530) {
       activeBattleRespinFn();
       return;
     }
-    if (sx < 180 && sy >= 460 && sy <= 525 && activeBattleAcceptFn) {
+    if (sx < 180 && sy >= 460 && sy <= 530 && activeBattleAcceptFn) {
       activeBattleAcceptFn();
       return;
     }
+    return;
   }
   if (ddCanClose) closeBattleOverlay();
 });
@@ -435,22 +446,15 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
   let atkSpin = (forcedSpins && forcedSpins.atkSpin) ? forcedSpins.atkSpin : spinWheelForUnit(atkUnit, true);
   let defSpin = (forcedSpins && forcedSpins.defSpin) ? forcedSpins.defSpin : spinWheelForUnit(defUnit, false);
 
-  // Z-Move removido a pedido do jogador
   const antiRespinOnField = state.units.some(u => u.location === "board" && (u.baseId === "dialga_o" || u.baseId === "metagross"));
-  if (state.doubleChanceArmed && antiRespinOnField) {
+  const isDoubleChanceArmed = Boolean(state.doubleChanceArmed || (forcedSpins && forcedSpins.doubleChanceArmed));
+  if (isDoubleChanceArmed && antiRespinOnField) {
     setLogText("🛡️ Re-Spin bloqueado pela passiva Hyper Sonic / Temporal Lock em campo!");
-    state.doubleChanceArmed = false;
   }
-  if (state.mode === "p2p" && state.doubleChanceArmed && !antiRespinOnField && !(forcedSpins && forcedSpins.atkSpin)) {
-    const firstTry = evaluateCombat(atkUnit, defUnit, atkSpin, defSpin);
-    if (firstTry.winner !== "atk") {
-      atkSpin = spinWheelForUnit(atkUnit, true);
-    }
-    state.doubleChanceArmed = false;
-  }
-  const canInteractiveDoubleChance = (state.mode !== "p2p") && state.doubleChanceArmed && !antiRespinOnField && (atkUnit.owner === getBottomRole()) && (!forcedSpins || hasManualSpin);
+  const isDoubleChanceActive = isDoubleChanceArmed && !antiRespinOnField;
   state.doubleChanceArmed = false;
   state.doubleChanceWaitingChoice = false;
+  state.doubleChanceUsedOnce = false;
   state.activePlate = null;
   renderPlatesTray();
 
@@ -468,6 +472,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       defUid: defUnit.uid,
       atkSpin,
       defSpin,
+      doubleChanceArmed: isDoubleChanceActive,
       nextTurn: nextTurnVal,
       nextTurnCounter: nextCounterVal
     });
@@ -486,6 +491,40 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
   const isMyUnitAttacker = (atkUnit.owner === botRole);
   const myUnit  = isMyUnitAttacker ? atkUnit : defUnit;
   const oppUnit = isMyUnitAttacker ? defUnit : atkUnit;
+  const canInteractiveDoubleChance = isDoubleChanceActive && isMyUnitAttacker;
+  let isRespinningAttacker = false;
+  let aiRespinTimeout = null;
+
+  function triggerAttackerRespin(newSpin) {
+    state.doubleChanceWaitingChoice = false;
+    state.doubleChanceUsedOnce = true;
+    activeBattleRespinFn = null;
+    activeBattleAcceptFn = null;
+    playSfx("portal");
+    atkSpin = newSpin;
+    Object.assign(outcome, evaluateCombat(atkUnit, defUnit, atkSpin, defSpin));
+    isRespinningAttacker = true;
+    stageIdx = 0;
+    stageStart = performance.now();
+    stageHoldAnnounced = false;
+    allSpinStagesFinished = false;
+  }
+
+  currentCombatDoubleChanceHandler = function(msg) {
+    if (!state.doubleChanceWaitingChoice && !allSpinStagesFinished) {
+      pendingP2PDoubleChanceMsg = msg;
+      return;
+    }
+    if (msg.action === "keep") {
+      state.doubleChanceWaitingChoice = false;
+      state.doubleChanceUsedOnce = true;
+      activeBattleRespinFn = null;
+      activeBattleAcceptFn = null;
+      postSpinStart = performance.now();
+    } else if (msg.action === "respin" && msg.newAtkSpin) {
+      triggerAttackerRespin(msg.newAtkSpin);
+    }
+  };
 
   // Exact contact angles from each wheel's center to the Central Clash Point (176.5, 265):
   // Top-Right Opponent Wheel center = (220, 146) -> ray to (176.5, 265) is atan2(119, -43.5) = +1.9337 rad
@@ -611,13 +650,15 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     const oppSpin = isMyUnitAttacker ? defSpin : atkSpin;
     const mySteps  = (mySpin.spinSteps && mySpin.spinSteps.length > 0) ? mySpin.spinSteps : [{ idx: mySpin.chosenIdx, sliceFrac: mySpin.sliceFrac, extraTurns: 6, isMultiHit: false, stoppedChain: false, hits: 1, unitDmg: mySpin.chosen.dmg, accumDmg: mySpin.chosen.dmg, landedName: mySpin.chosen.name }];
     const oppSteps = (oppSpin.spinSteps && oppSpin.spinSteps.length > 0) ? oppSpin.spinSteps : [{ idx: oppSpin.chosenIdx, sliceFrac: oppSpin.sliceFrac, extraTurns: 6, isMultiHit: false, stoppedChain: false, hits: 1, unitDmg: oppSpin.chosen.dmg, accumDmg: oppSpin.chosen.dmg, landedName: oppSpin.chosen.name }];
-    const totalStages = Math.max(mySteps.length, oppSteps.length);
+    const totalStages = isRespinningAttacker
+      ? (isMyUnitAttacker ? mySteps.length : oppSteps.length)
+      : Math.max(mySteps.length, oppSteps.length);
 
     const curStageIdx = Math.min(stageIdx, totalStages - 1);
     const myActiveStep  = mySteps[Math.min(curStageIdx, mySteps.length - 1)];
     const oppActiveStep = oppSteps[Math.min(curStageIdx, oppSteps.length - 1)];
-    const isMyWheelSpinningThisStage  = !allSpinStagesFinished && (curStageIdx < mySteps.length);
-    const isOppWheelSpinningThisStage = !allSpinStagesFinished && (curStageIdx < oppSteps.length);
+    const isMyWheelSpinningThisStage  = !allSpinStagesFinished && (isRespinningAttacker ? isMyUnitAttacker : (curStageIdx < mySteps.length));
+    const isOppWheelSpinningThisStage = !allSpinStagesFinished && (isRespinningAttacker ? !isMyUnitAttacker : (curStageIdx < oppSteps.length));
 
     const stageSpinDur = (curStageIdx === 0) ? 1420 : 1020;
     const stageHoldDur = (totalStages > 1) ? 880 : 0;
@@ -701,29 +742,56 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     }
     ddCtx.clearRect(-10, -10, LOGICAL_W + 20, LOGICAL_H + 20);
 
-    // Interactive Double Chance prompt once all spin stages finish!
-    if (allSpinStagesFinished && !impactTriggered && canInteractiveDoubleChance && !state.doubleChanceUsedOnce) {
+    // Interactive Double Chance prompt once all initial spin stages finish!
+    if (allSpinStagesFinished && !impactTriggered && isDoubleChanceActive && !state.doubleChanceUsedOnce) {
+      if (pendingP2PDoubleChanceMsg) {
+        const pm = pendingP2PDoubleChanceMsg;
+        pendingP2PDoubleChanceMsg = null;
+        window.handleP2PDoubleChanceChoice(pm);
+        return requestAnimationFrame(renderDataDiskFrame);
+      }
+
       state.doubleChanceWaitingChoice = true;
-      activeBattleRespinFn = () => {
-        state.doubleChanceWaitingChoice = false;
-        state.doubleChanceUsedOnce = true;
-        playSfx("portal");
-        atkSpin = spinWheelForUnit(atkUnit, true);
-        Object.assign(outcome, evaluateCombat(atkUnit, defUnit, atkSpin, defSpin));
-        stageIdx = 0;
-        stageStart = performance.now();
-        stageHoldAnnounced = false;
-        allSpinStagesFinished = false;
-      };
-      activeBattleAcceptFn = () => {
-        state.doubleChanceWaitingChoice = false;
-        state.doubleChanceUsedOnce = true;
-        postSpinStart = performance.now();
-      };
+      if (canInteractiveDoubleChance) {
+        activeBattleRespinFn = () => {
+          const freshSpin = spinWheelForUnit(atkUnit, true);
+          if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+            sendP2PPacket({ type: "P2P_DOUBLE_CHANCE_CHOICE", action: "respin", newAtkSpin: freshSpin });
+          }
+          triggerAttackerRespin(freshSpin);
+        };
+        activeBattleAcceptFn = () => {
+          state.doubleChanceWaitingChoice = false;
+          state.doubleChanceUsedOnce = true;
+          activeBattleRespinFn = null;
+          activeBattleAcceptFn = null;
+          if (state.mode === "p2p" && typeof sendP2PPacket === "function") {
+            sendP2PPacket({ type: "P2P_DOUBLE_CHANCE_CHOICE", action: "keep" });
+          }
+          postSpinStart = performance.now();
+        };
+      } else if (state.mode === "ai" && !isMyUnitAttacker) {
+        if (!aiRespinTimeout) {
+          aiRespinTimeout = setTimeout(() => {
+            aiRespinTimeout = null;
+            if (outcome.winner !== "atk") {
+              const aiFreshSpin = spinWheelForUnit(atkUnit, true);
+              triggerAttackerRespin(aiFreshSpin);
+            } else {
+              state.doubleChanceWaitingChoice = false;
+              state.doubleChanceUsedOnce = true;
+              postSpinStart = performance.now();
+            }
+          }, 650);
+        }
+      }
     }
 
-    // Trigger outcome resolution once all spin stages (including all multiplier re-spins!) are complete
+    // Trigger outcome resolution once all spin stages (including Double Chance re-spin!) are complete
     if (allSpinStagesFinished && !impactTriggered && !state.doubleChanceWaitingChoice) {
+      if (isRespinningAttacker) {
+        isRespinningAttacker = false;
+      }
       impactTriggered = true;
       state.doubleChanceUsedOnce = false;
       playSfx("hit");
@@ -882,23 +950,34 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     ddCtx.stroke();
     ddCtx.restore();
 
-    // Interactive Double Chance Buttons (Clean bottom placement outside wheels)
+    // Interactive Double Chance Buttons or Waiting Banner (Clean bottom placement outside wheels)
     if (state.doubleChanceWaitingChoice) {
       ddCtx.save();
-      ddCtx.fillStyle = "rgba(9, 13, 22, 0.94)";
-      ddCtx.fillRect(18, 466, 317, 56);
-      ddCtx.fillStyle = "#fde047"; ddCtx.font = "900 10px sans-serif"; ddCtx.textAlign = "center";
-      ddCtx.fillText("DOUBLE CHANCE — Aceitar giro ou Re-girar Roleta?", 176.5, 479);
+      if (canInteractiveDoubleChance) {
+        ddCtx.fillStyle = "rgba(9, 13, 22, 0.94)";
+        ddCtx.fillRect(18, 466, 317, 56);
+        ddCtx.strokeStyle = "#facc15"; ddCtx.lineWidth = 1.5;
+        ddCtx.strokeRect(18, 466, 317, 56);
+        ddCtx.fillStyle = "#fde047"; ddCtx.font = "900 10px sans-serif"; ddCtx.textAlign = "center";
+        ddCtx.fillText("DOUBLE CHANCE — Aceitar giro atual ou Re-girar?", 176.5, 479);
 
-      ddCtx.fillStyle = "#15803d"; ddCtx.strokeStyle = "#86efac"; ddCtx.lineWidth = 1.5;
-      ddCtx.beginPath(); ddCtx.roundRect(28, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
-      ddCtx.fillStyle = "#ffffff"; ddCtx.font = "900 11px sans-serif";
-      ddCtx.fillText("✓ Manter", 97, 501.5);
+        ddCtx.fillStyle = "#15803d"; ddCtx.strokeStyle = "#86efac"; ddCtx.lineWidth = 1.5;
+        ddCtx.beginPath(); ddCtx.roundRect(28, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
+        ddCtx.fillStyle = "#ffffff"; ddCtx.font = "900 11px sans-serif";
+        ddCtx.fillText("✓ Manter", 97, 501.5);
 
-      ddCtx.fillStyle = "#b45309"; ddCtx.strokeStyle = "#fde047"; ddCtx.lineWidth = 1.5;
-      ddCtx.beginPath(); ddCtx.roundRect(186, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
-      ddCtx.fillStyle = "#fef08a"; ddCtx.font = "900 11px sans-serif";
-      ddCtx.fillText("↻ Re-Girar", 255, 501.5);
+        ddCtx.fillStyle = "#b45309"; ddCtx.strokeStyle = "#fde047"; ddCtx.lineWidth = 1.5;
+        ddCtx.beginPath(); ddCtx.roundRect(186, 486, 138, 30, 5); ddCtx.fill(); ddCtx.stroke();
+        ddCtx.fillStyle = "#fef08a"; ddCtx.font = "900 11px sans-serif";
+        ddCtx.fillText("↻ Re-Girar", 255, 501.5);
+      } else {
+        ddCtx.fillStyle = "rgba(9, 13, 22, 0.94)";
+        ddCtx.fillRect(18, 474, 317, 38);
+        ddCtx.strokeStyle = "#38bdf8"; ddCtx.lineWidth = 1.5;
+        ddCtx.strokeRect(18, 474, 317, 38);
+        ddCtx.fillStyle = "#38bdf8"; ddCtx.font = "900 11px sans-serif"; ddCtx.textAlign = "center";
+        ddCtx.fillText("⏳ Oponente avaliando Double Chance...", 176.5, 497);
+      }
       ddCtx.restore();
     }
 
@@ -1019,7 +1098,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     // ======================================================================
     // CINEMATIC ATTACK IMPACT ANIMATION (Elemental Slash / Sonic Beam / Shield FX)
     // ======================================================================
-    if (allSpinStagesFinished && postElapsed > 50 && postElapsed < 1250 && outcome) {
+    if (allSpinStagesFinished && postElapsed > 50 && postElapsed < 1250 && outcome && !state.doubleChanceWaitingChoice && !isRespinningAttacker) {
       const isWinnerAtk = (outcome.winner === "atk");
       const isWinnerDef = (outcome.winner === "def");
       const hasWinner = (isWinnerAtk || isWinnerDef);
@@ -1121,7 +1200,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
 
     // Auto-close battle screen after wheels finish spinning and outcome is clearly shown
     const closeWaitMs = (totalStages > 1) ? 1900 : 1500;
-    if (allSpinStagesFinished && postElapsed > closeWaitMs && ddCanClose && !state.doubleChanceWaitingChoice) {
+    if (allSpinStagesFinished && postElapsed > closeWaitMs && ddCanClose && !state.doubleChanceWaitingChoice && !isRespinningAttacker) {
       closeBattleOverlay();
       return;
     }
@@ -1142,6 +1221,11 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
 function closeBattleOverlay() {
   document.getElementById("wheel-overlay").classList.remove("show");
   if (ddAnimId) cancelAnimationFrame(ddAnimId);
+  activeBattleRespinFn = null;
+  activeBattleAcceptFn = null;
+  currentCombatDoubleChanceHandler = null;
+  pendingP2PDoubleChanceMsg = null;
+  state.doubleChanceWaitingChoice = false;
   if (pendingCombatTurnInfo) {
     const info = pendingCombatTurnInfo;
     pendingCombatTurnInfo = null;

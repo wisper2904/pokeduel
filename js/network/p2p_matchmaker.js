@@ -146,10 +146,11 @@ function startP2PMatch(role, firstWinner) {
 
   const isMine = (state.myRole === winner);
   const oppNick = (remoteOpponentProfile && remoteOpponentProfile.nickname) ? remoteOpponentProfile.nickname : "Rival";
+  const winnerRole = (winner === "p1") ? "Player 1 · Azul" : "Player 2 · Vermelho";
   if (isMine) {
-    setLogText(`🎲 Roleta de 1º Turno: VOCÊ começa o duelo (-1 MP)!`);
+    setLogText(`🎲 Roleta de 1º Turno: VOCÊ começa o duelo (-1 MP)! (${winnerRole})`);
   } else {
-    setLogText(`🎲 Roleta de 1º Turno: ${oppNick} começa o duelo (-1 MP)!`);
+    setLogText(`🎲 Roleta de 1º Turno: ${oppNick} começa o duelo (-1 MP)! (${winnerRole})`);
   }
 }
 
@@ -278,9 +279,14 @@ function handleP2PPacket(raw) {
         triggerCombat(atk, def, false, {
           atkSpin: msg.atkSpin,
           defSpin: msg.defSpin,
+          doubleChanceArmed: Boolean(msg.doubleChanceArmed),
           nextTurn: msg.nextTurn,
           nextTurnCounter: msg.nextTurnCounter
         });
+      }
+    } else if (msg.type === "P2P_DOUBLE_CHANCE_CHOICE") {
+      if (typeof handleP2PDoubleChanceChoice === "function") {
+        handleP2PDoubleChanceChoice(msg);
       }
     } else if (msg.type === "StockGo") {
       applyExplicitTurn(msg.nextTurn, msg.turnCounter);
