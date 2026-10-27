@@ -4501,6 +4501,25 @@ function saveIndividualProfile() {
   } catch (e) {}
 }
 
+const OFFICIAL_CREATOR_TRAINER_ID = "484-861-517";
+
+function isOfficialCreatorProfile(p) {
+  if (!p) return false;
+  const tid = String(p.trainerId || "").trim();
+  if (tid === OFFICIAL_CREATOR_TRAINER_ID) return true;
+  const n = String(p.nickname || p.name || p.username || "").trim().toLowerCase();
+  if (n === "wisper" || n === "wisper2904") return true;
+  try {
+    const sess = typeof getSavedCloudSession === "function" ? getSavedCloudSession() : null;
+    if (p === window.trainerProfileData && sess && sess.username) {
+      const su = String(sess.username).trim().toLowerCase();
+      if (su === "wisper" || su === "wisper2904") return true;
+    }
+  } catch (e) {}
+  return false;
+}
+window.isOfficialCreatorProfile = isOfficialCreatorProfile;
+
 function computeEarnedAchievements(p) {
   const badges = [];
   const wins = (p.duelStats && p.duelStats.wins) || 0;
@@ -4508,6 +4527,10 @@ function computeEarnedAchievements(p) {
   const maxElo = p.highestRating || 1000;
   const unlockedCnt = (playerProgression && playerProgression.unlockedFigures) ? playerProgression.unlockedFigures.length : 6;
 
+  if (isOfficialCreatorProfile(p)) {
+    badges.push({ label: "👑 Criador Oficial do Jogo (Dev)", bg: "linear-gradient(90deg,#78350f,#b45309)", border: "#facc15", col: "#fef08a" });
+    badges.push({ label: "🏆 Fundador do PokeDuel (ID 484-861-517)", bg: "#3b0764", border: "#e879f9", col: "#fae8ff" });
+  }
   if (wins >= 1) badges.push({ label: "🏅 1ª Vitória Conquistada", bg: "#14532d", border: "#4ade80", col: "#dcfce7" });
   if (wins >= 5) badges.push({ label: "⚔️ 5 Vitórias em Duelos", bg: "#0c4a6e", border: "#38bdf8", col: "#bae6fd" });
   if (wins >= 15) badges.push({ label: "🏆 Campeão de Carmonte (15V)", bg: "#422006", border: "#facc15", col: "#fef08a" });
@@ -4521,6 +4544,19 @@ function computeEarnedAchievements(p) {
 function syncIndividualProfileUI() {
   const p = window.trainerProfileData;
   if (!p) return;
+  if (isOfficialCreatorProfile(p)) {
+    p.trainerId = OFFICIAL_CREATOR_TRAINER_ID;
+    if (!p.titleBadge || p.titleBadge === "Treinador Iniciante") {
+      p.titleBadge = "👑 Criador Oficial do Jogo";
+    }
+    const tSel = document.getElementById("prof-title-select");
+    if (tSel && !Array.from(tSel.options).some(o => o.value === "👑 Criador Oficial do Jogo")) {
+      const opt = document.createElement("option");
+      opt.value = "👑 Criador Oficial do Jogo";
+      opt.textContent = "👑 Criador Oficial do Jogo";
+      tSel.insertBefore(opt, tSel.firstChild);
+    }
+  }
   p.leagueTier = getTierForRating(p.rankRating || 1000);
   playerProfileName = p.nickname || "Treinador";
 
@@ -7770,6 +7806,25 @@ function saveStoredRegisteredPlayers(list) {
   } catch (e) {}
 }
 
+function decorateCreatorLeaderboardEntry(entry) {
+  if (!entry) return entry;
+  if (isOfficialCreatorProfile(entry)) {
+    entry.isCreator = true;
+    entry.trainerId = OFFICIAL_CREATOR_TRAINER_ID;
+    if (!entry.title || entry.title === 'Treinador Registrado' || entry.title === 'Conta Cadastrada' || entry.title === 'Treinador Iniciante') {
+      entry.title = '👑 Criador Oficial do Jogo';
+    }
+    const baseTrophies = ['👑 Criador Oficial do Jogo 🏆', '🛠️ Fundador & Desenvolvedor PokeDuel'];
+    const existingTr = Array.isArray(entry.trophies) ? entry.trophies : [];
+    entry.trophies = [...new Set([...baseTrophies, ...existingTr])];
+    const baseBadges = ['👑 Criador do Jogo', 'Dev Oficial'];
+    const existingBd = Array.isArray(entry.badges) ? entry.badges : [];
+    entry.badges = [...new Set([...baseBadges, ...existingBd])];
+    entry.desc = '👑 Conta Oficial do Criador e Desenvolvedor do PokeDuel (ID: 484-861-517).';
+  }
+  return entry;
+}
+
 function buildRegisteredAccountPublicProfile(overrideUsername) {
   const sess = typeof getSavedCloudSession === 'function' ? getSavedCloudSession() : null;
   const p = window.trainerProfileData || {};
@@ -7794,7 +7849,11 @@ function buildRegisteredAccountPublicProfile(overrideUsername) {
   const totalDuels = (p.duelStats && Number(p.duelStats.totalDuels)) || (wins + losses);
   const winRate = totalDuels > 0 ? ((wins / totalDuels) * 100).toFixed(1) + '%' : '0.0%';
 
-  return {
+  const earnedBadges = typeof computeEarnedAchievements === 'function'
+    ? computeEarnedAchievements(p).map(b => b.label)
+    : [];
+
+  return decorateCreatorLeaderboardEntry({
     id: 'acct_' + (uname || displayNick).toLowerCase().replace(/\s+/g, '_'),
     username: uname.toLowerCase(),
     name: displayNick,
@@ -7813,14 +7872,14 @@ function buildRegisteredAccountPublicProfile(overrideUsername) {
       currentWinStreak: (p.duelStats && Number(p.duelStats.currentWinStreak)) || 0,
       highestWinStreak: (p.duelStats && Number(p.duelStats.highestWinStreak)) || 0
     },
-    trophies: (Array.isArray(p.trophies) && p.trophies.length) ? p.trophies : ['Conta Registrada 🏆'],
+    trophies: earnedBadges.length ? earnedBadges : ((Array.isArray(p.trophies) && p.trophies.length) ? p.trophies : ['Conta Registrada 🏆']),
     badges: (Array.isArray(p.badges) && p.badges.length) ? p.badges : ['Jogador Oficial'],
     desc: uname
       ? `Conta oficial cadastrada (@${uname.toLowerCase()}) na Liga Carmonte.`
       : 'Perfil oficial de Treinador em Carmonte Island.',
     isRegistered: true,
     updatedAt: Date.now()
-  };
+  });
 }
 
 function upsertRegisteredPlayerEntry(entryData) {
@@ -7836,7 +7895,7 @@ function upsertRegisteredPlayerEntry(entryData) {
     ? entryData.duelStats.winRate
     : (totalDuels > 0 ? ((wins / totalDuels) * 100).toFixed(1) + '%' : '0.0%');
 
-  const normalized = {
+  const normalized = decorateCreatorLeaderboardEntry({
     id: 'acct_' + uname.replace(/\s+/g, '_'),
     username: uname,
     name: rawName,
@@ -7862,7 +7921,7 @@ function upsertRegisteredPlayerEntry(entryData) {
     desc: entryData.desc || `Conta oficial cadastrada (@${uname}) na Liga Carmonte.`,
     isRegistered: true,
     updatedAt: Number(entryData.updatedAt) || Date.now()
-  };
+  });
 
   const stored = getStoredRegisteredPlayers();
   const idx = stored.findIndex(item =>
@@ -8006,7 +8065,7 @@ function getGlobalLeaderboardData() {
   }
 
   // Only include self in the list if logged in OR if no other accounts exist yet
-  const all = [...realMap.values(), player];
+  const all = [...realMap.values(), player].map(item => decorateCreatorLeaderboardEntry(item));
   all.sort((a, b) => b.rating - a.rating);
 
   let playerRank = 1;
@@ -8081,6 +8140,7 @@ function renderGlobalRankings() {
           <div style="min-width:0;">
             <div style="font-size:11px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:4px;">
               <span>${t.name}</span>
+              ${t.isCreator ? '<span style="background:linear-gradient(90deg,#f59e0b,#eab308); color:#020617; font-size:7px; font-weight:900; padding:1px 4px; border-radius:2px; box-shadow:0 0 6px rgba(250,204,21,0.5);">👑 CRIADOR</span>' : ''}
               ${t.isSelf ? '<span style="background:#38bdf8; color:#020617; font-size:7px; font-weight:900; padding:1px 3.5px; border-radius:2px;">VOCÊ</span>' : ''}
             </div>
             <div style="font-size:8px; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.title}</div>
