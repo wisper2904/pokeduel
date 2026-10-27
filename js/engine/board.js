@@ -234,6 +234,8 @@ const REVIVER_PODS_P1 = [ { x: 50,  y: 434 }, { x: 82,  y: 452 } ];
 // ============================================================================
 let state = {
   mode: "ai",
+  isMatchActive: false,
+  matchFinished: false,
   myRole: "p1",
   turn: "p1",
   turnCounter: 300,
@@ -1332,15 +1334,20 @@ function drawHDVectorBoardAndChrome() {
   const nowClk = performance.now();
   const drawerEl = document.getElementById("drawer-modal");
   const isDrawerOpen = drawerEl && drawerEl.classList.contains("show");
-  if (!isDrawerOpen && !state.preMatchAnim && !state.winCelebrationAnim && !state.isAnimating) {
+  const isMatchRunning = state.isMatchActive && !state.matchFinished && !isDrawerOpen;
+  if (isMatchRunning && !state.preMatchAnim && !state.winCelebrationAnim && !state.isAnimating) {
     const dtClk = Math.min(200, Math.max(0, nowClk - (state.lastClockTick || nowClk)));
     if (state.turn === "p1") state.clockMsP1 = Math.max(0, state.clockMsP1 - dtClk);
     else state.clockMsP2 = Math.max(0, state.clockMsP2 - dtClk);
     if (state.clockMsP1 <= 0 && !state.winCelebrationAnim) {
       setLogText("⏰ TIME UP! Opponent wins on clock!");
+      state.isMatchActive = false;
+      state.matchFinished = true;
       state.winCelebrationAnim = { winner: "p2", t0: nowClk };
     } else if (state.clockMsP2 <= 0 && !state.winCelebrationAnim) {
       setLogText("⏰ TIME UP! You win on clock!");
+      state.isMatchActive = false;
+      state.matchFinished = true;
       state.winCelebrationAnim = { winner: "p1", t0: nowClk };
     }
   }
@@ -2016,6 +2023,8 @@ function drawVideoMatchOverlays() {
 }
 
 function showWinResultScreen(winner) {
+  state.isMatchActive = false;
+  state.matchFinished = true;
   const didWin = (winner === getBottomRole());
   const ov = document.getElementById("win-result-overlay");
   const t = document.getElementById("win-result-title");
@@ -2125,6 +2134,10 @@ function startVideoAuthenticMatch() {
   if (state.mode !== "p2p") {
     setGameMode("ai");
   }
+  state.isMatchActive = true;
+  state.matchFinished = false;
+  state.clockMsP1 = 300000;
+  state.clockMsP2 = 300000;
   demoFullMatchState();
   closeDrawer();
   playSfx("portal");

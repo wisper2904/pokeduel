@@ -73,6 +73,10 @@ function startP2PMatch(role) {
   state.viewSeatOverride = null;
   state.turn = "p1";
   state.turnCounter = 300;
+  state.isMatchActive = true;
+  state.matchFinished = false;
+  state.clockMsP1 = 300000;
+  state.clockMsP2 = 300000;
 
   // Clean tutorial locks and animation state
   tutorialStepBusy = false;
@@ -302,6 +306,8 @@ function cleanupActiveP2PSession(reason) {
     try { broadcastChan.close(); } catch(e) {}
     broadcastChan = null;
   }
+  state.isMatchActive = false;
+  state.matchFinished = true;
   state.mode = "ai";
   state.gameMode = "ai";
   state.matchKind = "league";
@@ -310,6 +316,7 @@ function cleanupActiveP2PSession(reason) {
   state.p2pLatency = null;
   state.winCelebrationAnim = null;
   state.pendingPlateAction = null;
+  remoteOpponentProfile = null;
   updateP2PStatusUI("⚪ SALA FECHADA", "Nenhuma sala ativa. Crie ou entre em uma sala para jogar online.", "OFFLINE", "#94a3b8");
   if (reason) appendTcpLog(`[P2P] Sessão encerrada: ${reason}`);
 }
@@ -326,6 +333,8 @@ function triggerVoluntaryForfeit() {
     sendP2PPacket({ type: "P2P_FORFEIT", loser: forfeiter, winner });
   }
   if (p2pPingTimer) { clearInterval(p2pPingTimer); p2pPingTimer = null; }
+  state.isMatchActive = false;
+  state.matchFinished = true;
   setLogText(`🏳️ Desistência (Forfeit)! Vitória por W.O. para ${winner.toUpperCase()}!`);
   state.winCelebrationAnim = { winner, t0: performance.now() };
 }
@@ -334,7 +343,7 @@ function startP2PHeartbeat() {
   lastPeerSignalTs = performance.now();
   if (p2pPingTimer) clearInterval(p2pPingTimer);
   p2pPingTimer = setInterval(() => {
-    if (state.mode !== "p2p") {
+    if (state.mode !== "p2p" || !state.isMatchActive || state.matchFinished) {
       clearInterval(p2pPingTimer);
       p2pPingTimer = null;
       return;
@@ -342,11 +351,13 @@ function startP2PHeartbeat() {
     const now = performance.now();
     lastPingSent = now;
     sendP2PPacket({ type: "PING", ts: lastPingSent });
-    // 30-second WebRTC signal loss detection -> automatic W.O. victory for connected player!
-    if (!state.winCelebrationAnim && (now - lastPeerSignalTs > 30000)) {
+    // 30-second WebRTC signal loss detection -> automatic W.O. victory ONLY during active match!
+    if (!state.winCelebrationAnim && state.isMatchActive && !state.matchFinished && (now - lastPeerSignalTs > 30000)) {
       const woWinner = state.myRole || "p1";
       setLogText("🏆 VITÓRIA POR W.O.! Sinal WebRTC do adversário perdido por >30s!");
       if (p2pPingTimer) { clearInterval(p2pPingTimer); p2pPingTimer = null; }
+      state.isMatchActive = false;
+      state.matchFinished = true;
       state.winCelebrationAnim = { winner: woWinner, t0: now };
       if (peerConnObj) { try { peerConnObj.close(); } catch(e){} peerConnObj = null; }
       if (dataChannel) { try { dataChannel.close(); } catch(e){} dataChannel = null; }
@@ -557,7 +568,7 @@ function runLiveInAppUpdate() {
 
 
 // ============================================================================
-// 18. AUTHENTIC RANKED MATCHMAKER (30S P2P SYNC + 5 DIVERSE BOTS FALLBACK)
+// 18. GLOBAL SALÃO & P2P MATCHMAKER ENGINE (REAL-TIME COMMUNITY HALL & QUEUE)
 // ============================================================================
 // (RANKED_BOT_TRAINERS loaded from js/data/bots.js)
 
@@ -565,37 +576,324 @@ window.windowCurrentSelectedBot = null;
 let rankedMatchmakerInterval = null;
 let rankedMatchmakerElapsed = 0;
 let rankedMatchmakerChannel = null;
-let rankedMatchmakerHostPeer = null;
-let rankedMatchmakerProbePeer = null;
 let rankedMatchmakerMatched = false;
-let rankedActiveQueueSlot = null;
+let isSearchingRankedQueue = false;
+let salaoQueueSessionId = null;
 
-const GIT_P2P_QUEUE_SLOTS = [
-  "pdr-git-p2p-s0",
-  "pdr-git-p2p-s1",
-  "pdr-git-p2p-s2"
+const SALAO_BROKER_URLS = [
+  "wss://broker.emqx.io:8084/mqtt",
+  "wss://broker.hivemq.com:8884/mqtt"
 ];
+const SALAO_TOPIC = "pokeduel/v600/salao";
+
+let salaoWs = null;
+let salaoConnected = false;
+let salaoBrokerIdx = 0;
+let salaoPresenceTimer = null;
+let salaoQueueTimer = null;
+const salaoKnownTrainers = new Map();
+
+function getMyUniquePeerId() {
+  const p = window.trainerProfileData || {};
+  const tid = String(p.trainerId || "trainer").replace(/[^a-zA-Z0-9]/g, "");
+  if (!window._myP2PPeerId) {
+    window._myP2PPeerId = `pdr-t-${tid}-${Math.random().toString(36).slice(2, 7)}`;
+  }
+  return window._myP2PPeerId;
+}
+
+function ensureMyPeerInstance(cb) {
+  const id = getMyUniquePeerId();
+  if (peerInstance && !peerInstance.destroyed && peerInstance.id === id) {
+    if (cb) cb(id);
+    return;
+  }
+  if (peerInstance) {
+    try { peerInstance.destroy(); } catch (e) {}
+    peerInstance = null;
+  }
+  try {
+    peerInstance = new Peer(id, { config: PEER_ICE_CONFIG, debug: 0 });
+    peerInstance.on("open", openId => {
+      window._myP2PPeerId = openId;
+      appendTcpLog(`[PeerJS] Peer ID ativo: ${openId}`);
+      if (cb) cb(openId);
+    });
+    peerInstance.on("connection", c => {
+      appendTcpLog(`[PeerJS] Conexão P2P recebida de oponente!`);
+      attachPeerJSConn(c);
+    });
+    peerInstance.on("error", err => {
+      appendTcpLog(`[PeerJS] Erro: ${err ? (err.type || err.message) : "desconhecido"}`);
+    });
+  } catch (e) {
+    if (cb) cb(id);
+  }
+}
+
+function encodeMqttRemainingLength(len) {
+  const bytes = [];
+  do {
+    let b = len % 128;
+    len = Math.floor(len / 128);
+    if (len > 0) b |= 0x80;
+    bytes.push(b);
+  } while (len > 0);
+  return bytes;
+}
+
+function sendMqttConnect(ws, clientId) {
+  const proto = [0x00, 0x04, 0x4d, 0x51, 0x54, 0x54, 0x04, 0x02, 0x00, 0x3c];
+  const idBytes = new TextEncoder().encode(clientId);
+  const payload = [idBytes.length >> 8, idBytes.length & 0xff, ...idBytes];
+  const varHeaderAndPayload = [...proto, ...payload];
+  const remLen = encodeMqttRemainingLength(varHeaderAndPayload.length);
+  ws.send(new Uint8Array([0x10, ...remLen, ...varHeaderAndPayload]));
+}
+
+function sendMqttSubscribe(ws, topic) {
+  const topBytes = new TextEncoder().encode(topic);
+  const body = [0x00, 0x01, topBytes.length >> 8, topBytes.length & 0xff, ...topBytes, 0x00];
+  const remLen = encodeMqttRemainingLength(body.length);
+  ws.send(new Uint8Array([0x82, ...remLen, ...body]));
+}
+
+function publishSalaoPacket(msgObj) {
+  if (salaoWs && salaoWs.readyState === WebSocket.OPEN && salaoConnected) {
+    try {
+      const topBytes = new TextEncoder().encode(SALAO_TOPIC);
+      const msgBytes = new TextEncoder().encode(JSON.stringify(msgObj));
+      const body = [topBytes.length >> 8, topBytes.length & 0xff, ...topBytes, ...msgBytes];
+      const remLen = encodeMqttRemainingLength(body.length);
+      salaoWs.send(new Uint8Array([0x30, ...remLen, ...body]));
+    } catch (e) {}
+  }
+  if (rankedMatchmakerChannel) {
+    try {
+      rankedMatchmakerChannel.postMessage(msgObj);
+    } catch (e) {}
+  }
+}
+
+function updateSalaoCountUI() {
+  const now = Date.now();
+  for (const [id, data] of salaoKnownTrainers.entries()) {
+    if (now - data.lastSeen > 28000) {
+      salaoKnownTrainers.delete(id);
+    }
+  }
+  const count = Math.max(1, salaoKnownTrainers.size + 1);
+  const lbl = document.getElementById("salao-count-label");
+  if (lbl) {
+    lbl.textContent = `Salão Carmonte: ${count} Treinador${count > 1 ? "es" : ""} Online`;
+  }
+}
+
+function sendSalaoPresencePing() {
+  const p = window.trainerProfileData || {};
+  publishSalaoPacket({
+    type: "SALAO_PRESENCE",
+    trainerId: p.trainerId || "guest",
+    nickname: p.nickname || "Treinador",
+    avatar: p.avatar || "pikachu",
+    rating: p.rankRating || 1000,
+    time: Date.now()
+  });
+}
+
+function startSalaoPresenceHeartbeat() {
+  if (salaoPresenceTimer) clearInterval(salaoPresenceTimer);
+  sendSalaoPresencePing();
+  salaoPresenceTimer = setInterval(sendSalaoPresencePing, 8000);
+}
+
+function connectToGlobalSalao() {
+  if (salaoWs && (salaoWs.readyState === WebSocket.OPEN || salaoWs.readyState === WebSocket.CONNECTING)) {
+    return;
+  }
+  const brokerUrl = SALAO_BROKER_URLS[salaoBrokerIdx % SALAO_BROKER_URLS.length];
+  try {
+    salaoWs = new WebSocket(brokerUrl, ["mqtt"]);
+    salaoWs.binaryType = "arraybuffer";
+
+    salaoWs.addEventListener("open", () => {
+      const clientId = "pdr_" + Math.random().toString(36).slice(2, 9);
+      sendMqttConnect(salaoWs, clientId);
+    });
+
+    salaoWs.addEventListener("message", ev => {
+      const buf = new Uint8Array(ev.data);
+      const type = buf[0] >> 4;
+      if (type === 2) { // CONNACK
+        salaoConnected = true;
+        sendMqttSubscribe(salaoWs, SALAO_TOPIC);
+        startSalaoPresenceHeartbeat();
+        updateSalaoCountUI();
+      } else if (type === 3) { // PUBLISH
+        let offset = 1;
+        let multiplier = 1;
+        let remLen = 0;
+        let digit;
+        do {
+          digit = buf[offset++];
+          remLen += (digit & 127) * multiplier;
+          multiplier *= 128;
+        } while ((digit & 128) !== 0);
+
+        const topicLen = (buf[offset] << 8) | buf[offset + 1];
+        offset += 2 + topicLen;
+        const payloadBytes = buf.subarray(offset);
+        const payloadStr = new TextDecoder().decode(payloadBytes);
+        try {
+          const parsed = JSON.parse(payloadStr);
+          handleIncomingSalaoMessage(parsed);
+        } catch (e) {}
+      }
+    });
+
+    salaoWs.addEventListener("error", () => {
+      salaoConnected = false;
+      salaoBrokerIdx++;
+      setTimeout(connectToGlobalSalao, 3000);
+    });
+
+    salaoWs.addEventListener("close", () => {
+      salaoConnected = false;
+      setTimeout(connectToGlobalSalao, 4000);
+    });
+  } catch (e) {
+    salaoBrokerIdx++;
+    setTimeout(connectToGlobalSalao, 3000);
+  }
+}
+
+function handleIncomingSalaoMessage(msg) {
+  if (!msg || typeof msg !== "object" || !msg.type) return;
+  const p = window.trainerProfileData || { trainerId: "948-204-182", nickname: "Treinador", rankRating: 1000, leagueTier: "Beginner" };
+
+  // 1. Presence Heartbeat
+  if (msg.type === "SALAO_PRESENCE" && msg.trainerId) {
+    if (msg.trainerId !== p.trainerId) {
+      salaoKnownTrainers.set(msg.trainerId, {
+        nickname: msg.nickname,
+        rating: msg.rating,
+        avatar: msg.avatar,
+        lastSeen: Date.now()
+      });
+      updateSalaoCountUI();
+    }
+    return;
+  }
+
+  // 2. Queue Search (Someone looking for a match)
+  if (msg.type === "SALAO_QUEUE_PING") {
+    if (msg.fromTrainerId && msg.fromTrainerId !== p.trainerId) {
+      salaoKnownTrainers.set(msg.fromTrainerId, {
+        nickname: msg.nickname,
+        rating: msg.rankRating,
+        lastSeen: Date.now()
+      });
+      updateSalaoCountUI();
+
+      if (isSearchingRankedQueue && !rankedMatchmakerMatched) {
+        const myKey = String(p.trainerId || "") + String(salaoQueueSessionId || "");
+        const oppKey = String(msg.fromTrainerId || "") + String(msg.queueSession || "");
+
+        // Deterministic role: smaller ID acts as Host (P1) and offers match
+        if (myKey < oppKey) {
+          const myPeerId = getMyUniquePeerId();
+          ensureMyPeerInstance();
+          publishSalaoPacket({
+            type: "SALAO_MATCH_OFFER",
+            toTrainerId: msg.fromTrainerId,
+            fromTrainerId: p.trainerId,
+            hostPeerId: myPeerId,
+            hostNickname: p.nickname || "Você",
+            hostRating: p.rankRating || 1000,
+            hostTier: p.leagueTier || "Liga Carmonte",
+            hostDeck: state.deckP1
+          });
+        }
+      }
+    }
+    return;
+  }
+
+  // 3. Match Offer (Guest receives offer from Host)
+  if (msg.type === "SALAO_MATCH_OFFER" && msg.toTrainerId === p.trainerId) {
+    if (isSearchingRankedQueue && !rankedMatchmakerMatched) {
+      rankedMatchmakerMatched = true;
+      isSearchingRankedQueue = false;
+
+      const myPeerId = getMyUniquePeerId();
+      publishSalaoPacket({
+        type: "SALAO_MATCH_ACCEPT",
+        toTrainerId: msg.fromTrainerId,
+        fromTrainerId: p.trainerId,
+        guestPeerId: myPeerId,
+        guestNickname: p.nickname || "Você",
+        guestRating: p.rankRating || 1000,
+        guestTier: p.leagueTier || "Liga Carmonte",
+        guestDeck: state.deckP1
+      });
+
+      // Connect via PeerJS to Host
+      ensureMyPeerInstance(id => {
+        try {
+          const c = peerInstance.connect(msg.hostPeerId, { reliable: true, serialization: "json" });
+          attachPeerJSConn(c);
+        } catch (e) {}
+      });
+
+      onHumanMatchFound({
+        nickname: msg.hostNickname,
+        rankRating: msg.hostRating,
+        leagueTier: msg.hostTier,
+        deck: msg.hostDeck,
+        role: "p2"
+      });
+    }
+    return;
+  }
+
+  // 4. Match Accept (Host receives accept from Guest)
+  if (msg.type === "SALAO_MATCH_ACCEPT" && msg.toTrainerId === p.trainerId) {
+    if (isSearchingRankedQueue && !rankedMatchmakerMatched) {
+      rankedMatchmakerMatched = true;
+      isSearchingRankedQueue = false;
+
+      onHumanMatchFound({
+        nickname: msg.guestNickname,
+        rankRating: msg.guestRating,
+        leagueTier: msg.guestTier,
+        deck: msg.guestDeck,
+        role: "p1"
+      });
+    }
+    return;
+  }
+
+  // 5. Queue Leave
+  if (msg.type === "SALAO_QUEUE_LEAVE") {
+    // A player left the queue
+    return;
+  }
+}
 
 function cleanupRankedMatchmaker(preserveActiveConn) {
+  isSearchingRankedQueue = false;
   if (rankedMatchmakerInterval) {
     clearInterval(rankedMatchmakerInterval);
     rankedMatchmakerInterval = null;
+  }
+  if (salaoQueueTimer) {
+    clearInterval(salaoQueueTimer);
+    salaoQueueTimer = null;
   }
   if (rankedMatchmakerChannel) {
     try { rankedMatchmakerChannel.close(); } catch (e) {}
     rankedMatchmakerChannel = null;
   }
-  if (!preserveActiveConn) {
-    if (rankedMatchmakerHostPeer) {
-      try { rankedMatchmakerHostPeer.destroy(); } catch (e) {}
-      rankedMatchmakerHostPeer = null;
-    }
-    if (rankedMatchmakerProbePeer) {
-      try { rankedMatchmakerProbePeer.destroy(); } catch (e) {}
-      rankedMatchmakerProbePeer = null;
-    }
-  }
-  rankedActiveQueueSlot = null;
 }
 
 window.addEventListener("beforeunload", () => {
@@ -608,6 +906,8 @@ function openRankedMatchmakerModal() {
   cleanupRankedMatchmaker(false);
   rankedMatchmakerMatched = false;
   rankedMatchmakerElapsed = 0;
+  isSearchingRankedQueue = true;
+  salaoQueueSessionId = Math.random().toString(36).slice(2, 8);
 
   const modal = document.getElementById("ranked-matchmaker-modal");
   if (!modal) {
@@ -632,8 +932,8 @@ function openRankedMatchmakerModal() {
   if (eloEl) eloEl.textContent = `${p.rankRating} ELO · ${p.leagueTier || 'Liga Carmonte'}`;
   if (tDisp) tDisp.textContent = "00:00 / 00:30";
   if (pBar) pBar.style.width = "0%";
-  if (lLog) lLog.textContent = "📡 Conectando à malha Git P2P WebRTC (Google STUN)...";
-  if (stSub) stSub.textContent = "Buscando oponentes nos slots Git P2P com latência reduzida...";
+  if (lLog) lLog.textContent = "📡 Conectado ao Salão Global · Procurando rival na fila...";
+  if (stSub) stSub.textContent = "Buscando oponentes reais conectados ao Salão da Liga...";
   if (stTitle) {
     stTitle.textContent = "BUSCANDO ADVERSÁRIO ONLINE";
     stTitle.style.color = "#fde047";
@@ -642,214 +942,41 @@ function openRankedMatchmakerModal() {
   modal.style.display = "flex";
   playSfx("portal");
 
-  // 1. Instant Local / LAN Mesh (BroadcastChannel)
+  connectToGlobalSalao();
+  ensureMyPeerInstance();
+
+  // Local BroadcastChannel for instant testing across 2 tabs on the same device
   try {
     if (typeof BroadcastChannel !== "undefined") {
-      rankedMatchmakerChannel = new BroadcastChannel("pokeduel_git_p2p_mesh");
-      rankedMatchmakerChannel.onmessage = function(ev) {
-        if (!ev || !ev.data || rankedMatchmakerMatched) return;
-        const msg = ev.data;
-        if (msg.type === "RANKED_QUEUE_PING" && msg.senderId !== p.trainerId) {
-          rankedMatchmakerMatched = true;
-          rankedMatchmakerChannel.postMessage({
-            type: "RANKED_QUEUE_PONG",
-            senderId: p.trainerId,
-            senderNick: p.nickname,
-            senderRating: p.rankRating,
-            senderTier: p.leagueTier,
-            deck: state.deckP1
-          });
-          onHumanMatchFound({
-            nickname: msg.senderNick || "Treinador Online",
-            rankRating: msg.senderRating || 1800,
-            leagueTier: msg.senderTier || "Master",
-            deck: msg.deck || [0, 1, 2, 3, 4, 5],
-            isBot: false,
-            role: "p2"
-          });
-        } else if (msg.type === "RANKED_QUEUE_PONG" && msg.senderId !== p.trainerId) {
-          rankedMatchmakerMatched = true;
-          onHumanMatchFound({
-            nickname: msg.senderNick || "Treinador Online",
-            rankRating: msg.senderRating || 1800,
-            leagueTier: msg.senderTier || "Master",
-            deck: msg.deck || [0, 1, 2, 3, 4, 5],
-            isBot: false,
-            role: "p1"
-          });
-        }
+      if (rankedMatchmakerChannel) rankedMatchmakerChannel.close();
+      rankedMatchmakerChannel = new BroadcastChannel("pokeduel_v600_salao");
+      rankedMatchmakerChannel.onmessage = ev => {
+        if (ev && ev.data) handleIncomingSalaoMessage(ev.data);
       };
-      rankedMatchmakerChannel.postMessage({
-        type: "RANKED_QUEUE_PING",
-        senderId: p.trainerId,
-        senderNick: p.nickname,
-        senderRating: p.rankRating,
-        senderTier: p.leagueTier,
-        deck: state.deckP1
-      });
     }
   } catch (e) {}
 
-  // 2. Global Internet Fast Rendezvous Swarm (Google STUN Direct Mesh)
-  if (window.Peer) {
-    try {
-      const probePeer = new Peer(undefined, { config: PEER_ICE_CONFIG, debug: 0 });
-      rankedMatchmakerProbePeer = probePeer;
-
-      probePeer.on("open", () => {
-        if (rankedMatchmakerMatched) return;
-        attemptFastQueueMatch(0);
-      });
-
-      function attemptFastQueueMatch(slotIdx) {
-        if (rankedMatchmakerMatched || !rankedMatchmakerProbePeer || rankedMatchmakerProbePeer.destroyed) return;
-        if (slotIdx >= GIT_P2P_QUEUE_SLOTS.length) {
-          claimFreeQueueSlot(0);
-          return;
-        }
-
-        const slotId = GIT_P2P_QUEUE_SLOTS[slotIdx];
-        if (lLog) lLog.textContent = `🔍 Conectando à fila da Liga [Slot ${slotIdx + 1}]...`;
-
-        let conn = null;
-        let slotHandled = false;
-        let timer = setTimeout(() => {
-          if (slotHandled) return;
-          slotHandled = true;
-          try { if (conn) conn.close(); } catch(e) {}
-          if (slotIdx === 0) {
-            claimFreeQueueSlot(0);
-          } else {
-            attemptFastQueueMatch(slotIdx + 1);
-          }
-        }, 650);
-
-        try {
-          conn = probePeer.connect(slotId, { reliable: true });
-          conn.on("open", () => {
-            if (slotHandled || rankedMatchmakerMatched) {
-              try { conn.close(); } catch(e) {}
-              return;
-            }
-            clearTimeout(timer);
-            slotHandled = true;
-            rankedMatchmakerMatched = true;
-
-            conn.send({
-              type: "RANKED_HANDSHAKE",
-              profile: {
-                nickname: p.nickname,
-                rankRating: p.rankRating,
-                leagueTier: p.leagueTier,
-                trainerId: p.trainerId
-              },
-              deck: state.deckP1
-            });
-
-            conn.on("data", data => {
-              if (data && data.type === "RANKED_ACCEPT") {
-                cleanupRankedMatchmaker(true);
-                attachPeerJSConn(conn);
-                remoteOpponentProfile = data.profile;
-                state.deckP2 = data.deck || state.deckP2;
-                state.mode = "p2p";
-                state.myRole = "p2";
-                onHumanMatchFound({
-                  nickname: data.profile.nickname,
-                  rankRating: data.profile.rankRating,
-                  leagueTier: data.profile.leagueTier,
-                  deck: data.deck,
-                  role: "p2"
-                });
-              }
-            });
-          });
-
-          conn.on("error", () => {
-            if (slotHandled) return;
-            slotHandled = true;
-            clearTimeout(timer);
-            if (slotIdx === 0) {
-              claimFreeQueueSlot(0);
-            } else {
-              attemptFastQueueMatch(slotIdx + 1);
-            }
-          });
-        } catch (e) {
-          clearTimeout(timer);
-          claimFreeQueueSlot(0);
-        }
-      }
-
-      function claimFreeQueueSlot(claimIdx) {
-        if (rankedMatchmakerMatched || claimIdx >= GIT_P2P_QUEUE_SLOTS.length) return;
-        const targetSlot = GIT_P2P_QUEUE_SLOTS[claimIdx];
-        if (rankedMatchmakerProbePeer) {
-          try { rankedMatchmakerProbePeer.destroy(); } catch (e) {}
-          rankedMatchmakerProbePeer = null;
-        }
-
-        try {
-          const hostPeer = new Peer(targetSlot, { config: PEER_ICE_CONFIG, debug: 0 });
-          rankedMatchmakerHostPeer = hostPeer;
-          rankedActiveQueueSlot = targetSlot;
-
-          hostPeer.on("open", () => {
-            if (lLog && !rankedMatchmakerMatched) {
-              lLog.textContent = `🟢 Aguardando adversário online (Slot de Duelo Ativo)...`;
-            }
-          });
-
-          hostPeer.on("connection", c => {
-            if (rankedMatchmakerMatched) {
-              try { c.close(); } catch(e) {}
-              return;
-            }
-            c.on("data", data => {
-              if (data && data.type === "RANKED_HANDSHAKE") {
-                rankedMatchmakerMatched = true;
-                c.send({
-                  type: "RANKED_ACCEPT",
-                  profile: {
-                    nickname: p.nickname,
-                    rankRating: p.rankRating,
-                    leagueTier: p.leagueTier,
-                    trainerId: p.trainerId
-                  },
-                  deck: state.deckP1
-                });
-                cleanupRankedMatchmaker(true);
-                attachPeerJSConn(c);
-                remoteOpponentProfile = data.profile;
-                state.deckP2 = data.deck || state.deckP2;
-                state.mode = "p2p";
-                state.myRole = "p1";
-                onHumanMatchFound({
-                  nickname: data.profile.nickname,
-                  rankRating: data.profile.rankRating,
-                  leagueTier: data.profile.leagueTier,
-                  deck: data.deck,
-                  role: "p1"
-                });
-              }
-            });
-          });
-
-          hostPeer.on("error", err => {
-            if (rankedMatchmakerMatched) return;
-            if (err && err.type === "unavailable-id") {
-              try { hostPeer.destroy(); } catch(e) {}
-              rankedMatchmakerHostPeer = null;
-              claimFreeQueueSlot(claimIdx + 1);
-            }
-          });
-        } catch (e) {}
-      }
-    } catch (e) {}
+  function sendQueuePing() {
+    if (!isSearchingRankedQueue || rankedMatchmakerMatched) return;
+    const myPeerId = getMyUniquePeerId();
+    publishSalaoPacket({
+      type: "SALAO_QUEUE_PING",
+      fromTrainerId: p.trainerId,
+      fromPeerId: myPeerId,
+      nickname: p.nickname,
+      rankRating: p.rankRating || 1000,
+      leagueTier: p.leagueTier || "Liga Carmonte",
+      deck: state.deckP1,
+      queueSession: salaoQueueSessionId,
+      time: Date.now()
+    });
   }
 
-  // 3. Start 30-Second Countdown Timer with Live Commentary
-  clearInterval(rankedMatchmakerInterval);
+  sendQueuePing();
+  if (salaoQueueTimer) clearInterval(salaoQueueTimer);
+  salaoQueueTimer = setInterval(sendQueuePing, 1200);
+
+  if (rankedMatchmakerInterval) clearInterval(rankedMatchmakerInterval);
   rankedMatchmakerInterval = setInterval(() => {
     if (rankedMatchmakerMatched) {
       clearInterval(rankedMatchmakerInterval);
@@ -861,30 +988,15 @@ function openRankedMatchmakerModal() {
     if (pBar) pBar.style.width = `${Math.min(100, (rankedMatchmakerElapsed / 30) * 100)}%`;
 
     if (lLog) {
-      if (rankedMatchmakerElapsed < 6) {
-        lLog.textContent = "📡 Sincronizando com a rede Git P2P (Google STUN)...";
-      } else if (rankedMatchmakerElapsed < 14) {
-        lLog.textContent = "⚡ Varrendo 8 slots de matchmaking para pareamento instantâneo...";
-      } else if (rankedMatchmakerElapsed < 22) {
-        lLog.textContent = "🌐 Otimizando canal WebRTC de baixa latência (Zero Delay)...";
+      if (rankedMatchmakerElapsed < 8) {
+        lLog.textContent = "📡 Sincronizando com a rede do Salão Global...";
+      } else if (rankedMatchmakerElapsed < 18) {
+        lLog.textContent = "⚡ Varrendo oponentes na fila de matchmaking...";
       } else if (rankedMatchmakerElapsed < 28) {
-        lLog.textContent = "⚡ Limite de 30s se aproximando... Preparando Campeão Mestre!";
+        lLog.textContent = "🌐 Otimizando canal P2P WebRTC de baixa latência...";
       } else {
-        lLog.textContent = "🤖 30s atingidos! Puxando Bot Ranqueado com deck e ELO sincronizado...";
+        lLog.textContent = "⏱️ 30s atingidos! Nenhum oponente entrou na fila.";
       }
-    }
-
-    if (rankedMatchmakerChannel && rankedMatchmakerElapsed % 3 === 0) {
-      try {
-        rankedMatchmakerChannel.postMessage({
-          type: "RANKED_QUEUE_PING",
-          senderId: p.trainerId,
-          senderNick: p.nickname,
-          senderRating: p.rankRating,
-          senderTier: p.leagueTier,
-          deck: state.deckP1
-        });
-      } catch (e) {}
     }
 
     if (rankedMatchmakerElapsed >= 30) {
@@ -895,8 +1007,14 @@ function openRankedMatchmakerModal() {
 }
 
 function cancelRankedMatchmaking() {
-  cleanupRankedMatchmaker(false);
+  isSearchingRankedQueue = false;
   rankedMatchmakerMatched = false;
+  cleanupRankedMatchmaker(false);
+  const p = window.trainerProfileData || {};
+  publishSalaoPacket({
+    type: "SALAO_QUEUE_LEAVE",
+    fromTrainerId: p.trainerId
+  });
   const modal = document.getElementById("ranked-matchmaker-modal");
   if (modal) modal.style.display = "none";
   playSfx("tick");
@@ -943,12 +1061,6 @@ function triggerBotFallbackNow() {
   if (rankedMatchmakerMatched) return;
   cleanupRankedMatchmaker(false);
   rankedMatchmakerMatched = true;
-  triggerBotFallbackTimeout();
-}
-
-function triggerBotFallbackTimeout() {
-  cleanupRankedMatchmaker(false);
-  rankedMatchmakerMatched = true;
 
   const p = window.trainerProfileData || { rankRating: 1000 };
   const pRating = p.rankRating || 1000;
@@ -967,11 +1079,11 @@ function triggerBotFallbackTimeout() {
   const pBar = document.getElementById("mm-progress-bar");
   if (pBar) pBar.style.width = "100%";
   if (stTitle) {
-    stTitle.textContent = "🤖 BOT ENCONTRADO (30S)";
+    stTitle.textContent = "🤖 BOT DA LIGA SELECIONADO";
     stTitle.style.color = "#38bdf8";
   }
   if (stSub) stSub.textContent = `${selectedBot.name} (${selectedBot.rating} ELO · ${selectedBot.tier})`;
-  if (lLog) lLog.textContent = `⚔️ ${selectedBot.title} — Iniciando partida oficial Git P2P!`;
+  if (lLog) lLog.textContent = `⚔️ ${selectedBot.title} — Iniciando partida de treino da Liga!`;
 
   remoteOpponentProfile = {
     nickname: selectedBot.name,
@@ -989,10 +1101,30 @@ function triggerBotFallbackTimeout() {
   }, 950);
 }
 
+function triggerBotFallbackTimeout() {
+  const stTitle = document.getElementById("mm-status-title");
+  const stSub = document.getElementById("mm-status-sub");
+  const lLog = document.getElementById("mm-live-log");
+  const pBar = document.getElementById("mm-progress-bar");
+  if (pBar) pBar.style.width = "100%";
+  if (stTitle) {
+    stTitle.textContent = "FILA NO SALÃO GLOBAL";
+    stTitle.style.color = "#facc15";
+  }
+  if (stSub) stSub.textContent = "Nenhum outro jogador entrou na fila nos últimos 30s.";
+  if (lLog) lLog.textContent = "Toque em 'Jogar com Bot' para treinar contra a IA ou aguarde oponentes no Salão.";
+}
+
 function launchMatchFromMatchmaker(isBot) {
+  cleanupRankedMatchmaker(true);
   const modal = document.getElementById("ranked-matchmaker-modal");
   if (modal) modal.style.display = "none";
   state.matchKind = "league";
+  state.isMatchActive = true;
+  state.matchFinished = false;
+  state.clockMsP1 = 300000;
+  state.clockMsP2 = 300000;
+
   if (isBot) {
     state.mode = "ai";
     state.gameMode = "ai";
@@ -1000,6 +1132,11 @@ function launchMatchFromMatchmaker(isBot) {
     startVideoAuthenticMatch();
   } else {
     state.mode = "p2p";
+    state.gameMode = "p2p";
+    startP2PMatch(state.myRole || "p1");
+  }
+  setLogText(`🏆 PARTIDA DA LIGA INICIADA! Você vs ${remoteOpponentProfile ? remoteOpponentProfile.nickname : "Rival"} (${remoteOpponentProfile ? remoteOpponentProfile.rankRating : 1000} ELO)!`);
+}
     state.gameMode = "p2p";
     state.p2pLatency = 14;
     startP2PMatch(state.myRole || "p1");
@@ -1291,3 +1428,15 @@ const TUTORIAL_MATCH_STEPS = [
     targetNode: 3
   }
 ];
+
+window.connectToGlobalSalao = connectToGlobalSalao;
+window.publishSalaoPacket = publishSalaoPacket;
+window.openRankedMatchmakerModal = openRankedMatchmakerModal;
+window.cancelRankedMatchmaking = cancelRankedMatchmaking;
+window.triggerBotFallbackNow = triggerBotFallbackNow;
+
+if (typeof window !== "undefined") {
+  setTimeout(() => {
+    try { connectToGlobalSalao(); } catch (e) {}
+  }, 1000);
+}
