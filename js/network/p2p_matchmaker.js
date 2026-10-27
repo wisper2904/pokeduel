@@ -708,6 +708,7 @@ function startSalaoPresenceHeartbeat() {
 }
 
 function connectToGlobalSalao() {
+  updateSalaoCountUI();
   if (salaoWs && (salaoWs.readyState === WebSocket.OPEN || salaoWs.readyState === WebSocket.CONNECTING)) {
     return;
   }
@@ -1132,11 +1133,6 @@ function launchMatchFromMatchmaker(isBot) {
     startVideoAuthenticMatch();
   } else {
     state.mode = "p2p";
-    state.gameMode = "p2p";
-    startP2PMatch(state.myRole || "p1");
-  }
-  setLogText(`🏆 PARTIDA DA LIGA INICIADA! Você vs ${remoteOpponentProfile ? remoteOpponentProfile.nickname : "Rival"} (${remoteOpponentProfile ? remoteOpponentProfile.rankRating : 1000} ELO)!`);
-}
     state.gameMode = "p2p";
     state.p2pLatency = 14;
     startP2PMatch(state.myRole || "p1");
