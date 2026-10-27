@@ -1074,59 +1074,42 @@ selectedCarouselSlot = 1; // Start highlighting Slot #2 of the player's team (`s
 
 if (homeCarouselCanvas) {
   homeCarouselCanvas.addEventListener("pointerdown", e => {
-    isDraggingCarousel = true;
-    dragStartX = e.clientX;
-    pointerDownX = e.clientX;
-    pointerDownY = e.clientY;
-    pointerMovedDist = 0;
-  });
-  window.addEventListener("pointermove", e => {
-    if (!isDraggingCarousel) return;
-    const dx = e.clientX - dragStartX;
-    pointerMovedDist += Math.abs(dx);
-    dragStartX = e.clientX;
-    carouselTargetAngle += dx * 0.012;
-  });
-  window.addEventListener("pointerup", e => {
-    if (!isDraggingCarousel) return;
-    isDraggingCarousel = false;
-    if (pointerMovedDist < 8 && homeCarouselCanvas) {
-      // User tapped directly on the stage! Check if they tapped one of the 6 team Pokémon or the Centerpiece:
-      const rect = homeCarouselCanvas.getBoundingClientRect();
-      const dpr = homeCarouselCanvas.width / (rect.width || 1);
-      const tx = (e.clientX - rect.left) * dpr;
-      const ty = (e.clientY - rect.top) * dpr;
-      let hitSlot = -1;
-      let bestD = 999999;
-      lastRenderedTeamSlots.forEach(it => {
-        const d = Math.hypot(tx - it.px, ty - (it.py - 18 * it.scale));
-        if (d < 46 * (homeCarouselCanvas.width / 415.0) && d < bestD) {
-          bestD = d;
-          hitSlot = it.slot;
-        }
-      });
-      if (hitSlot !== -1) {
-        selectedCarouselSlot = hitSlot;
-        activeCenterpieceKey = "team_slot";
-        playSfx("portal");
-        return;
+    const rect = homeCarouselCanvas.getBoundingClientRect();
+    const dpr = homeCarouselCanvas.width / (rect.width || 1);
+    const tx = (e.clientX - rect.left) * dpr;
+    const ty = (e.clientY - rect.top) * dpr;
+    const S = homeCarouselCanvas.width / 415.0;
+
+    // 1. Check if user tapped one of the 6 team Pokémon
+    let hitSlot = -1;
+    let bestD = 999999;
+    lastRenderedTeamSlots.forEach(it => {
+      const d = Math.hypot(tx - it.px, ty - (it.py - 16 * S * it.scale));
+      if (d < 46 * S && d < bestD) {
+        bestD = d;
+        hitSlot = it.slot;
       }
-      // If tapped on the Giant Centerpiece in the middle, open Details for that team member!
-      const cx = homeCarouselCanvas.width * 0.5, cy = homeCarouselCanvas.height * 0.45;
-      if (Math.hypot(tx - cx, ty - cy) < 88 * (homeCarouselCanvas.width / 415.0)) {
-        const centerFigIdx = state.deckP1[selectedCarouselSlot % 6];
-        openFigureDetailsModal(centerFigIdx);
-        return;
-      }
+    });
+
+    if (hitSlot !== -1) {
+      selectedCarouselSlot = hitSlot;
+      activeCenterpieceKey = "team_slot";
+      playSfx("tick");
+      const f = FIGURES_DB[state.deckP1[selectedCarouselSlot] % FIGURES_DB.length];
+      const msg = document.getElementById("chest-reward-msg");
+      if (msg && f) msg.textContent = `★ Time em Destaque (Slot #${selectedCarouselSlot + 1}/6): [${f.rarity}] ${f.name} (MP ${f.mp})`;
+      return;
     }
-    // Snap drag to select the next team slot
-    const step = (Math.PI * 2) / 6;
-    const idx = Math.round(-carouselTargetAngle / step);
-    carouselTargetAngle = -idx * step;
-    selectedCarouselSlot = ((idx % 6) + 6) % 6;
-    activeCenterpieceKey = "team_slot";
-    updateCarouselBanner();
-    playSfx("tick");
+
+    // 2. Check if user tapped the Centerpiece on the main pedestal
+    const cx = homeCarouselCanvas.width * 0.5;
+    const cy = homeCarouselCanvas.height * 0.50;
+    if (Math.hypot(tx - cx, ty - (cy - 20 * S)) < 90 * S) {
+      const centerFigIdx = state.deckP1[selectedCarouselSlot % 6];
+      openFigureDetailsModal(centerFigIdx);
+      playSfx("tick");
+      return;
+    }
   });
 }
 
@@ -1568,11 +1551,6 @@ function renderHomeCarouselLoop() {
     const W = homeCarouselCanvas.width, H = homeCarouselCanvas.height;
     const S = W / 415.0;
     const t = performance.now() * 0.002;
-    if (!isDraggingCarousel) {
-      carouselAngle += (carouselTargetAngle - carouselAngle) * 0.14;
-    } else {
-      carouselAngle = carouselTargetAngle;
-    }
 
     hcCtx.save();
     hcCtx.imageSmoothingEnabled = true;
@@ -1628,9 +1606,9 @@ function renderHomeCarouselLoop() {
     hcCtx.restore();
 
     const cx = W * 0.50;
-    const cy = H * 0.56;
+    const cy = H * 0.50;
 
-    // 3. Centerpiece Figurine: ALWAYS displays the currently selected Pokémon from the player's own 6-Pokémon Team (`state.deckP1[selectedCarouselSlot % 6]`)!
+    // 3. Centerpiece Figurine: displays the currently selected Pokémon from the player's 6-Pokémon Team
     const teamSlotIdx = ((selectedCarouselSlot % 6) + 6) % 6;
     const centerFigDbIdx = state.deckP1[teamSlotIdx] !== undefined ? state.deckP1[teamSlotIdx] : state.deckP1[0];
     const centerFig = FIGURES_DB[centerFigDbIdx % FIGURES_DB.length] || FIGURES_DB[0];
@@ -1639,53 +1617,43 @@ function renderHomeCarouselLoop() {
     // Floor shadow under centerpiece pedestal
     hcCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
     hcCtx.beginPath();
-    hcCtx.ellipse(cx, cy + 54 * S, 112 * S, 32 * S, 0, 0, Math.PI * 2);
+    hcCtx.ellipse(cx, cy + 54 * S, 110 * S, 30 * S, 0, 0, Math.PI * 2);
     hcCtx.fill();
 
-    if (centerFig.id === "greninja" && homeCenterpieceImg.complete) {
-      // Draw Ultra-HD 3D Greninja on its sculpted cobblestone & neon-cyan bronze pedestal!
-      const gw = 236 * S;
-      const gh = gw * (homeCenterpieceImg.naturalHeight / (homeCenterpieceImg.naturalWidth || 1));
-      hcCtx.drawImage(homeCenterpieceImg, cx - gw / 2, cy - gh + 68 * S, gw, gh);
-    } else {
-      // Draw the photorealistic 3D Cobblestone + Bronze + Neon-Cyan Centerpiece Pedestal (`homePedestal3DImg`)
-      if (homePedestal3DImg.complete && homePedestal3DImg.naturalWidth > 0) {
-        const pw = 236 * S;
-        const ph = pw * (homePedestal3DImg.naturalHeight / homePedestal3DImg.naturalWidth);
-        hcCtx.drawImage(homePedestal3DImg, cx - pw / 2, cy + 68 * S - ph, pw, ph);
-      }
-      // Draw the selected Team Pokémon's 3D Kaiyodo sculpt standing on top of the cobblestone pedestal!
-      const cImg = loadedFigImages[centerFig.spriteKey] || loadedFigImages[centerFig.id] || loadedFigImages["venusaur"];
-      if (cImg && cImg.complete) {
-        const cw = 186 * S;
-        const ch = cw * (138.0 / 144.0);
-        const figX = cx - cw / 2;
-        const figY = cy - ch + 38 * S;
-        // Clip out the bottom 18% small pedestal of the board sprite so the Pokémon's body/feet stand directly on the giant cobblestone pedestal!
-        hcCtx.save();
-        hcCtx.beginPath();
-        hcCtx.rect(figX - 10 * S, figY - 10 * S, cw + 20 * S, ch * 0.81 + 10 * S);
-        hcCtx.clip();
-        hcCtx.drawImage(cImg, figX, figY, cw, ch);
-        hcCtx.restore();
-      }
+    // 3D Pedestal
+    if (homePedestal3DImg.complete && homePedestal3DImg.naturalWidth > 0) {
+      const pw = 224 * S;
+      const ph = pw * (homePedestal3DImg.naturalHeight / homePedestal3DImg.naturalWidth);
+      hcCtx.drawImage(homePedestal3DImg, cx - pw / 2, cy + 62 * S - ph, pw, ph);
+    }
+
+    // Selected Team Pokémon standing on the pedestal
+    const cImg = loadedFigImages[centerFig.spriteKey] || loadedFigImages[centerFig.id] || loadedFigImages["pikachu"];
+    if (cImg && cImg.complete) {
+      const cw = 175 * S;
+      const ch = cw * (cImg.naturalHeight / (cImg.naturalWidth || 1));
+      const figX = cx - cw / 2;
+      const figY = cy - ch + 38 * S;
+      hcCtx.drawImage(cImg, figX, figY, cw, ch);
     }
     hcCtx.restore();
 
-    // 4. The 6 Active Deck Figurines (`state.deckP1[0..5]`) in a Semicircle along the V-Stage (`1001314047.jpg` exact coordinates!)
-    const baseAngles = [0.95 * Math.PI, 0.78 * Math.PI, 0.60 * Math.PI, 0.40 * Math.PI, 0.22 * Math.PI, 0.05 * Math.PI];
-    const rx = W * 0.39;
-    const ry = H * 0.21;
+    // 4. The 6 Active Deck Figurines (`state.deckP1[0..5]`) arranged in a fixed, elegant framing layout along the V-Stage floor (no 360 rotation!)
+    const slotCoords = [
+      { x: W * 0.10, y: H * 0.74, scale: 0.82 },
+      { x: W * 0.22, y: H * 0.81, scale: 0.90 },
+      { x: W * 0.34, y: H * 0.87, scale: 0.98 },
+      { x: W * 0.66, y: H * 0.87, scale: 0.98 },
+      { x: W * 0.78, y: H * 0.81, scale: 0.90 },
+      { x: W * 0.90, y: H * 0.74, scale: 0.82 }
+    ];
+
     const items = [];
     for (let slot = 0; slot < 6; slot++) {
-      const ang = baseAngles[slot] + carouselAngle * 0.45;
-      const px = cx + Math.cos(ang) * rx;
-      const py = (cy + 26 * S) + Math.sin(ang) * ry;
-      const depth = (Math.sin(ang) + 1) * 0.5;
-      const scale = 0.84 + depth * 0.20;
+      const coord = slotCoords[slot];
       const figIdx = state.deckP1[slot % 6];
       const fig = FIGURES_DB[figIdx % FIGURES_DB.length];
-      items.push({ slot, px, py, depth, scale, fig });
+      items.push({ slot, px: coord.x, py: coord.y, scale: coord.scale, fig });
     }
 
     lastRenderedTeamSlots = items.map(x => ({ ...x }));
@@ -1697,26 +1665,30 @@ function renderHomeCarouselLoop() {
       hcCtx.save();
       hcCtx.translate(it.px, it.py);
 
-      // Crisp dark floor shadow under each figurine's bronze pedestal
+      // Floor shadow under each figurine's pedestal
       hcCtx.fillStyle = "rgba(0, 0, 0, 0.68)";
       hcCtx.beginPath();
-      hcCtx.ellipse(0, 14 * S * it.scale, 32 * S * it.scale, 10 * S * it.scale, 0, 0, Math.PI * 2);
+      hcCtx.ellipse(0, 14 * S * it.scale, 30 * S * it.scale, 9 * S * it.scale, 0, 0, Math.PI * 2);
       hcCtx.fill();
 
-      // Subtle cyan glow ring on the currently selected team member in the semicircle
+      // Glowing active gold/cyan ring on the currently selected team member
       if (isCenterSelected) {
-        hcCtx.strokeStyle = "rgba(0, 245, 255, 0.85)";
-        hcCtx.lineWidth = 2.2 * S;
+        hcCtx.save();
+        hcCtx.strokeStyle = "#facc15";
+        hcCtx.lineWidth = 2.8 * S;
+        hcCtx.shadowColor = "#facc15";
+        hcCtx.shadowBlur = 12 * S;
         hcCtx.beginPath();
-        hcCtx.ellipse(0, 13 * S * it.scale, 31 * S * it.scale, 9.5 * S * it.scale, 0, 0, Math.PI * 2);
+        hcCtx.ellipse(0, 13 * S * it.scale, 29 * S * it.scale, 8.5 * S * it.scale, 0, 0, Math.PI * 2);
         hcCtx.stroke();
+        hcCtx.restore();
       }
 
       if (img && img.complete) {
-        const drawW = 80 * S * it.scale;
-        const drawH = drawW * (138.0 / 144.0);
-        const bob = Math.sin(t * 1.8 + it.slot) * (1.2 * S);
-        hcCtx.drawImage(img, -drawW / 2, -drawH + 20 * S * it.scale + bob, drawW, drawH);
+        const drawW = 74 * S * it.scale;
+        const drawH = drawW * (img.naturalHeight / (img.naturalWidth || 1));
+        const bob = isCenterSelected ? Math.sin(t * 2.2) * (2.2 * S) : 0;
+        hcCtx.drawImage(img, -drawW / 2, -drawH + 18 * S * it.scale + bob, drawW, drawH);
       }
       hcCtx.restore();
     });
