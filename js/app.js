@@ -34,6 +34,11 @@ if ("serviceWorker" in navigator) {
 
   const unlockAndPlayBgm = () => {
     ensureAudio();
+    if (typeof BgmEngine !== "undefined" && BgmEngine.enabled && BgmEngine.audioSource === "youtube") {
+      if (!BgmEngine.ytPlaying) {
+        BgmEngine.syncYouTubeTrack(BgmEngine.currentTrack || "lobby");
+      }
+    }
     if (typeof sfxCtx !== "undefined" && sfxCtx && sfxCtx.state === "suspended") {
       sfxCtx.resume().then(() => {
         if (typeof BgmEngine !== "undefined" && BgmEngine.enabled) {

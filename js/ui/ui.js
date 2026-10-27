@@ -2055,7 +2055,9 @@ const BgmEngine = {
   // YouTube Official OST Player Integration
   ytPlayer: null,
   ytReady: false,
-  audioSource: "webaudio", // "webaudio" | "youtube" (default webaudio guarantees instant playback)
+  ytPlaying: false,
+  ytInitPending: false,
+  audioSource: "webaudio", // "webaudio" | "youtube"
   playlistId: "PLjrVBVlg13D5yAiEr6l25nA_1XjTLddnq",
   trackMap: {
     title: 0,
@@ -2070,33 +2072,146 @@ const BgmEngine = {
     victory: 13      // Victory Fanfare
   },
 
+  ensureYouTubePlayer() {
+    if (typeof document === "undefined") return;
+    let container = document.getElementById("pokeduel-yt-bgm-container");
+    if (!container && document.body) {
+      container = document.createElement("div");
+      container.id = "pokeduel-yt-bgm-container";
+      container.style.cssText = "position:fixed; bottom:0; left:0; width:1px; height:1px; opacity:0.001; pointer-events:none; z-index:-1;";
+      document.body.appendChild(container);
+    }
+    if (this.ytPlayer || this.ytInitPending) return;
+    if (!window.YT || !window.YT.Player) {
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        tag.async = true;
+        document.head.appendChild(tag);
+      }
+      return;
+    }
+    this.ytInitPending = true;
+    const pVars = {
+      listType: "playlist",
+      list: this.playlistId,
+      autoplay: 0,
+      controls: 0,
+      disablekb: 1,
+      enablejsapi: 1,
+      fs: 0,
+      loop: 1,
+      modestbranding: 1,
+      playsinline: 1
+    };
+    if (window.location && window.location.protocol && window.location.protocol.startsWith("http")) {
+      pVars.origin = window.location.origin;
+    }
+    try {
+      this.ytPlayer = new YT.Player("pokeduel-yt-bgm-container", {
+        height: "1",
+        width: "1",
+        playerVars: pVars,
+        events: {
+          onReady: (event) => {
+            this.ytInitPending = false;
+            this.ytReady = true;
+            try {
+              if (typeof event.target.unMute === "function") event.target.unMute();
+              if (typeof event.target.setVolume === "function") event.target.setVolume(85);
+              if (this.enabled && this.audioSource === "youtube") {
+                const drawerModal = document.getElementById("drawer-modal");
+                const isLobby = drawerModal && drawerModal.classList.contains("show");
+                this.syncYouTubeTrack(isLobby ? "lobby" : "battle");
+              }
+            } catch (e) {}
+          },
+          onStateChange: (event) => {
+            if (!window.YT) return;
+            if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING) {
+              this.ytPlaying = true;
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.CUED) {
+              this.ytPlaying = false;
+            } else if (event.data === YT.PlayerState.ENDED) {
+              this.ytPlaying = false;
+              const targetIdx = this.trackMap[this.currentTrack] ?? 3;
+              try {
+                this.ytPlayer.playVideoAt(targetIdx);
+                this.ytPlayer.playVideo();
+              } catch (e) {}
+            }
+          },
+          onError: () => {
+            this.ytInitPending = false;
+            this.ytPlaying = false;
+            if (this.enabled && this.audioSource === "youtube" && this.ytPlayer && typeof this.ytPlayer.loadPlaylist === "function") {
+              const targetIdx = this.trackMap[this.currentTrack] ?? 3;
+              try {
+                this.ytPlayer.loadPlaylist({
+                  list: this.playlistId,
+                  listType: "playlist",
+                  index: targetIdx,
+                  startSeconds: 0
+                });
+              } catch (e) {}
+            }
+          }
+        }
+      });
+    } catch (e) {
+      this.ytInitPending = false;
+    }
+  },
+
   cycleAudioSource() {
     this.audioSource = (this.audioSource === "youtube") ? "webaudio" : "youtube";
     try {
       localStorage.setItem("pokeduel_bgm_source", this.audioSource);
     } catch (e) {}
     if (this.audioSource === "webaudio") {
+      this.ytPlaying = false;
       if (this.ytPlayer && typeof this.ytPlayer.pauseVideo === "function") {
         try { this.ytPlayer.pauseVideo(); } catch (e) {}
       }
       if (this.enabled && !this.stepTimer) this.playStep();
     } else {
-      if (this.stepTimer) {
-        clearTimeout(this.stepTimer);
-        this.stepTimer = null;
+      if (!this.enabled) {
+        this.enabled = true;
+        bgmEnabled = true;
+        try { localStorage.setItem("pokeduel_bgm_enabled", "1"); } catch (e) {}
       }
+      this.ensureYouTubePlayer();
+      const drawerModal = document.getElementById("drawer-modal");
+      const isLobby = drawerModal && drawerModal.classList.contains("show");
+      this.currentTrack = isLobby ? "lobby" : "battle";
       this.syncYouTubeTrack(this.currentTrack);
+      if (!this.stepTimer) this.playStep();
     }
     this.syncUi();
   },
 
   syncYouTubeTrack(targetTrack) {
     if (this.audioSource !== "youtube" || !this.enabled) return;
-    if (!this.ytReady || !this.ytPlayer || typeof this.ytPlayer.playVideoAt !== "function") return;
+    this.ensureYouTubePlayer();
+    if (!this.ytReady || !this.ytPlayer) return;
     const targetIdx = this.trackMap[targetTrack] ?? 3;
     try {
-      this.ytPlayer.setVolume(85);
-      this.ytPlayer.playVideoAt(targetIdx);
+      if (typeof this.ytPlayer.unMute === "function") this.ytPlayer.unMute();
+      if (typeof this.ytPlayer.setVolume === "function") this.ytPlayer.setVolume(85);
+      const pl = (typeof this.ytPlayer.getPlaylist === "function") ? this.ytPlayer.getPlaylist() : null;
+      if (!pl || !Array.isArray(pl) || pl.length === 0) {
+        if (typeof this.ytPlayer.loadPlaylist === "function") {
+          this.ytPlayer.loadPlaylist({
+            list: this.playlistId,
+            listType: "playlist",
+            index: targetIdx,
+            startSeconds: 0
+          });
+        }
+      } else if (typeof this.ytPlayer.playVideoAt === "function") {
+        this.ytPlayer.playVideoAt(targetIdx);
+        if (typeof this.ytPlayer.playVideo === "function") this.ytPlayer.playVideo();
+      }
     } catch (e) {}
   },
 
@@ -2264,8 +2379,15 @@ const BgmEngine = {
       }
     }
 
-    if (this.currentTrack !== prevTrack && this.audioSource === "youtube") {
-      this.syncYouTubeTrack(this.currentTrack);
+    if (this.audioSource === "youtube") {
+      if (this.currentTrack !== prevTrack) {
+        this.syncYouTubeTrack(this.currentTrack);
+      }
+      if (this.stepTimer) clearTimeout(this.stepTimer);
+      this.stepTimer = setTimeout(() => {
+        this.playStep();
+      }, 400);
+      return;
     }
 
     const cur = pattern[this.step % pattern.length];
@@ -8432,55 +8554,14 @@ requestAnimationFrame(boardRenderLoop);
 // Global callback required by YouTube IFrame API
 window.onYouTubeIframeAPIReady = function() {
   try {
-    if (typeof BgmEngine === "undefined") return;
-    BgmEngine.ytPlayer = new YT.Player('pokeduel-yt-bgm-container', {
-      height: '1',
-      width: '1',
-      playerVars: {
-        listType: 'playlist',
-        list: BgmEngine.playlistId,
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        enablejsapi: 1,
-        fs: 0,
-        loop: 1,
-        modestbranding: 1,
-        playsinline: 1,
-        origin: window.location.origin
-      },
-      events: {
-        onReady: function(event) {
-          BgmEngine.ytReady = true;
-          try {
-            event.target.setVolume(75);
-            if (BgmEngine.enabled && BgmEngine.isPlaying) {
-              const drawerModal = document.getElementById("drawer-modal");
-              const isLobby = drawerModal && drawerModal.classList.contains("show");
-              BgmEngine.syncYouTubeTrack(isLobby ? "lobby" : "battle");
-            }
-          } catch (e) {}
-        },
-        onStateChange: function(event) {
-          // Loop current track
-          if (event.data === (window.YT ? YT.PlayerState.ENDED : 0)) {
-            const targetIdx = BgmEngine.trackMap[BgmEngine.currentTrack] || 3;
-            try { BgmEngine.ytPlayer.playVideoAt(targetIdx); } catch (e) {}
-          }
-        },
-        onError: function() {
-          // Fallback seamlessly to native Web Audio if YouTube playback is restricted
-          BgmEngine.ytReady = false;
-          BgmEngine.audioSource = "webaudio";
-          BgmEngine.syncUi();
-          if (BgmEngine.enabled && !BgmEngine.stepTimer) {
-            BgmEngine.playStep();
-          }
-        }
-      }
-    });
+    if (typeof BgmEngine !== "undefined") {
+      BgmEngine.ensureYouTubePlayer();
+    }
   } catch (e) {}
 };
+if (typeof window !== "undefined" && window.YT && window.YT.Player && typeof BgmEngine !== "undefined") {
+  try { BgmEngine.ensureYouTubePlayer(); } catch (e) {}
+}
 
 // Pokémon Duel Web Audio BGM Initialization & User Gesture Auto-Unlock
 
