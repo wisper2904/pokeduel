@@ -298,32 +298,38 @@ function makeTeamUnits(owner, deckIndices) {
   return deckIndices.map((idx, slot) => {
     const base = FIGURES_DB[idx % FIGURES_DB.length];
     const targetName = base.name;
-    const chain = getEvolutionChainToTarget(targetName);
 
-    // CRITICAL: Megas NEVER start as Mega in a match!
-    // Find the earliest valid non-Mega starting figure in the evolution chain that exists in FIGURES_DB
-    let startFig = null;
-    let startName = targetName;
-    if (chain && chain.length > 0) {
-      for (let i = 0; i < chain.length; i++) {
-        const candidateName = chain[i];
-        if (candidateName.startsWith("Mega ") || candidateName.startsWith("Primal ")) continue;
-        const fig = findFigureByName(candidateName);
-        if (fig) {
-          startFig = fig;
-          startName = fig.name;
-          break;
-        }
+    // RULE 1: If the figure is a Mega Evolution (or Primal), it CANNOT enter the match directly as a Mega.
+    // It must enter as its immediate non-Mega base form (e.g. Mega Charizard X ➔ Charizard, Mega Gengar ➔ Gengar, Mega Blastoise ➔ Blastoise, Mega Lucario ➔ Lucario).
+    // RULE 2: If the figure is ANY standard Pokémon (including Golem, Blastoise, Charizard, Dragonite, Geodude, etc.),
+    // IT ENTERS THE MATCH AS THE EXACT FIGURE THE PLAYER SELECTED IN THEIR DECK!
+    // If the player puts Golem in the deck, they play with Golem!
+    // If the player puts Geodude in the deck, they play with Geodude (and can evolve into Graveler and Golem in combat).
+    let startFig = base;
+    let startName = base.name;
+
+    const isMega = targetName.startsWith("Mega ") || targetName.startsWith("Primal ") || (base.rarity === "UX" && base.megaTurns);
+    if (isMega) {
+      const baseCandidate = targetName.replace(/^Mega\s+/, "").replace(/^Primal\s+/, "").replace(/\s+[XY]$/, "");
+      const foundBase = (typeof findFigureByName === "function") ? findFigureByName(baseCandidate) : null;
+      if (foundBase) {
+        startFig = foundBase;
+        startName = foundBase.name;
       }
     }
-    // If targetName itself was a Mega and no prior non-Mega step was found, strip "Mega " and look up base
-    if (!startFig && (targetName.startsWith("Mega ") || targetName.startsWith("Primal ") || base.rarity === "UX")) {
-      const baseCandidate = targetName.replace(/^Mega\s+/, "").replace(/^Primal\s+/, "").replace(/\s+[XY]$/, "");
-      startFig = findFigureByName(baseCandidate);
-    }
-    if (!startFig) {
-      startFig = base;
-      startName = base.name;
+
+    // Chain for evolution: from startFig to targetName (or forward to Mega)
+    let chain = [startName];
+    if (typeof POKEMON_EVOLUTION_FAMILIES !== "undefined") {
+      const fam = POKEMON_EVOLUTION_FAMILIES.find(f =>
+        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === startName.toLowerCase().replace(/[\s\-_]/g, ""))
+      );
+      if (fam) {
+        const sIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === startName.toLowerCase().replace(/[\s\-_]/g, ""));
+        if (sIdx !== -1) {
+          chain = fam.slice(sIdx);
+        }
+      }
     }
 
     const startFigIdx = (typeof FIGURES_DB !== "undefined" && FIGURES_DB.indexOf(startFig) !== -1)

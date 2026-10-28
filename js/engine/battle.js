@@ -655,7 +655,22 @@ const SIGNATURE_Z_MOVES = {
   "blastoise": { name: "Hydro Vortex Plus", color: "white", dmg: 200, stars: 0, effect: "bench" },
   "venusaur": { name: "Bloom Doom Plus", color: "white", dmg: 200, stars: 0, effect: "spore" },
   "gengar": { name: "Never-Ending Nightmare Plus", color: "purple", dmg: 0, stars: 4, effect: "curse" },
-  "lucario": { name: "All-Out Aura Pummeling", color: "gold", dmg: 200, stars: 0, effect: "ko" }
+  "lucario": { name: "All-Out Aura Pummeling", color: "gold", dmg: 200, stars: 0, effect: "ko" },
+  "solgaleo": { name: "Searing Sunraze Smash", color: "white", dmg: 240, stars: 0, effect: "ultraspace" },
+  "lunala": { name: "Menacing Moonraze Maelstrom", color: "purple", dmg: 0, stars: 4, effect: "ultraspace" },
+  "necrozma": { name: "Light That Burns the Sky", color: "white", dmg: 260, stars: 0, effect: "ko" },
+  "tapu_koko": { name: "Guardian of Alola", color: "gold", dmg: 220, stars: 0, effect: "paralyze" },
+  "tapu_lele": { name: "Guardian of Alola (Psychic)", color: "gold", dmg: 220, stars: 0, effect: "wait" },
+  "tapu_bulu": { name: "Guardian of Alola (Grass)", color: "gold", dmg: 220, stars: 0, effect: "ko" },
+  "tapu_fini": { name: "Guardian of Alola (Water)", color: "gold", dmg: 220, stars: 0, effect: "bench" },
+  "dialga": { name: "Roar of Time Z", color: "purple", dmg: 0, stars: 4, effect: "wait" },
+  "palkia": { name: "Spacial Rend Z", color: "purple", dmg: 0, stars: 4, effect: "banish" },
+  "giratina": { name: "Shadow Force Z", color: "purple", dmg: 0, stars: 4, effect: "bench" },
+  "deoxys": { name: "Psycho Boost Z", color: "white", dmg: 240, stars: 0, effect: "ko" },
+  "reshiram": { name: "Fusion Flare Z", color: "white", dmg: 230, stars: 0, effect: "burn" },
+  "zekrom": { name: "Fusion Bolt Z", color: "gold", dmg: 230, stars: 0, effect: "paralyze" },
+  "marshadow": { name: "Soul-Stealing 7-Star Strike", color: "purple", dmg: 0, stars: 4, effect: "ko" },
+  "zeraora": { name: "Plasma Fists Z", color: "gold", dmg: 220, stars: 0, effect: "paralyze" }
 };
 
 function getFigureZMove(unit) {

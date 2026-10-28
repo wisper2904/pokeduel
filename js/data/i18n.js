@@ -27,6 +27,8 @@ const I18N_TRANSLATIONS = {
     "hub.season_reset_title": "TEMPORADA RANQUEADA",
     "hub.season_reset_desc": "Reset em {days} dias · Pontos retornam para 1000",
     "hub.lounge_online": "Salão Carmonte: {count} Treinadores Online",
+    "hub.pedestal_on": "Pedestal: 3D",
+    "hub.pedestal_off": "Só a Peça",
 
     // Settings / Config Tab
     "settings.language_title": "🌐 IDIOMA / LANGUAGE / IDIOMA",
@@ -287,6 +289,8 @@ const I18N_TRANSLATIONS = {
     "hub.season_reset_title": "RANKED SEASON",
     "hub.season_reset_desc": "Reset in {days} days · Rating resets to 1000",
     "hub.lounge_online": "Carmonte Lounge: {count} Trainers Online",
+    "hub.pedestal_on": "3D Pedestal",
+    "hub.pedestal_off": "Figure Only",
 
     // Settings / Config Tab
     "settings.language_title": "🌐 IDIOMA / LANGUAGE / IDIOMA",
@@ -547,6 +551,8 @@ const I18N_TRANSLATIONS = {
     "hub.season_reset_title": "TEMPORADA CLASIFICATORIA",
     "hub.season_reset_desc": "Reinicio en {days} días · Puntos vuelven a 1000",
     "hub.lounge_online": "Salón Carmonte: {count} Entrenadores Online",
+    "hub.pedestal_on": "Pedestal 3D",
+    "hub.pedestal_off": "Solo la Figura",
 
     // Settings / Config Tab
     "settings.language_title": "🌐 IDIOMA / LANGUAGE / IDIOMA",
@@ -2808,6 +2814,9 @@ function updateAllLocalizedUI() {
   if (mmStatus) mmStatus.textContent = t("mm.searching");
   const mmSub = document.getElementById("mm-status-sub");
   if (mmSub) mmSub.textContent = t("mm.syncing");
+
+  // 10. Update Home stage pedestal toggle button
+  if (typeof updatePedestalToggleButton === "function") updatePedestalToggleButton();
 }
 
 if (typeof document !== "undefined") {

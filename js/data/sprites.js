@@ -26,6 +26,335 @@ const HOME_V380_UI_ASSETS = {
 };
 
 const AUTHENTIC_FIG_SPRITES = {
+  "primarina": {
+    "uri": "assets/sprites/primarina.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "popplio": {
+    "uri": "assets/sprites/popplio.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "incineroar": {
+    "uri": "assets/sprites/incineroar.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "litten": {
+    "uri": "assets/sprites/litten.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "decidueye": {
+    "uri": "assets/sprites/decidueye.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "rowlet": {
+    "uri": "assets/sprites/rowlet.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "zeraora": {
+    "uri": "assets/sprites/zeraora.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "marshadow": {
+    "uri": "assets/sprites/marshadow.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "naganadel": {
+    "uri": "assets/sprites/naganadel.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "poipole": {
+    "uri": "assets/sprites/poipole.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "guzzlord": {
+    "uri": "assets/sprites/guzzlord.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "xurkitree": {
+    "uri": "assets/sprites/xurkitree.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "kartana": {
+    "uri": "assets/sprites/kartana.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "celesteela": {
+    "uri": "assets/sprites/celesteela.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "pheromosa": {
+    "uri": "assets/sprites/pheromosa.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "buzzwole": {
+    "uri": "assets/sprites/buzzwole.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "nihilego": {
+    "uri": "assets/sprites/nihilego.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "necrozma": {
+    "uri": "assets/sprites/necrozma.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "solgaleo": {
+    "uri": "assets/sprites/solgaleo.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "tapu_fini": {
+    "uri": "assets/sprites/tapu_fini.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "tapu_bulu": {
+    "uri": "assets/sprites/tapu_bulu.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "tapu_lele": {
+    "uri": "assets/sprites/tapu_lele.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "tapu_koko": {
+    "uri": "assets/sprites/tapu_koko.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "zygarde": {
+    "uri": "assets/sprites/zygarde.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "yveltal": {
+    "uri": "assets/sprites/yveltal.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "xerneas": {
+    "uri": "assets/sprites/xerneas.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "kyurem": {
+    "uri": "assets/sprites/kyurem.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "zekrom": {
+    "uri": "assets/sprites/zekrom.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "reshiram": {
+    "uri": "assets/sprites/reshiram.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "deoxys": {
+    "uri": "assets/sprites/deoxys.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "giratina": {
+    "uri": "assets/sprites/giratina.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "palkia": {
+    "uri": "assets/sprites/palkia.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "dialga": {
+    "uri": "assets/sprites/dialga.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "brionne": {
+    "uri": "assets/sprites/brionne.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "torracat": {
+    "uri": "assets/sprites/torracat.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "dartrix": {
+    "uri": "assets/sprites/dartrix.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "porygon2": {
+    "uri": "assets/sprites/porygon2.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "pupitar": {
+    "uri": "assets/sprites/pupitar.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "shelgon": {
+    "uri": "assets/sprites/shelgon.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "gabite": {
+    "uri": "assets/sprites/gabite.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "metang": {
+    "uri": "assets/sprites/metang.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "prinplup": {
+    "uri": "assets/sprites/prinplup.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "monferno": {
+    "uri": "assets/sprites/monferno.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "grotle": {
+    "uri": "assets/sprites/grotle.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "croconaw": {
+    "uri": "assets/sprites/croconaw.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "quilava": {
+    "uri": "assets/sprites/quilava.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
+  "bayleef": {
+    "uri": "assets/sprites/bayleef.png",
+    "w": 44,
+    "h": 42,
+    "ox": 22,
+    "oy": 28
+  },
   "abra": {
     "uri": "assets/sprites/abra.webp",
     "w": 44,
@@ -1462,14 +1791,14 @@ const AUTHENTIC_FIG_SPRITES = {
     "oy": 28
   },
   "staryu": {
-    "uri": "assets/sprites/starmie.webp",
+    "uri": "assets/sprites/staryu.png",
     "w": 44,
     "h": 42,
     "ox": 22,
     "oy": 28
   },
   "lopunny": {
-    "uri": "assets/sprites/megalopunny.png",
+    "uri": "assets/sprites/lopunny.png",
     "w": 44,
     "h": 42,
     "ox": 22,

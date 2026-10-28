@@ -178,7 +178,7 @@ function openFigureDetailsModal(figIdx, liveUnit) {
   }
 
   const abEl = document.getElementById("fdet-ability");
-  const chain = EVO_CHAIN_NAMES[f.id] || ["Mega " + f.name];
+  const evoLine = (typeof getFigureEvolutionLine === "function") ? getFigureEvolutionLine(f) : (EVO_CHAIN_NAMES[f.id] ? [f.name, ...EVO_CHAIN_NAMES[f.id]] : [f.name]);
   if (abEl) {
     const jumpDesc = (typeof t === "function") ? t("jump.jumps_desc", "🦘 PULA FIGURAS: Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.") : "🦘 PULA FIGURAS: Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.";
     const noJumpDesc = (typeof t === "function") ? t("jump.no_jump_desc", "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).") : "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).";
@@ -186,8 +186,18 @@ function openFigureDetailsModal(figIdx, liveUnit) {
       ? `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(22,163,74,0.18); border:1px solid #22c55e; border-radius:4px; color:#86efac; font-size:10px; font-weight:700;">${jumpDesc}</div>`
       : `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(71,85,105,0.22); border:1px solid #64748b; border-radius:4px; color:#cbd5e1; font-size:10px;">${noJumpDesc}</div>`;
     const abText = (typeof localizeAbility === "function") ? localizeAbility(f) : ((FIGURE_ABILITIES_DB && FIGURE_ABILITIES_DB[f.id]) || "Standard PFG Figure Ability.");
-    const evoTitle = (typeof t === "function") ? t("details.evo_line", "Evolution / [UX] Line:") : "Evolution / [UX] Line:";
-    abEl.innerHTML = `${jumpNotice}${abText}<br><strong style="color:#facc15;">${evoTitle}</strong> ${f.name} ➔ ${chain.join(" ➔ ")}`;
+    const evoTitle = (typeof t === "function") ? t("details.evo_line", "Linha Evolutiva / [UX]:") : "Linha Evolutiva / [UX]:";
+    let evoLineHtml = "";
+    if (evoLine.length > 1) {
+      const parts = evoLine.map(n => {
+        const isCurrent = (n.toLowerCase().replace(/[\s\-_]/g, "") === f.name.toLowerCase().replace(/[\s\-_]/g, ""));
+        return isCurrent ? `<strong style="color:#fde047; text-decoration:underline;">${n} ★</strong>` : `<span style="color:#94a3b8;">${n}</span>`;
+      });
+      evoLineHtml = `<br><strong style="color:#facc15;">${evoTitle}</strong> ${parts.join(" ➔ ")}`;
+    } else {
+      evoLineHtml = `<br><strong style="color:#38bdf8;">Linha:</strong> <span style="color:#bae6fd;">Forma Única / Sem evolução adicional</span>`;
+    }
+    abEl.innerHTML = `${jumpNotice}${abText}${evoLineHtml}`;
   }
 
   // Workshop Points Info Header
@@ -969,8 +979,7 @@ function renderHubAndCollection() {
     showcase.innerHTML = state.deckP1.map((idx, slotPos) => {
       const f = FIGURES_DB[idx % FIGURES_DB.length];
       const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
-      const chain = EVO_CHAIN_NAMES[f.id] || ["Mega " + f.name];
-      const evoName = chain[chain.length - 1];
+      const evoTarget = (typeof getFigureEvolutionTarget === "function") ? getFigureEvolutionTarget(f) : null;
       const isSelSlot = (slotPos === currentEditingDeckSlot);
       return `<div class="deck-slot-box ${isSelSlot ? 'selected-slot' : ''}" onclick="selectDeckSlotToEdit(${slotPos})">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:0 2px;">
@@ -980,7 +989,7 @@ function renderHubAndCollection() {
         <img src="${sp.uri}" style="width:36px; height:36px; object-fit:contain;">
         <div style="font-size:7.8px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.name}</div>
         <div style="font-size:7px; color:#facc15;">MP ${f.mp} · CLv+${f.clv}</div>
-        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolution / UX Form">⬆ ${evoName}</div>
+        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolução">${evoTarget ? '⬆ ' + evoTarget : '★ Final'}</div>
       </div>`;
     }).join("");
   }
@@ -1179,10 +1188,11 @@ if (homeCarouselCanvas) {
       return;
     }
 
-    // 2. Check if user tapped the Centerpiece on the main pedestal
+    // 2. Check if user tapped the Centerpiece on the main pedestal / stage
     const cx = homeCarouselCanvas.width * 0.5;
     const cy = homeCarouselCanvas.height * 0.50;
-    if (Math.hypot(tx - cx, ty - (cy - 20 * S)) < 90 * S) {
+    const targetY = homeCenterpieceShowPedestal ? (cy - 45 * S) : (cy - 20 * S);
+    if (Math.hypot(tx - cx, ty - targetY) < 95 * S) {
       const centerFigIdx = state.deckP1[selectedCarouselSlot % 6];
       openFigureDetailsModal(centerFigIdx);
       playSfx("tick");
@@ -1250,6 +1260,7 @@ function initHomeV380Assets() {
     const el = document.getElementById(elId);
     if (el && HOME_V380_UI_ASSETS[assetKey]) el.src = HOME_V380_UI_ASSETS[assetKey];
   });
+  if (typeof updatePedestalToggleButton === "function") updatePedestalToggleButton();
 }
 setTimeout(initHomeV380Assets, 0);
 
@@ -1613,6 +1624,49 @@ function cycleCenterpieceFigurine() {
   if (msg && f) msg.textContent = `★ Time em Destaque (Slot #${selectedCarouselSlot + 1}/6): [${f.rarity}] ${f.name} (MP ${f.mp})`;
 }
 
+let homeCenterpieceShowPedestal = (typeof localStorage !== "undefined" && localStorage.getItem("pokeduel_show_pedestal") === "false") ? false : true;
+
+function toggleHomePedestalMode() {
+  homeCenterpieceShowPedestal = !homeCenterpieceShowPedestal;
+  try {
+    localStorage.setItem("pokeduel_show_pedestal", homeCenterpieceShowPedestal ? "true" : "false");
+  } catch (e) {}
+  playSfx("tick");
+  updatePedestalToggleButton();
+  const msg = document.getElementById("chest-reward-msg");
+  if (msg) {
+    msg.textContent = homeCenterpieceShowPedestal 
+      ? `🏛️ ${typeof t === "function" ? t("hub.pedestal_on", "Palco: Com Pedestal") : "Palco: Com Pedestal"}` 
+      : `✨ ${typeof t === "function" ? t("hub.pedestal_off", "Palco: Só a Peça") : "Palco: Só a Peça"}`;
+  }
+}
+
+function updatePedestalToggleButton() {
+  const txt = document.getElementById("home-pedestal-toggle-text");
+  const icon = document.getElementById("home-pedestal-toggle-icon");
+  const btn = document.getElementById("home-pedestal-toggle-btn");
+  if (!txt || !icon) return;
+  if (homeCenterpieceShowPedestal) {
+    icon.textContent = "🏛️";
+    txt.textContent = (typeof t === "function" ? t("hub.pedestal_on", "Pedestal: 3D") : "Pedestal: 3D");
+    if (btn) {
+      btn.style.borderColor = "#38bdf8";
+      btn.style.color = "#7dd3fc";
+      btn.style.background = "rgba(15, 23, 42, 0.88)";
+    }
+  } else {
+    icon.textContent = "✨";
+    txt.textContent = (typeof t === "function" ? t("hub.pedestal_off", "Só a Peça") : "Só a Peça");
+    if (btn) {
+      btn.style.borderColor = "#c084fc";
+      btn.style.color = "#e9d5ff";
+      btn.style.background = "rgba(30, 16, 50, 0.88)";
+    }
+  }
+}
+window.toggleHomePedestalMode = toggleHomePedestalMode;
+window.updatePedestalToggleButton = updatePedestalToggleButton;
+
 function renderHomeCarouselLoop() {
   if (hcCtx && document.getElementById("drawer-modal").classList.contains("show") &&
       document.getElementById("dtab-hub").style.display !== "none") {
@@ -1692,27 +1746,60 @@ function renderHomeCarouselLoop() {
     const centerFig = FIGURES_DB[centerFigDbIdx % FIGURES_DB.length] || FIGURES_DB[0];
 
     hcCtx.save();
-    // Floor shadow under centerpiece pedestal
-    hcCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
-    hcCtx.beginPath();
-    hcCtx.ellipse(cx, cy + 54 * S, 110 * S, 30 * S, 0, 0, Math.PI * 2);
-    hcCtx.fill();
+    if (homeCenterpieceShowPedestal) {
+      // Floor shadow under centerpiece pedestal
+      hcCtx.fillStyle = "rgba(0, 0, 0, 0.72)";
+      hcCtx.beginPath();
+      hcCtx.ellipse(cx, cy + 54 * S, 110 * S, 30 * S, 0, 0, Math.PI * 2);
+      hcCtx.fill();
 
-    // 3D Pedestal
-    if (homePedestal3DImg.complete && homePedestal3DImg.naturalWidth > 0) {
-      const pw = 224 * S;
-      const ph = pw * (homePedestal3DImg.naturalHeight / homePedestal3DImg.naturalWidth);
-      hcCtx.drawImage(homePedestal3DImg, cx - pw / 2, cy + 62 * S - ph, pw, ph);
-    }
+      // 3D Pedestal
+      if (homePedestal3DImg.complete && homePedestal3DImg.naturalWidth > 0) {
+        const pw = 224 * S;
+        const ph = pw * (homePedestal3DImg.naturalHeight / homePedestal3DImg.naturalWidth);
+        hcCtx.drawImage(homePedestal3DImg, cx - pw / 2, cy + 62 * S - ph, pw, ph);
+      }
 
-    // Selected Team Pokémon standing on the pedestal
-    const cImg = loadedFigImages[centerFig.spriteKey] || loadedFigImages[centerFig.id] || loadedFigImages["pikachu"];
-    if (cImg && cImg.complete) {
-      const cw = 175 * S;
-      const ch = cw * (cImg.naturalHeight / (cImg.naturalWidth || 1));
-      const figX = cx - cw / 2;
-      const figY = cy - ch + 38 * S;
-      hcCtx.drawImage(cImg, figX, figY, cw, ch);
+      // Contact shadow under Pokémon figure on the top stone surface
+      const cImg = loadedFigImages[centerFig.spriteKey] || loadedFigImages[centerFig.id] || loadedFigImages["pikachu"];
+      if (cImg && cImg.complete) {
+        const cw = 162 * S;
+        const ch = cw * (cImg.naturalHeight / (cImg.naturalWidth || 1));
+        const figX = cx - cw / 2;
+        const figY = cy - ch + 18 * S;
+
+        hcCtx.fillStyle = "rgba(0, 0, 0, 0.45)";
+        hcCtx.beginPath();
+        hcCtx.ellipse(cx, figY + ch - 4 * S, 44 * S, 12 * S, 0, 0, Math.PI * 2);
+        hcCtx.fill();
+
+        hcCtx.drawImage(cImg, figX, figY, cw, ch);
+      }
+    } else {
+      // Pedestal OFF: "Só a Peça" - Pokémon figure stands cleanly on the stadium floor with authentic glowing ring base
+      hcCtx.fillStyle = "rgba(0, 0, 0, 0.65)";
+      hcCtx.beginPath();
+      hcCtx.ellipse(cx, cy + 38 * S, 58 * S, 16 * S, 0, 0, Math.PI * 2);
+      hcCtx.fill();
+
+      hcCtx.save();
+      hcCtx.strokeStyle = "rgba(56, 189, 248, 0.85)";
+      hcCtx.lineWidth = 3 * S;
+      hcCtx.shadowColor = "#38bdf8";
+      hcCtx.shadowBlur = 14 * S;
+      hcCtx.beginPath();
+      hcCtx.ellipse(cx, cy + 38 * S, 52 * S, 14 * S, 0, 0, Math.PI * 2);
+      hcCtx.stroke();
+      hcCtx.restore();
+
+      const cImg = loadedFigImages[centerFig.spriteKey] || loadedFigImages[centerFig.id] || loadedFigImages["pikachu"];
+      if (cImg && cImg.complete) {
+        const cw = 175 * S;
+        const ch = cw * (cImg.naturalHeight / (cImg.naturalWidth || 1));
+        const figX = cx - cw / 2;
+        const figY = cy - ch + 40 * S;
+        hcCtx.drawImage(cImg, figX, figY, cw, ch);
+      }
     }
     hcCtx.restore();
 
@@ -3556,8 +3643,7 @@ renderHubAndCollection = function() {
     showcase.innerHTML = state.deckP1.map((idx, slotPos) => {
       const f = FIGURES_DB[idx % FIGURES_DB.length];
       const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
-      const chain = EVO_CHAIN_NAMES[f.id] || ["Mega " + f.name];
-      const evoName = chain[chain.length - 1];
+      const evoTarget = (typeof getFigureEvolutionTarget === "function") ? getFigureEvolutionTarget(f) : null;
       const isSelSlot = (slotPos === currentEditingDeckSlot);
       return `<div class="deck-slot-box ${isSelSlot ? 'selected-slot' : ''}" onclick="selectDeckSlotToEdit(${slotPos})">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:0 2px;">
@@ -3567,7 +3653,7 @@ renderHubAndCollection = function() {
         <img src="${sp.uri}" style="width:36px; height:36px; object-fit:contain;">
         <div style="font-size:7.8px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.name}</div>
         <div style="font-size:7px; color:#facc15;">MP ${f.mp} · CLv+${f.clv}</div>
-        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolution / UX Form">⬆ ${evoName}</div>
+        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolução">${evoTarget ? '⬆ ' + evoTarget : '★ Final'}</div>
       </div>`;
     }).join("");
   }
@@ -3755,8 +3841,7 @@ renderHubAndCollection = function() {
     showcase.innerHTML = state.deckP1.map((idx, slotPos) => {
       const f = FIGURES_DB[idx % FIGURES_DB.length];
       const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
-      const chain = EVO_CHAIN_NAMES[f.id] || ["Mega " + f.name];
-      const evoName = chain[chain.length - 1];
+      const evoTarget = (typeof getFigureEvolutionTarget === "function") ? getFigureEvolutionTarget(f) : null;
       const isSelSlot = (slotPos === currentEditingDeckSlot);
       return `<div class="deck-slot-box ${isSelSlot ? 'selected-slot' : ''}" onclick="selectDeckSlotToEdit(${slotPos})">
         <div style="display:flex; justify-content:space-between; align-items:center; padding:0 2px;">
@@ -3766,7 +3851,7 @@ renderHubAndCollection = function() {
         <img src="${sp.uri}" style="width:36px; height:36px; object-fit:contain;">
         <div style="font-size:7.8px; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.name}</div>
         <div style="font-size:7px; color:#facc15;">MP ${f.mp} · CLv+${f.clv}</div>
-        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolution / UX Form">⬆ ${evoName}</div>
+        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolução">${evoTarget ? '⬆ ' + evoTarget : '★ Final'}</div>
       </div>`;
     }).join("");
   }
@@ -6232,8 +6317,7 @@ renderHubAndCollection = function() {
     showcase.innerHTML = state.deckP1.slice(0, 6).map((idx, slotPos) => {
       const f = FIGURES_DB[idx % FIGURES_DB.length] || FIGURES_DB[0];
       const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
-      const chain = EVO_CHAIN_NAMES[f.id] || ["Mega " + f.name];
-      const evoName = chain[chain.length - 1];
+      const evoTarget = (typeof getFigureEvolutionTarget === "function") ? getFigureEvolutionTarget(f) : null;
       const isSelSlot = (slotPos === (currentEditingDeckSlot % 6));
       const maxDmg = getFigureMaxDmg(f);
       const roleIcon = f.mp >= 3 ? "🏃" : (f.mp === 2 ? "⚔️" : "🛡️");
@@ -6252,7 +6336,7 @@ renderHubAndCollection = function() {
         <div style="font-size:7.2px; font-weight:800; color:#fde047; margin-top:0.5px;">${roleIcon} MP ${f.mp} · 💥${maxDmg} · Lv.${f.level || 1}</div>
         ${getWheelColorBarHtml(f.wheel)}
         ${zm ? `<div class="zmove-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="⚡ Z-Move: ${zm.name} (${zmPower})">⚡ ${zm.name.replace(/^⚡\s*/, "")} <span style="color:#ffffff;">(${zmPower})</span></div>` : ''}
-        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolução / Forma UX">⬆ ${evoName}</div>
+        <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolução">${evoTarget ? '⬆ ' + evoTarget : '★ Forma Final'}</div>
       </div>`;
     }).join("");
   }

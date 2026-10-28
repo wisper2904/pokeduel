@@ -1104,6 +1104,11 @@
       <!-- Center 3D Diorama Stage (`home-carousel-canvas` with 1:1 DPI scaling, V-shaped silver floor, Greninja centerpiece & 6 crisp Deck figures!) -->
       <div style="position:relative; flex:1; min-height:210px; width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:-36px;">
         <canvas id="home-carousel-canvas" style="width:100%; height:100%; display:block; touch-action:none;"></canvas>
+        <!-- Bottom-Left Stage View Mode Button (Pedestal 3D / Só a Peça) -->
+        <button onclick="toggleHomePedestalMode()" id="home-pedestal-toggle-btn" title="Alternar entre Com Pedestal e Só a Peça" style="position:absolute; left:10px; bottom:10px; padding:4px 9px; font-size:10px; font-weight:800; background:rgba(15,23,42,0.88); color:#7dd3fc; border:1px solid #38bdf8; border-radius:12px; cursor:pointer; z-index:12; backdrop-filter:blur(4px); box-shadow:0 3px 8px rgba(0,0,0,0.6); display:flex; align-items:center; gap:4px;">
+          <span id="home-pedestal-toggle-icon">🏛️</span>
+          <span id="home-pedestal-toggle-text">Pedestal: 3D</span>
+        </button>
         <!-- Bottom-Right Black Metallic Pokéball Button on Stage (`1001314047.jpg`) -->
         <div onclick="cycleCenterpieceFigurine()" title="Trocar Pokémon Central do Palco" style="position:absolute; right:10px; bottom:6px; width:40px; height:40px; cursor:pointer; z-index:12; filter:drop-shadow(0 3px 6px rgba(0,0,0,0.85));">
           <img id="home-black-pokeball-img" src="" style="width:100%; height:100%; object-fit:contain;">
