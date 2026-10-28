@@ -1,7 +1,7 @@
 // ============================================================================
 // POKÉMON FIGURES DATABASE (30 META FIGURES + 202 EXPANSION FIGURES)
 // ============================================================================
-const FIGURES_DB = [
+var FIGURES_DB = [
   { id:"charizard", spriteKey:"charizard", name:"Charizard", rarity:"EX", type:"Fire/Flying", mp:2, level:4, clv:3, c1:"#ea580c", canPassThrough:true,
     wheel:[{name:"Fire Spin 50x",color:"white",dmg:50,multiHit:true,stars:0,size:44},{name:"Dragon Claw",color:"gold",dmg:80,stars:0,size:24},{name:"Roar",color:"purple",dmg:0,stars:2,size:16,effect:"push"},{name:"Dodge",color:"blue",dmg:0,stars:0,size:12},{name:"Miss",color:"red",dmg:0,stars:0,size:4}] },
   { id:"pikachu", spriteKey:"pikachu", name:"Pikachu", rarity:"EX", type:"Electric", mp:3, level:10, clv:2, c1:"#facc15", canPassThrough:false,
@@ -257,3 +257,11 @@ if (typeof EVO_CHAIN_NAMES !== "undefined") {
   Object.assign(EVO_CHAIN_NAMES, NEW_200_EVO_CHAINS);
 }
 Object.assign(FIGURE_ABILITIES_DB, NEW_200_ABILITIES);
+
+if (typeof window !== "undefined") {
+  window.FIGURES_DB = FIGURES_DB;
+  window.POKEMON_EVOLUTION_FAMILIES = POKEMON_EVOLUTION_FAMILIES;
+}
+
+
+// ============================================================================

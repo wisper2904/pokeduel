@@ -1692,10 +1692,82 @@ function materialize3DFigurineSprite(f) {
     return AUTHENTIC_FIG_SPRITES[key];
   }
 
-  // Fallback to webp or png in assets/sprites/
+  // Fallback to webp or png in assets/sprites/ with procedural 3D Figurine synthesis on missing texture
   const uri = "assets/sprites/" + key + ".webp";
   const metaObj = { uri, w: 44.0, h: 42.0, ox: 22.0, oy: 28.0 };
   const im = new Image();
+  im.onerror = () => {
+    try {
+      const cvs = document.createElement("canvas");
+      cvs.width = 128;
+      cvs.height = 128;
+      const ctx = cvs.getContext("2d");
+      const c1 = f.c1 || "#38bdf8";
+      const c2 = f.c2 || "#1d4ed8";
+      
+      // 1. 3D Pedestal Dais
+      ctx.save();
+      ctx.translate(64, 92);
+      const gradBase = ctx.createLinearGradient(0, -10, 0, 20);
+      gradBase.addColorStop(0, "#1e293b");
+      gradBase.addColorStop(0.5, "#0f172a");
+      gradBase.addColorStop(1, "#020617");
+      ctx.fillStyle = gradBase;
+      ctx.beginPath();
+      ctx.ellipse(0, 10, 48, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = c1;
+      ctx.lineWidth = 3.5;
+      ctx.shadowColor = c1;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.ellipse(0, 8, 46, 14, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      const gradTop = ctx.createLinearGradient(0, -10, 0, 8);
+      gradTop.addColorStop(0, "#d97706");
+      gradTop.addColorStop(0.5, "#facc15");
+      gradTop.addColorStop(1, "#78350f");
+      ctx.fillStyle = gradTop;
+      ctx.beginPath();
+      ctx.ellipse(0, -2, 40, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 2. Elemental Figurine Core & Emblem
+      const gradAura = ctx.createRadialGradient(64, 52, 6, 64, 52, 44);
+      gradAura.addColorStop(0, c1 + "ee");
+      gradAura.addColorStop(0.8, c2 + "88");
+      gradAura.addColorStop(1, "transparent");
+      ctx.fillStyle = gradAura;
+      ctx.beginPath();
+      ctx.arc(64, 52, 42, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "#000000";
+      ctx.shadowBlur = 8;
+      ctx.font = "900 24px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const initial = (f.name || key).substring(0, 2).toUpperCase();
+      ctx.fillText(initial, 64, 46);
+
+      ctx.font = "800 10.5px sans-serif";
+      ctx.fillStyle = "#fef08a";
+      const displayName = (f.name || key).length > 10 ? (f.name || key).substring(0, 9) + "…" : (f.name || key);
+      ctx.fillText(displayName, 64, 68);
+
+      const rar = f.rarity || "EX";
+      ctx.fillStyle = rar === "UX" ? "#ec4899" : (rar === "EX" ? "#f59e0b" : "#38bdf8");
+      ctx.font = "900 11px sans-serif";
+      ctx.fillText(rar, 102, 22);
+
+      im.src = cvs.toDataURL();
+    } catch (e) {}
+  };
   im.src = uri;
   _generatedSpriteCache[key] = metaObj;
   AUTHENTIC_FIG_SPRITES[key] = metaObj;

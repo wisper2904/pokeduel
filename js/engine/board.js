@@ -263,6 +263,9 @@ let state = {
   winCelebrationAnim: null,
   postMoveAttackMode: false,
   pendingPostMoveTurn: null,
+  zGaugeP1: 50,
+  zGaugeP2: 50,
+  zMoveArmed: false,
   doubleChanceArmed: false,
   doubleChanceWaitingChoice: false,
   excludedP1: [],
@@ -412,6 +415,9 @@ function demoFullMatchState() {
   state.longThrowActive = false;
   state.postMoveAttackMode = false;
   state.pendingPostMoveTurn = null;
+  state.zGaugeP1 = 50;
+  state.zGaugeP2 = 50;
+  state.zMoveArmed = false;
   state.doubleChanceArmed = false;
   state.doubleChanceWaitingChoice = false;
   state.clockMsP1 = 300000;
@@ -481,7 +487,24 @@ function togglePlatesTray(force) {
   if (show) renderPlatesTray();
 }
 
-function toggleZMoveFromTray() {}
+function toggleZMoveFromTray() {
+  const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
+  if (zPct < 100) {
+    playSfx("tick");
+    setLogText(`⚡ Z-Power em ${zPct}%! Carrega a cada turno (+10%) e combate (+15%). Ativa aos 100%!`);
+    return;
+  }
+  state.zMoveArmed = !state.zMoveArmed;
+  if (state.zMoveArmed) {
+    playSfx("portal");
+    setLogText("⚡ Z-POWER ARMADO! O próximo ataque liberará 180~220 de Dano e quebrará Blue em Miss!");
+  } else {
+    playSfx("tick");
+    setLogText("Z-Move desarmado.");
+  }
+  renderPlatesTray();
+}
+window.toggleZMoveFromTray = toggleZMoveFromTray;
 
 function renderPlatesTray() {
   syncActivePlayerPlates();
@@ -505,7 +528,11 @@ function renderPlatesTray() {
   if (cBdg)  cBdg.textContent = curP.badge || "+20";
   if (cName) cName.textContent = curPlateName;
   if (cDesc) {
-    cDesc.innerHTML = curPlateDesc;
+    const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
+    const zNotice = zPct >= 100 
+      ? `<div style="margin-top:6px; padding:4px 6px; background:${state.zMoveArmed ? '#ca8a04' : '#1e1b4b'}; border:1px solid #facc15; border-radius:4px; color:${state.zMoveArmed ? '#090d16' : '#facc15'}; font-weight:900; font-size:8.5px; cursor:pointer;" onclick="toggleZMoveFromTray(); event.stopPropagation();">⚡ Z-MOVE 100%: ${state.zMoveArmed ? 'ARMADO (200 DMG)!' : 'TOQUE PARA ATIVAR!'}</div>`
+      : `<div style="margin-top:4px; font-size:7.5px; color:#94a3b8;">⚡ Z-Power Gauge: ${zPct}% / 100%</div>`;
+    cDesc.innerHTML = `${curPlateDesc}${zNotice}`;
   }
   if (uBtn) {
     uBtn.style.opacity = curP.used ? "0.4" : "1.0";
@@ -896,20 +923,23 @@ function evolveUnitInMatch(unit) {
   }
 
   // REGRA 2: Cadeia de evolução respeitando família e alvo do deck
-  const targetName = unit.deckTargetName || unit.name;
+  const targetName = unit.deckTargetName;
   const fam = (typeof POKEMON_EVOLUTION_FAMILIES !== "undefined")
     ? POKEMON_EVOLUTION_FAMILIES.find(f =>
-        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, "")) ||
+        (targetName && f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""))) ||
         f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === unit.name.toLowerCase().replace(/[\s\-_]/g, ""))
       )
     : null;
 
   let chain;
   if (fam) {
-    const targetIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""));
-    const isTargetIntermediate = (targetIdx !== -1 && targetIdx < fam.length - 2); // Ex: Charmeleon para em Charmeleon
-    if (isTargetIntermediate) {
-      chain = fam.slice(0, targetIdx + 1);
+    if (targetName) {
+      const targetIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""));
+      if (targetIdx !== -1 && targetIdx < fam.length - 1) {
+        chain = fam.slice(0, targetIdx + 1);
+      } else {
+        chain = fam;
+      }
     } else {
       chain = fam;
     }
@@ -955,20 +985,23 @@ function applyUnitEvolutionNow(unit) {
   // Nunca evolui se já estiver em Mega
   if ((unit.megaTurns && unit.megaTurns > 0) || unit.name.startsWith("Mega ")) return;
 
-  const targetName = unit.deckTargetName || unit.name;
+  const targetName = unit.deckTargetName;
   const fam = (typeof POKEMON_EVOLUTION_FAMILIES !== "undefined")
     ? POKEMON_EVOLUTION_FAMILIES.find(f =>
-        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, "")) ||
+        (targetName && f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""))) ||
         f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === unit.name.toLowerCase().replace(/[\s\-_]/g, ""))
       )
     : null;
 
   let chain;
   if (fam) {
-    const targetIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""));
-    const isTargetIntermediate = (targetIdx !== -1 && targetIdx < fam.length - 2);
-    if (isTargetIntermediate) {
-      chain = fam.slice(0, targetIdx + 1);
+    if (targetName) {
+      const targetIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""));
+      if (targetIdx !== -1 && targetIdx < fam.length - 1) {
+        chain = fam.slice(0, targetIdx + 1);
+      } else {
+        chain = fam;
+      }
     } else {
       chain = fam;
     }
@@ -1716,6 +1749,72 @@ function drawHDVectorBoardAndChrome() {
   const platesWord = (typeof t === "function") ? t("battle.plates", "🎴 Cartas") : "🎴 Cartas";
   drawBotBtn(16, 497, 72, 26, forfeitLbl, false, false);
   drawBotBtn(94, 497, 114, 26, `${platesWord} (${unUsedPlates})`, true, unUsedPlates > 0);
+
+  // Draw Z-Move 7.0 Button (x: 214, y: 497, w: 130, h: 26)
+  const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
+  const isZReady = zPct >= 100;
+  const isZArmed = Boolean(state.zMoveArmed);
+
+  ctx.save();
+  const zg = ctx.createLinearGradient(214, 497, 214, 523);
+  if (isZArmed) {
+    zg.addColorStop(0, "#ca8a04"); zg.addColorStop(0.5, "#eab308"); zg.addColorStop(1, "#a16207");
+  } else if (isZReady) {
+    zg.addColorStop(0, "#854d0e"); zg.addColorStop(0.5, "#422006"); zg.addColorStop(1, "#1c1917");
+  } else {
+    zg.addColorStop(0, "#1e2631"); zg.addColorStop(0.5, "#121820"); zg.addColorStop(1, "#0a0e14");
+  }
+  ctx.fillStyle = zg;
+  ctx.beginPath();
+  ctx.roundRect(214, 497, 130, 26, 3.5);
+  ctx.fill();
+
+  if (!isZArmed && !isZReady && zPct > 0) {
+    const fillW = Math.max(0, 128 * (zPct / 100));
+    const fillG = ctx.createLinearGradient(215, 497, 215 + fillW, 497);
+    fillG.addColorStop(0, "rgba(234, 179, 8, 0.15)");
+    fillG.addColorStop(1, "rgba(250, 204, 21, 0.45)");
+    ctx.fillStyle = fillG;
+    ctx.beginPath();
+    ctx.roundRect(215, 498, fillW, 24, 2.5);
+    ctx.fill();
+  }
+
+  if (isZArmed) {
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = "#facc15";
+    ctx.shadowBlur = 10;
+  } else if (isZReady) {
+    const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
+    ctx.strokeStyle = `rgba(250, 204, 21, ${0.7 + 0.3 * pulse})`;
+    ctx.lineWidth = 1.6;
+    ctx.shadowColor = "#facc15";
+    ctx.shadowBlur = 8 * pulse;
+  } else {
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 1.2;
+    ctx.shadowBlur = 0;
+  }
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  if (isZArmed) {
+    ctx.fillStyle = "#090d16";
+    ctx.font = "900 10px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("⚡ Z-ARMED! 🔥", 279, 510);
+  } else if (isZReady) {
+    ctx.fillStyle = "#fef08a";
+    ctx.font = "900 10px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("⚡ Z-MOVE (100%)", 279, 510);
+  } else {
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "700 9.5px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(`⚡ Z-Power (${zPct}%)`, 279, 510);
+  }
+  ctx.restore();
 
   ctx.restore();
 }
@@ -2482,12 +2581,14 @@ canvas.addEventListener("pointerdown", e => {
     return;
   }
 
-  // 5. Bottom Button Bar: [Forfeit] | [Plates]
+  // 5. Bottom Button Bar: [Forfeit] | [Plates] | [Z-Power]
   if (sy >= 490) {
     if (sx <= 90) {
       triggerVoluntaryForfeit();
     } else if (sx >= 92 && sx <= 212) {
       togglePlatesTray();
+    } else if (sx >= 214 && sx <= 348) {
+      toggleZMoveFromTray();
     }
     return;
   }

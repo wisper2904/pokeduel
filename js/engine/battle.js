@@ -31,6 +31,28 @@ function getActiveWheel(unit) {
     };
   });
 
+  // Section 2.5: Z-Move 7.0 Active Wheel Slices
+  if (state.zMoveArmed && (state.turn === unit.owner || (unit.owner === 'p2' && (state.zGaugeP2 || 0) >= 100))) {
+    const zm = typeof getFigureZMove === "function" ? getFigureZMove(unit) : null;
+    if (zm) {
+      let maxIdx = 0, maxSz = -1;
+      segs.forEach((s, i) => {
+        if (s.color !== "red" && s.size > maxSz) { maxSz = s.size; maxIdx = i; }
+      });
+      if (segs[maxIdx]) {
+        segs[maxIdx] = {
+          ...segs[maxIdx],
+          name: "⚡ " + zm.name,
+          color: zm.color,
+          dmg: zm.dmg,
+          stars: zm.stars,
+          effect: zm.effect,
+          isZMove: true
+        };
+      }
+    }
+  }
+
   // Section 3: Exact Status Condition Math
   if (unit.condition === PokemonCondition.Poison) {
     segs.forEach(s => { if (s.dmg > 0) s.dmg = Math.max(0, s.dmg - 20); });
@@ -270,6 +292,13 @@ function evaluateCombat(atkUnit, defUnit, atkSpin, defSpin) {
   if (d.color === "gold" && a.color === "purple") {
     return { winner:"def", effect:"ko", reason: typeof t === "function" ? t("combat.gold_beats_purple", { gold: dName, purple: aName }) : `Gold (${dName}) beats Purple (${aName})!` };
   }
+  // Z-Move brute force overpowers weak 1-2★ purple moves!
+  if ((a.isZMove || a.name.startsWith("⚡ ")) && d.color === "purple" && (d.stars || 1) <= 2) {
+    return { winner:"atk", effect:a.effect||"ko", reason: `⚡ Z-POWER: ${aName} sobrepujou o movimento roxo (${dName} ★${d.stars || 1}) pela força bruta!` };
+  }
+  if ((d.isZMove || d.name.startsWith("⚡ ")) && a.color === "purple" && (a.stars || 1) <= 2) {
+    return { winner:"def", effect:d.effect||"ko", reason: `⚡ Z-POWER: ${dName} sobrepujou o movimento roxo (${aName} ★${a.stars || 1}) pela força bruta!` };
+  }
   if (a.color === "purple" && d.color === "white") {
     return { winner:"atk", effect:a.effect||"ko", reason: typeof t === "function" ? t("combat.purple_beats_white", { purple: aName, stars: a.stars || 1 }) : `Purple (${aName} ★${a.stars}) beats White!` };
   }
@@ -460,13 +489,110 @@ ddCanvas.addEventListener("pointerdown", (e) => {
 });
 let ddCanClose = false;
 
-// (Z-Move removido do jogo)
+// ============================================================================
+// POKÉMON DUEL 7.0 AUTHENTIC Z-MOVE DATABASE & REGISTRATION
+// ============================================================================
+const Z_MOVES_DB = {
+  Grass: { name: "Bloom Doom", color: "white", dmg: 180, stars: 0, effect: "spore" },
+  Fire: { name: "Inferno Overdrive", color: "white", dmg: 190, stars: 0, effect: "burn" },
+  Water: { name: "Hydro Vortex", color: "white", dmg: 180, stars: 0, effect: "bench" },
+  Electric: { name: "Gigavolt Havoc", color: "gold", dmg: 170, stars: 0, effect: "paralyze" },
+  Psychic: { name: "Shattered Psyche", color: "purple", dmg: 0, stars: 4, effect: "bench" },
+  Ghost: { name: "Never-Ending Nightmare", color: "purple", dmg: 0, stars: 4, effect: "curse" },
+  Dragon: { name: "Devastating Drake", color: "white", dmg: 210, stars: 0, effect: "ko" },
+  Fighting: { name: "All-Out Pummeling", color: "gold", dmg: 180, stars: 0, effect: "ko" },
+  Steel: { name: "Corkscrew Crash", color: "white", dmg: 190, stars: 0, effect: "ko" },
+  Rock: { name: "Continental Crush", color: "white", dmg: 180, stars: 0, effect: "push" },
+  Ground: { name: "Tectonic Rage", color: "white", dmg: 190, stars: 0, effect: "ko" },
+  Flying: { name: "Supersonic Skystrike", color: "gold", dmg: 180, stars: 0, effect: "ko" },
+  Ice: { name: "Subzero Slammer", color: "white", dmg: 180, stars: 0, effect: "freeze" },
+  Poison: { name: "Acid Downpour", color: "purple", dmg: 0, stars: 4, effect: "toxic" },
+  Bug: { name: "Savage Spin-Out", color: "purple", dmg: 0, stars: 4, effect: "push" },
+  Dark: { name: "Black Hole Eclipse", color: "white", dmg: 190, stars: 0, effect: "ko" },
+  Fairy: { name: "Twinkle Tackle", color: "white", dmg: 180, stars: 0, effect: "heal" },
+  Normal: { name: "Breakneck Blitz", color: "white", dmg: 170, stars: 0, effect: "ko" }
+};
 
+const SIGNATURE_Z_MOVES = {
+  "pikachu": { name: "Catastropika", color: "gold", dmg: 220, stars: 0, effect: "paralyze" },
+  "snorlax": { name: "Pulverizing Pancake", color: "white", dmg: 220, stars: 0, effect: "ko" },
+  "mew": { name: "Genesis Supernova", color: "purple", dmg: 0, stars: 4, effect: "banish" },
+  "mewtwo": { name: "Psystrike Overdrive", color: "purple", dmg: 0, stars: 4, effect: "ko" },
+  "decidueye": { name: "Sinister Arrow Raid", color: "gold", dmg: 190, stars: 0, effect: "ko" },
+  "incineroar": { name: "Malicious Moonsault", color: "white", dmg: 200, stars: 0, effect: "burn" },
+  "primarina": { name: "Oceanic Operetta", color: "purple", dmg: 0, stars: 4, effect: "bench" },
+  "charizard": { name: "Inferno Overdrive Plus", color: "white", dmg: 210, stars: 0, effect: "burn" },
+  "blastoise": { name: "Hydro Vortex Plus", color: "white", dmg: 200, stars: 0, effect: "bench" },
+  "venusaur": { name: "Bloom Doom Plus", color: "white", dmg: 200, stars: 0, effect: "spore" },
+  "gengar": { name: "Never-Ending Nightmare Plus", color: "purple", dmg: 0, stars: 4, effect: "curse" },
+  "lucario": { name: "All-Out Aura Pummeling", color: "gold", dmg: 200, stars: 0, effect: "ko" }
+};
+
+function getFigureZMove(unit) {
+  if (!unit) return { name: "Breakneck Blitz", color: "white", dmg: 180, stars: 0, effect: "ko" };
+  const cleanId = (unit.baseId || unit.id || "").toLowerCase().replace(/[\s\-_]/g, "");
+  const cleanName = (unit.name || "").toLowerCase().replace(/[\s\-_]/g, "");
+  for (const [sigKey, zData] of Object.entries(SIGNATURE_Z_MOVES)) {
+    if (cleanId.includes(sigKey) || cleanName.includes(sigKey)) return zData;
+  }
+  const types = (unit.type || "Normal").split(/[\/,]/).map(t => t.trim());
+  for (const t of types) {
+    if (Z_MOVES_DB[t]) return Z_MOVES_DB[t];
+  }
+  return Z_MOVES_DB.Normal;
+}
+window.Z_MOVES_DB = Z_MOVES_DB;
+window.SIGNATURE_Z_MOVES = SIGNATURE_Z_MOVES;
+window.getFigureZMove = getFigureZMove;
 
 function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
   const hasManualSpin = forcedSpins && forcedSpins.manualSpin;
   let atkSpin = (forcedSpins && forcedSpins.atkSpin) ? forcedSpins.atkSpin : spinWheelForUnit(atkUnit, true);
   let defSpin = (forcedSpins && forcedSpins.defSpin) ? forcedSpins.defSpin : spinWheelForUnit(defUnit, false);
+
+  // Check if Bot (owner === 'p2') should auto-trigger Z-Move when charged!
+  if (atkUnit.owner === "p2" && (state.zGaugeP2 || 0) >= 100) {
+    state.zMoveArmed = true;
+  }
+
+  // Z-Move 7.0 Resolution: Unleash Z-Power and break defender's Blue defense slices into Miss!
+  const isZMove = Boolean(state.zMoveArmed && (atkUnit.owner === state.turn || atkUnit.owner === "p2"));
+  if (isZMove) {
+    state.zMoveArmed = false;
+    if (atkUnit.owner === "p1") state.zGaugeP1 = 0; else state.zGaugeP2 = 0;
+    const zData = getFigureZMove(atkUnit);
+    atkSpin.chosen = {
+      name: "⚡ " + zData.name,
+      color: zData.color,
+      dmg: zData.dmg,
+      stars: zData.stars,
+      effect: zData.effect,
+      size: 96,
+      isZMove: true
+    };
+    // Z-Break mechanic: Z-Move breaks defender's Blue defense slices into Miss!
+    defSpin.segs.forEach(s => {
+      if (s.color === "blue") {
+        s.color = "red";
+        s.name = "Miss (Z-Break)";
+        s.dmg = 0;
+      }
+    });
+    if (defSpin.chosen.color === "blue") {
+      defSpin.chosen = { name: "Miss (Z-Break)", color: "red", dmg: 0, stars: 0, size: defSpin.chosen.size };
+    }
+    playSfx("portal");
+    setLogText(`⚡ Z-MOVE: [${zData.name}] ativado por ${atkUnit.name}! Quebrou Blue do defensor em Miss!`);
+    const zb = document.getElementById("zmove-combat-banner");
+    if (zb) {
+      zb.innerHTML = `⚡ Z-MOVE: <strong>${zData.name.toUpperCase()}</strong> (${zData.dmg > 0 ? zData.dmg + ' DANO' : '★' + zData.stars + ' PURPLE'} · Z-BREAK BLUE)!`;
+      zb.style.display = "block";
+      setTimeout(() => { if (zb) zb.style.display = "none"; }, 3000);
+    }
+  } else {
+    state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 15);
+    state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 15);
+  }
 
   const antiRespinOnField = state.units.some(u => u.location === "board" && (u.baseId === "dialga_o" || u.baseId === "metagross"));
   const isDoubleChanceArmed = Boolean(state.doubleChanceArmed || (forcedSpins && forcedSpins.doubleChanceArmed));
@@ -828,12 +954,22 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       if (loser && winUnit) {
         if (state.meadowPowerActive && outcome.winner === "atk") state.meadowPowerActive = false;
         const effMap = {
-          sleep: PokemonCondition.Sleep, panic: PokemonCondition.Panic,
-          poison: PokemonCondition.Poison, badpoison: PokemonCondition.BadPoison,
+          sleep: PokemonCondition.Sleep, spore: PokemonCondition.Sleep,
+          panic: PokemonCondition.Panic, freeze: PokemonCondition.Freeze,
+          poison: PokemonCondition.Poison, badpoison: PokemonCondition.BadPoison, toxic: PokemonCondition.BadPoison,
           paralyze: PokemonCondition.Paralyze, burn: PokemonCondition.Burn
         };
         if (effMap[outcome.effect]) {
           loser.condition = effMap[outcome.effect];
+          evolveUnitInMatch(winUnit);
+        } else if (outcome.effect === "bench") {
+          loser.location = "bench"; loser.nodeId = null; loser.waitTurns = 2;
+          spawnPortalParticles(BOARD_NODES[winUnit.nodeId || 0].x, BOARD_NODES[winUnit.nodeId || 0].y, "#38bdf8");
+          evolveUnitInMatch(winUnit);
+        } else if (outcome.effect === "heal") {
+          if (winUnit) winUnit.condition = PokemonCondition.Normal;
+          sendToPC(loser);
+          evolveUnitInMatch(winUnit);
         } else if (outcome.effect === "push") {
           const openAdj = (ADJ[loser.nodeId] || []).find(nid => !unitAtNode(nid));
           if (openAdj !== undefined) {
@@ -1289,6 +1425,9 @@ function applyExplicitTurn(nextTurn, nextCounter) {
   state.abilityJumpActive = false;
   state.activePlate = null;
   state.pendingPlateAction = null;
+  state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 10);
+  state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 10);
+  state.zMoveArmed = false;
   state.turn = nextTurn;
   if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();
   if (typeof renderPlatesTray === "function") renderPlatesTray();
