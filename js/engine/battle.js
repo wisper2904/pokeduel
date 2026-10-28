@@ -665,7 +665,8 @@ function getFigureZMove(unit) {
   for (const [sigKey, zData] of Object.entries(SIGNATURE_Z_MOVES)) {
     if (cleanId.includes(sigKey) || cleanName.includes(sigKey)) return zData;
   }
-  const types = (unit.type || "Normal").split(/[\/,]/).map(t => t.trim());
+  const typeStr = Array.isArray(unit.types) ? unit.types.join("/") : (unit.type || "Normal");
+  const types = typeStr.split(/[\/,]/).map(t => t.trim());
   for (const t of types) {
     if (Z_MOVES_DB[t]) return Z_MOVES_DB[t];
   }

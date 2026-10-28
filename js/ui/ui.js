@@ -248,6 +248,68 @@ function openFigureDetailsModal(figIdx, liveUnit) {
     tbl.innerHTML = headerHtml + movesHtml + toolbarHtml;
   }
 
+  // Section 2.7: Z-Move Details Card & Live 100% Z-Wheel Preview Toggle
+  const zm = (typeof getFigureZMove === "function") ? getFigureZMove(liveUnit || f) : null;
+  const zmCard = document.getElementById("fdet-zmove-card");
+  let isViewingZMoveWheel = false;
+
+  window.toggleModalZMovePreview = function() {
+    isViewingZMoveWheel = !isViewingZMoveWheel;
+    const dCanv = document.getElementById("details-wheel-canvas");
+    if (!dCanv) return;
+    const dCtx2 = dCanv.getContext("2d");
+    dCtx2.clearRect(0, 0, 136, 136);
+    if (isViewingZMoveWheel && zm) {
+      const zSlice = [{
+        name: "⚡ " + zm.name,
+        color: zm.color,
+        dmg: zm.dmg || 0,
+        stars: zm.stars || (zm.color === "purple" ? 4 : 0),
+        effect: zm.effect,
+        size: 96,
+        isZMove: true
+      }];
+      drawAuthenticDataDisk(dCtx2, 68, 68, 54, zSlice, 0, 0, 0, zm.color === "purple" ? "#c084fc" : "#facc15");
+    } else {
+      drawAuthenticDataDisk(dCtx2, 68, 68, 54, f.wheel, 0, -1, 0, f.rarity === "UX" ? "#c084fc" : "#facc15");
+    }
+    const btn = document.getElementById("fdet-zmove-toggle-btn");
+    if (btn) {
+      btn.innerHTML = isViewingZMoveWheel ? "↺ Ver Roleta Base (96)" : "⚡ Ver Roleta 100%";
+      btn.style.background = isViewingZMoveWheel ? "#334155" : "linear-gradient(90deg, #ca8a04, #eab308)";
+      btn.style.color = isViewingZMoveWheel ? "#ffffff" : "#090d16";
+    }
+  };
+
+  if (zmCard && zm) {
+    const isPurple = zm.color === "purple";
+    const zmVal = isPurple ? "★".repeat(zm.stars || 4) : `${zm.dmg || 200}`;
+    const zmTypeLabel = isPurple ? "PURPLE ★★★★" : (zm.color === "gold" ? "GOLD CRITICAL" : "WHITE POWER");
+    const zmCol = isPurple ? "#c084fc" : (zm.color === "gold" ? "#facc15" : "#f8fafc");
+    const zmBorder = isPurple ? "#a855f7" : "#eab308";
+    const zmBg = isPurple ? "rgba(168, 85, 247, 0.2)" : "rgba(234, 179, 8, 0.2)";
+
+    zmCard.innerHTML = `
+      <div style="background:linear-gradient(90deg, #131b2e 0%, #1e1b4b 60%, #0f172a 100%); border:1.5px solid ${zmBorder}; border-radius:7px; padding:6px 8px; box-shadow:0 0 10px rgba(250,204,21,0.22); margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="font-size:15px; text-shadow:0 0 6px #facc15;">⚡</span>
+            <div>
+              <div style="font-size:10px; font-weight:900; color:#fde047; letter-spacing:0.3px;">Z-MOVE: ${zm.name.toUpperCase()}</div>
+              <div style="font-size:7.5px; color:#cbd5e1; margin-top:1px;">Roleta 100% · Quebra Blue em Miss · ${zmTypeLabel}</div>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+            <span style="background:${zmBg}; border:1px solid ${zmBorder}; color:${zmCol}; font-weight:900; font-size:11px; padding:1.5px 7px; border-radius:4px; box-shadow:0 0 8px ${zmCol}44;">
+              ${zmVal}
+            </span>
+            <button id="fdet-zmove-toggle-btn" onclick="toggleModalZMovePreview()" style="background:linear-gradient(90deg, #ca8a04, #eab308); border:1px solid #fef08a; border-radius:4px; color:#090d16; font-size:7.5px; font-weight:900; padding:1.5px 5px; cursor:pointer; margin-top:2px;">⚡ Ver Roleta 100%</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // Draw the Data Disk on `#details-wheel-canvas`
   const dCanv = document.getElementById("details-wheel-canvas");
   if (dCanv) {
@@ -6175,6 +6237,9 @@ renderHubAndCollection = function() {
       const isSelSlot = (slotPos === (currentEditingDeckSlot % 6));
       const maxDmg = getFigureMaxDmg(f);
       const roleIcon = f.mp >= 3 ? "🏃" : (f.mp === 2 ? "⚔️" : "🛡️");
+      const zm = (typeof getFigureZMove === "function") ? getFigureZMove(f) : null;
+      const zmPower = zm ? (zm.color === "purple" ? "★".repeat(zm.stars || 4) : `${zm.dmg || 200}`) : "";
+      const zmCol = zm ? (zm.color === "purple" ? "#c084fc" : (zm.color === "gold" ? "#facc15" : "#ffffff")) : "#fde047";
 
       return `<div class="deck-slot-card-v540 ${isSelSlot ? 'selected-slot' : ''}" onclick="selectDeckSlotToEdit(${slotPos})">
         <div class="deck-slot-top-row">
@@ -6186,6 +6251,7 @@ renderHubAndCollection = function() {
         <div style="font-size:8.6px; font-weight:900; color:#ffffff; width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${f.name}</div>
         <div style="font-size:7.2px; font-weight:800; color:#fde047; margin-top:0.5px;">${roleIcon} MP ${f.mp} · 💥${maxDmg} · Lv.${f.level || 1}</div>
         ${getWheelColorBarHtml(f.wheel)}
+        ${zm ? `<div class="zmove-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="⚡ Z-Move: ${zm.name} (${zmPower})">⚡ ${zm.name.replace(/^⚡\s*/, "")} <span style="color:#ffffff;">(${zmPower})</span></div>` : ''}
         <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolução / Forma UX">⬆ ${evoName}</div>
       </div>`;
     }).join("");
@@ -6342,6 +6408,10 @@ renderHubAndCollection = function() {
     const lockedLabel = (typeof t === "function") ? t("deck.locked", "🔒 Bloqueado") : "🔒 Bloqueado";
     const unlockShopLabel = (typeof t === "function") ? t("deck.unlock_in_shop", "🔒 Desbloquear na Loja") : "🔒 Desbloquear na Loja";
 
+    const zm = (typeof getFigureZMove === "function") ? getFigureZMove(f) : null;
+    const zmPower = zm ? (zm.color === "purple" ? "★".repeat(zm.stars || 4) : `${zm.dmg || 200}`) : "";
+    const zmCol = zm ? (zm.color === "purple" ? "#c084fc" : (zm.color === "gold" ? "#facc15" : "#ffffff")) : "#fde047";
+
     const card = document.createElement("div");
     card.className = "card";
     card.style.marginBottom = "0";
@@ -6363,6 +6433,7 @@ renderHubAndCollection = function() {
           <strong style="font-size:8.2px; color:${unlocked ? '#fff' : '#94a3b8'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${unlocked ? '' : '🔒 '}${f.name}</strong>
           <span style="font-size:6.8px; color:#94a3b8;">Lv.${f.level || 1} · CLv+${f.clv || 0}</span>
           ${getWheelColorBarHtml(f.wheel)}
+          ${zm ? `<div class="figcase-zmove-badge" title="⚡ Z-Move: ${zm.name} (${zmPower})">⚡ ${zm.name.replace(/^⚡\s*/, "")} (${zmPower})</div>` : ''}
         </div>
         <div style="display:flex; gap:3px; margin-top:2px;">
           ${unlocked ? `
@@ -6395,6 +6466,7 @@ renderHubAndCollection = function() {
             ${unlocked ? `<span style="color:#4ade80; font-weight:800;">✅ Lv.${f.level}/10 · CLv+${f.clv}</span>` : `<span style="color:#facc15; font-weight:800;">${lockedLabel}</span>`}<br>
             ${locType} · 💥Máx ${maxDmg}<br>
             ${getWheelColorBarHtml(f.wheel)}
+            ${zm ? `<div style="font-size:7.2px; font-weight:900; color:${zmCol}; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="⚡ Z-Move: ${zm.name} (${zmPower})">⚡ <strong>Z-Move:</strong> ${zm.name.replace(/^⚡\s*/, "")} <span style="color:#fde047;">(${zmPower})</span></div>` : ''}
           </div>
         </div>
         <div style="display:flex; gap:4px;">
