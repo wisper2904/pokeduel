@@ -336,6 +336,41 @@ const POKEMON_EVOLUTION_FAMILIES = [
     "Naganadel"
   ],
   [
+    "Froakie",
+    "Frogadier",
+    "Greninja"
+  ],
+  [
+    "Rhyhorn",
+    "Rhydon",
+    "Rhyperior"
+  ],
+  [
+    "Elekid",
+    "Electabuzz",
+    "Electivire"
+  ],
+  [
+    "Magby",
+    "Magmar",
+    "Magmortar"
+  ],
+  [
+    "Zubat",
+    "Golbat",
+    "Crobat"
+  ],
+  [
+    "Aron",
+    "Lairon",
+    "Aggron",
+    "Mega Aggron"
+  ],
+  [
+    "Aerodactyl",
+    "Mega Aerodactyl"
+  ],
+  [
     "Rayquaza",
     "Mega Rayquaza"
   ]
@@ -510,6 +545,135 @@ Object.assign(FIGURE_ABILITIES_DB, NEW_200_ABILITIES);
 if (typeof window !== "undefined") {
   window.FIGURES_DB = FIGURES_DB;
   window.POKEMON_EVOLUTION_FAMILIES = POKEMON_EVOLUTION_FAMILIES;
+}
+
+// ============================================================================
+// WEEKLY ELEMENTAL TYPE BUFF ENGINE (+10 DMG, +1★ PURPLE, +1 MP EXTRA)
+// ============================================================================
+const WEEKLY_BUFF_TYPES = [
+  { id: "Rock",     pt: "Pedra",     en: "Rock",     es: "Roca",      icon: "🪨", color: "#d97706", border: "#fbbf24", bg: "linear-gradient(180deg,#78350f 0%,#451a03 100%)" },
+  { id: "Fire",     pt: "Fogo",      en: "Fire",     es: "Fuego",     icon: "🔥", color: "#f97316", border: "#fdba74", bg: "linear-gradient(180deg,#9a3412 0%,#431407 100%)" },
+  { id: "Water",    pt: "Água",      en: "Water",    es: "Agua",      icon: "💧", color: "#0284c7", border: "#7dd3fc", bg: "linear-gradient(180deg,#0369a1 0%,#082f49 100%)" },
+  { id: "Grass",    pt: "Planta",    en: "Grass",    es: "Planta",    icon: "🌿", color: "#16a34a", border: "#86efac", bg: "linear-gradient(180deg,#15803d 0%,#052e16 100%)" },
+  { id: "Electric", pt: "Elétrico",  en: "Electric", es: "Eléctrico", icon: "⚡", color: "#eab308", border: "#fef08a", bg: "linear-gradient(180deg,#854d0e 0%,#422006 100%)" },
+  { id: "Psychic",  pt: "Psíquico",  en: "Psychic",  es: "Psíquico",  icon: "🔮", color: "#db2777", border: "#f9a8d4", bg: "linear-gradient(180deg,#831843 0%,#4a044e 100%)" },
+  { id: "Fighting", pt: "Lutador",   en: "Fighting", es: "Lucha",     icon: "🥊", color: "#dc2626", border: "#fca5a5", bg: "linear-gradient(180deg,#7f1d1d 0%,#450a0a 100%)" },
+  { id: "Dragon",   pt: "Dragão",    en: "Dragon",   es: "Dragón",    icon: "🐉", color: "#4f46e5", border: "#a5b4fc", bg: "linear-gradient(180deg,#312e81 0%,#1e1b4b 100%)" },
+  { id: "Steel",    pt: "Aço",       en: "Steel",    es: "Acero",     icon: "⚙️", color: "#64748b", border: "#cbd5e1", bg: "linear-gradient(180deg,#334155 0%,#0f172a 100%)" },
+  { id: "Ghost",    pt: "Fantasma",  en: "Ghost",    es: "Fantasma",  icon: "👻", color: "#7c3aed", border: "#c4b5fd", bg: "linear-gradient(180deg,#4c1d95 0%,#2e1065 100%)" },
+  { id: "Dark",     pt: "Sombrio",   en: "Dark",     es: "Siniestro", icon: "🌑", color: "#475569", border: "#94a3b8", bg: "linear-gradient(180deg,#1e293b 0%,#020617 100%)" },
+  { id: "Ground",   pt: "Terrestre", en: "Ground",   es: "Tierra",    icon: "🏜️", color: "#b45309", border: "#fcd34d", bg: "linear-gradient(180deg,#78350f 0%,#292524 100%)" },
+  { id: "Fairy",    pt: "Fada",      en: "Fairy",    es: "Hada",      icon: "✨", color: "#ec4899", border: "#fbcfe8", bg: "linear-gradient(180deg,#9d174d 0%,#500724 100%)" },
+  { id: "Bug",      pt: "Inseto",    en: "Bug",      es: "Bicho",     icon: "🪲", color: "#65a30d", border: "#bef264", bg: "linear-gradient(180deg,#3f6212 0%,#1a2e05 100%)" },
+  { id: "Flying",   pt: "Voador",    en: "Flying",   es: "Volador",   icon: "🦅", color: "#0ea5e9", border: "#bae6fd", bg: "linear-gradient(180deg,#0369a1 0%,#0c4a6e 100%)" },
+  { id: "Poison",   pt: "Venenoso",  en: "Poison",   es: "Veneno",    icon: "☠️", color: "#9333ea", border: "#d8b4fe", bg: "linear-gradient(180deg,#581c87 0%,#2e1065 100%)" },
+  { id: "Normal",   pt: "Normal",    en: "Normal",   es: "Normal",    icon: "⭐", color: "#a16207", border: "#fde047", bg: "linear-gradient(180deg,#57534e 0%,#1c1917 100%)" },
+  { id: "Ice",      pt: "Gelo",      en: "Ice",      es: "Hielo",     icon: "❄️", color: "#06b6d4", border: "#a5f3fc", bg: "linear-gradient(180deg,#155e75 0%,#083344 100%)" }
+];
+
+const WEEKLY_BUFF_STORAGE_KEY = "pdr_weekly_type_buff_v1";
+const WEEKLY_BUFF_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias exatos
+let _cachedWeeklyBuffData = null;
+
+function getWeeklyBuffState() {
+  const now = Date.now();
+  if (!_cachedWeeklyBuffData && typeof localStorage !== "undefined") {
+    try {
+      const raw = localStorage.getItem(WEEKLY_BUFF_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.typeId && typeof parsed.expiresAt === "number") {
+          _cachedWeeklyBuffData = parsed;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Semana inicial padrão: Pedra (Rock)
+  if (!_cachedWeeklyBuffData) {
+    _cachedWeeklyBuffData = {
+      typeId: "Rock",
+      startedAt: now,
+      expiresAt: now + WEEKLY_BUFF_DURATION_MS,
+      weekNumber: 1
+    };
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem(WEEKLY_BUFF_STORAGE_KEY, JSON.stringify(_cachedWeeklyBuffData));
+      } catch (e) {}
+    }
+  }
+
+  // Se a semana de 7 dias acabou, sorteia um novo elemento aleatório (sem repetir o anterior!)
+  if (now >= _cachedWeeklyBuffData.expiresAt) {
+    const weeksElapsed = Math.max(1, Math.floor((now - _cachedWeeklyBuffData.expiresAt) / WEEKLY_BUFF_DURATION_MS) + 1);
+    let lastTypeId = _cachedWeeklyBuffData.typeId;
+    for (let w = 0; w < weeksElapsed; w++) {
+      const candidates = WEEKLY_BUFF_TYPES.filter(t => t.id !== lastTypeId);
+      const pick = candidates[Math.floor(Math.random() * candidates.length)] || WEEKLY_BUFF_TYPES[0];
+      lastTypeId = pick.id;
+    }
+    const newStart = _cachedWeeklyBuffData.expiresAt + (weeksElapsed - 1) * WEEKLY_BUFF_DURATION_MS;
+    _cachedWeeklyBuffData = {
+      typeId: lastTypeId,
+      startedAt: newStart,
+      expiresAt: newStart + WEEKLY_BUFF_DURATION_MS,
+      weekNumber: (_cachedWeeklyBuffData.weekNumber || 1) + weeksElapsed
+    };
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem(WEEKLY_BUFF_STORAGE_KEY, JSON.stringify(_cachedWeeklyBuffData));
+      } catch (e) {}
+    }
+  }
+
+  const meta = WEEKLY_BUFF_TYPES.find(t => t.id.toLowerCase() === String(_cachedWeeklyBuffData.typeId).toLowerCase()) || WEEKLY_BUFF_TYPES[0];
+  const remainingMs = Math.max(0, _cachedWeeklyBuffData.expiresAt - now);
+  const remDays = Math.floor(remainingMs / (24 * 60 * 60 * 1000));
+  const remHours = Math.floor((remainingMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+  const remMins = Math.floor((remainingMs % (60 * 60 * 1000)) / (60 * 1000));
+  const remainingLabel = remDays > 0 ? `${remDays}d ${remHours}h` : `${remHours}h ${remMins}m`;
+
+  return {
+    typeId: meta.id,
+    meta,
+    dmgBonus: 10,
+    starBonus: 1,
+    mpBonus: 1,
+    startedAt: _cachedWeeklyBuffData.startedAt,
+    expiresAt: _cachedWeeklyBuffData.expiresAt,
+    weekNumber: _cachedWeeklyBuffData.weekNumber || 1,
+    remainingMs,
+    remainingLabel
+  };
+}
+
+function hasWeeklyTypeBuff(figOrUnit) {
+  if (!figOrUnit) return false;
+  const rawType = figOrUnit.type || (typeof FIGURES_DB !== "undefined" && typeof figOrUnit.baseIdx === "number" && FIGURES_DB[figOrUnit.baseIdx] ? FIGURES_DB[figOrUnit.baseIdx].type : "");
+  if (!rawType) return false;
+  const wb = getWeeklyBuffState();
+  const parts = String(rawType).split("/").map(s => s.trim().toLowerCase());
+  return parts.includes(wb.typeId.toLowerCase());
+}
+
+function getFigureEffectiveMp(figOrUnit) {
+  if (!figOrUnit) return 2;
+  const baseMp = typeof figOrUnit.rawBaseMp === "number" ? figOrUnit.rawBaseMp : (figOrUnit.mp || 2);
+  return baseMp + (hasWeeklyTypeBuff(figOrUnit) ? 1 : 0);
+}
+
+if (typeof window !== "undefined") {
+  window.WEEKLY_BUFF_TYPES = WEEKLY_BUFF_TYPES;
+  window.getWeeklyBuffState = getWeeklyBuffState;
+  window.hasWeeklyTypeBuff = hasWeeklyTypeBuff;
+  window.getFigureEffectiveMp = getFigureEffectiveMp;
+}
+if (typeof global !== "undefined") {
+  global.WEEKLY_BUFF_TYPES = WEEKLY_BUFF_TYPES;
+  global.getWeeklyBuffState = getWeeklyBuffState;
+  global.hasWeeklyTypeBuff = hasWeeklyTypeBuff;
+  global.getFigureEffectiveMp = getFigureEffectiveMp;
 }
 
 

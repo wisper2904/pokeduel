@@ -299,35 +299,35 @@ function makeTeamUnits(owner, deckIndices) {
     const base = FIGURES_DB[idx % FIGURES_DB.length];
     const targetName = base.name;
 
-    // RULE 1: If the figure is a Mega Evolution (or Primal), it CANNOT enter the match directly as a Mega.
-    // It must enter as its immediate non-Mega base form (e.g. Mega Charizard X ➔ Charizard, Mega Gengar ➔ Gengar, Mega Blastoise ➔ Blastoise, Mega Lucario ➔ Lucario).
-    // RULE 2: If the figure is ANY standard Pokémon (including Golem, Blastoise, Charizard, Dragonite, Geodude, etc.),
-    // IT ENTERS THE MATCH AS THE EXACT FIGURE THE PLAYER SELECTED IN THEIR DECK!
-    // If the player puts Golem in the deck, they play with Golem!
-    // If the player puts Geodude in the deck, they play with Geodude (and can evolve into Graveler and Golem in combat).
+    // SISTEMA DE EVOLUÇÃO ATIVA:
+    // Se o jogador equipa uma evolução (ex: Greninja, Charizard, Golem, Blastoise, Tyranitar),
+    // a peça entra na partida como o estágio inicial disponível (ex: Froakie, Charmander, Geodude, Squirtle, Pupitar)
+    // e vai evoluindo vitória após vitória até atingir o Pokémon do deck!
     let startFig = base;
     let startName = base.name;
+    let chain = [targetName];
 
-    const isMega = targetName.startsWith("Mega ") || targetName.startsWith("Primal ") || (base.rarity === "UX" && base.megaTurns);
-    if (isMega) {
-      const baseCandidate = targetName.replace(/^Mega\s+/, "").replace(/^Primal\s+/, "").replace(/\s+[XY]$/, "");
-      const foundBase = (typeof findFigureByName === "function") ? findFigureByName(baseCandidate) : null;
-      if (foundBase) {
-        startFig = foundBase;
-        startName = foundBase.name;
-      }
-    }
-
-    // Chain for evolution: from startFig to targetName (or forward to Mega)
-    let chain = [startName];
     if (typeof POKEMON_EVOLUTION_FAMILIES !== "undefined") {
       const fam = POKEMON_EVOLUTION_FAMILIES.find(f =>
-        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === startName.toLowerCase().replace(/[\s\-_]/g, ""))
+        f.some(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""))
       );
       if (fam) {
-        const sIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === startName.toLowerCase().replace(/[\s\-_]/g, ""));
-        if (sIdx !== -1) {
-          chain = fam.slice(sIdx);
+        const targetIdx = fam.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === targetName.toLowerCase().replace(/[\s\-_]/g, ""));
+        if (targetIdx !== -1) {
+          let earliestFig = base;
+          let earliestIdx = targetIdx;
+          for (let step = 0; step < targetIdx; step++) {
+            const candidateName = fam[step];
+            const found = (typeof findFigureByName === "function") ? findFigureByName(candidateName) : null;
+            if (found) {
+              earliestFig = found;
+              earliestIdx = step;
+              break;
+            }
+          }
+          startFig = earliestFig;
+          startName = earliestFig.name;
+          chain = targetIdx === 0 ? fam.slice(0) : fam.slice(earliestIdx, targetIdx + 1);
         }
       }
     }
@@ -342,6 +342,10 @@ function makeTeamUnits(owner, deckIndices) {
 
     const currentEvoStep = chain.findIndex(n => n.toLowerCase().replace(/[\s\-_]/g, "") === startFig.name.toLowerCase().replace(/[\s\-_]/g, ""));
 
+    const rawStartMp = startFig.mp || base.mp || 2;
+    const weeklyMpExtra = (typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(startFig)) ? 1 : 0;
+    const effStartMp = rawStartMp + weeklyMpExtra;
+
     return {
       uid: owner + "_" + slot,
       owner,
@@ -355,8 +359,9 @@ function makeTeamUnits(owner, deckIndices) {
       baseId: startFig.id,
       spriteKey,
       name: startFig.name,
-      mp: startFig.mp || base.mp || 2,
-      baseMp: startFig.mp || base.mp || 2,
+      rawBaseMp: rawStartMp,
+      mp: effStartMp,
+      baseMp: effStartMp,
       type: startFig.type || base.type,
       rarity: startFig.rarity || base.rarity,
       level: base.level || 5,
@@ -1055,9 +1060,14 @@ function applyUnitEvolutionNow(unit) {
     unit.baseIdx = (typeof FIGURES_DB !== "undefined" && FIGURES_DB.indexOf(nextFig) !== -1) ? FIGURES_DB.indexOf(nextFig) : unit.baseIdx;
     unit.baseId = nextFig.id;
     unit.spriteKey = nextFig.spriteKey;
-    if (nextFig.mp) unit.mp = nextFig.mp;
     if (nextFig.type) unit.type = nextFig.type;
     if (nextFig.rarity) unit.rarity = nextFig.rarity;
+    if (nextFig.mp) {
+      unit.rawBaseMp = nextFig.mp;
+      const wBonus = (typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(nextFig)) ? 1 : 0;
+      unit.mp = nextFig.mp + wBonus;
+      unit.baseMp = unit.mp;
+    }
   }
 
   if (isMega) {
@@ -2193,7 +2203,10 @@ function drawSelectedFigureTopHUD() {
   ctx.fillText("Status", 41, 35);
   ctx.fillStyle = "#f8fafc"; ctx.font = "bold 8.5px sans-serif";
   ctx.fillText(`MP ${u.mp}`, 41, 52);
-  if (state.meadowPowerActive && u.type && u.type.includes("Grass")) {
+  if (typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(u)) {
+    ctx.fillStyle = "#fde047"; ctx.font = "bold 6.8px sans-serif";
+    ctx.fillText("BUFF +10/+1★", 41, 64);
+  } else if (state.meadowPowerActive && u.type && u.type.includes("Grass")) {
     ctx.fillStyle = "#4ade80"; ctx.font = "bold 7.5px sans-serif";
     ctx.fillText("ATK +20", 41, 68);
   }

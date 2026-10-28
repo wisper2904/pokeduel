@@ -14,6 +14,9 @@ function getActiveWheel(unit) {
   const gymCupBonus = (state.matchKind === "gym_cup" && unit.type && unit.type.includes("Fire")) ? 20 : 0;
   const evoDmgBonus = (unit.evoStage || 0) * 10 + ((unit.megaTurns && unit.megaTurns > 0) ? 20 : 0);
   const evoStarBonus = (unit.evoStage || 0);
+  const isWeeklyBuffed = (typeof hasWeeklyTypeBuff === "function") && hasWeeklyTypeBuff(unit);
+  const weeklyDmgBonus = isWeeklyBuffed ? 10 : 0;
+  const weeklyStarBonus = isWeeklyBuffed ? 1 : 0;
   const segs = fig.wheel.map((seg, sIdx) => {
     const sliceClv = (fig.clvAlloc && typeof fig.clvAlloc[sIdx] === "number") ? fig.clvAlloc[sIdx] : (sIdx === 0 ? Math.min(10, unit.clv || 0) : 0);
     let color = seg.color;
@@ -26,8 +29,8 @@ function getActiveWheel(unit) {
       ...seg,
       name,
       color,
-      dmg: seg.dmg > 0 ? seg.dmg + sliceClv + meadowBonus + evoDmgBonus + xAtkBonus + gymCupBonus : 0,
-      stars: color === "purple" ? (seg.stars || 1) + evoStarBonus : 0
+      dmg: seg.dmg > 0 ? seg.dmg + sliceClv + meadowBonus + evoDmgBonus + xAtkBonus + gymCupBonus + weeklyDmgBonus : 0,
+      stars: color === "purple" ? (seg.stars || 1) + evoStarBonus + weeklyStarBonus : 0
     };
   });
 

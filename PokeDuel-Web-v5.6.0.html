@@ -487,6 +487,26 @@
     </div>
   </div>
 
+  <!-- MODAL DO BUFF SEMANAL DE TIPO -->
+  <div id="weekly-buff-info-modal" style="display:none; position:fixed; inset:0; z-index:296; background:rgba(2,6,23,0.92); align-items:center; justify-content:center; padding:14px; backdrop-filter:blur(5px);">
+    <div id="wtb-modal-card" style="width:100%; max-width:356px; max-height:88vh; background:linear-gradient(180deg,#451a03 0%,#0f172a 100%); border:2px solid #fbbf24; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.95), 0 0 22px rgba(251,191,36,0.35);">
+      <div style="padding:12px 14px; background:rgba(0,0,0,0.45); border-bottom:1.5px solid rgba(251,191,36,0.45); display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span id="wtb-modal-icon" style="font-size:22px;">🪨</span>
+          <div>
+            <div style="font-size:13px; font-weight:900; color:#fde047; letter-spacing:0.4px;" id="wtb-modal-title">BUFF SEMANAL: PEDRA</div>
+            <div style="font-size:9px; color:#cbd5e1; font-weight:700;" id="wtb-modal-subtitle">Rotação automática a cada 7 dias</div>
+          </div>
+        </div>
+        <button onclick="closeWeeklyBuffInfoModal()" style="background:#0f172a; border:1px solid #fbbf24; color:#fff; border-radius:50%; width:26px; height:26px; font-size:12px; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+      </div>
+      <div id="wtb-modal-body" style="padding:12px 14px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; color:#f8fafc; font-size:10.5px;"></div>
+      <div style="padding:10px 14px; background:rgba(0,0,0,0.5); border-top:1px solid rgba(251,191,36,0.35); display:flex; justify-content:center;">
+        <button onclick="closeWeeklyBuffInfoModal()" style="width:100%; background:linear-gradient(180deg,#fde047 0%,#ca8a04 100%); border:1.5px solid #ffffff; border-radius:8px; padding:8px; color:#090d16; font-size:12px; font-weight:900; cursor:pointer;">Entendi!</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SECTION 1: CLEAN INDIVIDUAL TRAINER PROFILE MODAL (v4.8.0) -->
   <div id="player-profile-modal" style="display:none; position:fixed; inset:0; z-index:270; background:rgba(3,7,18,0.92); align-items:center; justify-content:center; padding:12px;">
     <div style="width:100%; max-width:360px; max-height:90vh; overflow-y:auto; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #38bdf8; border-radius:12px; padding:14px; color:#f8fafc; box-shadow:0 10px 35px rgba(0,0,0,0.95);">
@@ -1083,7 +1103,7 @@
       </div>
 
       <!-- Right Floating `Locked Booster` Safe (`🔑 0/10`) & `NEW` Training Dumbbell Button (`1001314047.jpg`) -->
-      <div style="position:absolute; right:4px; top:48px; z-index:14; display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+      <div style="position:absolute; right:4px; top:48px; z-index:25; display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
         <!-- Locked Booster Safe (`🔑 0/10`) -->
         <div onclick="openLockedBooster()" style="width:86px; cursor:pointer; position:relative; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8));">
           <img id="home-locked-booster-img" src="" style="width:100%; height:auto; display:block; border-radius:6px;">
@@ -1097,6 +1117,22 @@
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">FEEDBACK</span>
             <span style="font-size:7.5px; font-weight:800; color:#bae6fd;">Ideias/Bugs</span>
+          </div>
+        </div>
+        <!-- Weekly Type Buff Notice Badge (Right Below Feedback!) -->
+        <div id="weekly-type-buff-hub-badge" onclick="openWeeklyBuffInfoModal()" title="Ver Detalhes do Buff Semanal de Tipo" style="cursor:pointer; background:linear-gradient(180deg,#78350f 0%,#451a03 100%); border:1.5px solid #fbbf24; border-radius:8px; padding:5px 7px; display:flex; flex-direction:column; align-items:flex-end; gap:2px; box-shadow:0 3px 10px rgba(0,0,0,0.85), 0 0 10px rgba(251,191,36,0.35); width:fit-content; margin-top:1px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span id="wtb-hub-icon" style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">🪨</span>
+            <div style="display:flex; flex-direction:column; line-height:1.05; text-align:right;">
+              <span style="font-size:7px; font-weight:900; color:#fde047; letter-spacing:0.3px;">BUFF DA SEMANA</span>
+              <span id="wtb-hub-type" style="font-size:9.5px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000;">TIPO: PEDRA</span>
+            </div>
+          </div>
+          <div id="wtb-hub-stats" style="font-size:7px; font-weight:900; color:#fef08a; background:rgba(0,0,0,0.5); padding:1.5px 4px; border-radius:4px; white-space:nowrap;">
+            +10 DMG · +1★ · +1 MP
+          </div>
+          <div id="wtb-hub-timer" style="font-size:6.5px; font-weight:800; color:#fed7aa;">
+            ⏳ 7d restantes
           </div>
         </div>
       </div>

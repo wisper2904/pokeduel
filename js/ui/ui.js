@@ -155,10 +155,13 @@ function openFigureDetailsModal(figIdx, liveUnit) {
     rEl.className = f.rarity === "UX" ? "ux-rainbow-badge" : (f.rarity === "EX" ? "ex-gold-badge" : "");
     rEl.textContent = f.rarity;
   }
+  const isWeeklyBuffedFig = typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(liveUnit || f);
+  const wbInfo = typeof getWeeklyBuffState === "function" ? getWeeklyBuffState() : null;
+  const effModalMp = liveUnit ? liveUnit.mp : (typeof getFigureEffectiveMp === "function" ? getFigureEffectiveMp(f) : f.mp);
   const nEl = document.getElementById("fdet-name");
-  if (nEl) nEl.textContent = liveUnit ? liveUnit.name : f.name;
+  if (nEl) nEl.textContent = (liveUnit ? liveUnit.name : f.name) + (isWeeklyBuffedFig && wbInfo ? ` ${wbInfo.meta.icon}` : "");
   const mpEl = document.getElementById("fdet-mp");
-  if (mpEl) mpEl.textContent = "MP " + (liveUnit ? liveUnit.mp : f.mp);
+  if (mpEl) mpEl.textContent = "MP " + effModalMp + (isWeeklyBuffedFig ? " (+1⬆️)" : "");
   const imgEl = document.getElementById("fdet-img");
   if (imgEl) imgEl.src = sp.uri;
   const typEl = document.getElementById("fdet-type");
@@ -180,6 +183,9 @@ function openFigureDetailsModal(figIdx, liveUnit) {
   const abEl = document.getElementById("fdet-ability");
   const evoLine = (typeof getFigureEvolutionLine === "function") ? getFigureEvolutionLine(f) : (EVO_CHAIN_NAMES[f.id] ? [f.name, ...EVO_CHAIN_NAMES[f.id]] : [f.name]);
   if (abEl) {
+    const weeklyBanner = (isWeeklyBuffedFig && wbInfo)
+      ? `<div style="margin-bottom:6px; padding:4px 6px; background:${wbInfo.meta.bg}; border:1px solid ${wbInfo.meta.border}; border-radius:4px; color:#fef08a; font-size:9.5px; font-weight:800;">${wbInfo.meta.icon} BUFF DA SEMANA (${wbInfo.meta.pt.toUpperCase()}): +10 Dano na Roleta · +1★ em Ataques Roxos · +1 MP Extra!</div>`
+      : "";
     const jumpDesc = (typeof t === "function") ? t("jump.jumps_desc", "🦘 PULA FIGURAS: Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.") : "🦘 PULA FIGURAS: Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.";
     const noJumpDesc = (typeof t === "function") ? t("jump.no_jump_desc", "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).") : "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).";
     const jumpNotice = canJump
@@ -197,7 +203,7 @@ function openFigureDetailsModal(figIdx, liveUnit) {
     } else {
       evoLineHtml = `<br><strong style="color:#38bdf8;">Linha:</strong> <span style="color:#bae6fd;">Forma Única / Sem evolução adicional</span>`;
     }
-    abEl.innerHTML = `${jumpNotice}${abText}${evoLineHtml}`;
+    abEl.innerHTML = `${weeklyBanner}${jumpNotice}${abText}${evoLineHtml}`;
   }
 
   // Workshop Points Info Header
@@ -209,6 +215,14 @@ function openFigureDetailsModal(figIdx, liveUnit) {
   const tbl = document.getElementById("fdet-moves-table");
   const colHex = { white:"#f8fafc", gold:"#facc15", purple:"#c084fc", blue:"#38bdf8", red:"#ef4444" };
   const tot = f.wheel.reduce((a, s) => a + s.size, 0) || 96;
+  const previewWheelForDisk = f.wheel.map((w, wIdx) => {
+    const sClv = (f.clvAlloc && f.clvAlloc[wIdx]) || 0;
+    return {
+      ...w,
+      dmg: w.dmg > 0 ? w.dmg + sClv + (isWeeklyBuffedFig ? 10 : 0) : 0,
+      stars: w.color === "purple" ? (w.stars || 1) + (isWeeklyBuffedFig ? 1 : 0) : 0
+    };
+  });
   if (tbl) {
     let headerHtml = `
       <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:4px 6px; border-radius:4px; margin-bottom:5px; border:1px solid #334155;">
@@ -220,7 +234,11 @@ function openFigureDetailsModal(figIdx, liveUnit) {
     let movesHtml = f.wheel.map((w, wIdx) => {
       const pct = Math.round((w.size / tot) * 100);
       const sClv = (f.clvAlloc && f.clvAlloc[wIdx]) || 0;
-      const val = w.color === "purple" ? "★".repeat(w.stars || 1) : (w.dmg > 0 ? (w.dmg + sClv + (sClv > 0 ? ` (+${sClv})` : '')) : "—");
+      const wDmgBonus = (isWeeklyBuffedFig && w.dmg > 0) ? 10 : 0;
+      const wStarBonus = (isWeeklyBuffedFig && w.color === "purple") ? 1 : 0;
+      const val = w.color === "purple"
+        ? "★".repeat((w.stars || 1) + wStarBonus)
+        : (w.dmg > 0 ? (w.dmg + sClv + wDmgBonus + ((sClv + wDmgBonus) > 0 ? ` (+${sClv + wDmgBonus})` : '')) : "—");
       const isDonor = (donorIdx === wIdx);
       const locMove = (typeof localizeMove === "function") ? localizeMove(w.name) : w.name;
 
@@ -281,7 +299,7 @@ function openFigureDetailsModal(figIdx, liveUnit) {
       }];
       drawAuthenticDataDisk(dCtx2, 68, 68, 54, zSlice, 0, 0, 0, zm.color === "purple" ? "#c084fc" : "#facc15");
     } else {
-      drawAuthenticDataDisk(dCtx2, 68, 68, 54, f.wheel, 0, -1, 0, f.rarity === "UX" ? "#c084fc" : "#facc15");
+      drawAuthenticDataDisk(dCtx2, 68, 68, 54, previewWheelForDisk, 0, -1, 0, f.rarity === "UX" ? "#c084fc" : "#facc15");
     }
     const btn = document.getElementById("fdet-zmove-toggle-btn");
     if (btn) {
@@ -325,7 +343,7 @@ function openFigureDetailsModal(figIdx, liveUnit) {
   if (dCanv) {
     const dCtx2 = dCanv.getContext("2d");
     dCtx2.clearRect(0, 0, 136, 136);
-    drawAuthenticDataDisk(dCtx2, 68, 68, 54, f.wheel, 0, -1, 0, f.rarity === "UX" ? "#c084fc" : "#facc15");
+    drawAuthenticDataDisk(dCtx2, 68, 68, 54, previewWheelForDisk, 0, -1, 0, f.rarity === "UX" ? "#c084fc" : "#facc15");
   }
 
   modal.style.display = "flex";
@@ -6450,7 +6468,9 @@ function getWheelColorBarHtml(wheel) {
 
 function getFigureMaxDmg(f) {
   if (!f || !Array.isArray(f.wheel)) return 0;
-  return f.wheel.reduce((m, s) => Math.max(m, s.dmg || 0), 0);
+  const baseMax = f.wheel.reduce((m, s) => Math.max(m, s.dmg || 0), 0);
+  const wBonus = (baseMax > 0 && typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(f)) ? 10 : 0;
+  return baseMax + wBonus;
 }
 
 function getRarityRankScore(rar) {
@@ -6656,10 +6676,89 @@ function ensureV540FigureCaseToolbar() {
   parentCard.insertBefore(tb, searchInp.parentNode);
 }
 
+function renderWeeklyTypeBuffHubBadge() {
+  if (typeof getWeeklyBuffState !== "function") return;
+  const wb = getWeeklyBuffState();
+  const badge = document.getElementById("weekly-type-buff-hub-badge");
+  const iconEl = document.getElementById("wtb-hub-icon");
+  const typeEl = document.getElementById("wtb-hub-type");
+  const statsEl = document.getElementById("wtb-hub-stats");
+  const timerEl = document.getElementById("wtb-hub-timer");
+  if (badge) {
+    badge.style.background = wb.meta.bg;
+    badge.style.borderColor = wb.meta.border;
+  }
+  if (iconEl) iconEl.textContent = wb.meta.icon;
+  if (typeEl) typeEl.textContent = `TIPO: ${wb.meta.pt.toUpperCase()}`;
+  if (statsEl) statsEl.textContent = `+${wb.dmgBonus} DMG · +${wb.starBonus}★ · +${wb.mpBonus} MP`;
+  if (timerEl) timerEl.textContent = `⏳ ${wb.remainingLabel} restantes`;
+}
+
+function openWeeklyBuffInfoModal() {
+  if (typeof playSfx === "function") playSfx("tick");
+  if (typeof getWeeklyBuffState !== "function") return;
+  const wb = getWeeklyBuffState();
+  const modal = document.getElementById("weekly-buff-info-modal");
+  const card = document.getElementById("wtb-modal-card");
+  const iconEl = document.getElementById("wtb-modal-icon");
+  const titleEl = document.getElementById("wtb-modal-title");
+  const subEl = document.getElementById("wtb-modal-subtitle");
+  const bodyEl = document.getElementById("wtb-modal-body");
+  if (!modal) return;
+  if (card) {
+    card.style.borderColor = wb.meta.border;
+  }
+  if (iconEl) iconEl.textContent = wb.meta.icon;
+  if (titleEl) titleEl.textContent = `BUFF DA SEMANA: ${wb.meta.pt.toUpperCase()} (${wb.meta.id.toUpperCase()})`;
+  if (subEl) subEl.textContent = `⏳ Tempo restante nesta semana: ${wb.remainingLabel}`;
+  if (bodyEl) {
+    const buffedFigs = (typeof FIGURES_DB !== "undefined" ? FIGURES_DB : [])
+      .map((f, idx) => ({ f, idx }))
+      .filter(item => typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(item.f));
+    const listHtml = buffedFigs.map(({ f, idx }) => {
+      const unlocked = isFigureUnlocked(idx);
+      const inDeck = state.deckP1 && state.deckP1.includes(idx);
+      const effMp = typeof getFigureEffectiveMp === "function" ? getFigureEffectiveMp(f) : (f.mp + 1);
+      return `<span onclick="closeWeeklyBuffInfoModal(); openFigureDetailsModal(${idx});" style="cursor:pointer; padding:3px 6px; border-radius:5px; font-size:8.5px; font-weight:800; background:${inDeck ? '#713f12' : (unlocked ? '#1e293b' : '#090d16')}; border:1px solid ${inDeck ? '#facc15' : (unlocked ? '#4ade80' : '#334155')}; color:${unlocked ? '#ffffff' : '#64748b'};">
+        ${inDeck ? '★ ' : (unlocked ? '✅ ' : '🔒 ')}${f.name} (MP ${f.mp}➔${effMp})
+      </span>`;
+    }).join("");
+    bodyEl.innerHTML = `
+      <div style="background:${wb.meta.bg}; border:1.5px solid ${wb.meta.border}; border-radius:8px; padding:9px 10px;">
+        <div style="font-size:11px; font-weight:900; color:#fde047; margin-bottom:4px;">${wb.meta.icon} Todos os Pokémon de ${wb.meta.pt} ganham nesta semana:</div>
+        <div style="display:flex; flex-direction:column; gap:4px; font-size:10px; font-weight:800; color:#ffffff;">
+          <div>💥 <span style="color:#fef08a;">+10 de Dano Extra</span> em todos os ataques da roleta</div>
+          <div>🟣 <span style="color:#e9d5ff;">+1 Estrela (★) Extra</span> em todos os ataques Roxos</div>
+          <div>🏃 <span style="color:#86efac;">+1 MP Extra</span> de movimento no tabuleiro</div>
+        </div>
+      </div>
+      <div style="font-size:9px; color:#cbd5e1; line-height:1.35; background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:6px; padding:7px 9px;">
+        🔄 <strong>Como funciona:</strong> Ao final dos 7 dias (faltam <strong>${wb.remainingLabel}</strong>), os Pokémon de <strong>${wb.meta.pt}</strong> voltam aos atributos originais e um novo elemento é sorteado aleatoriamente para a próxima semana!
+      </div>
+      <div>
+        <div style="font-size:9.5px; font-weight:900; color:#93c5fd; margin-bottom:5px;">Pokémon do Tipo ${wb.meta.pt} (${buffedFigs.length}):</div>
+        <div style="display:flex; flex-wrap:wrap; gap:4px;">${listHtml}</div>
+      </div>
+    `;
+  }
+  modal.style.display = "flex";
+}
+
+function closeWeeklyBuffInfoModal() {
+  const modal = document.getElementById("weekly-buff-info-modal");
+  if (modal) modal.style.display = "none";
+}
+
+window.renderWeeklyTypeBuffHubBadge = renderWeeklyTypeBuffHubBadge;
+window.openWeeklyBuffInfoModal = openWeeklyBuffInfoModal;
+window.closeWeeklyBuffInfoModal = closeWeeklyBuffInfoModal;
+setInterval(() => { renderWeeklyTypeBuffHubBadge(); }, 30000);
+
 renderHubAndCollection = function() {
   syncProgressionToDeckState();
   enforceStrict6CostPlates();
   ensureV540FigureCaseToolbar();
+  renderWeeklyTypeBuffHubBadge();
 
   const rmEl = document.getElementById("rm-lbl");
   if (rmEl) rmEl.textContent = state.rareMetals;
@@ -6694,6 +6793,14 @@ renderHubAndCollection = function() {
       : `<span style="padding:3px 6px; font-size:7.5px; color:#94a3b8; font-weight:800; border:1px solid #334155; border-radius:4px; background:rgba(0,0,0,0.3);">🔒 3/3 Times</span>`;
     const autoBtn = `<button class="btn green" style="padding:3px 6px; font-size:7.8px;" onclick="autoBuildBalancedTeamV540()" title="Monta automaticamente o melhor time com seus Pokémon desbloqueados">⚡ Auto-Time</button>`;
 
+    const wbDeck = (typeof getWeeklyBuffState === "function") ? getWeeklyBuffState() : null;
+    const wbDeckRow = wbDeck ? `
+      <div onclick="openWeeklyBuffInfoModal()" style="cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; margin-top:4px; padding:3px 6px; border-radius:6px; background:${wbDeck.meta.bg}; border:1px solid ${wbDeck.meta.border};">
+        <span style="font-size:7.6px; font-weight:900; color:#fde047;">${wbDeck.meta.icon} Buff Semanal: <strong>${wbDeck.meta.pt.toUpperCase()}</strong></span>
+        <span style="font-size:7.2px; font-weight:900; color:#ffffff;">+${wbDeck.dmgBonus} DMG · +${wbDeck.starBonus}★ Roxo · +${wbDeck.mpBonus} MP (⏳${wbDeck.remainingLabel})</span>
+      </div>
+    ` : "";
+
     const manageBar = `
       <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-top:3px; padding-top:3px; border-top:1px solid rgba(56,189,248,0.2);">
         <div style="display:flex; align-items:center; gap:4px;">
@@ -6712,6 +6819,7 @@ renderHubAndCollection = function() {
           <span style="font-size:7.2px; font-weight:800; color:#4ade80;">📦 R/UC/C & Repetidos: Livre</span>
         </div>
       </div>
+      ${wbDeckRow}
     `;
 
     pBarEl.innerHTML = `<div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">` + teamBtns + addBtn + autoBtn + `</div>` + manageBar;
@@ -6733,13 +6841,16 @@ renderHubAndCollection = function() {
 
   const showcase = document.getElementById("hub-deck-showcase");
   if (showcase) {
+    const wbCur = (typeof getWeeklyBuffState === "function") ? getWeeklyBuffState() : null;
     showcase.innerHTML = state.deckP1.slice(0, 6).map((idx, slotPos) => {
       const f = FIGURES_DB[idx % FIGURES_DB.length] || FIGURES_DB[0];
       const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
       const evoTarget = (typeof getFigureEvolutionTarget === "function") ? getFigureEvolutionTarget(f) : null;
       const isSelSlot = (slotPos === (currentEditingDeckSlot % 6));
       const maxDmg = getFigureMaxDmg(f);
-      const roleIcon = f.mp >= 3 ? "🏃" : (f.mp === 2 ? "⚔️" : "🛡️");
+      const isWb = typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(f);
+      const effMp = typeof getFigureEffectiveMp === "function" ? getFigureEffectiveMp(f) : f.mp;
+      const roleIcon = effMp >= 3 ? "🏃" : (effMp === 2 ? "⚔️" : "🛡️");
       const zm = (typeof getFigureZMove === "function") ? getFigureZMove(f) : null;
       const zmPower = zm ? (zm.color === "purple" ? "★".repeat(zm.stars || 4) : `${zm.dmg || 200}`) : "";
       const isMega = isMegaPokemonFigure(f);
@@ -6752,13 +6863,14 @@ renderHubAndCollection = function() {
           <div style="display:flex; align-items:center; gap:2px;">
             ${getRarityBadgeHtml(f.rarity)}
             ${isMega ? `<span style="background:#db2777; color:#fff; font-size:6.2px; font-weight:900; padding:0.5px 3px; border-radius:3px;">MEGA</span>` : ''}
+            ${isWb && wbCur ? `<span style="background:#d97706; color:#fff; font-size:6.2px; font-weight:900; padding:0.5px 3px; border-radius:3px;" title="Buff da Semana Ativo (+10 DMG, +1★, +1 MP)">${wbCur.meta.icon}</span>` : ''}
             ${copiesInDeck > 1 ? `<span style="background:#0284c7; color:#fff; font-size:6.2px; font-weight:900; padding:0.5px 3px; border-radius:3px;">📦${copiesInDeck}/${ownedUnits}</span>` : ''}
           </div>
           <span onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" style="font-size:8.5px; color:#7dd3fc; font-weight:900; padding:0 2px;">ⓘ</span>
         </div>
         <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain; margin:1px 0; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.8));">
         <div style="font-size:8.6px; font-weight:900; color:#ffffff; width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${f.name}</div>
-        <div style="font-size:7.2px; font-weight:800; color:#fde047; margin-top:0.5px;">${roleIcon} MP ${f.mp} · 💥${maxDmg} · Lv.${f.level || 1}</div>
+        <div style="font-size:7.2px; font-weight:800; color:#fde047; margin-top:0.5px;">${roleIcon} MP ${effMp}${isWb ? '⬆️' : ''} · 💥${maxDmg} · Lv.${f.level || 1}</div>
         ${getWheelColorBarHtml(f.wheel)}
         ${zm ? `<div class="zmove-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="⚡ Z-Move: ${zm.name} (${zmPower})">⚡ ${zm.name.replace(/^⚡\s*/, "")} <span style="color:#ffffff;">(${zmPower})</span></div>` : ''}
         <div class="evo-sub-slot" onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" title="Evolução">${evoTarget ? '⬆ ' + evoTarget : '★ Forma Final'}</div>
@@ -6916,6 +7028,9 @@ renderHubAndCollection = function() {
     const canAddMoreCopiesToDeck = unlocked && (equippedCount < ownedUnits);
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
     const maxDmg = getFigureMaxDmg(f);
+    const isWb = typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(f);
+    const effMp = typeof getFigureEffectiveMp === "function" ? getFigureEffectiveMp(f) : f.mp;
+    const wbMeta = (isWb && typeof getWeeklyBuffState === "function") ? getWeeklyBuffState().meta : null;
     const locType = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
     const lockedLabel = (typeof t === "function") ? t("deck.locked", "🔒 Bloqueado") : "🔒 Bloqueado";
     const unlockShopLabel = (typeof t === "function") ? t("deck.unlock_in_shop", "🔒 Desbloquear na Loja") : "🔒 Desbloquear na Loja";
@@ -6930,7 +7045,7 @@ renderHubAndCollection = function() {
     card.style.marginBottom = "0";
     card.style.padding = (figureCaseViewCols === 3) ? "5px" : "7px";
     card.style.opacity = unlocked ? "1.0" : "0.78";
-    card.style.borderColor = inDeck ? "#facc15" : (unlocked ? (f.rarity === "UX" ? "#c084fc" : "rgba(56,189,248,0.38)") : "#334155");
+    card.style.borderColor = inDeck ? "#facc15" : (isWb ? "#fbbf24" : (unlocked ? (f.rarity === "UX" ? "#c084fc" : "rgba(56,189,248,0.38)") : "#334155"));
 
     if (figureCaseViewCols === 3) {
       let slotEquipText = "";
@@ -6950,8 +7065,9 @@ renderHubAndCollection = function() {
           <div style="display:flex; align-items:center; gap:2px;">
             ${getRarityBadgeHtml(f.rarity)}
             ${isMega ? `<span style="background:#db2777; color:#fff; font-size:6px; font-weight:900; padding:0.5px 2.5px; border-radius:3px;">MEGA</span>` : ''}
+            ${isWb && wbMeta ? `<span style="background:#d97706; color:#fff; font-size:6px; font-weight:900; padding:0.5px 2.5px; border-radius:3px;" title="Buff da Semana (+10 DMG, +1★, +1 MP)">${wbMeta.icon}</span>` : ''}
           </div>
-          <span style="font-size:7px; color:#fde047; font-weight:900;">MP ${f.mp} · 💥${maxDmg}</span>
+          <span style="font-size:7px; color:#fde047; font-weight:900;">MP ${effMp}${isWb ? '⬆️' : ''} · 💥${maxDmg}</span>
         </div>
         <div style="display:flex; flex-direction:column; align-items:center; margin:2px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
           <img src="${sp.uri}" style="width:40px; height:40px; object-fit:contain; ${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.55);'}">
@@ -6992,7 +7108,8 @@ renderHubAndCollection = function() {
           <div style="display:flex; align-items:center; gap:3px;">
             ${getRarityBadgeHtml(f.rarity)}
             ${isMega ? `<span style="background:#db2777; color:#fff; font-size:6.5px; font-weight:900; padding:0.5px 3px; border-radius:3px;">MEGA</span>` : ''}
-            <span style="font-size:7.8px; color:#bae6fd; font-weight:900;">MP ${f.mp}</span>
+            ${isWb && wbMeta ? `<span style="background:#d97706; color:#fff; font-size:6.5px; font-weight:900; padding:0.5px 3px; border-radius:3px;">${wbMeta.icon} BUFF</span>` : ''}
+            <span style="font-size:7.8px; color:${isWb ? '#fde047' : '#bae6fd'}; font-weight:900;">MP ${effMp}${isWb ? '⬆️' : ''}</span>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:6px; margin:4px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">

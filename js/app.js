@@ -79,6 +79,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (typeof updateAllLocalizedUI === "function") updateAllLocalizedUI();
     if (typeof initVerbatimCodeViewer === "function") initVerbatimCodeViewer();
     if (typeof renderHubAndCollection === "function") renderHubAndCollection();
+    if (typeof renderWeeklyTypeBuffHubBadge === "function") renderWeeklyTypeBuffHubBadge();
     if (typeof updateDailyBonusButtonUI === "function") updateDailyBonusButtonUI();
     if (typeof syncEnergyUI === "function") syncEnergyUI();
     if (typeof injectCloudSaveAndGitHubPagesCards === "function") injectCloudSaveAndGitHubPagesCards();
