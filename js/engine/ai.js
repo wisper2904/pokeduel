@@ -5,12 +5,12 @@
 // COUNTER-DECK BUILDER, AI PLATE USAGE & PLAYSTYLE LEARNING MEMORY) +
 // FAIR 50/50 FIRST-TURN ROULETTE
 // ============================================================================
-const AI_BRAIN_STORAGE_KEY = "pdr_adaptive_ai_brain_v561";
+const AI_BRAIN_STORAGE_KEY = "pdr_adaptive_ai_brain_v570";
 const FIRST_TURN_HIST_KEY  = "pdr_first_turn_hist_v530";
 
 function loadAdaptiveAIBrain() {
   const defaultBrain = {
-    version: "5.6.1",
+    version: "5.7.0",
     matchesAnalyzed: 0,
     aiWins: 0,
     playerWins: 0,
@@ -22,11 +22,11 @@ function loadAdaptiveAIBrain() {
     playerAttacks: 0,
     playerFavBaseIds: {},
     weights: {
-      goalDefense: 0.95,
-      antiSurround: 1.10,
-      entryLockdown: 1.55,
-      combatAggression: 1.70,
-      speedRush: 2.00
+      goalDefense: 1.85,
+      antiSurround: 1.35,
+      entryLockdown: 1.50,
+      combatAggression: 1.65,
+      speedRush: 1.95
     }
   };
   try {
@@ -797,11 +797,12 @@ showWinResultScreen = function(winner) {
     adaptiveAIBrain.matchesAnalyzed = (adaptiveAIBrain.matchesAnalyzed || 0) + 1;
     if (winner === "p1") {
       adaptiveAIBrain.playerWins = (adaptiveAIBrain.playerWins || 0) + 1;
-      // When the player beats the AI, the AI increases offensive speed rush, combat aggression, and entry lockdown to win faster!
-      adaptiveAIBrain.weights.speedRush = Math.min(3.5, (adaptiveAIBrain.weights.speedRush || 2.00) + 0.15);
-      adaptiveAIBrain.weights.combatAggression = Math.min(3.2, (adaptiveAIBrain.weights.combatAggression || 1.70) + 0.12);
-      adaptiveAIBrain.weights.entryLockdown = Math.min(3.2, (adaptiveAIBrain.weights.entryLockdown || 1.55) + 0.10);
-      adaptiveAIBrain.weights.goalDefense = Math.min(1.8, (adaptiveAIBrain.weights.goalDefense || 0.95) + 0.05);
+      // When the player beats the AI, sharpen goal defense, anti-surround, and tactical counter-measures!
+      adaptiveAIBrain.weights.goalDefense = Math.min(3.2, (adaptiveAIBrain.weights.goalDefense || 1.85) + 0.20);
+      adaptiveAIBrain.weights.antiSurround = Math.min(2.8, (adaptiveAIBrain.weights.antiSurround || 1.35) + 0.15);
+      adaptiveAIBrain.weights.speedRush = Math.min(3.5, (adaptiveAIBrain.weights.speedRush || 1.95) + 0.08);
+      adaptiveAIBrain.weights.combatAggression = Math.min(3.2, (adaptiveAIBrain.weights.combatAggression || 1.65) + 0.08);
+      adaptiveAIBrain.weights.entryLockdown = Math.min(3.2, (adaptiveAIBrain.weights.entryLockdown || 1.50) + 0.08);
     } else {
       adaptiveAIBrain.aiWins = (adaptiveAIBrain.aiWins || 0) + 1;
       adaptiveAIBrain.weights.speedRush = Math.min(3.5, (adaptiveAIBrain.weights.speedRush || 2.00) + 0.08);
@@ -1204,29 +1205,55 @@ triggerPlayerAIMove = function() {
   enemyBoardUnits.forEach(eu => {
     const d = NODE_BFS_DIST[eu.nodeId][myGoalId];
     if (d < minEnemyStepsToMyGoal) minEnemyStepsToMyGoal = d;
-    if (d <= eu.mp) threateningEnemies.push(eu);
+    if (d <= eu.mp + 1) threateningEnemies.push(eu);
   });
 
-  // Only consider our goal in true danger if it is completely EMPTY and an enemy can reach it in <= 2 steps,
-  // or if an enemy is standing directly adjacent (d === 1) threatening a surround!
-  const goalInDanger = (!myGoalDefended && (minEnemyStepsToMyGoal <= 2 || threateningEnemies.length > 0)) ||
-                       (myGoalDefended && minEnemyStepsToMyGoal === 1);
+  // Dynamic Threat Level Classification:
+  // Level 3 (CRITICAL): Enemy can capture goal next turn, or is adjacent to defended goal threatening surround
+  // Level 2 (HIGH): Goal is undefended and enemy is within 3-4 steps, or enemy approaching within mp + 1
+  // Level 1 (MODERATE): Enemy has crossed into AI's half (dist <= 5)
+  // Level 0 (SAFE): Goal is securely defended and enemies are contained on player's half
+  let threatLevel = 0;
+  if (!myGoalDefended) {
+    if (minEnemyStepsToMyGoal <= 2 || threateningEnemies.some(eu => NODE_BFS_DIST[eu.nodeId][myGoalId] <= eu.mp)) {
+      threatLevel = 3; // CRITICAL: Enemy can take goal right now!
+    } else if (minEnemyStepsToMyGoal <= 4 || threateningEnemies.length > 0) {
+      threatLevel = 2; // HIGH: Goal is naked and enemy is closing in!
+    } else if (minEnemyStepsToMyGoal <= 6) {
+      threatLevel = 1; // MODERATE: Enemy advancing
+    }
+  } else {
+    // Goal is occupied by our defender
+    if (minEnemyStepsToMyGoal === 1) {
+      threatLevel = 3; // Enemy right next to our goal defender (nodes 2 or 4)!
+    } else if (minEnemyStepsToMyGoal <= 2) {
+      threatLevel = 2; // Enemy 2 steps away
+    } else if (minEnemyStepsToMyGoal <= 4) {
+      threatLevel = 1;
+    }
+  }
+
+  const goalInDanger = (threatLevel >= 2);
+  const goalInCritical = (threatLevel >= 3);
   const prefPlayerLane = getPlayerPreferredLane();
 
-  // Dynamic Real-Time Adaptive Weights: prioritize Speed Rush & Fast Wins
-  const tel = state.currentMatchTelemetry || {
-    playerGoalRushes: 0,
-    playerEntryThreats: 0,
-    playerSurroundThreats: 0,
-    playerAttacks: 0,
-    laneMoves: { left: 0, center: 0, right: 0 }
-  };
+  // Dynamic Real-Time Threat-Responsive Weights:
+  let wGoalDef   = Math.min(3.5, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)   || 1.85));
+  let wAntiSur   = Math.min(2.8, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)  || 1.35));
+  let wEntryLk   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown) || 1.50));
+  let wCombatAgg = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.combatAggression) || 1.65));
+  let wSpeedRush = Math.min(3.5, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.speedRush) || 1.95));
 
-  const wGoalDef   = Math.min(2.0, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)   || 0.95));
-  const wAntiSur   = Math.min(2.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)  || 1.10));
-  const wEntryLk   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown) || 1.55));
-  const wCombatAgg = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.combatAggression) || 1.70));
-  const wSpeedRush = Math.min(3.5, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.speedRush) || 2.00));
+  // When threat level rises, pivot intelligently to lock down the goal!
+  if (threatLevel === 3) {
+    wGoalDef   *= 2.5; // Top priority: save the goal!
+    wAntiSur   *= 1.8;
+    wSpeedRush *= 0.45; // Do not blind-rush while goal is under immediate fatal threat!
+  } else if (threatLevel === 2) {
+    wGoalDef   *= 1.8;
+    wAntiSur   *= 1.4;
+    wSpeedRush *= 0.75;
+  }
 
   // Helper: Calculate fastest turns needed to reach opponent's Goal Point from a given node
   function computeFastestTurnsToWin(unit, fromNode) {
@@ -1413,11 +1440,13 @@ triggerPlayerAIMove = function() {
       let reasonTag = usingHurdlePlate ? `Salto Ofensivo [Hurdle Jump] com ${u.name}` : `Avanço Rápido com ${u.name}`;
 
       // 1. ABSOLUTE 2-PLY GOAL SAFETY
-      if (sim.enemyCanCaptureMyGoalNextTurn) {
-        moveScore -= 90000 * wGoalDef;
-      }
-      if (sim.enemyCanSurroundMyGoalNextTurn) {
-        moveScore -= 70000 * wGoalDef;
+      if (nid !== oppGoalId) {
+        if (sim.enemyCanCaptureMyGoalNextTurn) {
+          moveScore -= 500000; // Fatal blunder veto: enemy wins next turn!
+        }
+        if (sim.enemyCanSurroundMyGoalNextTurn) {
+          moveScore -= 380000; // Fatal surround loss on goal!
+        }
       }
 
       // 2. SURROUND KOs ACHIEVED (Guaranteed eliminations)
@@ -1483,25 +1512,46 @@ triggerPlayerAIMove = function() {
           : `⚡ Invasão do Entry Point Inimigo com ${u.name}!`;
       }
 
-      // 8. MINIMAL SUFFICIENT GOAL DEFENSE (NÃO FICA ATRÁS PASSIVO)
+      // 8. GOAL DEFENSE & DEFENDER DISCIPLINE
       const distToMyGoal = NODE_BFS_DIST[nid][myGoalId];
-      if (u.location === "board" && u.nodeId === myGoalId && nid !== myGoalId && minEnemyStepsToMyGoal <= 3) {
-        moveScore -= 80000; // Never abandon goal if enemy is closing in
-      }
 
-      if (!myGoalDefended && goalInDanger && !sim.enemyCanCaptureMyGoalNextTurn) {
-        if (nid === myGoalId) {
-          moveScore += 35000 * wGoalDef;
-          reasonTag = `Defesa Urgente do Goal (${u.name})`;
-        } else if (distToMyGoal === 1) {
-          moveScore += 12000 * wGoalDef;
+      // A. The Goal Defender standing on `myGoalId` MUST NOT abandon the goal unless winning right now!
+      if (u.location === "board" && u.nodeId === myGoalId && nid !== myGoalId) {
+        if (nid !== oppGoalId) {
+          if (threatLevel >= 1 || minEnemyStepsToMyGoal <= 4) {
+            moveScore -= 450000; // Strict Veto: never abandon goal when enemies are on the board!
+          } else {
+            moveScore -= 150000;
+          }
         }
       }
 
-      // 9. OPENING BLITZ (PRIMEIROS TURNOS): RUSH TOTAL COM CORREDORES 3-MP
+      // B. If Goal is undefended, establishing/moving onto `myGoalId` is maximum priority!
+      if (!myGoalDefended) {
+        if (nid === myGoalId && !sim.enemyCanCaptureMyGoalNextTurn) {
+          const baseGoalWeight = (threatLevel >= 2 ? 180000 : 95000);
+          moveScore += baseGoalWeight * wGoalDef;
+          reasonTag = `🛡️ Trancamento do Goal Point (${u.name})`;
+        } else if (distToMyGoal === 1 && !sim.enemyCanCaptureMyGoalNextTurn) {
+          moveScore += (threatLevel >= 2 ? 75000 : 38000) * wGoalDef;
+          reasonTag = `Guarda da Entrada do Goal com ${u.name}`;
+        }
+      } else if (myGoalDefended && u.nodeId !== myGoalId) {
+        // Goal already has a keeper. If an enemy approaches within 2 steps, reinforcing guard on neighbor nodes (2/4) prevents surround!
+        if (distToMyGoal === 1 && minEnemyStepsToMyGoal <= 2 && !sim.enemyCanCaptureMyGoalNextTurn) {
+          moveScore += 55000 * wGoalDef;
+          reasonTag = `Suporte Anti-Cerco ao Goal Defender com ${u.name}`;
+        }
+      }
+
+      // 9. OPENING & BENCH DEPLOYMENT
       if (u.location === "bench") {
         const myBoardCount = state.units.filter(x => x.owner === owner && x.location === "board").length;
-        if (myBoardCount < 3) moveScore += 1200;
+        if (myBoardCount < 3) moveScore += 2400;
+        // Deploying a defender toward the goal when undefended
+        if (!myGoalDefended && distToMyGoal <= 3) {
+          moveScore += 28000 * wGoalDef;
+        }
         if (u.mp >= 3 && state.turnCounter >= 288) {
           moveScore += 16000 * wSpeedRush;
           reasonTag = `Blitz de Abertura com ${u.name} (3 MP)`;
@@ -1573,8 +1623,13 @@ triggerPlayerAIMove = function() {
 
           const effectiveNet = effectiveWin - effectiveLoss;
 
-          // Never gamble away our own Goal defender with high loss chance
-          if (nid === myGoalId && effectiveLoss > 22) return;
+          // Never gamble away our own Goal defender with high loss chance!
+          if (nid === myGoalId) {
+            const mustAttackToSurvive = sim.enemyCanSurroundMyGoalNextTurn;
+            if (!mustAttackToSurvive && (effectiveWin < 72 || effectiveLoss > 14)) {
+              return; // Hold ground on the goal! Don't gamble!
+            }
+          }
 
           // Highly aggressive thresholds for breakthrough:
           // If attacking enemy on Goal Point: MUST ATTACK to win in minimum turns!
@@ -1627,23 +1682,25 @@ triggerPlayerAIMove = function() {
               reasonTag: bestTargetForThisMove.reason
             };
           }
-        } else if (!isStandingAttack) {
-          // If no good attack odds, hold position to block or surround next turn
+        } else {
+          // If no good attack odds, hold position to block, defend or surround next turn!
           let holdScore = moveScore;
           if (sim.enemyPinnedCount > 0) holdScore += 3000 * wAntiSur;
-          if (nid === myGoalId) holdScore += 4000 * wGoalDef;
+          if (nid === myGoalId) holdScore += 65000 * wGoalDef; // Holding ground on goal point is top-tier play!
           if (holdScore > bestScore) {
             bestScore = holdScore;
             bestAction = {
-              type: "move",
+              type: isStandingAttack ? "hold" : "move",
               uid: u.uid,
               unitName: u.name,
               nid,
-              segs: res.paths[nid],
+              segs: isStandingAttack ? [] : res.paths[nid],
               holdNoAttack: true,
               attackNode: null,
               plateToUse: usingHurdlePlate ? hurdlePlate : null,
-              reasonTag: `${reasonTag} (Contenção Tática)`
+              reasonTag: isStandingAttack
+                ? `🛡️ Manutenção Firme no Goal Point com ${u.name}`
+                : `${reasonTag} (Contenção Tática)`
             };
           }
         }
@@ -1659,25 +1716,37 @@ triggerPlayerAIMove = function() {
   });
 
   // STEP 4: EMERGENCY `GOAL BLOCK` PLATE CHECK!
-  // If after evaluating all moves, our best action STILL leaves `myGoalId` capturable next turn (or `bestScore < -40000`),
-  // immediately use `Goal Block` Plate to teleport our strongest field unit onto `myGoalId`!
-  if (!myGoalOccupant && goalBlockPlate && (minEnemyStepsToMyGoal <= 2 || bestScore < -30000)) {
-    const fieldAllies = myUnits.filter(u => u.location === "board");
-    if (fieldAllies.length > 0) {
-      fieldAllies.sort((a, b) => {
-        const dA = getActiveWheel(a).reduce((m, s) => Math.max(m, s.dmg || 0), 0);
-        const dB = getActiveWheel(b).reduce((m, s) => Math.max(m, s.dmg || 0), 0);
-        return dB - dA;
-      });
-      const savior = fieldAllies[0];
-      goalBlockPlate.used = true;
-      playSfx("portal");
-      spawnPortalParticles(BOARD_NODES[myGoalId].x, BOARD_NODES[myGoalId].y, "#38bdf8");
-      savior.nodeId = myGoalId;
-      savior.waitTurns = 1;
-      setLogText(`🛡️ ${aiTitle} ativou Plate [Goal Block] e teleportou ${savior.name} para trancar o Goal Point!`);
-      endTurn(true, enemyRole, Math.max(0, state.turnCounter - 1));
-      return;
+  // If after evaluating all moves, our best action STILL leaves `myGoalId` undefended and under threat,
+  // immediately activate `Goal Block` plate to teleport our strongest defender onto `myGoalId`!
+  if (!myGoalOccupant && goalBlockPlate) {
+    const bestLandsOnGoal = (bestAction && bestAction.nid === myGoalId);
+    const needEmergencyGoalBlock = !bestLandsOnGoal && (
+      minEnemyStepsToMyGoal <= 3 ||
+      threatLevel >= 2 ||
+      (bestScore < -40000)
+    );
+
+    if (needEmergencyGoalBlock) {
+      const candidates = myUnits.filter(u => u.location === "board" || u.location === "bench");
+      if (candidates.length > 0) {
+        candidates.sort((a, b) => {
+          const wA = getActiveWheel(a);
+          const wB = getActiveWheel(b);
+          const valA = wA.reduce((m, s) => s.color === "blue" ? m + 80 : (s.color === "purple" ? m + (s.stars || 1) * 30 : Math.max(m, s.dmg || 0)), 0);
+          const valB = wB.reduce((m, s) => s.color === "blue" ? m + 80 : (s.color === "purple" ? m + (s.stars || 1) * 30 : Math.max(m, s.dmg || 0)), 0);
+          return valB - valA;
+        });
+        const savior = candidates[0];
+        goalBlockPlate.used = true;
+        playSfx("portal");
+        spawnPortalParticles(BOARD_NODES[myGoalId].x, BOARD_NODES[myGoalId].y, "#38bdf8");
+        savior.location = "board";
+        savior.nodeId = myGoalId;
+        savior.waitTurns = 1;
+        setLogText(`🛡️ ${aiTitle} ativou Plate [Goal Block] e teleportou ${savior.name} para trancar o Goal Point!`);
+        endTurn(true, enemyRole, Math.max(0, state.turnCounter - 1));
+        return;
+      }
     }
   }
 
@@ -1705,6 +1774,15 @@ triggerPlayerAIMove = function() {
 
     const plateBadge = bestAction.plateToUse ? ` + Plate [${bestAction.plateToUse.name}]` : "";
     setLogText(`🧠 ${aiTitle}: ${bestAction.reasonTag}${plateBadge}`);
+
+    if (bestAction.type === "hold") {
+      const nextTurnVal = owner === "p1" ? "p2" : "p1";
+      const nextCounterVal = Math.max(0, state.turnCounter - 1);
+      setTimeout(() => {
+        endTurn(true, nextTurnVal, nextCounterVal);
+      }, 260);
+      return;
+    }
 
     if (bestAction.type === "standing_attack" && bestAction.enemyUnit) {
       const nextTurnVal = owner === "p1" ? "p2" : "p1";
