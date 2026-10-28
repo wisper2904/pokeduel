@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokeduel-pwa-v666";
+const CACHE_NAME = "pokeduel-pwa-v667";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -9,6 +9,7 @@ const CORE_ASSETS = [
   "./assets/arena/carmonte_arena.jpg",
   "./assets/ui/banana_wheel.jpg",
   "./assets/ui/pokeduel_logo.webp",
+  "./assets/ui/centerpiece_pedestal_3d.png",
   "./assets/ui/tutorial_goal_board.png",
   "./js/data/i18n.js",
   "./js/data/sprites.js",
