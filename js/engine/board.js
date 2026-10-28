@@ -225,9 +225,9 @@ const BENCH_SLOTS_P1 = [
   { x: 218, y: 422 }
 ];
 
-const EXTRA_PLUS_SLOTS = [ { x: 252, y: 396 }, { x: 293, y: 396 } ];
-const REVIVER_PODS_P2 = [ { x: 288, y: 95 }, { x: 259, y: 86 } ];
-const REVIVER_PODS_P1 = [ { x: 50,  y: 434 }, { x: 82,  y: 452 } ];
+const REVIVER_PODS_P2 = [ { x: 73.5, y: 128 }, { x: 109.0, y: 128 } ];
+const REVIVER_PODS_P1 = [ { x: 252,   y: 396 }, { x: 293,   y: 396 } ];
+const EXTRA_PLUS_SLOTS = REVIVER_PODS_P1;
 
 // ============================================================================
 // 5. MATCH STATE & CLEAN 6v6 BENCH MATCH START (0 POKÉMON ON FIELD AT START!)
@@ -758,17 +758,18 @@ function spawnPortalParticles(x, y, color) {
 
 function sendToPC(unit) {
   const pods = unit.owner === "p1" ? REVIVER_PODS_P1 : REVIVER_PODS_P2;
+  const q = unit.owner === "p1" ? state.reviverQueueP1 : state.reviverQueueP2;
+  const targetPod = pods[Math.min(q.length, 1)] || pods[0];
   if (unit.location === "board" && unit.nodeId !== null) {
-    const n = BOARD_NODES[unit.nodeId];
+    const n = getNodePos(unit.nodeId);
     spawnPortalParticles(n.x, n.y, "#c084fc");
-    boardBeams.push({ x1: n.x, y1: n.y, x2: pods[0].x, y2: pods[0].y, color: "#c084fc", life: 1.0 });
+    boardBeams.push({ x1: n.x, y1: n.y, x2: targetPod.x, y2: targetPod.y, color: "#c084fc", life: 1.0 });
   }
   unit.location = "pc";
   unit.nodeId = null;
   unit.condition = PokemonCondition.Normal;
   unit.waitTurns = 0;
 
-  const q = unit.owner === "p1" ? state.reviverQueueP1 : state.reviverQueueP2;
   const ex = q.indexOf(unit.uid);
   if (ex !== -1) q.splice(ex, 1);
   q.push(unit.uid);
@@ -1192,6 +1193,192 @@ function drawHDBenchRing(cx, cy, rx, ry, isPlus) {
   ctx.restore();
 }
 
+function drawGreenIncubatorChambers(isFrontOverlay, topRevQueue) {
+  const tNow = performance.now() * 0.001;
+  ctx.save();
+  REVIVER_PODS_P2.forEach((pod, idx) => {
+    const isOccupied = topRevQueue && topRevQueue[idx];
+    const cx = pod.x, cy = pod.y;
+    // Capsule dimensions: width 24, height 48. Top at cy-24, bottom at cy+24.
+    const w = 24, h = 48;
+    const left = cx - w / 2, top = cy - h / 2;
+    const r = w / 2; // radius for rounded top/bottom capsule
+
+    if (!isFrontOverlay) {
+      // 1. Back chamber interior & cryo-fluid (covers any underlying arena artifacts)
+      ctx.save();
+      // Outer drop shadow on table
+      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + h / 2 + 1, r + 2, 5.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Metallic pedestal base
+      const pedGrad = ctx.createLinearGradient(cx - r, 0, cx + r, 0);
+      pedGrad.addColorStop(0, "#1e293b");
+      pedGrad.addColorStop(0.5, "#64748b");
+      pedGrad.addColorStop(1, "#0f172a");
+      ctx.fillStyle = pedGrad;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + h / 2, r + 1.5, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Deep emerald capsule interior
+      const bgGrad = ctx.createLinearGradient(cx - r, top, cx + r, top + h);
+      bgGrad.addColorStop(0, "#011c13");
+      bgGrad.addColorStop(0.4, "#064e3b");
+      bgGrad.addColorStop(0.8, "#022c22");
+      bgGrad.addColorStop(1, "#01160e");
+
+      ctx.beginPath();
+      ctx.roundRect(left, top, w, h, [r, r, r, r]);
+      ctx.fillStyle = bgGrad;
+      ctx.fill();
+
+      // Metallic top cap
+      ctx.fillStyle = pedGrad;
+      ctx.beginPath();
+      ctx.ellipse(cx, top + 2, r + 0.8, 4.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cryo chamber inner energy ambient glow
+      const glowGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, r);
+      glowGrad.addColorStop(0, isOccupied ? "rgba(52, 211, 153, 0.45)" : "rgba(16, 185, 129, 0.28)");
+      glowGrad.addColorStop(1, "rgba(5, 150, 105, 0)");
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.roundRect(left, top, w, h, [r, r, r, r]);
+      ctx.fill();
+
+      // Ambient rising bio-energy bubbles
+      const bubblePhase = tNow * 1.8 + idx * 1.5;
+      for (let b = 0; b < 3; b++) {
+        const bOff = (bubblePhase + b * 1.1) % 1;
+        const bx = cx - 4 + ((b * 3.7 + idx) % 8);
+        const by = (cy + h / 2 - 6) - bOff * (h - 12);
+        ctx.fillStyle = `rgba(110, 231, 183, ${0.4 * (1 - bOff)})`;
+        ctx.beginPath();
+        ctx.arc(bx, by, 1.2 + (b % 2) * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    } else {
+      // 2. Front Glass Cylinder overlay (drawn in front of the figurine!)
+      ctx.save();
+      // Glass cylinder outline with high-tech glowing border
+      ctx.beginPath();
+      ctx.roundRect(left, top, w, h, [r, r, r, r]);
+      ctx.strokeStyle = isOccupied ? "rgba(52, 211, 153, 0.85)" : "rgba(16, 185, 129, 0.55)";
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+
+      // Glass tint
+      ctx.fillStyle = "rgba(16, 185, 129, 0.12)";
+      ctx.fill();
+
+      // Left specular reflection (vertical curved highlight on glass)
+      const shineGrad = ctx.createLinearGradient(left + 2, top, left + 6, top);
+      shineGrad.addColorStop(0, "rgba(255, 255, 255, 0.55)");
+      shineGrad.addColorStop(0.5, "rgba(167, 243, 208, 0.35)");
+      shineGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = shineGrad;
+      ctx.beginPath();
+      ctx.roundRect(left + 2.5, top + 6, 3.2, h - 14, 1.5);
+      ctx.fill();
+
+      // Top dome curved highlight
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(cx, top + 5, r * 0.65, 3, 0, Math.PI * 0.9, Math.PI * 2.1);
+      ctx.stroke();
+
+      // High-tech holographic scanline drifting downward
+      const scanY = top + ((tNow * 16 + idx * 12) % h);
+      ctx.strokeStyle = "rgba(167, 243, 208, 0.4)";
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(left + 3, scanY);
+      ctx.lineTo(left + w - 3, scanY);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+  });
+  ctx.restore();
+}
+
+function drawP1ReviverPods(botRevQueue) {
+  const tNow = performance.now() * 0.001;
+  ctx.save();
+  REVIVER_PODS_P1.forEach((pod, idx) => {
+    const isOccupied = botRevQueue && botRevQueue[idx];
+    const cx = pod.x, cy = pod.y;
+    const rx = 16.5, ry = 11.2;
+
+    // Outer drop shadow
+    ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 1.8, rx + 1.5, ry + 1.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // High-tech P.C. recovery pad outer ring
+    const rimGrad = ctx.createLinearGradient(cx - rx, cy - ry, cx + rx, cy + ry);
+    rimGrad.addColorStop(0, "#38bdf8");
+    rimGrad.addColorStop(0.5, "#0284c7");
+    rimGrad.addColorStop(1, "#0369a1");
+    ctx.strokeStyle = rimGrad;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Dark high-tech concave base
+    const padGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, rx);
+    padGrad.addColorStop(0, isOccupied ? "#0c4a6e" : "#082f49");
+    padGrad.addColorStop(0.7, "#0f172a");
+    padGrad.addColorStop(1, "#020617");
+    ctx.fillStyle = padGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx - 1.2, ry - 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Inner glowing ring
+    ctx.strokeStyle = isOccupied ? "rgba(56, 189, 248, 0.85)" : "rgba(56, 189, 248, 0.4)";
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx * 0.72, ry * 0.72, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    if (!isOccupied) {
+      // Crisp Glowing Hospital '+' Cross in center when empty
+      ctx.save();
+      ctx.shadowColor = "#38bdf8";
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = "#e0f2fe";
+      // Horizontal bar
+      ctx.fillRect(cx - 5.5, cy - 1.8, 11, 3.6);
+      // Vertical bar
+      ctx.fillRect(cx - 1.8, cy - 5.5, 3.6, 11);
+      ctx.restore();
+    } else {
+      // Pulsing cyan medical recovery aura beneath the resting Pokémon
+      const pulse = 1.0 + Math.sin(tNow * 3.5 + idx) * 0.12;
+      ctx.save();
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.85)";
+      ctx.shadowColor = "#38bdf8";
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx * 0.9 * pulse, ry * 0.9 * pulse, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  });
+  ctx.restore();
+}
+
 function drawHDVectorBoardAndChrome() {
   // 1. Crisp 1080p Top Action Bar (Clean full-width log without Skip / Perspective buttons)
   ctx.save();
@@ -1284,26 +1471,16 @@ function drawHDVectorBoardAndChrome() {
   }
 
 
-  // 3. Crisp 1080p Enhancements on Green Incubator Capsules & Mechanical P.C. Pods
-  // Top-Right P.C. empty concave pods (so P2 P.C. starts 100% empty & crisp!)
-  REVIVER_PODS_P2.forEach((pod, idx) => {
-    const rx = idx === 0 ? 18 : 12, ry = idx === 0 ? 12 : 8.5;
-    ctx.fillStyle = "rgba(24, 16, 36, 0.88)";
-    ctx.strokeStyle = "#f43f5e";
-    ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.ellipse(pod.x, pod.y, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = "rgba(251, 113, 133, 0.45)";
-    ctx.lineWidth = 0.9;
-    ctx.beginPath(); ctx.ellipse(pod.x, pod.y, rx * 0.65, ry * 0.65, 0, 0, Math.PI * 2); ctx.stroke();
-  });
+  const botRoleForChrome = getBottomRole();
+  const topRevQueueForChrome = botRoleForChrome === "p1" ? state.reviverQueueP2 : state.reviverQueueP1;
+  const botRevQueueForChrome = botRoleForChrome === "p1" ? state.reviverQueueP1 : state.reviverQueueP2;
 
-  // Bottom-Left P.C. empty concave pods enhancement
-  REVIVER_PODS_P1.forEach((pod, idx) => {
-    const rx = idx === 0 ? 20 : 13.5, ry = idx === 0 ? 14 : 9.5;
-    ctx.strokeStyle = "rgba(56, 189, 248, 0.65)";
-    ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.ellipse(pod.x, pod.y, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
-  });
+  // 3. Crisp 1080p Enhancements on Authentic Green Incubator Capsules & Medical P.C. Pods
+  // Back interior of Top-Left Green Incubator Capsules (Opponent P.C. Pods)
+  drawGreenIncubatorChambers(false, topRevQueueForChrome);
+
+  // Bottom-Right Medical P.C. Recovery Pads (Local Viewer P.C. Pods)
+  drawP1ReviverPods(botRevQueueForChrome);
 
   // 4. Crisp 1080p Top & Bottom Horizontal White Divider Bars
   ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -1313,10 +1490,9 @@ function drawHDVectorBoardAndChrome() {
   ctx.fillRect(58, 160, 236, 2.4);
   ctx.fillRect(41, 371.5, 270, 2.8);
 
-  // 5. Crisp 1080p 12 Bench Rings + 2 Plus Rings
+  // 5. Crisp 1080p 12 Bench Rings
   P2_BENCH_COORDS.forEach(s => drawHDBenchRing(s.x, s.y, 15.2, 9.8, false));
   BENCH_SLOTS_P1.forEach(s => drawHDBenchRing(s.x, s.y, 16.2, 10.8, false));
-  EXTRA_PLUS_SLOTS.forEach(s => drawHDBenchRing(s.x, s.y, 15.8, 10.6, true));
 
   // 6. Crisp 1080p 28-Node Board Route Lines (`BOARD_EDGES`)
   ctx.lineCap = "round";
@@ -1693,14 +1869,16 @@ function drawFullTabletopFrame() {
     drawAuthenticFigurine(u, slot.x, slot.y, 0, 1.0, 0, slot.x, slot.y, state.selectedUnitId === u.uid);
   });
 
-  // 4. Draw Opponent Reviver Pods (top-right turntable: 2 pods max)
+  // 4. Draw Opponent Reviver Pods (inside top-left incubator capsules: 2 pods max)
   topRevQueue.forEach((uid, idx) => {
     const pod = REVIVER_PODS_P2[idx];
     const u = state.units.find(x => x.uid === uid);
     if (pod && u && idx < 2) {
-      drawAuthenticFigurine(u, pod.x, pod.y, 0, 0.72, 0, pod.x, pod.y, false);
+      drawAuthenticFigurine(u, pod.x, pod.y + 4, 0, 0.68, 0, pod.x, pod.y + 4, false);
     }
   });
+  // Draw front glass cylinder overlay & highlights in front of figures
+  drawGreenIncubatorChambers(true, topRevQueue);
 
   // 5. Draw Reachable Nodes, Parabolic Jump Arcs & Attack Reticles on the 28-node grid (mapped to viewer's seat!)
   if (state.selectedUnitId && !state.isAnimating) {
@@ -1757,12 +1935,12 @@ function drawFullTabletopFrame() {
     drawAuthenticFigurine(u, slot.x, slot.y, 0, 1.0, 0, slot.x, slot.y, state.selectedUnitId === u.uid);
   });
 
-  // 8. Draw Local Viewer's Reviver Pods (bottom-left turntable: 2 pods max)
+  // 8. Draw Local Viewer's Reviver Pods (bottom-right P.C. recovery pads: 2 pods max)
   botRevQueue.forEach((uid, idx) => {
     const pod = REVIVER_PODS_P1[idx];
     const u = state.units.find(x => x.uid === uid);
     if (pod && u && idx < 2) {
-      drawAuthenticFigurine(u, pod.x, pod.y, 0, 0.76, 0, pod.x, pod.y, false);
+      drawAuthenticFigurine(u, pod.x, pod.y - 2, 0, 0.82, 0, pod.x, pod.y - 2, false);
     }
   });
 
@@ -2331,6 +2509,27 @@ canvas.addEventListener("pointerdown", e => {
     if (Math.hypot(sx - slot.x, (sy - (slot.y - 10)) * 0.85) < 26) { selectUnit(u.uid); return; }
   }
 
+  // 7.5. Check P.C. Reviver Pods (Bottom viewer P1 & Top opponent P2)
+  const botRevQueue = botRole === "p1" ? state.reviverQueueP1 : state.reviverQueueP2;
+  const topRevQueue = botRole === "p1" ? state.reviverQueueP2 : state.reviverQueueP1;
+
+  for (let idx = 0; idx < botRevQueue.length && idx < 2; idx++) {
+    const pod = REVIVER_PODS_P1[idx];
+    const u = state.units.find(x => x.uid === botRevQueue[idx]);
+    if (pod && u && Math.hypot(sx - pod.x, sy - (pod.y - 2)) < 24) {
+      selectUnit(u.uid);
+      return;
+    }
+  }
+  for (let idx = 0; idx < topRevQueue.length && idx < 2; idx++) {
+    const pod = REVIVER_PODS_P2[idx];
+    const u = state.units.find(x => x.uid === topRevQueue[idx]);
+    if (pod && u && Math.hypot(sx - pod.x, sy - (pod.y + 4)) < 22) {
+      selectUnit(u.uid);
+      return;
+    }
+  }
+
   // 8. Check 28 Board Nodes (mapped to viewer's 180-degree tabletop perspective, with 28px touch tolerance!)
   let bestNode = null, bestDist = 28;
   BOARD_NODES.forEach(n => {
@@ -2375,7 +2574,17 @@ function finishPostMoveWithoutAttack() {
 
 function selectUnit(uid) {
   const u = state.units.find(x => x.uid === uid);
-  if (!u || u.location === "pc" || u.location === "ultra_space") return;
+  if (!u || u.location === "ultra_space") return;
+
+  if (u.location === "pc") {
+    playSfx("tick");
+    showCornerFigureCard(u);
+    const ownerLbl = (u.owner === state.myRole) ? "Seu Pokémon" : "Rival";
+    const canJ = typeof isFigurePassThroughOrJumper === "function" && isFigurePassThroughOrJumper(u);
+    const jInfo = canJ ? " · 🦘 Pula Figuras" : " · 🚫 Não Pula";
+    setLogText(`P.C. [${u.name}] (${ownerLbl}${jInfo}) — Em recuperação.`);
+    return;
+  }
 
   // If not active turn controller, allow inspecting any figure on the board or bench!
   if (!canControlTurn()) {
