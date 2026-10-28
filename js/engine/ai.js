@@ -5,12 +5,12 @@
 // COUNTER-DECK BUILDER, AI PLATE USAGE & PLAYSTYLE LEARNING MEMORY) +
 // FAIR 50/50 FIRST-TURN ROULETTE
 // ============================================================================
-const AI_BRAIN_STORAGE_KEY = "pdr_adaptive_ai_brain_v530";
+const AI_BRAIN_STORAGE_KEY = "pdr_adaptive_ai_brain_v561";
 const FIRST_TURN_HIST_KEY  = "pdr_first_turn_hist_v530";
 
 function loadAdaptiveAIBrain() {
   const defaultBrain = {
-    version: "5.6.0",
+    version: "5.6.1",
     matchesAnalyzed: 0,
     aiWins: 0,
     playerWins: 0,
@@ -22,10 +22,11 @@ function loadAdaptiveAIBrain() {
     playerAttacks: 0,
     playerFavBaseIds: {},
     weights: {
-      goalDefense: 1.20,
-      antiSurround: 1.25,
-      entryLockdown: 1.15,
-      combatAggression: 1.10
+      goalDefense: 0.95,
+      antiSurround: 1.10,
+      entryLockdown: 1.55,
+      combatAggression: 1.70,
+      speedRush: 2.00
     }
   };
   try {
@@ -796,13 +797,15 @@ showWinResultScreen = function(winner) {
     adaptiveAIBrain.matchesAnalyzed = (adaptiveAIBrain.matchesAnalyzed || 0) + 1;
     if (winner === "p1") {
       adaptiveAIBrain.playerWins = (adaptiveAIBrain.playerWins || 0) + 1;
-      // When the player beats the AI, the AI sharpens its defense, anti-surround and entry lockdown weights!
-      adaptiveAIBrain.weights.goalDefense  = Math.min(2.8, (adaptiveAIBrain.weights.goalDefense || 1.20) + 0.12);
-      adaptiveAIBrain.weights.antiSurround = Math.min(2.8, (adaptiveAIBrain.weights.antiSurround || 1.25) + 0.12);
-      adaptiveAIBrain.weights.entryLockdown = Math.min(2.6, (adaptiveAIBrain.weights.entryLockdown || 1.15) + 0.10);
+      // When the player beats the AI, the AI increases offensive speed rush, combat aggression, and entry lockdown to win faster!
+      adaptiveAIBrain.weights.speedRush = Math.min(3.5, (adaptiveAIBrain.weights.speedRush || 2.00) + 0.15);
+      adaptiveAIBrain.weights.combatAggression = Math.min(3.2, (adaptiveAIBrain.weights.combatAggression || 1.70) + 0.12);
+      adaptiveAIBrain.weights.entryLockdown = Math.min(3.2, (adaptiveAIBrain.weights.entryLockdown || 1.55) + 0.10);
+      adaptiveAIBrain.weights.goalDefense = Math.min(1.8, (adaptiveAIBrain.weights.goalDefense || 0.95) + 0.05);
     } else {
       adaptiveAIBrain.aiWins = (adaptiveAIBrain.aiWins || 0) + 1;
-      adaptiveAIBrain.weights.combatAggression = Math.min(2.6, (adaptiveAIBrain.weights.combatAggression || 1.10) + 0.06);
+      adaptiveAIBrain.weights.speedRush = Math.min(3.5, (adaptiveAIBrain.weights.speedRush || 2.00) + 0.08);
+      adaptiveAIBrain.weights.combatAggression = Math.min(3.2, (adaptiveAIBrain.weights.combatAggression || 1.70) + 0.08);
     }
     saveAdaptiveAIBrain();
   }
@@ -1193,18 +1196,24 @@ triggerPlayerAIMove = function() {
   }
 
   // STEP 2: ASSESS THREAT LEVEL AGAINST AI'S GOAL POINT (`myGoalId = 3`)
+  const myGoalOccupant = unitAtNode(myGoalId);
+  const myGoalDefended = Boolean(myGoalOccupant && myGoalOccupant.owner === owner);
+
   let minEnemyStepsToMyGoal = 99;
   const threateningEnemies = [];
   enemyBoardUnits.forEach(eu => {
     const d = NODE_BFS_DIST[eu.nodeId][myGoalId];
     if (d < minEnemyStepsToMyGoal) minEnemyStepsToMyGoal = d;
-    if (d <= eu.mp + 1) threateningEnemies.push(eu);
+    if (d <= eu.mp) threateningEnemies.push(eu);
   });
-  const goalInDanger = (minEnemyStepsToMyGoal <= 3 || threateningEnemies.length > 0);
-  const myGoalOccupant = unitAtNode(myGoalId);
+
+  // Only consider our goal in true danger if it is completely EMPTY and an enemy can reach it in <= 2 steps,
+  // or if an enemy is standing directly adjacent (d === 1) threatening a surround!
+  const goalInDanger = (!myGoalDefended && (minEnemyStepsToMyGoal <= 2 || threateningEnemies.length > 0)) ||
+                       (myGoalDefended && minEnemyStepsToMyGoal === 1);
   const prefPlayerLane = getPlayerPreferredLane();
 
-  // Dynamic Real-Time Adaptive Weights: cross-match learning memory blended with in-match telemetry
+  // Dynamic Real-Time Adaptive Weights: prioritize Speed Rush & Fast Wins
   const tel = state.currentMatchTelemetry || {
     playerGoalRushes: 0,
     playerEntryThreats: 0,
@@ -1213,15 +1222,49 @@ triggerPlayerAIMove = function() {
     laneMoves: { left: 0, center: 0, right: 0 }
   };
 
-  const liveGoalMult     = (tel.playerGoalRushes >= 2) ? 1.40 : (tel.playerGoalRushes >= 1 ? 1.20 : 1.0);
-  const liveSurroundMult = (tel.playerSurroundThreats >= 1) ? 1.35 : 1.0;
-  const liveEntryMult    = (tel.playerEntryThreats >= 1) ? 1.30 : 1.0;
-  const liveCombatMult   = (tel.playerAttacks >= 3) ? 1.25 : 1.0;
+  const wGoalDef   = Math.min(2.0, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)   || 0.95));
+  const wAntiSur   = Math.min(2.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)  || 1.10));
+  const wEntryLk   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown) || 1.55));
+  const wCombatAgg = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.combatAggression) || 1.70));
+  const wSpeedRush = Math.min(3.5, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.speedRush) || 2.00));
 
-  const wGoalDef   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)   || 1.20) * liveGoalMult);
-  const wAntiSur   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)  || 1.25) * liveSurroundMult);
-  const wEntryLk   = Math.min(3.0, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown) || 1.15) * liveEntryMult);
-  const wCombatAgg = Math.min(2.8, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.combatAggression) || 1.10) * liveCombatMult);
+  // Helper: Calculate fastest turns needed to reach opponent's Goal Point from a given node
+  function computeFastestTurnsToWin(unit, fromNode) {
+    if (fromNode === oppGoalId) return 0;
+    const effectiveMp = Math.max(1, (unit.baseMp || unit.mp) - (unit.condition === PokemonCondition.Paralyze ? 1 : 0));
+    const canJump = Boolean(unit.canPassThrough || (typeof isFigurePassThroughOrJumper === "function" && isFigurePassThroughOrJumper(unit)));
+
+    const distMap = new Map();
+    distMap.set(fromNode, 0);
+    const q = [{ nid: fromNode, steps: 0, enemyBlockers: 0 }];
+    let minTurns = 99;
+
+    while (q.length > 0) {
+      const cur = q.shift();
+      if (cur.nid === oppGoalId) {
+        const turns = Math.ceil(cur.steps / effectiveMp) + cur.enemyBlockers;
+        if (turns < minTurns) minTurns = turns;
+        continue;
+      }
+      if (cur.steps >= 10) continue;
+
+      for (const nb of ADJ[cur.nid] || []) {
+        const occ = unitAtNode(nb);
+        let blocker = 0;
+        if (occ && occ.owner !== owner && nb !== oppGoalId) {
+          if (!canJump) blocker = 1;
+        }
+        const nSteps = cur.steps + 1;
+        const nBlockers = cur.enemyBlockers + blocker;
+        const cost = nSteps + nBlockers * 2;
+        if (!distMap.has(nb) || distMap.get(nb) > cost) {
+          distMap.set(nb, cost);
+          q.push({ nid: nb, steps: nSteps, enemyBlockers: nBlockers });
+        }
+      }
+    }
+    return minTurns;
+  }
 
   // Helper: Full 2-Ply Simulation when AI moves `movingUnit` to `destNid`
   function simulate2PlyAfterAIMove(movingUnit, destNid) {
@@ -1261,18 +1304,16 @@ triggerPlayerAIMove = function() {
       return o;
     };
 
-    // 3) CRITICAL 2-PLY CHECK: After `movingUnit` lands on `destNid` (and any `enemyKOs` are removed),
-    // can the human player reach `myGoalId` (Node 3) on their very next turn (including via Hurdle Jump)?
+    // 3) CRITICAL 2-PLY CHECK: After `movingUnit` lands on `destNid`, can enemy capture or surround our Goal next turn?
     const goalOccupantAfter = getOccPostKO(myGoalId);
     let enemyCanCaptureMyGoalNextTurn = false;
     if (!goalOccupantAfter) {
       enemyCanCaptureMyGoalNextTurn = canEnemyReachNodeInSim(enemyRole, myGoalId, getOccPostKO, true);
     }
 
-    // 4) Can the human player Surround-KO our Goal Defender on `myGoalId` next turn (Goal Surround Loss)?
     let enemyCanSurroundMyGoalNextTurn = false;
     if (goalOccupantAfter && goalOccupantAfter.owner === owner) {
-      const gNbs = ADJ[myGoalId] || []; // [2, 4]
+      const gNbs = ADJ[myGoalId] || [];
       const openGNbs = gNbs.filter(nb => getOccPostKO(nb) === null);
       const enemyGNbs = gNbs.filter(nb => { const o = getOccPostKO(nb); return o && o.owner !== owner; });
       if (openGNbs.length === 1 && enemyGNbs.length === (gNbs.length - 1) && canEnemyReachNodeInSim(enemyRole, openGNbs[0], getOccPostKO, true)) {
@@ -1282,7 +1323,7 @@ triggerPlayerAIMove = function() {
       }
     }
 
-    // 5) Count how many of our board units have only 1 open neighbor that the enemy can reach next turn (1-Turn Surround Trap!)
+    // 4) 1-turn surround trap checks
     let allySurroundTrapsNextTurn = 0;
     const allMyBoard = state.units.filter(u => u.owner === owner && (u.location === "board" || u.uid === movingUnit.uid));
     allMyBoard.forEach(au => {
@@ -1301,7 +1342,6 @@ triggerPlayerAIMove = function() {
       }
     });
 
-    // 6) Count how many enemy units are put into a 1-neighbor Pincer / Surround Trap by this move!
     let enemyPinnedCount = 0;
     enemyBoardUnits.forEach(eu => {
       if (enemyKOs.includes(eu)) return;
@@ -1326,7 +1366,7 @@ triggerPlayerAIMove = function() {
     };
   }
 
-  // STEP 3: EVALUATE ALL CANDIDATE MOVES (NORMAL + OPTIONAL `HURDLE JUMP` OFFENSIVE/SURROUND PLAYS)
+  // STEP 3: EVALUATE ALL CANDIDATE MOVES WITH HIGHEST TEMPO & FASTEST-WIN CALCULATION
   let bestAction = null;
   let bestScore  = -9999999;
 
@@ -1344,7 +1384,6 @@ triggerPlayerAIMove = function() {
       if (hasAdjEnemyNow) candidateNodes.push(u.nodeId);
     }
 
-    // Check if `u` is currently trapped in a 1-neighbor surround danger right now
     let currentlyTrapped = false;
     if (u.location === "board" && typeof u.nodeId === "number") {
       const curNbs = ADJ[u.nodeId] || [];
@@ -1360,7 +1399,6 @@ triggerPlayerAIMove = function() {
       const sim = simulate2PlyAfterAIMove(u, nid);
       if (sim.selfSurrounded) return;
 
-      // Only spend Hurdle Jump Plate if it achieves a Surround KO, captures an Entry Point, reaches within 1 step of Goal, or saves our Goal!
       if (usingHurdlePlate) {
         const highImpactJump = (
           sim.enemyKOs.length > 0 ||
@@ -1371,113 +1409,106 @@ triggerPlayerAIMove = function() {
         if (!highImpactJump) return;
       }
 
-      let moveScore = usingHurdlePlate ? -450 : 0; // Slight cost so normal walk is preferred over burning Hurdle Jump when equal
-      let reasonTag = usingHurdlePlate ? `Salto Tático [Hurdle Jump] com ${u.name}` : `Manobra Grandmaster com ${u.name}`;
+      let moveScore = usingHurdlePlate ? -300 : 0;
+      let reasonTag = usingHurdlePlate ? `Salto Ofensivo [Hurdle Jump] com ${u.name}` : `Avanço Rápido com ${u.name}`;
 
-      // 1. ABSOLUTE 2-PLY GOAL SAFETY: If this move allows the player to capture or surround our Goal next turn, massive penalty!
+      // 1. ABSOLUTE 2-PLY GOAL SAFETY
       if (sim.enemyCanCaptureMyGoalNextTurn) {
-        moveScore -= 85000 * wGoalDef;
+        moveScore -= 90000 * wGoalDef;
       }
       if (sim.enemyCanSurroundMyGoalNextTurn) {
-        moveScore -= 65000 * wGoalDef;
+        moveScore -= 70000 * wGoalDef;
       }
 
-      // 2. SURROUND KOs ACHIEVED!
+      // 2. SURROUND KOs ACHIEVED (Guaranteed eliminations)
       if (!isStandingAttack && sim.enemyKOs.length > 0) {
         sim.enemyKOs.forEach(koUnit => {
-          moveScore += 14500 * wCombatAgg;
-          if (koUnit.nodeId === oppGoalId) moveScore += 90000; // Goal Surround Win!
-          if (threateningEnemies.includes(koUnit)) moveScore += 12000 * wGoalDef;
-          if (myEntryIds.includes(koUnit.nodeId)) moveScore += 7500 * wEntryLk;
-          if (oppEntryIds.includes(koUnit.nodeId)) moveScore += 5500 * wEntryLk;
+          moveScore += 22000 * wCombatAgg;
+          if (koUnit.nodeId === oppGoalId) moveScore += 120000; // Goal Surround Win!
+          if (threateningEnemies.includes(koUnit)) moveScore += 18000;
+          if (oppEntryIds.includes(koUnit.nodeId)) moveScore += 14000 * wEntryLk;
         });
-        reasonTag = `Cerco Letal (Surround KO em ${sim.enemyKOs[0].name})`;
+        reasonTag = `Cerco Relâmpago (Surround KO em ${sim.enemyKOs[0].name})`;
       }
 
       // 3. 2-PLY ANTI-SURROUND DISCIPLINE
       if (sim.allySurroundTrapsNextTurn > 0) {
-        moveScore -= 6500 * sim.allySurroundTrapsNextTurn * wAntiSur;
+        moveScore -= 6000 * sim.allySurroundTrapsNextTurn * wAntiSur;
       }
       if (currentlyTrapped && !isStandingAttack && sim.allySurroundTrapsNextTurn === 0) {
-        moveScore += 7500 * wAntiSur;
-        reasonTag = `Fuga de Pinça com ${u.name}`;
+        moveScore += 6000 * wAntiSur;
+        reasonTag = `Fuga Rápida com ${u.name}`;
       }
 
-      // 4. OFFENSIVE PINCER / SURROUND TRAP SETUP (2-Turn Surround!)
+      // 4. OFFENSIVE PINCER SETUP
       if (!isStandingAttack && sim.enemyPinnedCount > 0) {
-        moveScore += 3000 * sim.enemyPinnedCount * wCombatAgg;
-        if (sim.enemyKOs.length === 0) {
-          reasonTag = `Armadilha de Pinça com ${u.name}`;
-        }
+        moveScore += 4500 * sim.enemyPinnedCount * wCombatAgg;
       }
 
-      // 5. GOAL POINT DEFENSE & FORTRESS FORMATION (`myGoalId = 3`, Inner Center `21`, Goal Flanks `2` & `4`)
-      const distToMyGoal  = NODE_BFS_DIST[nid][myGoalId];
+      // 5. FASTEST-WIN TURN METRIC (CALCULA A JOGADA PARA GANHAR NO MENOR TEMPO POSSÍVEL)
+      const turnsToWin = computeFastestTurnsToWin(u, nid);
+      if (nid === oppGoalId) {
+        moveScore += 250000; // Instant Victory!
+        reasonTag = `🏆 Vitória Imediata no Goal Point com ${u.name}!`;
+      } else if (turnsToWin === 1) {
+        moveScore += 88000 * wSpeedRush;
+        reasonTag = `⚡ Xeque Letal no Goal! (Vitória em 1 Turno com ${u.name})`;
+      } else if (turnsToWin === 2) {
+        moveScore += 48000 * wSpeedRush;
+        reasonTag = `🚀 Rota Direta de Xeque (2 Turnos com ${u.name})`;
+      } else if (turnsToWin === 3) {
+        moveScore += 26000 * wSpeedRush;
+      } else if (turnsToWin === 4) {
+        moveScore += 14000 * wSpeedRush;
+      }
+
+      // 6. EXPONENTIAL FORWARD GOAL PULL (PUXADA AGRESSIVA PARA O GOL ADVERSÁRIO)
       const distToOppGoal = NODE_BFS_DIST[nid][oppGoalId];
+      const goalPull = Math.pow(Math.max(0, 13 - distToOppGoal), 3.2) * 26 * wSpeedRush;
+      moveScore += goalPull;
 
-      // Never abandon `myGoalId` if enemies are within 4 steps!
-      if (u.location === "board" && u.nodeId === myGoalId && nid !== myGoalId && minEnemyStepsToMyGoal <= 4) {
-        moveScore -= 70000 * wGoalDef;
-      }
-
-      if (goalInDanger && !sim.enemyCanCaptureMyGoalNextTurn) {
-        if (nid === myGoalId && !myGoalOccupant) {
-          // Prefer high-damage / Blue-dodge guardian on the Goal Point!
-          const wList = getActiveWheel(u);
-          const maxD = wList.reduce((m, s) => Math.max(m, s.dmg || 0), 0);
-          moveScore += (28000 + maxD * 15) * wGoalDef;
-          reasonTag = `Guardião do Goal Point (${u.name})`;
-        } else if (nid === 21 || nid === 2 || nid === 4) {
-          moveScore += 9500 * wGoalDef;
-          reasonTag = `Escudo de Acesso ao Goal (${u.name})`;
-        }
-        // Body-blocking directly in front of the threatening enemy
-        threateningEnemies.forEach(te => {
-          if (NODE_BFS_DIST[nid][myGoalId] < NODE_BFS_DIST[te.nodeId][myGoalId] && NODE_BFS_DIST[nid][te.nodeId] === 1) {
-            moveScore += 8800 * wGoalDef;
-          }
-        });
-      } else if (!myGoalOccupant && (minEnemyStepsToMyGoal <= 4 || wGoalDef >= 1.4) && (nid === 21 || nid === myGoalId)) {
-        // Proactive Goal Sentry when player demonstrates goal rush playstyle!
-        moveScore += 3800 * wGoalDef;
-      }
-
-      // 6. ENTRY POINT ASPHYXIATION (`Nó 7` and `Nó 13`) & GOAL PRESSURE (`Nó 10`)
-      moveScore += (12 - distToOppGoal) * 185;
       if (distToOppGoal === 1) {
-        moveScore += 4800; // Threaten Check on Player's Goal Point (Nodes 9 or 11)!
-        reasonTag = `Xeque no Goal Inimigo com ${u.name}!`;
-      } else if (nid === 26) {
-        moveScore += 2600; // Key central choke point right above Player's Goal!
+        moveScore += 16000 * wSpeedRush;
+        reasonTag = `Ameaça Imediata ao Goal Inimigo com ${u.name}!`;
       }
 
+      // 7. ENTRY POINT LOCKDOWN (ASFIXIA TOTAL & WAIT WIN RÁPIDO)
       if (oppEntryIds.includes(nid)) {
         const otherEntry = oppEntryIds.find(id => id !== nid);
         const otherOcc = otherEntry !== undefined ? unitAtNode(otherEntry) : null;
         const otherTakenByAI = Boolean(otherOcc && otherOcc.owner === owner);
-        moveScore += (otherTakenByAI ? 16000 : 5400) * wEntryLk;
+        moveScore += (otherTakenByAI ? 95000 : 42000) * wEntryLk;
         reasonTag = otherTakenByAI
-          ? `Asfixia Dupla dos Entry Points (${u.name}) — Pressão de Wait Win!`
-          : `Tomada do Entry Point Inimigo com ${u.name}!`;
+          ? `🔒 Asfixia Dupla dos Entry Points (${u.name}) — Vitória por Wait-Win!`
+          : `⚡ Invasão do Entry Point Inimigo com ${u.name}!`;
       }
 
-      // Never leave our own Entry Point (`0` or `6`) sitting blocked by our own piece if bench units need to deploy
-      const myBenchCount = state.units.filter(x => x.owner === owner && x.location === "bench").length;
-      if (myEntryIds.includes(nid) && myBenchCount > 0 && !goalInDanger) {
-        moveScore -= 650;
+      // 8. MINIMAL SUFFICIENT GOAL DEFENSE (NÃO FICA ATRÁS PASSIVO)
+      const distToMyGoal = NODE_BFS_DIST[nid][myGoalId];
+      if (u.location === "board" && u.nodeId === myGoalId && nid !== myGoalId && minEnemyStepsToMyGoal <= 3) {
+        moveScore -= 80000; // Never abandon goal if enemy is closing in
       }
 
-      // 7. DEPLOYMENT CADENCE & LANE COUNTERING
-      if (getNodeLaneCategory(nid) === prefPlayerLane) {
-        moveScore += 450 * (tel.laneMoves[prefPlayerLane] >= 2 ? 1.6 : 1.1);
+      if (!myGoalDefended && goalInDanger && !sim.enemyCanCaptureMyGoalNextTurn) {
+        if (nid === myGoalId) {
+          moveScore += 35000 * wGoalDef;
+          reasonTag = `Defesa Urgente do Goal (${u.name})`;
+        } else if (distToMyGoal === 1) {
+          moveScore += 12000 * wGoalDef;
+        }
       }
+
+      // 9. OPENING BLITZ (PRIMEIROS TURNOS): RUSH TOTAL COM CORREDORES 3-MP
       if (u.location === "bench") {
         const myBoardCount = state.units.filter(x => x.owner === owner && x.location === "board").length;
-        if (myBoardCount < 4) moveScore += 920;
-        if (u.mp >= 3 && state.turnCounter >= 292) moveScore += 650;
+        if (myBoardCount < 3) moveScore += 1200;
+        if (u.mp >= 3 && state.turnCounter >= 288) {
+          moveScore += 16000 * wSpeedRush;
+          reasonTag = `Blitz de Abertura com ${u.name} (3 MP)`;
+        }
       }
 
-      // 8. EVALUATE COMBAT vs TACTICAL HOLD AT `nid`
+      // 10. EVALUATE COMBAT (BREAKTHROUGH ATTACKS VS TACTICAL HOLD)
       const adjEnemiesAtDest = [];
       (ADJ[nid] || []).forEach(adjId => {
         const occ = unitAtNode(adjId);
@@ -1502,12 +1533,105 @@ triggerPlayerAIMove = function() {
           };
         }
       } else {
-        // Option A: Move to `nid` and HOLD POSITION without attacking (crucial when setting up a Surround or blocking with a defender!)
-        if (!isStandingAttack) {
-          let holdScore = moveScore + 350;
-          if (sim.enemyPinnedCount > 0) holdScore += 1800 * wAntiSur; // Don't risk a bad spin when you just pinned the enemy for a Surround next turn!
-          if (nid === myGoalId) holdScore += 2500 * wGoalDef;         // Goal defender prefers holding the Goal if attack isn't guaranteed!
-          if (tel.playerAttacks >= 2) holdScore += 600;               // Counter-defense against over-aggressive player
+        // Combat vs Hold: Assess each enemy target
+        let bestTargetForThisMove = null;
+        let bestAtkScoreForThisMove = -9999999;
+
+        adjEnemiesAtDest.forEach(({ nodeId: enemyNid, unit: eu }) => {
+          const baseOdds = computeDuelDbOdds(u, eu);
+          const isGoalDefender = (eu.nodeId === oppGoalId);
+          const isEntryDefender = oppEntryIds.includes(eu.nodeId);
+          const isDirectBlocker = (NODE_BFS_DIST[eu.nodeId][oppGoalId] < distToOppGoal);
+
+          let chosenPlate = usingHurdlePlate ? hurdlePlate : null;
+          let effectiveWin = baseOdds.win;
+          let effectiveLoss = baseOdds.loss;
+
+          if (!usingHurdlePlate) {
+            const euWheel = getActiveWheel(eu);
+            const euPurpleRatio = euWheel.filter(w => w.color === "purple").reduce((s, w) => s + (w.size || 0), 0) / 96;
+
+            if (megaPlate && !u.megaTurns && (isGoalDefender || isEntryDefender || baseOdds.win < 70)) {
+              chosenPlate = megaPlate;
+              effectiveWin = Math.min(96, baseOdds.win + 24);
+              effectiveLoss = Math.max(2, baseOdds.loss - 16);
+            } else if (doublePlate && (isGoalDefender || isEntryDefender || (baseOdds.win >= 28 && baseOdds.win <= 78))) {
+              const pWin = baseOdds.win / 100;
+              effectiveWin = Math.round((pWin + (1 - pWin) * pWin) * 100);
+              effectiveLoss = Math.round((baseOdds.loss / 100) * (1 - pWin) * 100);
+              chosenPlate = doublePlate;
+            } else if (xSpdPlate && euPurpleRatio >= 0.22 && baseOdds.win < 75) {
+              chosenPlate = xSpdPlate;
+              effectiveWin = Math.min(95, baseOdds.win + 25);
+              effectiveLoss = Math.max(3, baseOdds.loss - 18);
+            } else if (xAtkPlate && (isGoalDefender || isEntryDefender || (baseOdds.win >= 35 && baseOdds.win <= 68))) {
+              chosenPlate = xAtkPlate;
+              effectiveWin = Math.min(94, baseOdds.win + 20);
+              effectiveLoss = Math.max(4, baseOdds.loss - 15);
+            }
+          }
+
+          const effectiveNet = effectiveWin - effectiveLoss;
+
+          // Never gamble away our own Goal defender with high loss chance
+          if (nid === myGoalId && effectiveLoss > 22) return;
+
+          // Highly aggressive thresholds for breakthrough:
+          // If attacking enemy on Goal Point: MUST ATTACK to win in minimum turns!
+          const shouldAttack = (
+            (isGoalDefender && effectiveWin >= 30) ||
+            (isEntryDefender && effectiveWin >= 38) ||
+            (isDirectBlocker && effectiveWin >= 42) ||
+            (effectiveNet >= -2 || effectiveWin >= 45)
+          );
+
+          if (shouldAttack) {
+            let atkScore = moveScore + (effectiveNet * 32 + effectiveWin * 24) * wCombatAgg;
+            if (isGoalDefender) {
+              atkScore += 70000 * wSpeedRush; // Knocking out the goal defender is game-winning!
+            } else if (isEntryDefender) {
+              atkScore += 32000 * wEntryLk;
+            } else if (isDirectBlocker) {
+              atkScore += 20000 * wSpeedRush;
+            }
+
+            if (atkScore > bestAtkScoreForThisMove) {
+              bestAtkScoreForThisMove = atkScore;
+              bestTargetForThisMove = {
+                enemyNid,
+                eu,
+                chosenPlate,
+                effectiveWin,
+                reason: isGoalDefender
+                  ? `⚔️ Assalto ao Goal Defender (${u.name} vs ${eu.name} · ${Math.round(effectiveWin)}% Win)`
+                  : `Ataque Decisivo (${u.name} vs ${eu.name} · ${Math.round(effectiveWin)}% Win)`
+              };
+            }
+          }
+        });
+
+        // If an attack was selected, compare attack vs hold
+        if (bestTargetForThisMove) {
+          if (bestAtkScoreForThisMove > bestScore) {
+            bestScore = bestAtkScoreForThisMove;
+            bestAction = {
+              type: isStandingAttack ? "standing_attack" : "move_attack",
+              uid: u.uid,
+              unitName: u.name,
+              nid,
+              segs: isStandingAttack ? [] : res.paths[nid],
+              holdNoAttack: false,
+              attackNode: bestTargetForThisMove.enemyNid,
+              enemyUnit: bestTargetForThisMove.eu,
+              plateToUse: bestTargetForThisMove.chosenPlate,
+              reasonTag: bestTargetForThisMove.reason
+            };
+          }
+        } else if (!isStandingAttack) {
+          // If no good attack odds, hold position to block or surround next turn
+          let holdScore = moveScore;
+          if (sim.enemyPinnedCount > 0) holdScore += 3000 * wAntiSur;
+          if (nid === myGoalId) holdScore += 4000 * wGoalDef;
           if (holdScore > bestScore) {
             bestScore = holdScore;
             bestAction = {
@@ -1519,81 +1643,10 @@ triggerPlayerAIMove = function() {
               holdNoAttack: true,
               attackNode: null,
               plateToUse: usingHurdlePlate ? hurdlePlate : null,
-              reasonTag: `${reasonTag} (Tranca Posicional)`
+              reasonTag: `${reasonTag} (Contenção Tática)`
             };
           }
         }
-
-        // Option B: Attack the most favorable adjacent enemy at `nid` (with smart Plate activation!)
-        adjEnemiesAtDest.forEach(({ nodeId: enemyNid, unit: eu }) => {
-          const baseOdds = computeDuelDbOdds(u, eu);
-          const netOdds  = baseOdds.win - baseOdds.loss;
-          const isCriticalTarget = (
-            eu.nodeId === myGoalId ||
-            myEntryIds.includes(eu.nodeId) ||
-            threateningEnemies.includes(eu) ||
-            eu.nodeId === oppGoalId ||
-            NODE_BFS_DIST[eu.nodeId][oppGoalId] <= 1
-          );
-
-          let chosenPlate = usingHurdlePlate ? hurdlePlate : null;
-          let effectiveWin = baseOdds.win;
-          let effectiveLoss = baseOdds.loss;
-
-          if (!usingHurdlePlate) {
-            const euWheel = getActiveWheel(eu);
-            const euPurpleRatio = euWheel.filter(w => w.color === "purple").reduce((s, w) => s + (w.size || 0), 0) / 96;
-
-            // Choose the best combat Plate if needed!
-            if (megaPlate && !u.megaTurns && isCriticalTarget && baseOdds.win < 72) {
-              chosenPlate = megaPlate;
-              effectiveWin = Math.min(96, baseOdds.win + 24);
-              effectiveLoss = Math.max(2, baseOdds.loss - 16);
-            } else if (xSpdPlate && euPurpleRatio >= 0.25 && baseOdds.win < 75) {
-              chosenPlate = xSpdPlate;
-              effectiveWin = Math.min(95, baseOdds.win + 25);
-              effectiveLoss = Math.max(3, baseOdds.loss - 18);
-            } else if (doublePlate && (isCriticalTarget || (baseOdds.win >= 35 && baseOdds.win <= 75))) {
-              // Double Chance boosts win probability from p to p + (1-p)*p!
-              const pWin = baseOdds.win / 100;
-              effectiveWin = Math.round((pWin + (1 - pWin) * pWin) * 100);
-              effectiveLoss = Math.round((baseOdds.loss / 100) * (1 - pWin) * 100);
-              chosenPlate = doublePlate;
-            } else if (xAtkPlate && (isCriticalTarget || (netOdds >= -15 && netOdds <= 30))) {
-              chosenPlate = xAtkPlate;
-              effectiveWin = Math.min(94, baseOdds.win + 20);
-              effectiveLoss = Math.max(4, baseOdds.loss - 15);
-            }
-          }
-
-          const effectiveNet = effectiveWin - effectiveLoss;
-
-          // Never gamble away our Goal Defender on `myGoalId` if loss chance > 18%!
-          if (nid === myGoalId && effectiveLoss > 18) return;
-          // If this move already pinned the enemy for a guaranteed Surround KO next turn, only attack if effectiveWin >= 68%!
-          if (!isStandingAttack && sim.enemyPinnedCount > 0 && effectiveWin < 68 && !isCriticalTarget) return;
-
-          if (effectiveNet >= 6 || (isCriticalTarget && effectiveWin >= 40)) {
-            let atkScore = moveScore + (effectiveNet * 28 + effectiveWin * 14) * wCombatAgg;
-            if (isCriticalTarget) atkScore += 5200 * wGoalDef;
-            if (eu.nodeId === oppGoalId && effectiveWin >= 42) atkScore += 14000; // Attack the enemy Goal Defender to clear the Goal!
-            if (atkScore > bestScore) {
-              bestScore = atkScore;
-              bestAction = {
-                type: isStandingAttack ? "standing_attack" : "move_attack",
-                uid: u.uid,
-                unitName: u.name,
-                nid,
-                segs: isStandingAttack ? [] : res.paths[nid],
-                holdNoAttack: false,
-                attackNode: enemyNid,
-                enemyUnit: eu,
-                plateToUse: chosenPlate,
-                reasonTag: `Ataque Calculado (${u.name} vs ${eu.name} · ${Math.round(effectiveWin)}% Win)`
-              };
-            }
-          }
-        });
       }
     });
   }
