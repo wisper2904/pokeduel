@@ -31,25 +31,26 @@ function getActiveWheel(unit) {
     };
   });
 
-  // Section 2.5: Z-Move 7.0 Active Wheel Slices
-  if (state.zMoveArmed && (state.turn === unit.owner || (unit.owner === 'p2' && (state.zGaugeP2 || 0) >= 100))) {
+  // Section 2.5: Z-Move 7.0 Whole-Wheel Transformation (100% Whole Wheel becomes Z-Move!)
+  const isZMoveForThisUnit = Boolean(
+    state.zMoveArmed && (
+      (unit.owner === "p1" && state.turn === "p1" && !state.zMoveUsedP1) ||
+      (unit.owner === "p2" && !state.zMoveUsedP2 && (state.zGaugeP2 || 0) >= 100)
+    )
+  );
+
+  if (isZMoveForThisUnit) {
     const zm = typeof getFigureZMove === "function" ? getFigureZMove(unit) : null;
     if (zm) {
-      let maxIdx = 0, maxSz = -1;
-      segs.forEach((s, i) => {
-        if (s.color !== "red" && s.size > maxSz) { maxSz = s.size; maxIdx = i; }
-      });
-      if (segs[maxIdx]) {
-        segs[maxIdx] = {
-          ...segs[maxIdx],
-          name: "⚡ " + zm.name,
-          color: zm.color,
-          dmg: zm.dmg,
-          stars: zm.stars,
-          effect: zm.effect,
-          isZMove: true
-        };
-      }
+      return [{
+        name: "⚡ " + zm.name,
+        color: zm.color,
+        dmg: zm.dmg || 0,
+        stars: zm.stars || (zm.color === "purple" ? 4 : 0),
+        effect: zm.effect,
+        size: 96,
+        isZMove: true
+      }];
     }
   }
 
@@ -360,6 +361,135 @@ function drawAuthenticDataDisk(dctx, cx, cy, radius, segs, rotAngle, highlightId
     red:    ["#fca5a5", "#dc2626"]
   };
 
+  // Section 2.6: Whole-Wheel Z-Move Transformation Rendering (100% Solid Wheel with Sunburst Rays & Crest)
+  const isWholeWheelZMove = segs.length === 1 && (segs[0].isZMove || (typeof segs[0].name === "string" && segs[0].name.startsWith("⚡ ")));
+  if (isWholeWheelZMove) {
+    const s = segs[0];
+    const cols = sliceColors[s.color] || sliceColors.purple;
+
+    // 1. Draw 360-degree Solid Attack Base (Purple / Gold / White / etc.)
+    dctx.beginPath();
+    dctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    const sGrad = dctx.createRadialGradient(cx, cy, radius * 0.15, cx, cy, radius);
+    sGrad.addColorStop(0, cols[0]);
+    sGrad.addColorStop(1, cols[1]);
+    dctx.fillStyle = sGrad;
+    dctx.fill();
+    dctx.strokeStyle = "#090d16";
+    dctx.lineWidth = 2.0;
+    dctx.stroke();
+
+    // 2. Rotating Sunburst Cosmic Rays (Spin with rotAngle)
+    dctx.save();
+    dctx.translate(cx, cy);
+    dctx.rotate(rotAngle);
+    const numRays = 16;
+    for (let r = 0; r < numRays; r++) {
+      const rayA = (r / numRays) * Math.PI * 2;
+      dctx.beginPath();
+      dctx.moveTo(0, 0);
+      dctx.arc(0, 0, radius - 1, rayA - 0.09, rayA + 0.09);
+      dctx.closePath();
+      dctx.fillStyle = (r % 2 === 0) ? "rgba(255, 255, 255, 0.22)" : "rgba(0, 0, 0, 0.14)";
+      dctx.fill();
+    }
+    // Subtle inner energy ring
+    dctx.beginPath();
+    dctx.arc(0, 0, radius * 0.88, 0, Math.PI * 2);
+    dctx.strokeStyle = (s.color === "purple") ? "rgba(232, 121, 249, 0.7)" : "rgba(254, 240, 138, 0.7)";
+    dctx.lineWidth = 2.2;
+    dctx.stroke();
+    dctx.restore();
+
+    // 3. Move Name & Stars / Damage positioned at midA (which lines up with pointer when stopped!)
+    const midA = -Math.PI / 2 + rotAngle + Math.PI;
+    const tx = cx + Math.cos(midA) * (radius * 0.58);
+    const ty = cy + Math.sin(midA) * (radius * 0.58);
+
+    dctx.save();
+    dctx.translate(tx, ty);
+    // Align text angle with pointer for crisp legibility
+    dctx.rotate(midA + Math.PI / 2);
+
+    const darkText = (s.color === "white" || s.color === "gold");
+    dctx.textAlign = "center";
+    dctx.textBaseline = "middle";
+
+    const locName = (typeof localizeMove === "function") ? localizeMove(s.name) : s.name;
+    const cleanName = locName.replace(/^⚡\s*/, "");
+
+    // Main Value: Stars if purple, DMG if white/gold
+    if (s.color === "purple") {
+      dctx.fillStyle = "#ffffff";
+      dctx.shadowColor = "#f0abfc";
+      dctx.shadowBlur = 10;
+      const starCount = s.stars || 4;
+      dctx.font = `900 ${radius > 75 ? 20 : 13}px sans-serif`;
+      dctx.fillText("★".repeat(starCount), 0, radius > 75 ? -8 : -5);
+    } else {
+      dctx.fillStyle = darkText ? "#090d16" : "#ffffff";
+      dctx.shadowColor = darkText ? "#fef08a" : "#facc15";
+      dctx.shadowBlur = 10;
+      dctx.font = `900 ${radius > 75 ? 22 : 14}px sans-serif`;
+      dctx.fillText(String(s.dmg || 200), 0, radius > 75 ? -8 : -5);
+    }
+
+    // Move Title
+    dctx.shadowBlur = 4;
+    dctx.shadowColor = darkText ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.85)";
+    dctx.fillStyle = darkText ? "#090d16" : "#ffffff";
+    dctx.font = `900 ${radius > 75 ? 10 : 7.5}px sans-serif`;
+    dctx.fillText("⚡ " + cleanName.toUpperCase().slice(0, 18), 0, radius > 75 ? 8 : 5);
+
+    dctx.restore();
+
+    // 4. Glow outer border when stopped / highlighted
+    if (highlightIdx >= 0) {
+      dctx.save();
+      dctx.beginPath();
+      dctx.arc(cx, cy, radius + 1, 0, Math.PI * 2);
+      dctx.strokeStyle = (s.color === "purple") ? "#c084fc" : "#facc15";
+      dctx.lineWidth = 4.5;
+      dctx.shadowColor = (s.color === "purple") ? "#c084fc" : "#facc15";
+      dctx.shadowBlur = 18;
+      dctx.stroke();
+      dctx.restore();
+    }
+
+    // 5. Center Hub Cap with ⚡ Crest
+    dctx.beginPath(); dctx.arc(cx, cy, radius * 0.22, 0, Math.PI * 2);
+    dctx.fillStyle = "#0f172a"; dctx.fill();
+    dctx.strokeStyle = (s.color === "purple") ? "#c084fc" : (borderCol || "#38bdf8"); dctx.lineWidth = 2.8; dctx.stroke();
+    dctx.beginPath(); dctx.arc(cx, cy, radius * 0.12, 0, Math.PI * 2);
+    dctx.fillStyle = (s.color === "purple") ? "#9333ea" : "#ca8a04"; dctx.fill();
+    dctx.fillStyle = "#ffffff";
+    dctx.font = `900 ${radius > 75 ? 12 : 8.5}px sans-serif`;
+    dctx.textAlign = "center";
+    dctx.textBaseline = "middle";
+    dctx.fillText("⚡", cx, cy);
+
+    // 6. SINGLE UNAMBIGUOUS PIN (if showTopPin or customPinAngle)
+    if (showTopPin || customPinAngle !== null) {
+      const pAng = (customPinAngle !== null) ? customPinAngle : -Math.PI / 2;
+      const px = cx + Math.cos(pAng) * (radius + 5);
+      const py = cy + Math.sin(pAng) * (radius + 5);
+      dctx.save();
+      dctx.translate(px, py);
+      dctx.rotate(pAng + Math.PI / 2 + (needleWobble || 0));
+      dctx.beginPath();
+      dctx.moveTo(0, 14);
+      dctx.lineTo(-8, -6);
+      dctx.lineTo(8, -6);
+      dctx.closePath();
+      dctx.fillStyle = "#facc15"; dctx.fill();
+      dctx.strokeStyle = "#090d16"; dctx.lineWidth = 2; dctx.stroke();
+      dctx.restore();
+    }
+
+    dctx.restore();
+    return;
+  }
+
   // First draw all slices
   segs.forEach((s, idx) => {
     const slice = (s.size / total) * Math.PI * 2;
@@ -546,30 +676,48 @@ window.SIGNATURE_Z_MOVES = SIGNATURE_Z_MOVES;
 window.getFigureZMove = getFigureZMove;
 
 function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
+  // Check if Bot (owner === 'p2') should auto-trigger Z-Move when charged (1x per match limit)!
+  if (atkUnit.owner === "p2" && !state.zMoveUsedP2 && (state.zGaugeP2 || 0) >= 100) {
+    state.zMoveArmed = true;
+  }
+
   const hasManualSpin = forcedSpins && forcedSpins.manualSpin;
   let atkSpin = (forcedSpins && forcedSpins.atkSpin) ? forcedSpins.atkSpin : spinWheelForUnit(atkUnit, true);
   let defSpin = (forcedSpins && forcedSpins.defSpin) ? forcedSpins.defSpin : spinWheelForUnit(defUnit, false);
 
-  // Check if Bot (owner === 'p2') should auto-trigger Z-Move when charged!
-  if (atkUnit.owner === "p2" && (state.zGaugeP2 || 0) >= 100) {
-    state.zMoveArmed = true;
-  }
-
   // Z-Move 7.0 Resolution: Unleash Z-Power and break defender's Blue defense slices into Miss!
-  const isZMove = Boolean(state.zMoveArmed && (atkUnit.owner === state.turn || atkUnit.owner === "p2"));
+  const isZMove = Boolean(
+    state.zMoveArmed && (
+      (atkUnit.owner === "p1" && state.turn === "p1" && !state.zMoveUsedP1) ||
+      (atkUnit.owner === "p2" && !state.zMoveUsedP2)
+    )
+  );
   if (isZMove) {
     state.zMoveArmed = false;
-    if (atkUnit.owner === "p1") state.zGaugeP1 = 0; else state.zGaugeP2 = 0;
+    if (atkUnit.owner === "p1") {
+      state.zMoveUsedP1 = true;
+      state.zGaugeP1 = 0;
+    } else {
+      state.zMoveUsedP2 = true;
+      state.zGaugeP2 = 0;
+    }
     const zData = getFigureZMove(atkUnit);
-    atkSpin.chosen = {
+    const zMoveSlice = {
       name: "⚡ " + zData.name,
       color: zData.color,
-      dmg: zData.dmg,
-      stars: zData.stars,
+      dmg: zData.dmg || 0,
+      stars: zData.stars || (zData.color === "purple" ? 4 : 0),
       effect: zData.effect,
       size: 96,
       isZMove: true
     };
+    atkSpin.segs = [zMoveSlice];
+    atkSpin.chosen = zMoveSlice;
+    atkSpin.chosenIdx = 0;
+    if (atkSpin.spinSteps && atkSpin.spinSteps[0]) {
+      atkSpin.spinSteps[0].idx = 0;
+      atkSpin.spinSteps[0].landedName = zMoveSlice.name;
+    }
     // Z-Break mechanic: Z-Move breaks defender's Blue defense slices into Miss!
     defSpin.segs.forEach(s => {
       if (s.color === "blue") {
@@ -585,13 +733,15 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     setLogText(`⚡ Z-MOVE: [${zData.name}] ativado por ${atkUnit.name}! Quebrou Blue do defensor em Miss!`);
     const zb = document.getElementById("zmove-combat-banner");
     if (zb) {
-      zb.innerHTML = `⚡ Z-MOVE: <strong>${zData.name.toUpperCase()}</strong> (${zData.dmg > 0 ? zData.dmg + ' DANO' : '★' + zData.stars + ' PURPLE'} · Z-BREAK BLUE)!`;
+      zb.innerHTML = `⚡ Z-MOVE: <strong>${zData.name.toUpperCase()}</strong> (${zData.dmg > 0 ? zData.dmg + ' DANO' : '★' + (zData.stars || 4) + ' PURPLE'} · Z-BREAK BLUE)!`;
       zb.style.display = "block";
       setTimeout(() => { if (zb) zb.style.display = "none"; }, 3000);
     }
   } else {
-    state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 15);
-    state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 15);
+    if (!state.zMoveUsedP1) state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 15);
+    else state.zGaugeP1 = 0;
+    if (!state.zMoveUsedP2) state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 15);
+    else state.zGaugeP2 = 0;
   }
 
   const antiRespinOnField = state.units.some(u => u.location === "board" && (u.baseId === "dialga_o" || u.baseId === "metagross"));
@@ -1425,8 +1575,10 @@ function applyExplicitTurn(nextTurn, nextCounter) {
   state.abilityJumpActive = false;
   state.activePlate = null;
   state.pendingPlateAction = null;
-  state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 10);
-  state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 10);
+  if (!state.zMoveUsedP1) state.zGaugeP1 = Math.min(100, (state.zGaugeP1 || 0) + 10);
+  else state.zGaugeP1 = 0;
+  if (!state.zMoveUsedP2) state.zGaugeP2 = Math.min(100, (state.zGaugeP2 || 0) + 10);
+  else state.zGaugeP2 = 0;
   state.zMoveArmed = false;
   state.turn = nextTurn;
   if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();

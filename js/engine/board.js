@@ -266,6 +266,9 @@ let state = {
   zGaugeP1: 50,
   zGaugeP2: 50,
   zMoveArmed: false,
+  zMoveUsedP1: false,
+  zMoveUsedP2: false,
+  zMoveActivationAnim: null,
   doubleChanceArmed: false,
   doubleChanceWaitingChoice: false,
   excludedP1: [],
@@ -418,6 +421,9 @@ function demoFullMatchState() {
   state.zGaugeP1 = 50;
   state.zGaugeP2 = 50;
   state.zMoveArmed = false;
+  state.zMoveUsedP1 = false;
+  state.zMoveUsedP2 = false;
+  state.zMoveActivationAnim = null;
   state.doubleChanceArmed = false;
   state.doubleChanceWaitingChoice = false;
   state.clockMsP1 = 300000;
@@ -488,16 +494,25 @@ function togglePlatesTray(force) {
 }
 
 function toggleZMoveFromTray() {
+  if (state.zMoveUsedP1) {
+    playSfx("hit");
+    setLogText("⚠️ Z-Move já foi utilizado nesta partida! (Limite: 1x por duelo).");
+    return;
+  }
   const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
   if (zPct < 100) {
     playSfx("tick");
-    setLogText(`⚡ Z-Power em ${zPct}%! Carrega a cada turno (+10%) e combate (+15%). Ativa aos 100%!`);
+    setLogText(`⚡ Z-Power em ${zPct}%! Carrega a cada turno (+10%) e combate (+15%). Ativa aos 100% (1x por duelo)!`);
     return;
   }
   state.zMoveArmed = !state.zMoveArmed;
   if (state.zMoveArmed) {
     playSfx("portal");
-    setLogText("⚡ Z-POWER ARMADO! O próximo ataque liberará 180~220 de Dano e quebrará Blue em Miss!");
+    state.zMoveActivationAnim = { t0: performance.now() };
+    if (typeof spawnPortalParticles === "function") {
+      spawnPortalParticles(279, 510, "#facc15");
+    }
+    setLogText("⚡ Z-POWER ATIVADO! A roleta inteira (100%) será convertida no Z-Move (1x por duelo)!");
   } else {
     playSfx("tick");
     setLogText("Z-Move desarmado.");
@@ -528,10 +543,15 @@ function renderPlatesTray() {
   if (cBdg)  cBdg.textContent = curP.badge || "+20";
   if (cName) cName.textContent = curPlateName;
   if (cDesc) {
-    const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
-    const zNotice = zPct >= 100 
-      ? `<div style="margin-top:6px; padding:4px 6px; background:${state.zMoveArmed ? '#ca8a04' : '#1e1b4b'}; border:1px solid #facc15; border-radius:4px; color:${state.zMoveArmed ? '#090d16' : '#facc15'}; font-weight:900; font-size:8.5px; cursor:pointer;" onclick="toggleZMoveFromTray(); event.stopPropagation();">⚡ Z-MOVE 100%: ${state.zMoveArmed ? 'ARMADO (200 DMG)!' : 'TOQUE PARA ATIVAR!'}</div>`
-      : `<div style="margin-top:4px; font-size:7.5px; color:#94a3b8;">⚡ Z-Power Gauge: ${zPct}% / 100%</div>`;
+    let zNotice = "";
+    if (state.zMoveUsedP1) {
+      zNotice = `<div style="margin-top:6px; padding:4px 6px; background:#0f172a; border:1px solid #334155; border-radius:4px; color:#64748b; font-size:8px; font-weight:700;">⚡ Z-Power: Utilizado nesta partida (0/1)</div>`;
+    } else {
+      const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
+      zNotice = zPct >= 100 
+        ? `<div style="margin-top:6px; padding:4px 6px; background:${state.zMoveArmed ? '#ca8a04' : '#1e1b4b'}; border:1px solid #facc15; border-radius:4px; color:${state.zMoveArmed ? '#090d16' : '#facc15'}; font-weight:900; font-size:8.5px; cursor:pointer;" onclick="toggleZMoveFromTray(); event.stopPropagation();">⚡ Z-MOVE 100%: ${state.zMoveArmed ? 'ARMADO (ROLETA TOTAL)!' : 'TOQUE PARA ATIVAR (1x)!'}</div>`
+        : `<div style="margin-top:4px; font-size:7.5px; color:#94a3b8;">⚡ Z-Power Gauge: ${zPct}% / 100% (1x por duelo)</div>`;
+    }
     cDesc.innerHTML = `${curPlateDesc}${zNotice}`;
   }
   if (uBtn) {
@@ -1750,71 +1770,87 @@ function drawHDVectorBoardAndChrome() {
   drawBotBtn(16, 497, 72, 26, forfeitLbl, false, false);
   drawBotBtn(94, 497, 114, 26, `${platesWord} (${unUsedPlates})`, true, unUsedPlates > 0);
 
-  // Draw Z-Move 7.0 Button (x: 214, y: 497, w: 130, h: 26)
-  const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
-  const isZReady = zPct >= 100;
-  const isZArmed = Boolean(state.zMoveArmed);
-
+  // Draw Z-Move 7.0 Button (x: 214, y: 497, w: 130, h: 26) - Strictly 1x Per Match!
   ctx.save();
-  const zg = ctx.createLinearGradient(214, 497, 214, 523);
-  if (isZArmed) {
-    zg.addColorStop(0, "#ca8a04"); zg.addColorStop(0.5, "#eab308"); zg.addColorStop(1, "#a16207");
-  } else if (isZReady) {
-    zg.addColorStop(0, "#854d0e"); zg.addColorStop(0.5, "#422006"); zg.addColorStop(1, "#1c1917");
-  } else {
-    zg.addColorStop(0, "#1e2631"); zg.addColorStop(0.5, "#121820"); zg.addColorStop(1, "#0a0e14");
-  }
-  ctx.fillStyle = zg;
-  ctx.beginPath();
-  ctx.roundRect(214, 497, 130, 26, 3.5);
-  ctx.fill();
-
-  if (!isZArmed && !isZReady && zPct > 0) {
-    const fillW = Math.max(0, 128 * (zPct / 100));
-    const fillG = ctx.createLinearGradient(215, 497, 215 + fillW, 497);
-    fillG.addColorStop(0, "rgba(234, 179, 8, 0.15)");
-    fillG.addColorStop(1, "rgba(250, 204, 21, 0.45)");
-    ctx.fillStyle = fillG;
+  if (state.zMoveUsedP1) {
+    ctx.fillStyle = "#0c111a";
     ctx.beginPath();
-    ctx.roundRect(215, 498, fillW, 24, 2.5);
+    ctx.roundRect(214, 497, 130, 26, 3.5);
     ctx.fill();
-  }
-
-  if (isZArmed) {
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 1.8;
-    ctx.shadowColor = "#facc15";
-    ctx.shadowBlur = 10;
-  } else if (isZReady) {
-    const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
-    ctx.strokeStyle = `rgba(250, 204, 21, ${0.7 + 0.3 * pulse})`;
-    ctx.lineWidth = 1.6;
-    ctx.shadowColor = "#facc15";
-    ctx.shadowBlur = 8 * pulse;
-  } else {
-    ctx.strokeStyle = "#475569";
+    ctx.strokeStyle = "#334155";
     ctx.lineWidth = 1.2;
-    ctx.shadowBlur = 0;
-  }
-  ctx.stroke();
-
-  ctx.shadowBlur = 0;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  if (isZArmed) {
-    ctx.fillStyle = "#090d16";
-    ctx.font = "900 10px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText("⚡ Z-ARMED! 🔥", 279, 510);
-  } else if (isZReady) {
-    ctx.fillStyle = "#fef08a";
-    ctx.font = "900 10px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText("⚡ Z-MOVE (100%)", 279, 510);
+    ctx.stroke();
+    ctx.fillStyle = "#64748b";
+    ctx.font = "700 9px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("⚡ Z-POWER (0/1 USADO)", 279, 510);
+    ctx.restore();
   } else {
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "700 9.5px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(`⚡ Z-Power (${zPct}%)`, 279, 510);
+    const zPct = Math.min(100, Math.max(0, state.zGaugeP1 || 0));
+    const isZReady = zPct >= 100;
+    const isZArmed = Boolean(state.zMoveArmed);
+
+    const zg = ctx.createLinearGradient(214, 497, 214, 523);
+    if (isZArmed) {
+      zg.addColorStop(0, "#ca8a04"); zg.addColorStop(0.5, "#eab308"); zg.addColorStop(1, "#a16207");
+    } else if (isZReady) {
+      zg.addColorStop(0, "#854d0e"); zg.addColorStop(0.5, "#422006"); zg.addColorStop(1, "#1c1917");
+    } else {
+      zg.addColorStop(0, "#1e2631"); zg.addColorStop(0.5, "#121820"); zg.addColorStop(1, "#0a0e14");
+    }
+    ctx.fillStyle = zg;
+    ctx.beginPath();
+    ctx.roundRect(214, 497, 130, 26, 3.5);
+    ctx.fill();
+
+    if (!isZArmed && !isZReady && zPct > 0) {
+      const fillW = Math.max(0, 128 * (zPct / 100));
+      const fillG = ctx.createLinearGradient(215, 497, 215 + fillW, 497);
+      fillG.addColorStop(0, "rgba(234, 179, 8, 0.15)");
+      fillG.addColorStop(1, "rgba(250, 204, 21, 0.45)");
+      ctx.fillStyle = fillG;
+      ctx.beginPath();
+      ctx.roundRect(215, 498, fillW, 24, 2.5);
+      ctx.fill();
+    }
+
+    if (isZArmed) {
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = "#facc15";
+      ctx.shadowBlur = 10;
+    } else if (isZReady) {
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
+      ctx.strokeStyle = `rgba(250, 204, 21, ${0.7 + 0.3 * pulse})`;
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = "#facc15";
+      ctx.shadowBlur = 8 * pulse;
+    } else {
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 1.2;
+      ctx.shadowBlur = 0;
+    }
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    if (isZArmed) {
+      ctx.fillStyle = "#090d16";
+      ctx.font = "900 10px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("⚡ Z-ARMED! 🔥", 279, 510);
+    } else if (isZReady) {
+      ctx.fillStyle = "#fef08a";
+      ctx.font = "900 10px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText("⚡ Z-MOVE (100%)", 279, 510);
+    } else {
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "700 9.5px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.fillText(`⚡ Z-Power (${zPct}%)`, 279, 510);
+    }
+    ctx.restore();
   }
-  ctx.restore();
 
   ctx.restore();
 }
@@ -2238,6 +2274,60 @@ function drawVideoMatchOverlays() {
       ctx.fillStyle = "#ffffff"; ctx.font = "900 13px sans-serif";
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.fillText(isMy ? "My turn" : "Opponent turn", 176.5, 67);
+      ctx.restore();
+    }
+  }
+
+  // 1.5. Z-Power Awakening Shockwave & Cosmic Crystal Animation (v7.0.0)
+  if (state.zMoveActivationAnim) {
+    const elapsed = now - state.zMoveActivationAnim.t0;
+    const dur = 1400;
+    if (elapsed >= dur) {
+      state.zMoveActivationAnim = null;
+    } else {
+      const p = elapsed / dur;
+      ctx.save();
+      // Expanding golden ring from button position
+      const ringRadius = p * 420;
+      ctx.strokeStyle = `rgba(250, 204, 21, ${Math.max(0, 1 - p)})`;
+      ctx.lineWidth = 4.0 * (1 - p * 0.6);
+      ctx.beginPath();
+      ctx.arc(279, 510, ringRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Cosmic Z-Crystal energy banner in center of board
+      const alpha = p < 0.18 ? (p / 0.18) : (p > 0.72 ? Math.max(0, 1 - (p - 0.72) / 0.28) : 1);
+      const scale = p < 0.18 ? (0.75 + 0.25 * (p / 0.18)) : 1;
+      ctx.save();
+      ctx.translate(176.5, 265);
+      ctx.scale(scale, scale);
+      ctx.globalAlpha = alpha;
+
+      const bgG = ctx.createLinearGradient(-155, -28, 155, 28);
+      bgG.addColorStop(0, "rgba(234, 88, 12, 0.96)");
+      bgG.addColorStop(0.5, "rgba(250, 204, 21, 0.98)");
+      bgG.addColorStop(1, "rgba(234, 88, 12, 0.96)");
+      ctx.fillStyle = bgG;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = "#facc15";
+      ctx.shadowBlur = 22;
+      ctx.beginPath();
+      ctx.roundRect(-155, -26, 310, 52, 9);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#090d16";
+      ctx.font = "900 13px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("⚡ Z-POWER ATIVADO! (1x POR DUELO)", 0, -6);
+      ctx.fillStyle = "#1e1b4b";
+      ctx.font = "800 9px sans-serif";
+      ctx.fillText("ROLETA 100% CONVERTIDA NO Z-MOVE!", 0, 13);
+      ctx.restore();
+
       ctx.restore();
     }
   }
@@ -3208,9 +3298,34 @@ function drawCornerMiniDisk(canvasEl, segs) {
   const cx = w / 2, cy = h / 2, r = (w / 2) - 4;
   ctx.clearRect(0, 0, w, h);
 
+  const colMap = { white: "#f8fafc", gold: "#facc15", purple: "#c084fc", blue: "#38bdf8", red: "#ef4444" };
+
+  if (segs.length === 1 && (segs[0].isZMove || (typeof segs[0].name === "string" && segs[0].name.startsWith("⚡ ")))) {
+    const s = segs[0];
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
+    ctx.fillStyle = "#090d16"; ctx.fill();
+    ctx.strokeStyle = (s.color === "purple") ? "#c084fc" : "#facc15"; ctx.lineWidth = 2.0; ctx.stroke();
+
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = colMap[s.color] || "#fff"; ctx.fill();
+    ctx.strokeStyle = "#090d16"; ctx.lineWidth = 1.2; ctx.stroke();
+
+    const darkText = (s.color === "white" || s.color === "gold");
+    ctx.fillStyle = darkText ? "#090d16" : "#ffffff";
+    ctx.font = "900 13px sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if (s.color === "purple") {
+      ctx.fillText("★★★★", cx, cy);
+    } else {
+      ctx.fillText(String(s.dmg || 200), cx, cy);
+    }
+    ctx.restore();
+    return;
+  }
+
   const total = segs.reduce((a, s) => a + s.size, 0) || 96;
   let ang = -Math.PI / 2;
-  const colMap = { white: "#f8fafc", gold: "#facc15", purple: "#c084fc", blue: "#38bdf8", red: "#ef4444" };
 
   ctx.save();
   // Outer ring
