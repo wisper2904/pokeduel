@@ -3012,8 +3012,150 @@ function isFigureUnlocked(figIdx) {
   return playerProgression.unlockedFigures.includes(figIdx);
 }
 
+// ============================================================================
+// DECK BALANCE RULES (MAX 1 MEGA · 1 UX · 2 EX) & MULTI-UNIT QUANTITY ENGINE
+// ============================================================================
+const MAX_DECK_MEGAS = 1;
+const MAX_DECK_UX    = 1;
+const MAX_DECK_EX    = 2;
+
+function ensureFigureCopiesMap() {
+  if (!playerProgression.figureCopies || typeof playerProgression.figureCopies !== "object") {
+    playerProgression.figureCopies = {};
+  }
+  if (Array.isArray(playerProgression.unlockedFigures)) {
+    playerProgression.unlockedFigures.forEach(idx => {
+      const cur = parseInt(playerProgression.figureCopies[idx], 10);
+      if (!cur || cur < 1) playerProgression.figureCopies[idx] = 1;
+    });
+  }
+}
+
+function getOwnedFigureUnits(figIdx) {
+  if (!isFigureUnlocked(figIdx)) return 0;
+  ensureFigureCopiesMap();
+  return Math.max(1, parseInt(playerProgression.figureCopies[figIdx], 10) || 1);
+}
+
+function getEquippedFigureCount(figIdx, deckArr) {
+  const arr = Array.isArray(deckArr) ? deckArr : (state.deckP1 || []);
+  let cnt = 0;
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === figIdx) cnt++;
+  }
+  return cnt;
+}
+
+function isMegaPokemonFigure(f) {
+  if (!f) return false;
+  const nm = String(f.name || "");
+  const id = String(f.id || "");
+  return Boolean(
+    nm.startsWith("Mega ") ||
+    nm.startsWith("Primal ") ||
+    id.startsWith("mega") ||
+    id.startsWith("primal_") ||
+    (f.megaTurns && f.megaTurns > 0)
+  );
+}
+
+function getFigureDeckCategory(f) {
+  if (!f) return "STANDARD";
+  if (isMegaPokemonFigure(f)) return "MEGA";
+  if (f.rarity === "UX") return "UX";
+  if (f.rarity === "EX") return "EX";
+  return "STANDARD";
+}
+
+function countDeckBalanceStats(deckIndices) {
+  const arr = Array.isArray(deckIndices) ? deckIndices : [];
+  let megas = 0;
+  let uxs = 0;
+  let exs = 0;
+  let standards = 0;
+  for (let i = 0; i < arr.length; i++) {
+    const f = FIGURES_DB[arr[i] % FIGURES_DB.length] || FIGURES_DB[0];
+    const cat = getFigureDeckCategory(f);
+    if (cat === "MEGA") megas++;
+    else if (cat === "UX") uxs++;
+    else if (cat === "EX") exs++;
+    else standards++;
+  }
+  return {
+    megas,
+    uxs,
+    exs,
+    standards,
+    valid: (megas <= MAX_DECK_MEGAS && uxs <= MAX_DECK_UX && exs <= MAX_DECK_EX)
+  };
+}
+
+function sanitizeTeamSlotsForBalance(slots) {
+  ensureFigureCopiesMap();
+  const fallbackPool = [2, 3, 4, 6, 1, 0]; // Squirtle (UC), Bulbasaur (UC), Eevee (UC), Charmander (UC), Pikachu (EX), Charizard (EX)
+  let megas = 0;
+  let uxs = 0;
+  let exs = 0;
+  const usedCopies = {};
+
+  for (let i = 0; i < 6; i++) {
+    let idx = slots[i];
+    if (typeof idx !== "number" || idx < 0 || idx >= FIGURES_DB.length || !isFigureUnlocked(idx)) {
+      idx = STARTER_TEAM_INDICES[i % STARTER_TEAM_INDICES.length];
+    }
+    const f = FIGURES_DB[idx] || FIGURES_DB[0];
+    const cat = getFigureDeckCategory(f);
+    const owned = getOwnedFigureUnits(idx);
+    const curUsed = usedCopies[idx] || 0;
+
+    let violates = false;
+    if (curUsed + 1 > owned) violates = true;
+    if (cat === "MEGA" && megas + 1 > MAX_DECK_MEGAS) violates = true;
+    if (cat === "UX" && uxs + 1 > MAX_DECK_UX) violates = true;
+    if (cat === "EX" && exs + 1 > MAX_DECK_EX) violates = true;
+
+    if (violates) {
+      // Pick an unlocked figure that respects rarity caps & unit counts, or grant +1 unit of a UC starter if needed
+      let replacement = -1;
+      for (const cand of playerProgression.unlockedFigures) {
+        const cf = FIGURES_DB[cand];
+        if (!cf) continue;
+        const cCat = getFigureDeckCategory(cf);
+        if (cCat === "MEGA" && megas + 1 > MAX_DECK_MEGAS) continue;
+        if (cCat === "UX" && uxs + 1 > MAX_DECK_UX) continue;
+        if (cCat === "EX" && exs + 1 > MAX_DECK_EX) continue;
+        if ((usedCopies[cand] || 0) + 1 <= getOwnedFigureUnits(cand)) {
+          replacement = cand;
+          break;
+        }
+      }
+      if (replacement === -1) {
+        const ucStarter = fallbackPool[i % 4]; // 2, 3, 4, 6 are all UC
+        if (!isFigureUnlocked(ucStarter)) playerProgression.unlockedFigures.push(ucStarter);
+        playerProgression.figureCopies[ucStarter] = Math.max(getOwnedFigureUnits(ucStarter), (usedCopies[ucStarter] || 0) + 1);
+        replacement = ucStarter;
+      }
+      idx = replacement;
+    }
+
+    slots[i] = idx;
+    usedCopies[idx] = (usedCopies[idx] || 0) + 1;
+    const finalCat = getFigureDeckCategory(FIGURES_DB[idx]);
+    if (finalCat === "MEGA") megas++;
+    else if (finalCat === "UX") uxs++;
+    else if (finalCat === "EX") exs++;
+  }
+}
+
+window.getOwnedFigureUnits = getOwnedFigureUnits;
+window.getEquippedFigureCount = getEquippedFigureCount;
+window.isMegaPokemonFigure = isMegaPokemonFigure;
+window.getFigureDeckCategory = getFigureDeckCategory;
+window.countDeckBalanceStats = countDeckBalanceStats;
+
 // Sync active team with state.deckP1 & DECK_PRESETS
 function syncProgressionToDeckState() {
+  ensureFigureCopiesMap();
   if (!playerProgression.teams || playerProgression.teams.length === 0) {
     playerProgression.teams = [{ name: "Time #1", slots: [...STARTER_TEAM_INDICES] }];
   }
@@ -3023,13 +3165,14 @@ function syncProgressionToDeckState() {
   }
   activeDeckPresetIdx = Math.max(0, Math.min(playerProgression.teams.length - 1, playerProgression.activeTeamIdx || 0));
   playerProgression.activeTeamIdx = activeDeckPresetIdx;
-  // Ensure every slot in active team only uses unlocked figures
-  const curSlots = playerProgression.teams[activeDeckPresetIdx].slots;
-  for (let i = 0; i < 6; i++) {
-    if (!isFigureUnlocked(curSlots[i])) {
-      curSlots[i] = STARTER_TEAM_INDICES[i % STARTER_TEAM_INDICES.length];
+  // Ensure every team respects unlocked figures, owned unit quantities, and 1 Mega / 1 UX / 2 EX limits
+  playerProgression.teams.forEach(t => {
+    if (!Array.isArray(t.slots) || t.slots.length < 6) {
+      t.slots = [...STARTER_TEAM_INDICES];
     }
-  }
+    sanitizeTeamSlotsForBalance(t.slots);
+  });
+  const curSlots = playerProgression.teams[activeDeckPresetIdx].slots;
   state.deckP1 = [...curSlots];
   DECK_PRESETS.length = 0;
   playerProgression.teams.forEach(t => DECK_PRESETS.push([...t.slots]));
@@ -3048,7 +3191,7 @@ if (!localStorage.getItem(TB_V450_INIT_KEY)) {
 }
 
 /**
- * Smart Gacha Roll that prioritizes locked Pokémon so opening boxes genuinely unlocks the roster!
+ * Smart Gacha Roll that balances unlocking new Pokémon (65%) and rolling duplicates (35%) so players can accumulate multiple units (x2, x3...)!
  */
 function rollFiguresForBox(count, guaranteedHighRarity = false) {
   const lockedIndices = [];
@@ -3059,14 +3202,14 @@ function rollFiguresForBox(count, guaranteedHighRarity = false) {
   }
   const pulledIndices = [];
   for (let c = 0; c < count; c++) {
-    // 80% chance to pull a NEW locked Pokémon if any locked Pokémon remain (100% on the first card of a box!)
-    const pool = (lockedIndices.length > 0 && (c === 0 || Math.random() < 0.80))
+    // 65% chance to pull a NEW locked Pokémon if any remain; 35% chance to pull any Pokémon (including duplicates to gain +1 Unidade!)
+    const pool = (lockedIndices.length > 0 && Math.random() < 0.65)
       ? lockedIndices
       : Array.from({ length: FIGURES_DB.length }, (_, k) => k);
     let chosenIdx = pool[Math.floor(Math.random() * pool.length)];
-    if (guaranteedHighRarity && c === 0 && lockedIndices.length > 0) {
-      const highLocked = lockedIndices.filter(idx => FIGURES_DB[idx].rarity === "UX" || FIGURES_DB[idx].rarity === "EX");
-      if (highLocked.length > 0) chosenIdx = highLocked[Math.floor(Math.random() * highLocked.length)];
+    if (guaranteedHighRarity && c === 0) {
+      const highPool = pool.filter(idx => FIGURES_DB[idx].rarity === "UX" || FIGURES_DB[idx].rarity === "EX" || FIGURES_DB[idx].rarity === "R");
+      if (highPool.length > 0) chosenIdx = highPool[Math.floor(Math.random() * highPool.length)];
     }
     pulledIndices.push(chosenIdx);
     const lPos = lockedIndices.indexOf(chosenIdx);
@@ -3076,12 +3219,13 @@ function rollFiguresForBox(count, guaranteedHighRarity = false) {
 }
 
 /**
- * Unlocks pulled figures (or upgrades CLv +1 if duplicate) and displays the Unboxing Modal with NEW / DUPLICATE badges!
+ * Unlocks pulled figures (or adds +1 Unidade & +1 CLv if duplicate) and displays the Unboxing Modal with NEW / QUANTITY badges!
  */
 function unlockAndShowBoosterModal(title, pulledIndices, bonusText) {
   if (typeof BgmEngine !== "undefined") {
     BgmEngine.playFanfare("booster");
   }
+  ensureFigureCopiesMap();
   const cardData = pulledIndices.map(idx => {
     const f = FIGURES_DB[idx] || FIGURES_DB[0];
     const wasUnlocked = isFigureUnlocked(idx);
@@ -3089,7 +3233,7 @@ function unlockAndShowBoosterModal(title, pulledIndices, bonusText) {
       playerProgression.unlockedFigures.push(idx);
       playerProgression.figureCopies[idx] = 1;
     } else {
-      playerProgression.figureCopies[idx] = (playerProgression.figureCopies[idx] || 1) + 1;
+      playerProgression.figureCopies[idx] = getOwnedFigureUnits(idx) + 1;
       ensureFigureUpgradeMetadata(f);
       if (f.clv < 10) {
         f.clv += 1;
@@ -3108,7 +3252,6 @@ function unlockAndShowBoosterModal(title, pulledIndices, bonusText) {
   const tEl = document.getElementById("unbox-title");
   const gEl = document.getElementById("unbox-cards-grid");
   const bEl = document.getElementById("unbox-bonus-summary");
-  const newCount = cardData.filter(c => c.isNew).length;
   if (tEl) tEl.textContent = title;
   if (bEl) {
     bEl.textContent = `${bonusText} · Coleção: ${playerProgression.unlockedFigures.length}/${FIGURES_DB.length} Desbloqueados!`;
@@ -3118,12 +3261,12 @@ function unlockAndShowBoosterModal(title, pulledIndices, bonusText) {
       const f = c.fig;
       const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
       const statusPill = c.isNew
-        ? `<div style="background:#16a34a; color:#fff; font-size:8px; font-weight:900; padding:2px 5px; border-radius:4px; margin-top:3px;">✨ NOVO! DESBLOQUEADO!</div>`
-        : `<div style="background:#0284c7; color:#fff; font-size:8px; font-weight:900; padding:2px 5px; border-radius:4px; margin-top:3px;">⬆️ DUPLICATA (+1 CLv ➔ CLv+${f.clv})</div>`;
+        ? `<div style="background:#16a34a; color:#fff; font-size:8px; font-weight:900; padding:2px 5px; border-radius:4px; margin-top:3px;">✨ NOVO! (📦 x1 UNIDADE)</div>`
+        : `<div style="background:#0284c7; color:#fff; font-size:7.8px; font-weight:900; padding:2px 5px; border-radius:4px; margin-top:3px;">📦 REPETIDO! AGORA TEM x${c.copies} UNIDADES! (+1 CLv)</div>`;
       return `<div style="background:linear-gradient(180deg,#1e293b,#090d16); border:2px solid ${c.isNew ? '#4ade80' : (f.rarity==='UX'?'#c084fc':'#facc15')}; border-radius:8px; padding:6px; text-align:center; box-shadow:${c.isNew ? '0 0 14px rgba(74,222,128,0.45)' : 'none'};">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
           ${getRarityBadgeHtml(f.rarity)}
-          <span style="font-size:8px; color:#bae6fd; font-weight:900;">MP ${f.mp}</span>
+          <span style="font-size:8px; color:#bae6fd; font-weight:900;">MP ${f.mp} · 📦x${c.copies}</span>
         </div>
         <img src="${sp.uri}" style="width:48px; height:48px; object-fit:contain;">
         <div style="font-size:10px; font-weight:900; color:#fff;">${f.name}</div>
@@ -3443,14 +3586,15 @@ exchangeMaterialForFigure = function(idx) {
 
   const wasUnlocked = isFigureUnlocked(idx);
   unlockAndShowBoosterModal(
-    wasUnlocked ? `⬆️ UPGRADE NA LOJA: ${f.name.toUpperCase()}` : `🔓 DESBLOQUEADO NA LOJA: ${f.name.toUpperCase()}!`,
+    wasUnlocked ? `📦 +1 UNIDADE NA LOJA: ${f.name.toUpperCase()}!` : `🔓 DESBLOQUEADO NA LOJA: ${f.name.toUpperCase()}!`,
     [idx],
     `Adquirido por ${mCost.toLocaleString("en-US")} Material`
   );
+  const totalCopiesNow = getOwnedFigureUnits(idx);
   if (m) {
     m.textContent = wasUnlocked
-      ? `⬆️ [${f.rarity}] ${f.name} recebeu +1 CLv na Loja!`
-      : `✅ [${f.rarity}] ${f.name} foi DESBLOQUEADO na sua coleção! Vá em [Decks] para equipar no seu Time!`;
+      ? `📦 +1 Unidade de [${f.rarity}] ${f.name} adquirida! Agora você possui x${totalCopiesNow} unidades para usar no mesmo time (+1 CLv)!`
+      : `✅ [${f.rarity}] ${f.name} foi DESBLOQUEADO (📦 x1 unidade)! Vá em [Decks] para equipar no seu Time!`;
   }
 };
 
@@ -3577,33 +3721,109 @@ switchDeckPreset = function(presetIdx) {
   renderHubAndCollection();
 };
 
+let _lastDeckStatusOverrideMsg = "";
+let _lastDeckStatusOverrideColor = "";
+
+function setDeckStatusBannerMsg(text, color = "#fde047") {
+  _lastDeckStatusOverrideMsg = text || "";
+  _lastDeckStatusOverrideColor = color || "#fde047";
+  const ind = document.getElementById("editing-slot-indicator");
+  if (ind && text) {
+    ind.style.color = color;
+    ind.textContent = text;
+  }
+}
+
 toggleDeckEquip = function(idx) {
+  const f = FIGURES_DB[idx] || FIGURES_DB[0];
   if (!isFigureUnlocked(idx)) {
     playSfx("hit");
-    const f = FIGURES_DB[idx];
-    const ind = document.getElementById("editing-slot-indicator");
-    if (ind) ind.textContent = `🔒 ${f ? f.name : 'Pokémon'} bloqueado! Ganhe em Caixas de Vitória ou na Loja!`;
+    setDeckStatusBannerMsg(`🔒 ${f ? f.name : 'Pokémon'} bloqueado! Ganhe em Caixas de Vitória ou na Loja!`, "#f87171");
     return;
   }
   const editedSlot = currentEditingDeckSlot % 6;
-  // If already in another slot of the current team, swap them cleanly so a team has 6 distinct figures
-  const existingPos = state.deckP1.indexOf(idx);
-  if (existingPos !== -1 && existingPos !== editedSlot) {
-    state.deckP1[existingPos] = state.deckP1[editedSlot];
+  const ownedUnits = getOwnedFigureUnits(idx);
+
+  if (state.deckP1[editedSlot] === idx) {
+    selectedCarouselSlot = editedSlot;
+    currentEditingDeckSlot = (editedSlot + 1) % 6;
+    playSfx("tick");
+    setDeckStatusBannerMsg(`Slot #${currentEditingDeckSlot + 1} Ativo (${f.name} mantido no Slot #${editedSlot + 1})`, "#38bdf8");
+    renderHubAndCollection();
+    return;
   }
-  state.deckP1[editedSlot] = idx;
-  if (playerProgression.teams[playerProgression.activeTeamIdx]) {
-    playerProgression.teams[playerProgression.activeTeamIdx].slots = [...state.deckP1];
+
+  let otherSlotsCount = 0;
+  for (let s = 0; s < 6; s++) {
+    if (s !== editedSlot && state.deckP1[s] === idx) otherSlotsCount++;
   }
-  DECK_PRESETS[playerProgression.activeTeamIdx] = [...state.deckP1];
-  saveProgressionState();
-  selectedCarouselSlot = editedSlot;
-  currentEditingDeckSlot = (editedSlot + 1) % 6;
-  const ind = document.getElementById("editing-slot-indicator");
-  if (ind) ind.textContent = `Slot #${currentEditingDeckSlot + 1} Ativo`;
-  playSfx("portal");
-  demoFullMatchState();
-  renderHubAndCollection();
+
+  // Case 1: Player owns enough units to equip into editedSlot (including 2nd, 3rd, ... 6th copy!)
+  if (otherSlotsCount + 1 <= ownedUnits) {
+    const nextDeck = [...state.deckP1];
+    nextDeck[editedSlot] = idx;
+    const stats = countDeckBalanceStats(nextDeck);
+    if (stats.megas > MAX_DECK_MEGAS) {
+      playSfx("hit");
+      setDeckStatusBannerMsg(`⚠️ Limite do Deck: Máximo 1 Pokémon MEGA permitido (${stats.megas}/1)! Selecione o slot do Mega atual para substituí-lo.`, "#f87171");
+      return;
+    }
+    if (stats.uxs > MAX_DECK_UX) {
+      playSfx("hit");
+      setDeckStatusBannerMsg(`⚠️ Limite do Deck: Máximo 1 Pokémon UX permitido (${stats.uxs}/1)! Selecione o slot do UX atual para substituí-lo.`, "#f87171");
+      return;
+    }
+    if (stats.exs > MAX_DECK_EX) {
+      playSfx("hit");
+      setDeckStatusBannerMsg(`⚠️ Limite do Deck: Máximo 2 Pokémon EX permitidos (${stats.exs}/2)! Selecione o slot de um EX atual para substituí-lo.`, "#f87171");
+      return;
+    }
+
+    state.deckP1 = nextDeck;
+    if (playerProgression.teams[playerProgression.activeTeamIdx]) {
+      playerProgression.teams[playerProgression.activeTeamIdx].slots = [...state.deckP1];
+    }
+    DECK_PRESETS[playerProgression.activeTeamIdx] = [...state.deckP1];
+    saveProgressionState();
+    selectedCarouselSlot = editedSlot;
+    currentEditingDeckSlot = (editedSlot + 1) % 6;
+    const newEquippedCnt = otherSlotsCount + 1;
+    setDeckStatusBannerMsg(
+      ownedUnits > 1
+        ? `✅ ${f.name} equipado no Slot #${editedSlot + 1} (📦 ${newEquippedCnt}/${ownedUnits} unidades no time) ➔ Editando Slot #${currentEditingDeckSlot + 1}`
+        : `✅ ${f.name} equipado no Slot #${editedSlot + 1} ➔ Editando Slot #${currentEditingDeckSlot + 1}`,
+      "#4ade80"
+    );
+    playSfx("portal");
+    demoFullMatchState();
+    renderHubAndCollection();
+    return;
+  }
+
+  // Case 2: Player only has 1 unit and it's in another slot -> swap slots so they can rearrange their team, and inform how to get more units!
+  if (ownedUnits === 1) {
+    const existingPos = state.deckP1.indexOf(idx);
+    if (existingPos !== -1 && existingPos !== editedSlot) {
+      state.deckP1[existingPos] = state.deckP1[editedSlot];
+      state.deckP1[editedSlot] = idx;
+      if (playerProgression.teams[playerProgression.activeTeamIdx]) {
+        playerProgression.teams[playerProgression.activeTeamIdx].slots = [...state.deckP1];
+      }
+      DECK_PRESETS[playerProgression.activeTeamIdx] = [...state.deckP1];
+      saveProgressionState();
+      selectedCarouselSlot = editedSlot;
+      currentEditingDeckSlot = (editedSlot + 1) % 6;
+      setDeckStatusBannerMsg(`🔄 ${f.name} movido p/ Slot #${editedSlot + 1} (Você tem 📦x1 un. — pegue repetidos na Caixa/Loja p/ usar mais de 1 no time!)`, "#fde047");
+      playSfx("portal");
+      demoFullMatchState();
+      renderHubAndCollection();
+      return;
+    }
+  }
+
+  // Case 3: Player owns multiple units (e.g. x2) and all owned units are already in the team
+  playSfx("hit");
+  setDeckStatusBannerMsg(`⚠️ Todas as suas 📦x${ownedUnits} unidades de ${f.name} já estão no time! Obtenha mais repetidos na Caixa ou Loja para adicionar outra.`, "#f87171");
 };
 
 // Override renderHubAndCollection to render 1 Starter Team + Locked/Unlocked Collection Cards!
@@ -4027,22 +4247,21 @@ renderShopExchange = function() {
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
     const mCost = OFFICIAL_MATERIAL_COSTS[f.rarity] || 1800;
     const unlocked = isFigureUnlocked(idx);
+    const ownedUnits = unlocked ? getOwnedFigureUnits(idx) : 0;
     const locType = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
-    const unlockedTag = (typeof t === "function") ? t("shop.unlocked", "✅ DESBLOQUEADO") : "✅ DESBLOQUEADO";
-    const lockedTag = (typeof t === "function") ? t("shop.locked", "🔒 BLOQUEADO") : "🔒 BLOQUEADO";
-    const clvBtnText = (typeof t === "function") ? t("shop.clv_btn", "⬆️ +1 CLv") : "⬆️ +1 CLv";
+    const unlockedTag = unlocked ? `📦 x${ownedUnits} UNID.` : ((typeof t === "function") ? t("shop.locked", "🔒 BLOQUEADO") : "🔒 BLOQUEADO");
     const unlockBtnText = (typeof t === "function") ? t("shop.unlock_btn", "🔓 Desbloquear") : "🔓 Desbloquear";
     return `
       <div class="card" style="margin-bottom:0; text-align:center; border-color:${unlocked ? 'rgba(74,222,128,0.45)' : 'rgba(250,204,21,0.45)'};">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
           ${getRarityBadgeHtml(f.rarity)}
-          <span style="font-size:7.5px; font-weight:900; color:${unlocked ? '#4ade80' : '#facc15'};">${unlocked ? unlockedTag : lockedTag}</span>
+          <span style="font-size:7.5px; font-weight:900; color:${unlocked ? '#4ade80' : '#facc15'};">${unlockedTag}</span>
         </div>
         <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
         <div style="font-size:9.5px; font-weight:900;">${f.name}</div>
         <div style="font-size:8px; color:#bae6fd; margin-bottom:4px;">MP ${f.mp} · ${locType}</div>
-        <button class="btn ${unlocked ? 'secondary' : 'gold'}" style="width:100%; font-size:8px; padding:4px;" onclick="exchangeMaterialForFigure(${idx})">
-          ${unlocked ? `${clvBtnText} (🔷 ${mCost.toLocaleString("en-US")})` : `${unlockBtnText} (🔷 ${mCost.toLocaleString("en-US")})`}
+        <button class="btn ${unlocked ? 'secondary' : 'gold'}" style="width:100%; font-size:7.6px; padding:4px;" onclick="exchangeMaterialForFigure(${idx})">
+          ${unlocked ? `➕ +1 Unid. [x${ownedUnits}➔x${ownedUnits + 1}] (🔷 ${mCost.toLocaleString("en-US")})` : `${unlockBtnText} (🔷 ${mCost.toLocaleString("en-US")})`}
         </button>
       </div>
     `;
@@ -5635,9 +5854,20 @@ function openCarmonteQuestsModal() {
 }
 
 
-// --- 17.2: STRICT 6-COST PLATE CASE LIMIT (`MAX_PLATE_COST = 6`) ---
+// --- 17.2: STRICT 6-COST PLATE CASE LIMIT WITH DUPLICATE DOUBLED COST (`MAX_PLATE_COST = 6`) ---
 const EQUIPPED_PLATES_KEY = "pdr_equipped_plates_v510";
 const MAX_DECK_PLATE_COST = 6;
+
+const BASE_PLATE_CATALOG = (Array.isArray(state.plates) ? state.plates : []).map(p => ({
+  ...p,
+  baseCost: p.baseCost || p.cost || 1
+}));
+
+function getPlateCopyCost(baseCost, copyIndex1Based) {
+  const b = Math.max(1, Number(baseCost) || 1);
+  const k = Math.max(1, parseInt(copyIndex1Based, 10) || 1);
+  return b * Math.pow(2, k - 1);
+}
 
 function getSavedEquippedPlateIds() {
   try {
@@ -5651,28 +5881,176 @@ function getSavedEquippedPlateIds() {
   return ["hurdle", "double", "xatk", "goalblock"];
 }
 
-function saveEquippedPlateIds() {
+function saveEquippedPlateIds(explicitIds) {
   try {
-    const activeIds = state.plates.filter(p => !p.disabledInDeck).map(p => p.id);
+    const activeIds = Array.isArray(explicitIds)
+      ? explicitIds
+      : state.plates.filter(p => !p.disabledInDeck).map(p => p.id);
     localStorage.setItem(EQUIPPED_PLATES_KEY, JSON.stringify(activeIds));
   } catch (e) {}
 }
 
 function enforceStrict6CostPlates() {
-  if (!state.plates || !Array.isArray(state.plates)) return;
+  if (!BASE_PLATE_CATALOG || BASE_PLATE_CATALOG.length === 0) return;
+  const prevUsedMap = {};
+  if (Array.isArray(state.plates)) {
+    state.plates.forEach(p => {
+      if (!p.disabledInDeck && p.id) {
+        const key = `${p.id}#${p.copyNumber || 1}`;
+        prevUsedMap[key] = { used: Boolean(p.used), usedP1: Boolean(p.usedP1), usedP2: Boolean(p.usedP2) };
+      }
+    });
+  }
+
   const savedIds = getSavedEquippedPlateIds();
+  const countsById = {};
   let runningCost = 0;
-  state.plates.forEach(p => {
-    const wantsActive = savedIds.includes(p.id);
-    if (wantsActive && (runningCost + p.cost <= MAX_DECK_PLATE_COST)) {
-      p.disabledInDeck = false;
-      runningCost += p.cost;
-    } else {
-      p.disabledInDeck = true;
+  const activeInstances = [];
+
+  savedIds.forEach(pid => {
+    const baseP = BASE_PLATE_CATALOG.find(x => x.id === pid);
+    if (!baseP) return;
+    const copyNum = (countsById[pid] || 0) + 1;
+    const copyCost = getPlateCopyCost(baseP.baseCost, copyNum);
+    if (runningCost + copyCost <= MAX_DECK_PLATE_COST) {
+      countsById[pid] = copyNum;
+      runningCost += copyCost;
+      const prev = prevUsedMap[`${pid}#${copyNum}`] || { used: false, usedP1: false, usedP2: false };
+      activeInstances.push({
+        ...baseP,
+        baseCost: baseP.baseCost,
+        cost: copyCost,
+        copyNumber: copyNum,
+        disabledInDeck: false,
+        used: prev.used,
+        usedP1: prev.usedP1,
+        usedP2: prev.usedP2
+      });
     }
   });
-  saveEquippedPlateIds();
+
+  activeInstances.forEach(inst => {
+    inst.totalCopiesEquipped = countsById[inst.id] || 1;
+  });
+
+  const disabledPlaceholders = [];
+  BASE_PLATE_CATALOG.forEach(baseP => {
+    if (!countsById[baseP.id]) {
+      disabledPlaceholders.push({
+        ...baseP,
+        baseCost: baseP.baseCost,
+        cost: baseP.baseCost,
+        copyNumber: 0,
+        totalCopiesEquipped: 0,
+        disabledInDeck: true,
+        used: false,
+        usedP1: false,
+        usedP2: false
+      });
+    }
+  });
+
+  state.plates = [...activeInstances, ...disabledPlaceholders];
+  saveEquippedPlateIds(activeInstances.map(p => p.id));
 }
+
+function getEquippedPlateCopiesInfo(plateId) {
+  const activeMatching = (state.plates || []).filter(p => !p.disabledInDeck && p.id === plateId);
+  const count = activeMatching.length;
+  const totalCost = activeMatching.reduce((s, p) => s + (p.cost || 0), 0);
+  const baseP = BASE_PLATE_CATALOG.find(x => x.id === plateId);
+  const baseCost = baseP ? baseP.baseCost : 1;
+  const nextCopyCost = getPlateCopyCost(baseCost, count + 1);
+  return { count, totalCost, baseCost, nextCopyCost, basePlate: baseP };
+}
+
+function ensurePlateWarningBanner() {
+  let msgEl = document.getElementById("plate-limit-warning");
+  if (!msgEl) {
+    const pSel = document.getElementById("deck-plates-selector");
+    if (pSel && pSel.parentNode) {
+      msgEl = document.createElement("div");
+      msgEl.id = "plate-limit-warning";
+      msgEl.style.cssText = "font-size:8.8px; font-weight:800; margin-top:5px; min-height:14px; color:#fde047;";
+      pSel.parentNode.appendChild(msgEl);
+    }
+  }
+  return msgEl;
+}
+
+function addPlateCopyToDeck(plateId) {
+  enforceStrict6CostPlates();
+  const info = getEquippedPlateCopiesInfo(plateId);
+  if (!info.basePlate) return;
+  const msgEl = ensurePlateWarningBanner();
+  const usedCost = state.plates.filter(x => !x.disabledInDeck).reduce((s, x) => s + x.cost, 0);
+
+  if (usedCost + info.nextCopyCost > MAX_DECK_PLATE_COST) {
+    playSfx("hit");
+    if (msgEl) {
+      msgEl.style.color = "#f87171";
+      msgEl.textContent = info.count > 0
+        ? `⚠️ A ${info.count + 1}ª cópia de [${info.basePlate.name}] tem custo dobrado (${info.nextCopyCost}◆) e você já usa ${usedCost}/6 ◆! Remova outra Plate primeiro.`
+        : `⚠️ Limite 6/6 ◆ atingido! Você usa ${usedCost}/6 ◆ e [${info.basePlate.name}] custa ${info.nextCopyCost}◆.`;
+    }
+    return;
+  }
+
+  const nextIds = state.plates.filter(x => !x.disabledInDeck).map(x => x.id);
+  nextIds.push(plateId);
+  saveEquippedPlateIds(nextIds);
+  enforceStrict6CostPlates();
+  playSfx("portal");
+
+  if (msgEl) {
+    const newUsed = state.plates.filter(x => !x.disabledInDeck).reduce((s, x) => s + x.cost, 0);
+    msgEl.style.color = "#4ade80";
+    msgEl.textContent = info.count > 0
+      ? `✅ ${info.count + 1}ª cópia de [${info.basePlate.name}] equipada com custo dobrado (${info.nextCopyCost}◆)! Total: ${newUsed}/6 ◆.`
+      : `✅ [${info.basePlate.name} (${info.nextCopyCost}◆)] equipada no Deck! Total: ${newUsed}/6 ◆.`;
+  }
+  renderHubAndCollection();
+  renderPlatesTray();
+}
+
+function removePlateCopyFromDeck(plateId) {
+  enforceStrict6CostPlates();
+  const nextIds = state.plates.filter(x => !x.disabledInDeck).map(x => x.id);
+  const lastPos = nextIds.lastIndexOf(plateId);
+  if (lastPos === -1) return;
+  const baseP = BASE_PLATE_CATALOG.find(x => x.id === plateId);
+  nextIds.splice(lastPos, 1);
+  saveEquippedPlateIds(nextIds);
+  enforceStrict6CostPlates();
+  playSfx("tick");
+
+  const msgEl = ensurePlateWarningBanner();
+  if (msgEl && baseP) {
+    const newUsed = state.plates.filter(x => !x.disabledInDeck).reduce((s, x) => s + x.cost, 0);
+    const remCount = nextIds.filter(id => id === plateId).length;
+    msgEl.style.color = "#94a3b8";
+    msgEl.textContent = `➖ 1x [${baseP.name}] removida (${remCount}x no Deck). Custo atual: ${newUsed}/${MAX_DECK_PLATE_COST} ◆.`;
+  }
+  renderHubAndCollection();
+  renderPlatesTray();
+}
+
+function clearAllDeckPlates() {
+  saveEquippedPlateIds([]);
+  enforceStrict6CostPlates();
+  playSfx("tick");
+  const msgEl = ensurePlateWarningBanner();
+  if (msgEl) {
+    msgEl.style.color = "#38bdf8";
+    msgEl.textContent = "🔄 Todas as Plates foram desequipadas (0/6 ◆). Escolha suas Plates (cópias repetidas dobram de custo)!";
+  }
+  renderHubAndCollection();
+  renderPlatesTray();
+}
+
+window.addPlateCopyToDeck = addPlateCopyToDeck;
+window.removePlateCopyFromDeck = removePlateCopyFromDeck;
+window.clearAllDeckPlates = clearAllDeckPlates;
 
 enforceStrict6CostPlates();
 
@@ -5716,58 +6094,25 @@ demoFullMatchState = function() {
   renderPlatesTray();
 };
 
-// Override togglePlateInDeck so selecting a Plate strictly checks `usedCost + p.cost <= 6`!
-togglePlateInDeck = function(pIdx) {
-  const p = state.plates[pIdx];
-  if (!p) return;
-
-  let msgEl = document.getElementById("plate-limit-warning");
-  if (!msgEl) {
-    const pSel = document.getElementById("deck-plates-selector");
-    if (pSel && pSel.parentNode) {
-      msgEl = document.createElement("div");
-      msgEl.id = "plate-limit-warning";
-      msgEl.style.cssText = "font-size:9px; font-weight:800; margin-top:4px; min-height:13px; color:#f87171;";
-      pSel.parentNode.appendChild(msgEl);
-    }
+// Override togglePlateInDeck so clicking a plate adds a copy (with doubled cost for duplicates) or removes if budget full!
+togglePlateInDeck = function(plateIdOrIdx) {
+  let plateId = plateIdOrIdx;
+  if (typeof plateIdOrIdx === "number") {
+    const baseP = BASE_PLATE_CATALOG[plateIdOrIdx] || (state.plates && state.plates[plateIdOrIdx]);
+    if (!baseP) return;
+    plateId = baseP.id;
   }
-
-  // If currently active -> deactivate it and free up its diamond cost!
-  if (!p.disabledInDeck) {
-    p.disabledInDeck = true;
-    saveEquippedPlateIds();
-    playSfx("tick");
-    if (msgEl) {
-      const newCost = state.plates.filter(x => !x.disabledInDeck).reduce((s, x) => s + x.cost, 0);
-      msgEl.style.color = "#94a3b8";
-      msgEl.textContent = `Plate [${p.name}] removida. Custo atual: ${newCost}/${MAX_DECK_PLATE_COST} ◆.`;
-    }
-    renderHubAndCollection();
-    renderPlatesTray();
-    return;
-  }
-
-  // Trying to activate an unselected plate -> strictly verify cost <= 6!
+  if (!plateId) return;
+  enforceStrict6CostPlates();
+  const info = getEquippedPlateCopiesInfo(plateId);
   const usedCost = state.plates.filter(x => !x.disabledInDeck).reduce((s, x) => s + x.cost, 0);
-  if (usedCost + p.cost > MAX_DECK_PLATE_COST) {
-    playSfx("hit");
-    if (msgEl) {
-      msgEl.style.color = "#f87171";
-      msgEl.textContent = `⚠️ Limite de Custo 6/6 ◆ atingido! Você já usa ${usedCost}/6 ◆ e [${p.name}] custa ${p.cost}◆. Desative outra Plate antes!`;
-    }
-    return;
+  if (usedCost + info.nextCopyCost <= MAX_DECK_PLATE_COST) {
+    addPlateCopyToDeck(plateId);
+  } else if (info.count > 0) {
+    removePlateCopyFromDeck(plateId);
+  } else {
+    addPlateCopyToDeck(plateId);
   }
-
-  p.disabledInDeck = false;
-  saveEquippedPlateIds();
-  playSfx("portal");
-  if (msgEl) {
-    const newCost = usedCost + p.cost;
-    msgEl.style.color = "#4ade80";
-    msgEl.textContent = `✅ [${p.name} (${p.cost}◆)] equipada no Deck! Custo total: ${newCost}/6 ◆.`;
-  }
-  renderHubAndCollection();
-  renderPlatesTray();
 };
 
 // Upgrade Plate Case UI in renderHubAndCollection so unavailable plates over the remaining budget look clearly locked
@@ -6115,49 +6460,89 @@ function getRarityRankScore(rar) {
 
 function autoBuildBalancedTeamV540() {
   playSfx("portal");
+  ensureFigureCopiesMap();
   const unlockedIdxList = (playerProgression && Array.isArray(playerProgression.unlockedFigures))
     ? [...playerProgression.unlockedFigures]
     : [1, 2, 3, 4, 6, 0];
-  if (unlockedIdxList.length <= 6) {
-    state.deckP1 = unlockedIdxList.slice(0, 6);
-  } else {
-    const scored = unlockedIdxList.map(idx => {
-      const f = FIGURES_DB[idx % FIGURES_DB.length] || FIGURES_DB[0];
-      const maxDmg = getFigureMaxDmg(f);
-      const rScore = getRarityRankScore(f.rarity);
-      const goldSz = (f.wheel || []).filter(w => w.color === "gold").reduce((s, w) => s + (w.size || 0), 0);
-      const purpSz = (f.wheel || []).filter(w => w.color === "purple").reduce((s, w) => s + (w.size || 0), 0);
-      const totalScore = rScore * 28 + maxDmg * 0.65 + (f.level || 1) * 6 + (f.clv || 0) * 8 + goldSz * 0.4 + purpSz * 0.35;
-      return { idx, f, mp: f.mp, totalScore };
-    }).sort((a, b) => b.totalScore - a.totalScore);
 
-    const picked = [];
-    const pickBy = (fn) => {
+  const scored = [];
+  unlockedIdxList.forEach(idx => {
+    const f = FIGURES_DB[idx % FIGURES_DB.length] || FIGURES_DB[0];
+    const maxDmg = getFigureMaxDmg(f);
+    const rScore = getRarityRankScore(f.rarity);
+    const goldSz = (f.wheel || []).filter(w => w.color === "gold").reduce((s, w) => s + (w.size || 0), 0);
+    const purpSz = (f.wheel || []).filter(w => w.color === "purple").reduce((s, w) => s + (w.size || 0), 0);
+    const totalScore = rScore * 28 + maxDmg * 0.65 + (f.level || 1) * 6 + (f.clv || 0) * 8 + goldSz * 0.4 + purpSz * 0.35;
+    const owned = getOwnedFigureUnits(idx);
+    for (let u = 0; u < owned; u++) {
+      scored.push({ idx, f, mp: f.mp, totalScore: totalScore - u * 4, copyIdx: u });
+    }
+  });
+  scored.sort((a, b) => b.totalScore - a.totalScore);
+
+  const picked = [];
+  let megas = 0, uxs = 0, exs = 0;
+  const usedCounts = {};
+
+  const canPickCandidate = (c) => {
+    const curUsed = usedCounts[c.idx] || 0;
+    if (curUsed + 1 > getOwnedFigureUnits(c.idx)) return false;
+    const cat = getFigureDeckCategory(c.f);
+    if (cat === "MEGA" && megas + 1 > MAX_DECK_MEGAS) return false;
+    if (cat === "UX" && uxs + 1 > MAX_DECK_UX) return false;
+    if (cat === "EX" && exs + 1 > MAX_DECK_EX) return false;
+    return true;
+  };
+
+  const commitCandidate = (c) => {
+    picked.push(c.idx);
+    usedCounts[c.idx] = (usedCounts[c.idx] || 0) + 1;
+    const cat = getFigureDeckCategory(c.f);
+    if (cat === "MEGA") megas++;
+    else if (cat === "UX") uxs++;
+    else if (cat === "EX") exs++;
+  };
+
+  const pickBy = (fn, preferDistinct = true) => {
+    for (const c of scored) {
+      if (preferDistinct && (usedCounts[c.idx] || 0) > 0) continue;
+      if (canPickCandidate(c) && fn(c)) {
+        commitCandidate(c);
+        return;
+      }
+    }
+    if (preferDistinct) {
       for (const c of scored) {
-        if (!picked.includes(c.idx) && fn(c)) {
-          picked.push(c.idx);
+        if (canPickCandidate(c) && fn(c)) {
+          commitCandidate(c);
           return;
         }
       }
-    };
-    pickBy(c => c.mp >= 3);
-    pickBy(c => c.mp >= 3);
-    pickBy(c => c.mp === 2);
-    pickBy(c => c.mp === 2);
-    pickBy(c => c.mp === 2);
-    while (picked.length < 6) {
-      pickBy(() => true);
     }
-    state.deckP1 = picked.slice(0, 6);
+  };
+
+  pickBy(c => c.mp >= 3);
+  pickBy(c => c.mp >= 3);
+  pickBy(c => c.mp === 2);
+  pickBy(c => c.mp === 2);
+  pickBy(c => c.mp === 2);
+  let guard = 0;
+  while (picked.length < 6 && guard++ < 20) {
+    pickBy(() => true, false);
   }
+  while (picked.length < 6) {
+    picked.push(STARTER_TEAM_INDICES[picked.length % STARTER_TEAM_INDICES.length]);
+  }
+  sanitizeTeamSlotsForBalance(picked);
+  state.deckP1 = picked.slice(0, 6);
+
   if (playerProgression && playerProgression.teams && playerProgression.teams[playerProgression.activeTeamIdx]) {
     playerProgression.teams[playerProgression.activeTeamIdx].slots = [...state.deckP1];
     saveProgressionState();
   }
+  setDeckStatusBannerMsg("⚡ Time Ideal Balanceado Montado (Respeitando Máx 1 Mega · 1 UX · 2 EX)!", "#4ade80");
   demoFullMatchState();
   renderHubAndCollection();
-  const ind = document.getElementById("editing-slot-indicator");
-  if (ind) ind.textContent = "⚡ Time Ideal Montado!";
 }
 
 refreshStrictPlateCaseUI = function() {
@@ -6169,31 +6554,43 @@ refreshStrictPlateCaseUI = function() {
   const remBudget = Math.max(0, MAX_DECK_PLATE_COST - usedCost);
 
   if (pBar) {
-    pBar.innerHTML = `<span style="color:${usedCost === 6 ? '#4ade80' : '#fde047'};">COST ${usedCost}/6</span> <span style="letter-spacing:1px; color:#38bdf8;">${"◆".repeat(Math.min(6, usedCost))}${"◇".repeat(remBudget)}</span>`;
+    pBar.innerHTML = `<span style="color:${usedCost === 6 ? '#4ade80' : '#fde047'};">COST ${usedCost}/6</span> <span style="letter-spacing:1px; color:#38bdf8;">${"◆".repeat(Math.min(6, usedCost))}${"◇".repeat(remBudget)}</span> <button onclick="event.stopPropagation(); clearAllDeckPlates();" style="margin-left:4px; background:#1e293b; border:1px solid #475569; color:#cbd5e1; border-radius:4px; padding:1px 5px; font-size:7px; font-weight:900; cursor:pointer;" title="Limpar todas as Plates equipadas">🔄 Limpar</button>`;
   }
 
-  pSel.innerHTML = state.plates.map((p, pIdx) => {
-    const active = !p.disabledInDeck;
-    const exceeds = !active && (p.cost > remBudget);
-    const spUri = BANANA_PLATE_SPRITES[p.id] || "";
+  pSel.innerHTML = BASE_PLATE_CATALOG.map((baseP, pIdx) => {
+    const info = getEquippedPlateCopiesInfo(baseP.id);
+    const active = info.count > 0;
+    const canAddNext = (usedCost + info.nextCopyCost) <= MAX_DECK_PLATE_COST;
+    const exceeds = !active && !canAddNext;
+    const spUri = BANANA_PLATE_SPRITES[baseP.id] || "";
     const statusBadge = active
-      ? `<span style="background:#22c55e; color:#052e16; font-size:6.8px; font-weight:900; padding:0.5px 4px; border-radius:99px;">✓ ATIVA</span>`
+      ? `<span style="background:#22c55e; color:#052e16; font-size:6.8px; font-weight:900; padding:0.5px 4px; border-radius:99px;">✓ x${info.count} (${info.totalCost}◆)</span>`
       : (exceeds
-          ? `<span style="background:#334155; color:#94a3b8; font-size:6.8px; font-weight:900; padding:0.5px 4px; border-radius:99px;">🔒 +${p.cost}◆</span>`
-          : `<span style="background:#1e293b; color:#bae6fd; font-size:6.8px; font-weight:800; padding:0.5px 4px; border-radius:99px;">+ EQUIPAR</span>`);
+          ? `<span style="background:#334155; color:#94a3b8; font-size:6.8px; font-weight:900; padding:0.5px 4px; border-radius:99px;">🔒 ${info.nextCopyCost}◆</span>`
+          : `<span style="background:#1e293b; color:#bae6fd; font-size:6.8px; font-weight:800; padding:0.5px 4px; border-radius:99px;">+ ${info.nextCopyCost}◆</span>`);
 
-    return `<div class="plate-card-v540 ${active ? 'plate-equipped' : ''} ${exceeds ? 'plate-exceeds' : ''}" onclick="togglePlateInDeck(${pIdx})">
+    const nextCostHint = info.count > 0
+      ? (canAddNext
+          ? `<span style="color:#fde047; font-weight:900;">+${info.count + 1}ª cópia: ${info.nextCopyCost}◆ (2x)</span>`
+          : `<span style="color:#64748b;">+${info.count + 1}ª: ${info.nextCopyCost}◆ (2x)</span>`)
+      : `<span style="color:#94a3b8;">1ª: ${baseP.baseCost}◆ · 2ª: ${baseP.baseCost * 2}◆</span>`;
+
+    return `<div class="plate-card-v540 ${active ? 'plate-equipped' : ''} ${exceeds ? 'plate-exceeds' : ''}" onclick="togglePlateInDeck('${baseP.id}')">
       <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:1px;">
-        <span style="font-size:7.2px; font-weight:900; color:#fde047;">${"◆".repeat(p.cost)} (${p.cost})</span>
+        <span style="font-size:6.9px; font-weight:900; color:#fde047;">Base ${baseP.baseCost}◆</span>
         ${statusBadge}
       </div>
-      <div style="width:42px; height:42px; display:flex; align-items:center; justify-content:center; margin:1px 0;">
+      <div style="width:38px; height:38px; display:flex; align-items:center; justify-content:center; margin:1px 0;">
         ${spUri
-          ? `<img src="${spUri}" style="width:42px; height:42px; object-fit:contain; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.85));">`
-          : `<div style="font-size:16px;">${p.badge || '⚡'}</div>`}
+          ? `<img src="${spUri}" style="width:38px; height:38px; object-fit:contain; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.85));">`
+          : `<div style="font-size:15px;">${baseP.badge || '⚡'}</div>`}
       </div>
-      <div style="font-size:8px; font-weight:900; color:#ffffff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${p.name}</div>
-      <div style="font-size:6.6px; color:#94a3b8; line-height:1.15; height:15px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; width:100%; margin-top:1px;">${p.sub}</div>
+      <div style="font-size:7.8px; font-weight:900; color:#ffffff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${baseP.name}</div>
+      <div style="font-size:6.4px; line-height:1.15; width:100%; margin:1px 0;">${nextCostHint}</div>
+      <div style="display:flex; width:100%; gap:3px; margin-top:2px;">
+        <button onclick="event.stopPropagation(); removePlateCopyFromDeck('${baseP.id}');" ${info.count > 0 ? '' : 'disabled'} style="flex:1; background:${info.count > 0 ? '#7f1d1d' : '#0f172a'}; border:1px solid ${info.count > 0 ? '#f87171' : '#334155'}; color:${info.count > 0 ? '#fff' : '#475569'}; border-radius:4px; font-size:7.2px; font-weight:900; padding:1.5px 0; cursor:${info.count > 0 ? 'pointer' : 'not-allowed'};">➖</button>
+        <button onclick="event.stopPropagation(); addPlateCopyToDeck('${baseP.id}');" ${canAddNext ? '' : 'disabled'} style="flex:1.4; background:${canAddNext ? '#0284c7' : '#0f172a'}; border:1px solid ${canAddNext ? '#7dd3fc' : '#334155'}; color:${canAddNext ? '#fff' : '#475569'}; border-radius:4px; font-size:7px; font-weight:900; padding:1.5px 0; cursor:${canAddNext ? 'pointer' : 'not-allowed'};">+${info.nextCopyCost}◆</button>
+      </div>
     </div>`;
   }).join("");
 };
@@ -6206,6 +6603,10 @@ renderPlatesTray = function() {
   const selIdx = state.selectedPlateIdx;
   const curP = state.plates[selIdx] || equipped[0].p;
   const cBdg = document.getElementById("pcard-badge");
+  const cName = document.getElementById("pcard-name");
+  if (cName && curP) {
+    cName.textContent = (curP.totalCopiesEquipped > 1) ? `${curP.name} #${curP.copyNumber || 1}` : curP.name;
+  }
   if (cBdg && curP && BANANA_PLATE_SPRITES[curP.id]) {
     cBdg.style.background = "radial-gradient(circle, rgba(56,189,248,0.28) 0%, rgba(15,23,42,0.95) 100%)";
     cBdg.style.borderColor = "#38bdf8";
@@ -6220,12 +6621,13 @@ renderPlatesTray = function() {
       div.className = `plate-card ${p.used ? "used" : ""} ${selIdx === idx ? "active" : ""}`;
       div.style.minWidth = "80px";
       div.style.textAlign = "center";
+      const copyTag = (p.totalCopiesEquipped > 1) ? ` #${p.copyNumber || 1}` : "";
       div.innerHTML = `
         <span class="p-cost">${p.cost}◆ · ${p.rarity || "C"}</span>
         <div style="height:36px; display:flex; align-items:center; justify-content:center; margin:2px 0;">
           ${spUri ? `<img src="${spUri}" style="width:34px; height:34px; object-fit:contain;">` : `<span style="font-size:12px; font-weight:900; color:#f97316;">${p.badge || "+20"}</span>`}
         </div>
-        <div class="p-title" style="font-size:8.2px;">${p.name}</div>
+        <div class="p-title" style="font-size:8.2px;">${p.name}${copyTag}</div>
       `;
       div.onclick = () => {
         state.selectedPlateIdx = idx;
@@ -6281,6 +6683,7 @@ renderHubAndCollection = function() {
     const canAdd = playerProgression.teams.length < maxTeams;
     const canDelete = playerProgression.teams.length > 1;
     const curTeam = playerProgression.teams[playerProgression.activeTeamIdx] || playerProgression.teams[0] || { name: "Time #1" };
+    const bal = countDeckBalanceStats(state.deckP1);
 
     const teamBtns = playerProgression.teams.map((t, i) => {
       const isAct = (i === playerProgression.activeTeamIdx);
@@ -6300,6 +6703,15 @@ renderHubAndCollection = function() {
         </div>
         <span style="font-size:7.8px; color:#facc15; font-weight:800;">Limite: ${playerProgression.teams.length}/3</span>
       </div>
+      <div style="width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; margin-top:4px; padding:3px 6px; border-radius:6px; background:rgba(15,23,42,0.92); border:1px solid rgba(250,204,21,0.38);">
+        <span style="font-size:7.6px; font-weight:900; color:#fde047;">⚖️ Regras do Deck:</span>
+        <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
+          <span style="font-size:7.4px; font-weight:900; padding:1px 5px; border-radius:4px; background:${bal.megas >= MAX_DECK_MEGAS ? '#581c87' : '#1e293b'}; border:1px solid ${bal.megas >= MAX_DECK_MEGAS ? '#e879f9' : '#475569'}; color:#f5d0fe;">🔥 Mega: ${bal.megas}/${MAX_DECK_MEGAS}</span>
+          <span style="font-size:7.4px; font-weight:900; padding:1px 5px; border-radius:4px; background:${bal.uxs >= MAX_DECK_UX ? '#3b0764' : '#1e293b'}; border:1px solid ${bal.uxs >= MAX_DECK_UX ? '#c084fc' : '#475569'}; color:#e9d5ff;">💎 UX: ${bal.uxs}/${MAX_DECK_UX}</span>
+          <span style="font-size:7.4px; font-weight:900; padding:1px 5px; border-radius:4px; background:${bal.exs >= MAX_DECK_EX ? '#713f12' : '#1e293b'}; border:1px solid ${bal.exs >= MAX_DECK_EX ? '#facc15' : '#475569'}; color:#fef08a;">⭐ EX: ${bal.exs}/${MAX_DECK_EX}</span>
+          <span style="font-size:7.2px; font-weight:800; color:#4ade80;">📦 R/UC/C & Repetidos: Livre</span>
+        </div>
+      </div>
     `;
 
     pBarEl.innerHTML = `<div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">` + teamBtns + addBtn + autoBtn + `</div>` + manageBar;
@@ -6307,9 +6719,16 @@ renderHubAndCollection = function() {
 
   const indEl = document.getElementById("editing-slot-indicator");
   if (indEl) {
-    const curFigIdx = state.deckP1[currentEditingDeckSlot % 6];
-    const curFig = FIGURES_DB[curFigIdx % FIGURES_DB.length];
-    indEl.textContent = `Editando Slot #${(currentEditingDeckSlot % 6) + 1} (${curFig ? curFig.name : ''})`;
+    if (_lastDeckStatusOverrideMsg) {
+      indEl.style.color = _lastDeckStatusOverrideColor || "#fde047";
+      indEl.textContent = _lastDeckStatusOverrideMsg;
+      _lastDeckStatusOverrideMsg = "";
+    } else {
+      const curFigIdx = state.deckP1[currentEditingDeckSlot % 6];
+      const curFig = FIGURES_DB[curFigIdx % FIGURES_DB.length];
+      indEl.style.color = "#fde047";
+      indEl.textContent = `Editando Slot #${(currentEditingDeckSlot % 6) + 1} (${curFig ? curFig.name : ''})`;
+    }
   }
 
   const showcase = document.getElementById("hub-deck-showcase");
@@ -6323,12 +6742,18 @@ renderHubAndCollection = function() {
       const roleIcon = f.mp >= 3 ? "🏃" : (f.mp === 2 ? "⚔️" : "🛡️");
       const zm = (typeof getFigureZMove === "function") ? getFigureZMove(f) : null;
       const zmPower = zm ? (zm.color === "purple" ? "★".repeat(zm.stars || 4) : `${zm.dmg || 200}`) : "";
-      const zmCol = zm ? (zm.color === "purple" ? "#c084fc" : (zm.color === "gold" ? "#facc15" : "#ffffff")) : "#fde047";
+      const isMega = isMegaPokemonFigure(f);
+      const copiesInDeck = getEquippedFigureCount(idx, state.deckP1);
+      const ownedUnits = getOwnedFigureUnits(idx);
 
       return `<div class="deck-slot-card-v540 ${isSelSlot ? 'selected-slot' : ''}" onclick="selectDeckSlotToEdit(${slotPos})">
         <div class="deck-slot-top-row">
           <span class="deck-slot-num-tag">#${slotPos + 1}</span>
-          ${getRarityBadgeHtml(f.rarity)}
+          <div style="display:flex; align-items:center; gap:2px;">
+            ${getRarityBadgeHtml(f.rarity)}
+            ${isMega ? `<span style="background:#db2777; color:#fff; font-size:6.2px; font-weight:900; padding:0.5px 3px; border-radius:3px;">MEGA</span>` : ''}
+            ${copiesInDeck > 1 ? `<span style="background:#0284c7; color:#fff; font-size:6.2px; font-weight:900; padding:0.5px 3px; border-radius:3px;">📦${copiesInDeck}/${ownedUnits}</span>` : ''}
+          </div>
           <span onclick="event.stopPropagation(); openFigureDetailsModal(${idx});" style="font-size:8.5px; color:#7dd3fc; font-weight:900; padding:0 2px;">ⓘ</span>
         </div>
         <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain; margin:1px 0; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.8));">
@@ -6362,7 +6787,7 @@ renderHubAndCollection = function() {
 
     const roleBtns = [
       { id: "ALL",     lbl: "🌐 Todos Papéis" },
-      { id: "IN_DECK", lbl: "⭐ No Time (6)" },
+      { id: "IN_DECK", lbl: "⭐ No Time" },
       { id: "MP3",     lbl: "🏃 3 MP Runners" },
       { id: "MP2",     lbl: "⚔️ 2 MP Fighters" },
       { id: "MP1",     lbl: "🛡️ 1 MP Tanks" }
@@ -6484,13 +6909,17 @@ renderHubAndCollection = function() {
   pageItems.forEach(idx => {
     const f = FIGURES_DB[idx];
     const unlocked = isFigureUnlocked(idx);
+    const ownedUnits = unlocked ? getOwnedFigureUnits(idx) : 0;
+    const equippedCount = getEquippedFigureCount(idx, state.deckP1);
     const deckSlotIdx = state.deckP1.indexOf(idx);
-    const inDeck = deckSlotIdx !== -1;
+    const inDeck = equippedCount > 0;
+    const canAddMoreCopiesToDeck = unlocked && (equippedCount < ownedUnits);
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
     const maxDmg = getFigureMaxDmg(f);
     const locType = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
     const lockedLabel = (typeof t === "function") ? t("deck.locked", "🔒 Bloqueado") : "🔒 Bloqueado";
     const unlockShopLabel = (typeof t === "function") ? t("deck.unlock_in_shop", "🔒 Desbloquear na Loja") : "🔒 Desbloquear na Loja";
+    const isMega = isMegaPokemonFigure(f);
 
     const zm = (typeof getFigureZMove === "function") ? getFigureZMove(f) : null;
     const zmPower = zm ? (zm.color === "purple" ? "★".repeat(zm.stars || 4) : `${zm.dmg || 200}`) : "";
@@ -6504,24 +6933,36 @@ renderHubAndCollection = function() {
     card.style.borderColor = inDeck ? "#facc15" : (unlocked ? (f.rarity === "UX" ? "#c084fc" : "rgba(56,189,248,0.38)") : "#334155");
 
     if (figureCaseViewCols === 3) {
-      const slotEquipText = inDeck
-        ? (typeof t === "function" ? t("deck.in_slot", `★ Slot #${deckSlotIdx + 1}`, { slot: deckSlotIdx + 1 }) : `★ Slot #${deckSlotIdx + 1}`)
-        : (typeof t === "function" ? t("deck.to_slot", `➔ Slot #${(currentEditingDeckSlot % 6) + 1}`, { slot: (currentEditingDeckSlot % 6) + 1 }) : `➔ Slot #${(currentEditingDeckSlot % 6) + 1}`);
+      let slotEquipText = "";
+      if (inDeck) {
+        if (canAddMoreCopiesToDeck) {
+          slotEquipText = `★ ${equippedCount}/${ownedUnits} (+Slot #${(currentEditingDeckSlot % 6) + 1})`;
+        } else if (ownedUnits > 1) {
+          slotEquipText = `★ ${equippedCount}/${ownedUnits} No Time`;
+        } else {
+          slotEquipText = `★ Slot #${deckSlotIdx + 1}`;
+        }
+      } else {
+        slotEquipText = `➔ Slot #${(currentEditingDeckSlot % 6) + 1}`;
+      }
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; gap:2px;">
-          ${getRarityBadgeHtml(f.rarity)}
-          <span style="font-size:7.2px; color:#fde047; font-weight:900;">MP ${f.mp} · 💥${maxDmg}</span>
+          <div style="display:flex; align-items:center; gap:2px;">
+            ${getRarityBadgeHtml(f.rarity)}
+            ${isMega ? `<span style="background:#db2777; color:#fff; font-size:6px; font-weight:900; padding:0.5px 2.5px; border-radius:3px;">MEGA</span>` : ''}
+          </div>
+          <span style="font-size:7px; color:#fde047; font-weight:900;">MP ${f.mp} · 💥${maxDmg}</span>
         </div>
         <div style="display:flex; flex-direction:column; align-items:center; margin:2px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
           <img src="${sp.uri}" style="width:40px; height:40px; object-fit:contain; ${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.55);'}">
           <strong style="font-size:8.2px; color:${unlocked ? '#fff' : '#94a3b8'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${unlocked ? '' : '🔒 '}${f.name}</strong>
-          <span style="font-size:6.8px; color:#94a3b8;">Lv.${f.level || 1} · CLv+${f.clv || 0}</span>
+          <span style="font-size:6.8px; color:#94a3b8;">Lv.${f.level || 1} · CLv+${f.clv || 0}${unlocked ? ` · <strong style="color:#4ade80;">📦x${ownedUnits}</strong>` : ''}</span>
           ${getWheelColorBarHtml(f.wheel)}
           ${zm ? `<div class="figcase-zmove-badge" title="⚡ Z-Move: ${zm.name} (${zmPower})">⚡ ${zm.name.replace(/^⚡\s*/, "")} (${zmPower})</div>` : ''}
         </div>
         <div style="display:flex; gap:3px; margin-top:2px;">
           ${unlocked ? `
-            <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:7.4px; padding:3px 2px;" onclick="toggleDeckEquip(${idx})">
+            <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:7.2px; padding:3px 2px;" onclick="toggleDeckEquip(${idx})">
               ${slotEquipText}
             </button>
             <button class="btn purple" style="font-size:7.2px; padding:3px 4px;" onclick="fuseFigure(${idx})" title="Fusão / +CLv">⚡</button>
@@ -6533,21 +6974,31 @@ renderHubAndCollection = function() {
         </div>
       `;
     } else {
-      const slotEquipText = inDeck
-        ? (typeof t === "function" ? t("deck.in_slot", `★ No Slot #${deckSlotIdx + 1}`, { slot: deckSlotIdx + 1 }) : `★ No Slot #${deckSlotIdx + 1}`)
-        : (typeof t === "function" ? t("deck.to_slot", `➔ Equipar Slot #${(currentEditingDeckSlot % 6) + 1}`, { slot: (currentEditingDeckSlot % 6) + 1 }) : `➔ Equipar Slot #${(currentEditingDeckSlot % 6) + 1}`);
+      let slotEquipText = "";
+      if (inDeck) {
+        if (canAddMoreCopiesToDeck) {
+          slotEquipText = `★ ${equippedCount}/${ownedUnits} (+Equipar Slot #${(currentEditingDeckSlot % 6) + 1})`;
+        } else if (ownedUnits > 1) {
+          slotEquipText = `★ ${equippedCount}/${ownedUnits} Unidades no Time`;
+        } else {
+          slotEquipText = `★ No Slot #${deckSlotIdx + 1}`;
+        }
+      } else {
+        slotEquipText = `➔ Equipar Slot #${(currentEditingDeckSlot % 6) + 1}`;
+      }
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <strong style="font-size:9.2px; color:${unlocked ? '#fff' : '#94a3b8'};">${unlocked ? '' : '🔒 '}${f.name}</strong>
           <div style="display:flex; align-items:center; gap:3px;">
             ${getRarityBadgeHtml(f.rarity)}
+            ${isMega ? `<span style="background:#db2777; color:#fff; font-size:6.5px; font-weight:900; padding:0.5px 3px; border-radius:3px;">MEGA</span>` : ''}
             <span style="font-size:7.8px; color:#bae6fd; font-weight:900;">MP ${f.mp}</span>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:6px; margin:4px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
           <img src="${sp.uri}" style="width:42px; height:42px; object-fit:contain; ${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.55);'}">
           <div class="small-muted" style="flex:1; min-width:0;">
-            ${unlocked ? `<span style="color:#4ade80; font-weight:800;">✅ Lv.${f.level}/10 · CLv+${f.clv}</span>` : `<span style="color:#facc15; font-weight:800;">${lockedLabel}</span>`}<br>
+            ${unlocked ? `<span style="color:#4ade80; font-weight:800;">✅ Lv.${f.level}/10 · CLv+${f.clv} · 📦x${ownedUnits} un.</span>` : `<span style="color:#facc15; font-weight:800;">${lockedLabel}</span>`}<br>
             ${locType} · 💥Máx ${maxDmg}<br>
             ${getWheelColorBarHtml(f.wheel)}
             ${zm ? `<div style="font-size:7.2px; font-weight:900; color:${zmCol}; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="⚡ Z-Move: ${zm.name} (${zmPower})">⚡ <strong>Z-Move:</strong> ${zm.name.replace(/^⚡\s*/, "")} <span style="color:#fde047;">(${zmPower})</span></div>` : ''}
@@ -6555,7 +7006,7 @@ renderHubAndCollection = function() {
         </div>
         <div style="display:flex; gap:4px;">
           ${unlocked ? `
-            <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:8px; padding:3.5px;" onclick="toggleDeckEquip(${idx})">
+            <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:7.8px; padding:3.5px;" onclick="toggleDeckEquip(${idx})">
               ${slotEquipText}
             </button>
             <button class="btn purple" style="font-size:8px; padding:3.5px 6px;" onclick="fuseFigure(${idx})">+CLv</button>
