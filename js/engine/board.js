@@ -1448,13 +1448,17 @@ function drawHDVectorBoardAndChrome() {
     ctx.fillStyle = "#ffffff";
     ctx.font = "900 8.5px sans-serif";
     ctx.textAlign = "center";
+    const turnMine = (typeof t === "function") ? t("battle.turn_pill_mine", "🟢 SUA VEZ!") : "🟢 SUA VEZ!";
+    const turnOpp = (typeof t === "function") ? t("battle.turn_pill_opp", "⏳ Vez do Oponente...") : "⏳ Vez do Oponente...";
     ctx.fillText(
-      isMyTurn ? "🟢 SEU TURNO — Selecione uma peça" : "⏳ TURNO DO OPONENTE — Aguarde...",
+      isMyTurn ? `${turnMine} — Selecione uma peça` : `${turnOpp}`,
       176.5, 59
     );
     ctx.restore();
   } else if (state.mode === "pass") {
-    const curP = state.turn === "p1" ? "Jogador 1 (Azul)" : "Jogador 2 (Vermelho)";
+    const curP = state.turn === "p1"
+      ? ((typeof t === "function") ? t("battle.turn_p1", "Jogador 1 (Azul)") : "Jogador 1 (Azul)")
+      : ((typeof t === "function") ? t("battle.turn_p2", "Jogador 2 (Vermelho)") : "Jogador 2 (Vermelho)");
     ctx.save();
     ctx.fillStyle = state.turn === "p1" ? "rgba(2, 132, 199, 0.95)" : "rgba(225, 29, 72, 0.95)";
     ctx.strokeStyle = "#ffffff";
@@ -3185,19 +3189,21 @@ function showCornerFigureCard(u) {
       let val = "";
       if (s.color === "purple") val = "★".repeat(s.stars || 1);
       else if (s.dmg > 0) val = String(s.dmg);
-      else if (s.color === "blue") val = "Dodge";
-      else if (s.color === "red") val = "Miss";
+      else if (s.color === "blue") val = (typeof t === "function") ? t("slice.dodge", "Dodge") : "Dodge";
+      else if (s.color === "red") val = (typeof t === "function") ? t("slice.miss", "Miss") : "Miss";
 
+      const locName = (typeof localizeMove === "function") ? localizeMove(s.name) : s.name;
       let effBadge = "";
-      if (s.effect && FCC_EFFECT_LABELS[s.effect]) {
-        effBadge = `<span style="font-size:7px; color:#38bdf8; background:rgba(2,132,199,0.25); border-radius:2px; padding:0 3px;">${FCC_EFFECT_LABELS[s.effect]}</span>`;
+      if (s.effect) {
+        const effText = (typeof t === "function") ? t("effect." + s.effect, FCC_EFFECT_LABELS[s.effect] || s.effect) : (FCC_EFFECT_LABELS[s.effect] || s.effect);
+        effBadge = `<span style="font-size:7px; color:#38bdf8; background:rgba(2,132,199,0.25); border-radius:2px; padding:0 3px;">${effText}</span>`;
       }
 
       return `
         <div class="fcc-move-row">
           <span style="display:flex; align-items:center; gap:2.5px; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
             <span style="width:5px; height:5px; border-radius:1px; background:${colMap[s.color] || '#fff'}; display:inline-block; flex-shrink:0;"></span>
-            <span style="color:#f1f5f9; font-weight:700; overflow:hidden; text-overflow:ellipsis;">${s.name}</span>
+            <span style="color:#f1f5f9; font-weight:700; overflow:hidden; text-overflow:ellipsis;">${locName}</span>
             ${effBadge}
           </span>
           <span style="color:#fde047; font-weight:900; margin-left:2px; flex-shrink:0;">${val}</span>
@@ -3210,13 +3216,13 @@ function showCornerFigureCard(u) {
   const abEl = document.getElementById("fcc-ability-box");
   if (abEl) {
     const jumpDesc = (typeof t === "function") ? t("jump.jumps_desc", "🦘 PULA FIGURAS: Pode saltar por cima de outros Pokémon gastando 2 MP por salto.") : "🦘 PULA FIGURAS: Pode saltar por cima de outros Pokémon gastando 2 MP por salto.";
-    const noJumpDesc = (typeof t === "function") ? t("jump.no_jump_desc", "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (bloqueado por peças adjacentes).") : "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (bloqueado por peças adjacentes).";
+    const noJumpDesc = (typeof t === "function") ? t("jump.no_jump_desc", "🚫 NÃO PULA: Não pode saltar sobre outras figuras no caminho.") : "🚫 NÃO PULA: Não pode saltar sobre outras figuras no caminho.";
     const jumpNotice = canJump
       ? `<div style="margin-bottom:2px; font-weight:900; color:#4ade80; font-size:7.5px;">${jumpDesc}</div>`
       : `<div style="margin-bottom:2px; font-weight:800; color:#94a3b8; font-size:7.5px;">${noJumpDesc}</div>`;
-    const abText = (typeof FIGURE_ABILITIES_DB !== "undefined" && (FIGURE_ABILITIES_DB[u.baseId] || FIGURE_ABILITIES_DB[u.id]))
-      || u.ability || "Figura padrão Pokémon Duel.";
-    abEl.innerHTML = `${jumpNotice}<strong style="color:#facc15;">Passiva:</strong> ${abText}`;
+    const abText = (typeof localizeAbility === "function") ? localizeAbility(u) : ((typeof FIGURE_ABILITIES_DB !== "undefined" && (FIGURE_ABILITIES_DB[u.baseId] || FIGURE_ABILITIES_DB[u.id])) || u.ability || "Figura padrão Pokémon Duel.");
+    const passLabel = (typeof t === "function") ? t("ability.passive", "Passiva:") : "Passiva:";
+    abEl.innerHTML = `${jumpNotice}<strong style="color:#facc15;">${passLabel}</strong> ${abText}`;
   }
 
   card.classList.add("visible");

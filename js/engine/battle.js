@@ -249,34 +249,55 @@ function getTargetAngleForSegment(segs, chosenIdx, pinAngleRad = -Math.PI / 2, s
 
 function evaluateCombat(atkUnit, defUnit, atkSpin, defSpin) {
   const a = atkSpin.chosen, d = defSpin.chosen;
-  if (a.color === "blue" || d.color === "blue") return { winner:"none", reason:"Blue Defense! Both hold ground." };
-  if (a.color === "red" && d.color === "red") return { winner:"none", reason:"Both spun Miss!" };
-  if (a.color === "red") return { winner:"def", effect:d.color==="purple"?d.effect:"ko", reason:`${atkUnit.name} spun Miss! ${defUnit.name} wins!` };
-  if (d.color === "red") return { winner:"atk", effect:a.color==="purple"?a.effect:"ko", reason:`${defUnit.name} spun Miss! ${atkUnit.name} wins!` };
-  if (a.color === "gold" && d.color === "purple") return { winner:"atk", effect:"ko", reason:`Gold (${a.name}) beats Purple (${d.name})!` };
-  if (d.color === "gold" && a.color === "purple") return { winner:"def", effect:"ko", reason:`Gold (${d.name}) beats Purple (${a.name})!` };
-  if (a.color === "purple" && d.color === "white") return { winner:"atk", effect:a.effect||"ko", reason:`Purple (${a.name} ★${a.stars}) beats White!` };
-  if (d.color === "purple" && a.color === "white") return { winner:"def", effect:d.effect||"ko", reason:`Purple (${d.name} ★${d.stars}) beats White!` };
+  const aName = (typeof localizeMove === "function") ? localizeMove(a.name) : a.name;
+  const dName = (typeof localizeMove === "function") ? localizeMove(d.name) : d.name;
+
+  if (a.color === "blue" || d.color === "blue") {
+    return { winner:"none", reason: typeof t === "function" ? t("combat.blue_defense", "Blue Defense! Both hold ground.") : "Blue Defense! Both hold ground." };
+  }
+  if (a.color === "red" && d.color === "red") {
+    return { winner:"none", reason: typeof t === "function" ? t("combat.miss_both", "Both spun Miss!") : "Both spun Miss!" };
+  }
+  if (a.color === "red") {
+    return { winner:"def", effect:d.color==="purple"?d.effect:"ko", reason: typeof t === "function" ? t("combat.miss_win", { loser: atkUnit.name, winner: defUnit.name }) : `${atkUnit.name} spun Miss! ${defUnit.name} wins!` };
+  }
+  if (d.color === "red") {
+    return { winner:"atk", effect:a.color==="purple"?a.effect:"ko", reason: typeof t === "function" ? t("combat.miss_win", { loser: defUnit.name, winner: atkUnit.name }) : `${defUnit.name} spun Miss! ${atkUnit.name} wins!` };
+  }
+  if (a.color === "gold" && d.color === "purple") {
+    return { winner:"atk", effect:"ko", reason: typeof t === "function" ? t("combat.gold_beats_purple", { gold: aName, purple: dName }) : `Gold (${aName}) beats Purple (${dName})!` };
+  }
+  if (d.color === "gold" && a.color === "purple") {
+    return { winner:"def", effect:"ko", reason: typeof t === "function" ? t("combat.gold_beats_purple", { gold: dName, purple: aName }) : `Gold (${dName}) beats Purple (${aName})!` };
+  }
+  if (a.color === "purple" && d.color === "white") {
+    return { winner:"atk", effect:a.effect||"ko", reason: typeof t === "function" ? t("combat.purple_beats_white", { purple: aName, stars: a.stars || 1 }) : `Purple (${aName} ★${a.stars}) beats White!` };
+  }
+  if (d.color === "purple" && a.color === "white") {
+    return { winner:"def", effect:d.effect||"ko", reason: typeof t === "function" ? t("combat.purple_beats_white", { purple: dName, stars: d.stars || 1 }) : `Purple (${dName} ★${d.stars}) beats White!` };
+  }
   if (a.color === "purple" && d.color === "purple") {
-    if (a.stars > d.stars) return { winner:"atk", effect:a.effect||"ko", reason:`★${a.stars} beats ★${d.stars}!` };
-    if (d.stars > a.stars) return { winner:"def", effect:d.effect||"ko", reason:`★${d.stars} beats ★${a.stars}!` };
-    return { winner:"none", reason:`Purple Star Tie (★${a.stars})!` };
+    if (a.stars > d.stars) return { winner:"atk", effect:a.effect||"ko", reason: typeof t === "function" ? t("combat.star_beats_star", { highStars: a.stars, lowStars: d.stars }) : `★${a.stars} beats ★${d.stars}!` };
+    if (d.stars > a.stars) return { winner:"def", effect:d.effect||"ko", reason: typeof t === "function" ? t("combat.star_beats_star", { highStars: d.stars, lowStars: a.stars }) : `★${d.stars} beats ★${a.stars}!` };
+    return { winner:"none", reason: typeof t === "function" ? t("combat.star_tie", { stars: a.stars }) : `Purple Star Tie (★${a.stars})!` };
   }
 
   // === HYPER SONIC IMMUNITY RULE (Mew / Official Pokémon Duel Rule) ===
-  // If a Pokémon spins Hyper Sonic (Gold, 50 DMG) and the opponent spins a White or Gold attack with 100+ DMG,
-  // this Pokémon is NOT knocked out! It survives the hit and both hold ground.
   const isHyperSonicMove = (s) => s && typeof s.name === "string" && s.name.toLowerCase().replace(/[\s\-_]/g, "") === "hypersonic";
   if (isHyperSonicMove(a) && (d.color === "white" || d.color === "gold") && (d.dmg || 0) >= 100) {
-    return { winner: "none", reason: `🛡️ Hyper Sonic (${atkUnit.name}): Imune a nocaute contra 100+ DANO (${d.name} ${d.dmg})! Ambos mantêm posição.` };
+    return { winner: "none", reason: typeof t === "function" ? t("combat.hyper_sonic", { name: atkUnit.name }) : `🛡️ Hyper Sonic (${atkUnit.name}): Imune a nocaute contra 100+ DANO!` };
   }
   if (isHyperSonicMove(d) && (a.color === "white" || a.color === "gold") && (a.dmg || 0) >= 100) {
-    return { winner: "none", reason: `🛡️ Hyper Sonic (${defUnit.name}): Imune a nocaute contra 100+ DANO (${a.name} ${a.dmg})! Ambos mantêm posição.` };
+    return { winner: "none", reason: typeof t === "function" ? t("combat.hyper_sonic", { name: defUnit.name }) : `🛡️ Hyper Sonic (${defUnit.name}): Imune a nocaute contra 100+ DANO!` };
   }
 
-  if (a.dmg > d.dmg) return { winner:"atk", effect:"ko", reason:`${a.name} (${a.dmg}) defeats ${d.name} (${d.dmg})!` };
-  if (d.dmg > a.dmg) return { winner:"def", effect:"ko", reason:`${d.name} (${d.dmg}) defeats ${a.name} (${a.dmg})!` };
-  return { winner:"none", reason:`Damage Tie (${a.dmg} vs ${d.dmg})!` };
+  if (a.dmg > d.dmg) {
+    return { winner:"atk", effect:"ko", reason: typeof t === "function" ? t("combat.dmg_beats_dmg", { winner: aName, winDmg: a.dmg, loser: dName, loseDmg: d.dmg }) : `${aName} (${a.dmg}) defeats ${dName} (${d.dmg})!` };
+  }
+  if (d.dmg > a.dmg) {
+    return { winner:"def", effect:"ko", reason: typeof t === "function" ? t("combat.dmg_beats_dmg", { winner: dName, winDmg: d.dmg, loser: aName, loseDmg: a.dmg }) : `${dName} (${d.dmg}) defeats ${aName} (${a.dmg})!` };
+  }
+  return { winner:"none", reason: typeof t === "function" ? t("combat.dmg_tie", { dmg: a.dmg }) : `Damage Tie (${a.dmg} vs ${d.dmg})!` };
 }
 
 function drawAuthenticDataDisk(dctx, cx, cy, radius, segs, rotAngle, highlightIdx, needleWobble, borderCol, showTopPin = true, customPinAngle = null) {
@@ -340,12 +361,13 @@ function drawAuthenticDataDisk(dctx, cx, cy, radius, segs, rotAngle, highlightId
       dctx.textAlign = "center";
       dctx.textBaseline = "middle";
       const isMultiSlice = Boolean(s.multiHit || /\d+x\b/i.test(s.name));
-      const mainLbl = s.color === "purple" ? "★".repeat(s.stars || 1) : (s.dmg > 0 ? (String(s.dmg) + (isMultiSlice ? "x" : "")) : s.name.slice(0, 4));
+      const locName = (typeof localizeMove === "function") ? localizeMove(s.name) : s.name;
+      const mainLbl = s.color === "purple" ? "★".repeat(s.stars || 1) : (s.dmg > 0 ? (String(s.dmg) + (isMultiSlice ? "x" : "")) : locName.slice(0, 5));
       dctx.fillText(mainLbl, 0, radius > 75 ? -4 : 0);
 
       if (radius > 75 && s.size >= 12) {
         dctx.font = "bold 7.8px sans-serif";
-        dctx.fillText(s.name.slice(0, 12), 0, 7);
+        dctx.fillText(locName.slice(0, 14), 0, 7);
       }
       dctx.restore();
     }

@@ -218,30 +218,30 @@
         <div style="display:flex; align-items:center; gap:8px;">
           <span style="font-size:18px;">🎮</span>
           <div>
-            <div style="font-size:14px; font-weight:900; color:#38bdf8;">OUTROS MODOS DE DUELO</div>
-            <div style="font-size:9.5px; color:#bae6fd;">Multiplayer por Convite, Ginásio, Quests & Treino</div>
+            <div style="font-size:14px; font-weight:900; color:#38bdf8;" data-i18n="modes.title">OUTROS MODOS DE DUELO</div>
+            <div style="font-size:9.5px; color:#bae6fd;" data-i18n="modes.sub">Multiplayer por Convite, Ginásio, Quests & Treino</div>
           </div>
         </div>
         <button onclick="closePlayModeSelectorModal()" style="background:#1e293b; border:1px solid #94a3b8; color:#fff; border-radius:5px; width:28px; height:28px; font-weight:900; cursor:pointer;">✕</button>
       </div>
       <div style="display:flex; flex-direction:column; gap:7px;">
         <button class="btn" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(180deg,#0284c7 0%,#0369a1 100%); border:1.5px solid #38bdf8;" onclick="closePlayModeSelectorModal(); switchDrawerTab('p2p');">
-          <span>🌐 <strong>Room Match (Multiplayer por Convite P2P)</strong><br><span style="font-size:9px; font-weight:700; color:#e0f2fe;">Conecte 2 celulares por código de 4 dígitos ou jogue 2P local</span></span>
+          <span>🌐 <strong data-i18n="modes.room_match">Room Match (Multiplayer por Convite P2P)</strong><br><span style="font-size:9px; font-weight:700; color:#e0f2fe;" data-i18n="modes.room_match_desc">Conecte 2 celulares por código de 4 dígitos ou jogue 2P local</span></span>
           <span style="font-size:16px;">▶</span>
         </button>
         <button class="btn gold" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(180deg,#854d0e 0%,#713f12 50%,#451a03 100%); border:1.5px solid #facc15;" onclick="closePlayModeSelectorModal(); startGymCupMatch();">
-          <span>🏆 <strong>Gym Cup (Copa de Ginásio Temática)</strong><br><span style="font-size:9px; font-weight:800; color:#fef08a;">🌿 Copa de Grama & Fogo · Grama (+1 MP) · Fogo (+20 DMG) · Vale Troféus!</span></span>
+          <span>🏆 <strong data-i18n="modes.gym_cup">Gym Cup (Copa de Ginásio Temática)</strong><br><span style="font-size:9px; font-weight:800; color:#fef08a;" data-i18n="modes.gym_cup_desc">🌿 Copa de Grama & Fogo · Grama (+1 MP) · Fogo (+20 DMG) · Vale Troféus!</span></span>
           <span style="font-size:16px;">🏆</span>
         </button>
         <button class="btn purple" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;" onclick="closePlayModeSelectorModal(); openCarmonteQuestsModal();">
-          <span>🗺️ <strong>Quests (Campanha Carmonte Island · ⚡15)</strong><br><span style="font-size:9px; font-weight:700; color:#f3e8ff;">Usa 15⚡ da Barra Verde · Hotéis Ulex, Rosa, Atlantis, Elysium</span></span>
+          <span>🗺️ <strong data-i18n="modes.quests">Quests (Campanha Carmonte Island · ⚡15)</strong><br><span style="font-size:9px; font-weight:700; color:#f3e8ff;" data-i18n="modes.quests_desc">Usa 15⚡ da Barra Verde · Hotéis Ulex, Rosa, Atlantis, Elysium</span></span>
           <span style="font-size:16px;">▶</span>
         </button>
         <button class="btn green" style="padding:10px; font-size:12px; text-align:left; display:flex; justify-content:space-between; align-items:center;" onclick="closePlayModeSelectorModal(); startTrainingCenterMatch();">
-          <span>🏋️ <strong>Training Center (Treino Tático Livre)</strong><br><span style="font-size:9px; font-weight:700; color:#dcfce7;">Treino sem risco: 0 Pontos ELO e Sem Recompensas/Caixas</span></span>
+          <span>🏋️ <strong data-i18n="modes.training">Training Center (Treino Tático Livre)</strong><br><span style="font-size:9px; font-weight:700; color:#dcfce7;" data-i18n="modes.training_desc">Treino sem risco: 0 Pontos ELO e Sem Recompensas/Caixas</span></span>
           <span style="font-size:16px;">▶</span>
         </button>
-        <div style="font-size:9.5px; color:#fde047; text-align:center; margin-top:2px; background:rgba(15,23,42,0.6); padding:4px 6px; border-radius:6px; border:1px dashed rgba(250,204,21,0.4);">
+        <div style="font-size:9.5px; color:#fde047; text-align:center; margin-top:2px; background:rgba(15,23,42,0.6); padding:4px 6px; border-radius:6px; border:1px dashed rgba(250,204,21,0.4);" data-i18n-html="modes.ranked_tip">
           ⚡ Para jogar <strong>Ranqueada (League Match)</strong>, toque no botão principal <strong>Play</strong>!
         </div>
       </div>
@@ -257,9 +257,9 @@
       <div class="mm-radar-ring ring2"></div>
       <div class="mm-radar-ring ring3"></div>
 
-      <div class="ux-rainbow-badge" style="display:inline-block; margin-bottom:6px;">🏆 LIGA CARMONTE · RANQUEADA</div>
-      <div id="mm-status-title" style="font-size:16px; font-weight:900; color:#fde047; letter-spacing:0.5px; margin-bottom:2px;">BUSCANDO ADVERSÁRIO ONLINE</div>
-      <div id="mm-status-sub" style="font-size:10px; color:#93c5fd; font-weight:700; margin-bottom:12px;">Sincronizando com a rede de treinadores da Liga...</div>
+      <div class="ux-rainbow-badge" style="display:inline-block; margin-bottom:6px;" data-i18n="mm.league_ranked">🏆 LIGA CARMONTE · RANQUEADA</div>
+      <div id="mm-status-title" style="font-size:16px; font-weight:900; color:#fde047; letter-spacing:0.5px; margin-bottom:2px;" data-i18n="mm.searching">BUSCANDO ADVERSÁRIO ONLINE</div>
+      <div id="mm-status-sub" style="font-size:10px; color:#93c5fd; font-weight:700; margin-bottom:12px;" data-i18n="mm.syncing">Sincronizando com a rede de treinadores da Liga...</div>
 
       <!-- Animated Center Radar & Ball -->
       <div style="position:relative; width:110px; height:110px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center;">
@@ -273,13 +273,13 @@
       <!-- Timer & Progress Bar -->
       <div style="background:#091224; border:1px solid #1e3a8a; border-radius:8px; padding:8px 10px; margin-bottom:12px; position:relative; z-index:4;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span style="font-size:10px; color:#cbd5e1; font-weight:800;">Tempo de Busca:</span>
+          <span style="font-size:10px; color:#cbd5e1; font-weight:800;" data-i18n="mm.search_time">Tempo de Busca:</span>
           <span id="mm-timer-display" style="font-size:13px; font-weight:900; color:#fde047; font-family:monospace;">00:00 / 00:30</span>
         </div>
         <div style="width:100%; height:6px; background:#1e293b; border-radius:99px; overflow:hidden;">
           <div id="mm-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg,#38bdf8,#facc15); transition:width 0.9s linear;"></div>
         </div>
-        <div id="mm-live-log" style="font-size:9px; color:#7dd3fc; margin-top:5px; min-height:14px; font-weight:700;">📡 Escaneando fila de matchmaking online...</div>
+        <div id="mm-live-log" style="font-size:9px; color:#7dd3fc; margin-top:5px; min-height:14px; font-weight:700;" data-i18n="mm.scanning_queue">📡 Escaneando fila de matchmaking online...</div>
       </div>
 
       <!-- Player Info Badge -->
@@ -289,13 +289,13 @@
           <div id="mm-player-name" style="font-size:11px; font-weight:900; color:#f8fafc;">Você</div>
           <div id="mm-player-elo" style="font-size:9.5px; color:#facc15; font-weight:800;">1,850 ELO · Master League</div>
         </div>
-        <div id="mm-queue-tag" style="font-size:9px; color:#4ade80; font-weight:800; background:rgba(74,222,128,0.15); border:1px solid #4ade80; border-radius:4px; padding:2px 5px;">FILA ATIVA</div>
+        <div id="mm-queue-tag" style="font-size:9px; color:#4ade80; font-weight:800; background:rgba(74,222,128,0.15); border:1px solid #4ade80; border-radius:4px; padding:2px 5px;" data-i18n="mm.active_queue">FILA ATIVA</div>
       </div>
 
       <!-- Action Buttons -->
       <div style="display:flex; gap:6px; position:relative; z-index:4;">
-        <button onclick="cancelRankedMatchmaking()" style="flex:1; height:34px; border-radius:6px; background:#1e293b; border:1.5px solid #64748b; color:#cbd5e1; font-weight:900; font-size:10.5px; cursor:pointer;">✕ Cancelar</button>
-        <button onclick="triggerBotFallbackNow()" style="flex:1.2; height:34px; border-radius:6px; background:linear-gradient(180deg,#fef08a 0%,#facc15 50%,#ca8a04 100%); border:1.5px solid #ffffff; color:#090d16; font-weight:900; font-size:10.5px; cursor:pointer;">⚡ Jogar com Bot</button>
+        <button onclick="cancelRankedMatchmaking()" style="flex:1; height:34px; border-radius:6px; background:#1e293b; border:1.5px solid #64748b; color:#cbd5e1; font-weight:900; font-size:10.5px; cursor:pointer;" data-i18n="mm.cancel">✕ Cancelar</button>
+        <button onclick="triggerBotFallbackNow()" style="flex:1.2; height:34px; border-radius:6px; background:linear-gradient(180deg,#fef08a 0%,#facc15 50%,#ca8a04 100%); border:1.5px solid #ffffff; color:#090d16; font-weight:900; font-size:10.5px; cursor:pointer;" data-i18n="mm.play_bot">⚡ Jogar com Bot</button>
       </div>
     </div>
   </div>
@@ -1220,11 +1220,11 @@
 
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="color:#38bdf8; font-size:11px;">📦 FIGURE CASE (`FigureMasters` — Toque em ⓘ para Detalhes ou Equipar no Slot)</strong>
+          <strong style="color:#38bdf8; font-size:11px;" data-i18n="deck.figure_case">📦 FIGURE CASE (`FigureMasters` — Toque em ⓘ para Detalhes ou Equipar no Slot)</strong>
           <div style="display:flex; gap:3px; flex-wrap:wrap;">
-            <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('ALL')">TODOS (217)</button>
-            <button class="btn green" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('UNLOCKED')">✅ MEUS</button>
-            <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('LOCKED')">🔒 FALTAM</button>
+            <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.all" onclick="filterFigureCase('ALL')">TODOS (217)</button>
+            <button class="btn green" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.owned" onclick="filterFigureCase('UNLOCKED')">✅ MEUS</button>
+            <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.missing" onclick="filterFigureCase('LOCKED')">🔒 FALTAM</button>
             <button class="btn purple" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('UX')">UX</button>
             <button class="btn gold" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('EX')">EX</button>
             <button class="btn" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('R')">R</button>
@@ -1233,7 +1233,7 @@
           </div>
         </div>
         <div style="display:flex; gap:5px; margin-bottom:6px; align-items:center;">
-          <input id="collection-search-inp" type="text" placeholder="🔍 Buscar entre os 217 Pokémon (nome, tipo, #dex)..." oninput="onCollectionSearchInput(this.value)" style="flex:1; background:#050912; border:1px solid #38bdf8; color:#fff; border-radius:5px; padding:4px 8px; font-size:9.5px; font-weight:700;">
+          <input id="collection-search-inp" type="text" data-i18n-placeholder="deck.search_placeholder" placeholder="🔍 Buscar entre os 217 Pokémon (nome, tipo, #dex)..." oninput="onCollectionSearchInput(this.value)" style="flex:1; background:#050912; border:1px solid #38bdf8; color:#fff; border-radius:5px; padding:4px 8px; font-size:9.5px; font-weight:700;">
         </div>
         <div id="collection-pagination-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:8.5px; color:#bae6fd; font-weight:800;"></div>
         <div class="grid-cards" id="collection-grid"></div>
@@ -1244,7 +1244,7 @@
     <div id="dtab-fusion" class="dtab-content" style="display:none; padding:8px; overflow-y:auto;">
       <div class="card" style="background:radial-gradient(circle at 50% 35%,#1a2e52,#08101f); text-align:center;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <strong style="color:#38bdf8; font-size:11.5px;">🧬 FUSION & DISK EXPANSION (`/Figure/SkillRangeExt`)</strong>
+          <strong style="color:#38bdf8; font-size:11.5px;" data-i18n="fusion.title">🧬 FUSION & DISK EXPANSION (`/Figure/SkillRangeExt`)</strong>
           <span class="ux-rainbow-badge">UX / EX / R / UC</span>
         </div>
         <select id="fusion-target-select" onchange="renderFusionChamber()" style="width:100%; margin-bottom:8px; font-weight:800;"></select>
@@ -1252,7 +1252,7 @@
         <!-- Interactive Circular Data Disk Canvas + Figure Stats -->
         <div style="display:grid; grid-template-columns:145px 1fr; gap:8px; align-items:center; background:#060b16; border:1.5px solid #38bdf8; border-radius:10px; padding:8px; margin-bottom:8px;">
           <div style="text-align:center;">
-            <div style="font-size:8px; color:#fde047; font-weight:900; margin-bottom:3px;">TOQUE NA FATIA DO DISCO!</div>
+            <div style="font-size:8px; color:#fde047; font-weight:900; margin-bottom:3px;" data-i18n="fusion.wheel_touch_hint">TOQUE NA FATIA DO DISCO!</div>
             <canvas id="fusion-wheel-canvas" width="136" height="136" style="width:128px; height:128px; cursor:pointer; margin:0 auto; display:block;"></canvas>
           </div>
           <div id="fusion-preview-box" style="text-align:left;"></div>
@@ -1282,8 +1282,8 @@
           </button>
         </div>
         <div style="display:flex; gap:6px; margin-top:6px;">
-          <button class="btn secondary" style="flex:1; font-size:9px; padding:5px;" onclick="resetFigureDiskAllocation()">↺ Reset Disk & CLv (Voltar Base 96)</button>
-          <button class="btn" style="flex:1; font-size:9px; padding:5px;" onclick="autoAllocateDiskAndClv()">⚡ Auto-Recommended (Lv & CLv)</button>
+          <button class="btn secondary" style="flex:1; font-size:9px; padding:5px;" data-i18n="fusion.reset_btn" onclick="resetFigureDiskAllocation()">↺ Reset Disk & CLv (Voltar Base 96)</button>
+          <button class="btn" style="flex:1; font-size:9px; padding:5px;" data-i18n="fusion.auto_btn" onclick="autoAllocateDiskAndClv()">⚡ Auto-Recommended (Lv & CLv)</button>
         </div>
         <div id="fusion-status-msg" style="margin-top:8px; font-size:10.5px; font-weight:800; color:#fde047;"></div>
       </div>
@@ -1294,79 +1294,79 @@
       <div class="card" style="background:linear-gradient(180deg,#1e1b4b,#090d16); border-color:#c084fc;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <strong style="color:#facc15; font-size:12px;">🛒 TIA'S PFG SHOP (`/Shop/ExecFigureLot`)</strong>
-            <div class="small-muted">Compre Boosters com Gems ou troque Material por qualquer Figura EX/UX!</div>
+            <strong style="color:#facc15; font-size:12px;" data-i18n="shop.title">🛒 TIA'S PFG SHOP (`/Shop/ExecFigureLot`)</strong>
+            <div class="small-muted" data-i18n="shop.subtitle">Compre Boosters com Gems ou troque Material por qualquer Figura EX/UX!</div>
           </div>
-          <button id="daily-bonus-btn" class="btn gold" style="font-size:8.8px; padding:5px 8px;" onclick="claimDailyGems()">🎁 Bônus Diário (24h)</button>
+          <button id="daily-bonus-btn" class="btn gold" style="font-size:8.8px; padding:5px 8px;" data-i18n="shop.daily_bonus" onclick="claimDailyGems()">🎁 Bônus Diário (24h)</button>
         </div>
       </div>
 
       <div class="card" style="background:linear-gradient(90deg,#14532d,#064e3b); border:1.5px solid #4ade80; margin-bottom:8px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
         <div>
-          <strong style="color:#fde047; font-size:10.5px;">⏱️ TIME BOOSTERS DE PARTIDA (NO HUB): <span id="shop-victory-boxes-lbl">0</span></strong>
-          <div class="small-muted" style="color:#dcfce7;">Vença duelos para ganhar Caixas grátis e desbloquear novos Pokémon!</div>
+          <strong style="color:#fde047; font-size:10.5px;" data-i18n="shop.time_boosters">⏱️ TIME BOOSTERS DE PARTIDA (NO HUB):</strong> <span id="shop-victory-boxes-lbl">0</span>
+          <div class="small-muted" style="color:#dcfce7;" data-i18n="shop.time_boosters_sub">Vença duelos para ganhar Caixas grátis e desbloquear novos Pokémon!</div>
         </div>
-        <button id="shop-open-victory-btn" class="btn gold" style="font-size:9px; padding:5px 8px; white-space:nowrap;" onclick="openEarnedVictoryBox()">🎁 Abrir Caixa</button>
+        <button id="shop-open-victory-btn" class="btn gold" style="font-size:9px; padding:5px 8px; white-space:nowrap;" data-i18n="shop.open_victory_btn" onclick="openEarnedVictoryBox()">🎁 Abrir Caixa</button>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:8px;">
         <div class="card" style="margin-bottom:0; text-align:center; padding:6px;">
-          <strong style="font-size:10.5px; color:#fde047;">🌈 Sextuple Booster (6x)</strong>
-          <div class="small-muted" style="margin:2px 0;">Garante 1 [EX]/[UX] + 300 Material</div>
+          <strong style="font-size:10.5px; color:#fde047;" data-i18n="shop.sextuple">🌈 Sextuple Booster (6x)</strong>
+          <div class="small-muted" style="margin:2px 0;" data-i18n="shop.sextuple_sub">Garante 1 [EX]/[UX] + 300 Material</div>
           <button class="btn gold" style="width:100%; margin-top:3px; padding:4px;" onclick="buyShopBooster(6)">🔻 300 Gems</button>
         </div>
         <div class="card" style="margin-bottom:0; text-align:center; padding:6px;">
-          <strong style="font-size:10.5px; color:#c084fc;">🎁 Quadruple Booster (4x)</strong>
-          <div class="small-muted" style="margin:2px 0;">4 Figuras + 1 Plate + 200 Material</div>
+          <strong style="font-size:10.5px; color:#c084fc;" data-i18n="shop.quadruple">🎁 Quadruple Booster (4x)</strong>
+          <div class="small-muted" style="margin:2px 0;" data-i18n="shop.quadruple_sub">4 Figuras + 1 Plate + 200 Material</div>
           <button class="btn purple" style="width:100%; margin-top:3px; padding:4px;" onclick="buyShopBooster(4)">🔻 200 Gems</button>
         </div>
         <div class="card" style="margin-bottom:0; text-align:center; padding:6px;">
-          <strong style="font-size:10.5px; color:#38bdf8;">⚡ Double Booster (2x)</strong>
-          <div class="small-muted" style="margin:2px 0;">2 Figuras + 100 Material</div>
+          <strong style="font-size:10.5px; color:#38bdf8;" data-i18n="shop.double">⚡ Double Booster (2x)</strong>
+          <div class="small-muted" style="margin:2px 0;" data-i18n="shop.double_sub">2 Figuras + 100 Material</div>
           <button class="btn" style="width:100%; margin-top:3px; padding:4px;" onclick="buyShopBooster(2)">🔻 100 Gems</button>
         </div>
         <div class="card" style="margin-bottom:0; text-align:center; padding:6px;">
-          <strong style="font-size:10.5px; color:#86efac;">🎟️ Single Booster (1x)</strong>
-          <div class="small-muted" style="margin:2px 0;">1 Figura + 50 Material</div>
+          <strong style="font-size:10.5px; color:#86efac;" data-i18n="shop.single">🎟️ Single Booster (1x)</strong>
+          <div class="small-muted" style="margin:2px 0;" data-i18n="shop.single_sub">1 Figura + 50 Material</div>
           <button class="btn green" style="width:100%; margin-top:3px; padding:4px;" onclick="buyShopBooster(1)">🔻 50 Gems</button>
         </div>
       </div>
 
       <div class="card" style="background:linear-gradient(180deg,#1c1917,#090d16); border:1.5px solid #facc15; margin-bottom:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <strong style="color:#facc15; font-size:11px;">🪙 LOJA DE MOEDAS (SALDO: <span id="shop-coins-lbl" style="color:#fff;">10,000</span> 🪙 COINS)</strong>
-          <span style="font-size:8px; color:#fde047; font-weight:800;">Ganhe 🪙 vencendo partidas!</span>
+          <strong style="color:#facc15; font-size:11px;" data-i18n="shop.coin_shop">🪙 LOJA DE MOEDAS (SALDO: <span id="shop-coins-lbl" style="color:#fff;">10,000</span> 🪙 COINS)</strong>
+          <span style="font-size:8px; color:#fde047; font-weight:800;" data-i18n="shop.coin_shop_sub">Ganhe 🪙 vencendo partidas!</span>
         </div>
         <div id="coin-shop-msg" style="font-size:9.5px; color:#4ade80; font-weight:800; margin-bottom:5px;"></div>
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px;">
           <div class="card" style="margin-bottom:0; text-align:center; padding:6px; border-color:rgba(250,204,21,0.4);">
-            <strong style="font-size:10px; color:#fde047;">📦 Caixa de Moedas (1x)</strong>
-            <div class="small-muted" style="margin:2px 0;">1 Pokémon + 1🟦 Rare Metal + 25🔷</div>
+            <strong style="font-size:10px; color:#fde047;" data-i18n="shop.coin_box">📦 Caixa de Moedas (1x)</strong>
+            <div class="small-muted" style="margin:2px 0;" data-i18n="shop.coin_box_sub">1 Pokémon + 1🟦 Rare Metal + 25🔷</div>
             <button class="btn gold" style="width:100%; margin-top:3px; padding:4px; font-size:8.5px;" onclick="buyWithCoins('coin_box')">🪙 10,000 Coins</button>
           </div>
           <div class="card" style="margin-bottom:0; text-align:center; padding:6px; border-color:rgba(56,189,248,0.4);">
-            <strong style="font-size:10px; color:#38bdf8;">🟦 Rare Metal (Fusão Lv.1–5)</strong>
-            <div class="small-muted" style="margin:2px 0;">+1 Rare Metal (Estoque: <span id="shop-rm-item-lbl">2</span>)</div>
+            <strong style="font-size:10px; color:#38bdf8;" data-i18n="shop.rare_metal">🟦 Rare Metal (Fusão Lv.1–5)</strong>
+            <div class="small-muted" style="margin:2px 0;" data-i18n="shop.rare_metal_sub">+1 Rare Metal (Estoque: <span id="shop-rm-item-lbl">2</span>)</div>
             <button class="btn" style="width:100%; margin-top:3px; padding:4px; font-size:8.5px;" onclick="buyWithCoins('rare_metal')">🪙 4,000 Coins</button>
           </div>
           <div class="card" style="margin-bottom:0; text-align:center; padding:6px; border-color:rgba(192,132,252,0.4);">
-            <strong style="font-size:10px; color:#c084fc;">🟣 Lote Carmonite (+50)</strong>
-            <div class="small-muted" style="margin:2px 0;">Para Fusão Lv.6–10 (Estoque: <span id="shop-carm-lbl">50</span>)</div>
+            <strong style="font-size:10px; color:#c084fc;" data-i18n="shop.carmonite">🟣 Lote Carmonite (+50)</strong>
+            <div class="small-muted" style="margin:2px 0;" data-i18n="shop.carmonite_sub">Para Fusão Lv.6–10 (Estoque: <span id="shop-carm-lbl">50</span>)</div>
             <button class="btn purple" style="width:100%; margin-top:3px; padding:4px; font-size:8.5px;" onclick="buyWithCoins('carmonite')">🪙 15,000 Coins</button>
           </div>
           <div class="card" style="margin-bottom:0; text-align:center; padding:6px; border-color:rgba(74,222,128,0.4);">
-            <strong style="font-size:10px; color:#4ade80;">🟩 Green Cube (+1 CLv)</strong>
-            <div class="small-muted" style="margin:2px 0;">+1 DMG na Fusão (Estoque: <span id="shop-cube-lbl">1</span>)</div>
+            <strong style="font-size:10px; color:#4ade80;" data-i18n="shop.cube">🟩 Green Cube (+1 CLv)</strong>
+            <div class="small-muted" style="margin:2px 0;" data-i18n="shop.cube_sub">+1 DMG na Fusão (Estoque: <span id="shop-cube-lbl">1</span>)</div>
             <button class="btn green" style="width:100%; margin-top:3px; padding:4px; font-size:8.5px;" onclick="buyWithCoins('cube')">🪙 22,000 Coins</button>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <strong style="color:#38bdf8; font-size:11px;">🔷 MATERIAL EXCHANGE (<span id="mat-lbl" style="color:#facc15;">12,500</span> Material — UX: 5000 · EX: 4000 · R: 1800 · UC: 450 · C: 250)</strong>
+        <strong style="color:#38bdf8; font-size:11px;" data-i18n="shop.mat_exchange">🔷 MATERIAL EXCHANGE (<span id="mat-lbl" style="color:#facc15;">12,500</span> Material — UX: 5000 · EX: 4000 · R: 1800 · UC: 450 · C: 250)</strong>
         <div id="shop-exchange-msg" style="font-size:10px; color:#4ade80; font-weight:800; margin:4px 0;"></div>
         <div style="display:flex; gap:4px; margin:5px 0; align-items:center; flex-wrap:wrap;">
-          <input id="shop-search-inp" type="text" placeholder="🔍 Buscar Pokémon na Loja (217 figuras)..." oninput="onShopSearchInput(this.value)" style="flex:1; min-width:140px; background:#050912; border:1px solid #38bdf8; color:#fff; border-radius:5px; padding:4px 8px; font-size:9.5px; font-weight:700;">
+          <input id="shop-search-inp" type="text" data-i18n-placeholder="shop.search_placeholder" placeholder="🔍 Buscar Pokémon na Loja (217 figuras)..." oninput="onShopSearchInput(this.value)" style="flex:1; min-width:140px; background:#050912; border:1px solid #38bdf8; color:#fff; border-radius:5px; padding:4px 8px; font-size:9.5px; font-weight:700;">
           <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" onclick="setShopRarityFilter('ALL')">ALL</button>
           <button class="btn purple" style="padding:2px 5px; font-size:7.5px;" onclick="setShopRarityFilter('UX')">UX</button>
           <button class="btn gold" style="padding:2px 5px; font-size:7.5px;" onclick="setShopRarityFilter('EX')">EX</button>

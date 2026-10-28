@@ -190,14 +190,12 @@ if (typeof window !== "undefined") {
 }
 
 function getFigureAbilityDescription(f) {
-  if (!f) return "Figura padrão Pokémon Duel.";
-  const fid = f.id || f.baseId || "";
-  let baseDesc = (typeof FIGURE_ABILITIES_DB !== "undefined" && (FIGURE_ABILITIES_DB[fid] || FIGURE_ABILITIES_DB[f.id] || FIGURE_ABILITIES_DB[f.baseId]))
-    || f.ability || "Habilidade padrão Pokémon Duel.";
+  if (!f) return (typeof t === "function" ? t("ability.default", "Figura padrão Pokémon Duel.") : "Figura padrão Pokémon Duel.");
+  let baseDesc = (typeof localizeAbility === "function") ? localizeAbility(f) : (f.ability || "Habilidade padrão Pokémon Duel.");
   const canJump = isFigurePassThroughOrJumper(f);
   const jumpTag = canJump
-    ? `<span style="color:#4ade80; font-weight:800;">[🦘 Pula Figuras]</span>`
-    : `<span style="color:#94a3b8; font-weight:700;">[🚫 Não Pula Figuras]</span>`;
+    ? `<span style="color:#4ade80; font-weight:800;">[${typeof t === "function" ? t("jump.jumps_badge", "🦘 Pula Figuras") : "🦘 Pula Figuras"}]</span>`
+    : `<span style="color:#94a3b8; font-weight:700;">[${typeof t === "function" ? t("jump.no_jump_desc", "🚫 Não Pula Figuras") : "🚫 Não Pula Figuras"}]</span>`;
   return `${jumpTag} ${baseDesc}`;
 }
 if (typeof window !== "undefined") {

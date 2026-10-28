@@ -162,7 +162,7 @@ function openFigureDetailsModal(figIdx, liveUnit) {
   const imgEl = document.getElementById("fdet-img");
   if (imgEl) imgEl.src = sp.uri;
   const typEl = document.getElementById("fdet-type");
-  if (typEl) typEl.textContent = f.type;
+  if (typEl) typEl.textContent = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
   const lvlEl = document.getElementById("fdet-lvl");
   const clvDots = "●".repeat(Math.min(10, f.clv)) + "○".repeat(Math.max(0, 5 - f.clv));
   if (lvlEl) lvlEl.textContent = `Lv.${f.level}/10 · CLv+${f.clv} (${clvDots})`;
@@ -172,16 +172,22 @@ function openFigureDetailsModal(figIdx, liveUnit) {
   if (jEl) {
     jEl.style.background = canJump ? "#16a34a" : "#475569";
     jEl.style.borderColor = canJump ? "#86efac" : "#64748b";
-    jEl.textContent = canJump ? "🦘 PULA FIGURAS" : "🚫 NÃO PULA";
+    const jBadge = (typeof t === "function") ? t("jump.jumps_badge", "🦘 PULA FIGURAS") : "🦘 PULA FIGURAS";
+    const noJBadge = (typeof t === "function") ? t("jump.no_jump", "🚫 NÃO PULA") : "🚫 NÃO PULA";
+    jEl.textContent = canJump ? jBadge : noJBadge;
   }
 
   const abEl = document.getElementById("fdet-ability");
   const chain = EVO_CHAIN_NAMES[f.id] || ["Mega " + f.name];
   if (abEl) {
+    const jumpDesc = (typeof t === "function") ? t("jump.jumps_desc", "🦘 PULA FIGURAS: Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.") : "🦘 PULA FIGURAS: Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.";
+    const noJumpDesc = (typeof t === "function") ? t("jump.no_jump_desc", "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).") : "🚫 MOVIMENTO TERRESTRE: Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).";
     const jumpNotice = canJump
-      ? `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(22,163,74,0.18); border:1px solid #22c55e; border-radius:4px; color:#86efac; font-size:10px; font-weight:700;">🦘 <strong>Pula Figuras:</strong> Este Pokémon pode saltar por cima de outros Pokémon aliados e adversários no tabuleiro gastando 2 MP por salto.</div>`
-      : `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(71,85,105,0.22); border:1px solid #64748b; border-radius:4px; color:#cbd5e1; font-size:10px;">🚫 <strong>Movimento Terrestre:</strong> Não pula outros Pokémon (o caminho é bloqueado por peças adjacentes).</div>`;
-    abEl.innerHTML = `${jumpNotice}${FIGURE_ABILITIES_DB[f.id] || "Standard PFG Figure Ability."}<br><strong style="color:#facc15;">Evolution / [UX] Line:</strong> ${f.name} ➔ ${chain.join(" ➔ ")}`;
+      ? `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(22,163,74,0.18); border:1px solid #22c55e; border-radius:4px; color:#86efac; font-size:10px; font-weight:700;">${jumpDesc}</div>`
+      : `<div style="margin-bottom:6px; padding:4px 6px; background:rgba(71,85,105,0.22); border:1px solid #64748b; border-radius:4px; color:#cbd5e1; font-size:10px;">${noJumpDesc}</div>`;
+    const abText = (typeof localizeAbility === "function") ? localizeAbility(f) : ((FIGURE_ABILITIES_DB && FIGURE_ABILITIES_DB[f.id]) || "Standard PFG Figure Ability.");
+    const evoTitle = (typeof t === "function") ? t("details.evo_line", "Evolution / [UX] Line:") : "Evolution / [UX] Line:";
+    abEl.innerHTML = `${jumpNotice}${abText}<br><strong style="color:#facc15;">${evoTitle}</strong> ${f.name} ➔ ${chain.join(" ➔ ")}`;
   }
 
   // Workshop Points Info Header
@@ -206,6 +212,7 @@ function openFigureDetailsModal(figIdx, liveUnit) {
       const sClv = (f.clvAlloc && f.clvAlloc[wIdx]) || 0;
       const val = w.color === "purple" ? "★".repeat(w.stars || 1) : (w.dmg > 0 ? (w.dmg + sClv + (sClv > 0 ? ` (+${sClv})` : '')) : "—");
       const isDonor = (donorIdx === wIdx);
+      const locMove = (typeof localizeMove === "function") ? localizeMove(w.name) : w.name;
 
       let actionBtns = `<div style="display:flex; gap:3px; align-items:center;">`;
       if (w.color !== "red") {
@@ -222,7 +229,7 @@ function openFigureDetailsModal(figIdx, liveUnit) {
       return `<div style="display:flex; justify-content:space-between; align-items:center; padding:3px 4px; border-bottom:1px solid #1e293b;">
         <span style="display:flex; align-items:center; gap:5px; flex:1.2;">
           <span style="width:9px; height:9px; border-radius:2px; background:${colHex[w.color]||'#fff'}; display:inline-block;"></span>
-          <strong style="color:#f8fafc; font-size:9.5px;">${w.name}</strong>
+          <strong style="color:#f8fafc; font-size:9.5px;">${locMove}</strong>
         </span>
         <span style="color:#fde047; font-weight:900; font-size:9.5px; width:46px; text-align:center;">${val}</span>
         <span style="color:#94a3b8; font-size:8.5px; width:64px; text-align:right; margin-right:4px;">${w.size}/96 (${pct}%)</span>
@@ -933,11 +940,13 @@ function renderHubAndCollection() {
 
   const qList = document.getElementById("hub-quests-list");
   if (qList) {
+    const oppLabel = (typeof t === "function") ? t("hotel.opponent", "Oponente:") : "Oponente:";
+    const startDuelText = (typeof t === "function") ? t("modes.start_duel", "Iniciar Duelo") : "Iniciar Duelo";
     qList.innerHTML = CARMONTE_HOTELS.map(h => `
       <div class="card" style="margin-bottom:0;">
         <strong style="font-size:10.5px; color:#facc15;">${h.name}</strong>
-        <div class="small-muted" style="margin:3px 0;">Opponent: ${h.boss}</div>
-        <button class="btn" style="width:100%; font-size:9.5px; padding:4px;" onclick="setGameMode('ai'); setTableSurface('${h.surface}'); demoFullMatchState(); closeDrawer();">Iniciar Duelo</button>
+        <div class="small-muted" style="margin:3px 0;">${oppLabel} ${h.boss}</div>
+        <button class="btn" style="width:100%; font-size:9.5px; padding:4px;" onclick="setGameMode('ai'); setTableSurface('${h.surface}'); demoFullMatchState(); closeDrawer();">${startDuelText}</button>
       </div>
     `).join("");
   }
@@ -950,6 +959,13 @@ function renderHubAndCollection() {
     const unlocked = (typeof isFigureUnlocked === "function") ? isFigureUnlocked(idx) : (state.deckP1.includes(idx));
     const inDeck = state.deckP1.includes(idx);
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
+    const locType = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
+    const lockedLabel = (typeof t === "function") ? t("deck.locked", "🔒 Bloqueado") : "🔒 Bloqueado";
+    const viewWheelLabel = (typeof t === "function") ? t("deck.view_details", "ⓘ Ver Roleta & Habilidade") : "ⓘ Ver Roleta & Habilidade";
+    const inDeckLabel = (typeof t === "function") ? t("deck.in_deck", "★ No Deck") : "★ No Deck";
+    const toSlotLabel = (typeof t === "function") ? t("deck.to_slot", `➔ Slot #${currentEditingDeckSlot + 1}`, { slot: currentEditingDeckSlot + 1 }) : `➔ Slot #${currentEditingDeckSlot + 1}`;
+    const unlockShopLabel = (typeof t === "function") ? t("deck.unlock_in_shop", "🔒 Desbloquear na Loja") : "🔒 Desbloquear na Loja";
+
     const card = document.createElement("div");
     card.className = "card";
     card.style.marginBottom = "0";
@@ -965,17 +981,17 @@ function renderHubAndCollection() {
       </div>
       <div style="display:flex; align-items:center; gap:7px; margin:5px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
         <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain; ${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.55);'}">
-        <div class="small-muted">${unlocked ? `Lv.${f.level}/10 · CLv+${f.clv}` : '<span style="color:#facc15; font-weight:800;">🔒 Bloqueado</span>'}<br>${f.type}<br><span style="color:#38bdf8; font-weight:800;">ⓘ Ver Roleta & Ability</span></div>
+        <div class="small-muted">${unlocked ? `Lv.${f.level}/10 · CLv+${f.clv}` : `<span style="color:#facc15; font-weight:800;">${lockedLabel}</span>`}<br>${locType}<br><span style="color:#38bdf8; font-weight:800;">${viewWheelLabel}</span></div>
       </div>
       <div style="display:flex; gap:4px;">
         ${unlocked ? `
           <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:8.5px; padding:4px;" onclick="toggleDeckEquip(${idx})">
-            ${inDeck ? '★ No Deck' : `➔ Slot #${currentEditingDeckSlot + 1}`}
+            ${inDeck ? inDeckLabel : toSlotLabel}
           </button>
           <button class="btn purple" style="font-size:8.5px; padding:4px 6px;" onclick="fuseFigure(${idx})">+CLv</button>
         ` : `
           <button class="btn secondary" style="flex:1; font-size:8.5px; padding:4px; color:#facc15; border-color:#ca8a04;" onclick="switchDrawerTab('shop')">
-            🔒 Desbloquear na Loja
+            ${unlockShopLabel}
           </button>
         `}
       </div>
@@ -1945,20 +1961,22 @@ function renderFusionChamber() {
     const wheelSum     = f.wheel.reduce((a, s) => a + s.size, 0);
     const carmReq      = CARMONITE_COST_BY_RARITY[f.rarity] || 100;
     const cubeReq      = CUBE_REQ_BY_RARITY[f.rarity] || 1;
-    const capTag       = f.level >= 10 ? `<span style="color:#facc15; font-weight:900;">[MAX CAP LV.10]</span>`
-                       : (f.level >= 5 ? `<span style="color:#c084fc; font-weight:900;">[Lv.5 Soft Cap ➔ Requer ${carmReq} Carmonite]</span>`
-                                       : `<span style="color:#38bdf8; font-weight:900;">[Rare Metal até Lv.5]</span>`);
+    const capTag       = f.level >= 10 ? `<span style="color:#facc15; font-weight:900;">${typeof t === "function" ? t("fusion.max_reached", "[MAX CAP LV.10]") : "[MAX CAP LV.10]"}</span>`
+                       : (f.level >= 5 ? `<span style="color:#c084fc; font-weight:900;">${typeof t === "function" ? t("fusion.carmonite", `[Lv.5 Soft Cap ➔ Requer ${carmReq} Carmonite]`) : `[Lv.5 Soft Cap ➔ Requer ${carmReq} Carmonite]`}</span>`
+                                       : `<span style="color:#38bdf8; font-weight:900;">${typeof t === "function" ? t("fusion.rare_metal", "[Rare Metal até Lv.5]") : "[Rare Metal até Lv.5]"}</span>`);
 
     const sliceBtns = f.wheel.map((w, sIdx) => {
       const sClv = (f.clvAlloc && f.clvAlloc[sIdx]) || 0;
       const isDonor = (f.shrinkDonorIdx === sIdx);
       const canClv = (w.color === "white" || w.color === "gold");
+      const locMove = (typeof localizeMove === "function") ? localizeMove(w.name) : w.name;
+      const donorBtnText = isDonor ? '➖Doador ✓' : '➖-1';
       return `<div style="display:flex; align-items:center; justify-content:space-between; gap:3px; background:#0f172a; border:1px solid ${isDonor?'#f43f5e':'#334155'}; border-radius:4px; padding:2px 4px; width:100%;">
         <button onclick="lastExpandedSliceIdx=${sIdx}; expandWheelSlice(${idx}, ${sIdx})" style="background:${lastExpandedSliceIdx===sIdx?'#0284c7':'#1e293b'}; border:1px solid #38bdf8; color:#fff; border-radius:3px; padding:2px 5px; font-size:8px; font-weight:800; cursor:pointer; flex:1; text-align:left;">
-          ➕ ${w.name} (${w.size}/96)${sClv>0?` +${sClv}DMG`:''}
+          ➕ ${locMove} (${w.size}/96)${sClv>0?` +${sClv}DMG`:''}
         </button>
         <button onclick="selectShrinkDonorSlice(${idx}, ${sIdx})" title="Escolher fatia > 4 para reduzir (-1)" style="background:${isDonor?'#be123c':'#1e293b'}; border:1px solid #f43f5e; color:#fecdd3; border-radius:3px; padding:2px 4px; font-size:7.5px; font-weight:900; cursor:pointer;">
-          ${w.size > 4 ? (isDonor ? '➖Doador' : '➖-1') : '🔒Min4'}
+          ${w.size > 4 ? donorBtnText : '🔒Min4'}
         </button>
         ${canClv ? `<button onclick="allocateClvDamageToSlice(${idx}, ${sIdx})" style="background:#14532d; border:1px solid #4ade80; color:#dcfce7; border-radius:3px; padding:2px 4px; font-size:7.5px; font-weight:900; cursor:pointer;">+1⚔️</button>` : ''}
       </div>`;
@@ -3747,10 +3765,15 @@ renderHubAndCollection = function() {
 
   const pagBar = document.getElementById("collection-pagination-bar");
   if (pagBar) {
+    const prevText = (typeof t === "function") ? t("deck.prev", "◀ Anterior") : "◀ Anterior";
+    const nextText = (typeof t === "function") ? t("deck.next", "Próxima ▶") : "Próxima ▶";
+    const pageInfo = (typeof t === "function")
+      ? t("deck.page_info", `Mostrando ${pageItems.length} de ${filteredIndices.length} Pokémon (Pág ${collectionCurrentPage + 1}/${totalPages})`, { count: pageItems.length, total: filteredIndices.length, page: collectionCurrentPage + 1, max: totalPages })
+      : `Mostrando ${pageItems.length} de ${filteredIndices.length} Pokémon (Pág ${collectionCurrentPage + 1}/${totalPages})`;
     pagBar.innerHTML = `
-      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage <= 0 ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(-1)">◀ Anterior</button>
-      <span>Mostrando ${pageItems.length} de ${filteredIndices.length} Pokémon (Pág ${collectionCurrentPage + 1}/${totalPages})</span>
-      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage + 1 >= totalPages ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(1)">Próxima ▶</button>
+      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage <= 0 ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(-1)">${prevText}</button>
+      <span>${pageInfo}</span>
+      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage + 1 >= totalPages ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(1)">${nextText}</button>
     `;
   }
 
@@ -3760,6 +3783,14 @@ renderHubAndCollection = function() {
     const unlocked = isFigureUnlocked(idx);
     const inDeck = state.deckP1.includes(idx);
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
+    const locType = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
+    const unlockedLabel = (typeof t === "function") ? t("deck.unlocked_badge", "✅ Desbloqueado") : "✅ Desbloqueado";
+    const lockedLabel = (typeof t === "function") ? t("deck.locked", "🔒 Bloqueado") : "🔒 Bloqueado";
+    const viewWheelLabel = (typeof t === "function") ? t("deck.view_details", "ⓘ Ver Roleta & Habilidade") : "ⓘ Ver Roleta & Habilidade";
+    const inDeckLabel = (typeof t === "function") ? t("deck.in_deck", "★ No Deck") : "★ No Deck";
+    const toSlotLabel = (typeof t === "function") ? t("deck.to_slot", `➔ Slot #${currentEditingDeckSlot + 1}`, { slot: currentEditingDeckSlot + 1 }) : `➔ Slot #${currentEditingDeckSlot + 1}`;
+    const unlockShopLabel = (typeof t === "function") ? t("deck.unlock_in_shop", "🔒 Desbloquear na Loja") : "🔒 Desbloquear na Loja";
+
     const card = document.createElement("div");
     card.className = "card";
     card.style.marginBottom = "0";
@@ -3776,19 +3807,19 @@ renderHubAndCollection = function() {
       <div style="display:flex; align-items:center; gap:7px; margin:5px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
         <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain; ${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.55);'}">
         <div class="small-muted">
-          ${unlocked ? `<span style="color:#4ade80; font-weight:800;">✅ Desbloqueado</span> · Lv.${f.level}/10 · CLv+${f.clv}` : `<span style="color:#facc15; font-weight:800;">🔒 Bloqueado</span> · Caixas/Loja`}<br>
-          ${f.type}<br><span style="color:#38bdf8; font-weight:800;">ⓘ Ver Roleta (96)</span>
+          ${unlocked ? `<span style="color:#4ade80; font-weight:800;">${unlockedLabel}</span> · Lv.${f.level}/10 · CLv+${f.clv}` : `<span style="color:#facc15; font-weight:800;">${lockedLabel}</span>`}<br>
+          ${locType}<br><span style="color:#38bdf8; font-weight:800;">${viewWheelLabel}</span>
         </div>
       </div>
       <div style="display:flex; gap:4px;">
         ${unlocked ? `
           <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:8.5px; padding:4px;" onclick="toggleDeckEquip(${idx})">
-            ${inDeck ? '★ No Time' : `➔ Slot #${currentEditingDeckSlot + 1}`}
+            ${inDeck ? inDeckLabel : toSlotLabel}
           </button>
           <button class="btn purple" style="font-size:8.5px; padding:4px 6px;" onclick="fuseFigure(${idx})">+CLv</button>
         ` : `
           <button class="btn secondary" style="flex:1; font-size:8px; padding:4px; color:#fde047; border-color:#ca8a04;" onclick="switchDrawerTab('shop')">
-            🔒 Obter em Caixas / Loja
+            ${unlockShopLabel}
           </button>
         `}
       </div>
@@ -3808,7 +3839,9 @@ renderShopExchange = function() {
   const vBoxBtn = document.getElementById("shop-open-victory-btn");
   if (vBoxBtn) {
     const vCount = playerProgression.victoryBoxesWon || 0;
-    vBoxBtn.textContent = vCount > 0 ? `🎁 Abrir Caixa (${vCount})` : `🔒 Vença 1 Partida`;
+    const openBoxText = (typeof t === "function") ? t("shop.open_victory_btn", "🎁 Abrir Caixa") : "🎁 Abrir Caixa";
+    const win1Text = (typeof t === "function") ? t("shop.win_1_match", "🔒 Vença 1 Partida") : "🔒 Vença 1 Partida";
+    vBoxBtn.textContent = vCount > 0 ? `${openBoxText} (${vCount})` : win1Text;
     vBoxBtn.style.opacity = vCount > 0 ? "1.0" : "0.65";
   }
 
@@ -3830,10 +3863,15 @@ renderShopExchange = function() {
 
   const pagBar = document.getElementById("shop-pagination-bar");
   if (pagBar) {
+    const prevText = (typeof t === "function") ? t("shop.prev", "◀ Anterior") : "◀ Anterior";
+    const nextText = (typeof t === "function") ? t("shop.next", "Próxima ▶") : "Próxima ▶";
+    const pageInfo = (typeof t === "function")
+      ? t("shop.page_info", `Loja: ${pageItems.length} de ${filtered.length} Pokémon (Pág ${shopCurrentPage + 1}/${totalPages})`, { count: pageItems.length, total: filtered.length, page: shopCurrentPage + 1, max: totalPages })
+      : `Loja: ${pageItems.length} de ${filtered.length} Pokémon (Pág ${shopCurrentPage + 1}/${totalPages})`;
     pagBar.innerHTML = `
-      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${shopCurrentPage <= 0 ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeShopPage(-1)">◀ Anterior</button>
-      <span>Loja: ${pageItems.length} de ${filtered.length} Pokémon (Pág ${shopCurrentPage + 1}/${totalPages})</span>
-      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${shopCurrentPage + 1 >= totalPages ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeShopPage(1)">Próxima ▶</button>
+      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${shopCurrentPage <= 0 ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeShopPage(-1)">${prevText}</button>
+      <span>${pageInfo}</span>
+      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${shopCurrentPage + 1 >= totalPages ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeShopPage(1)">${nextText}</button>
     `;
   }
 
@@ -3842,17 +3880,22 @@ renderShopExchange = function() {
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
     const mCost = OFFICIAL_MATERIAL_COSTS[f.rarity] || 1800;
     const unlocked = isFigureUnlocked(idx);
+    const locType = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
+    const unlockedTag = (typeof t === "function") ? t("shop.unlocked", "✅ DESBLOQUEADO") : "✅ DESBLOQUEADO";
+    const lockedTag = (typeof t === "function") ? t("shop.locked", "🔒 BLOQUEADO") : "🔒 BLOQUEADO";
+    const clvBtnText = (typeof t === "function") ? t("shop.clv_btn", "⬆️ +1 CLv") : "⬆️ +1 CLv";
+    const unlockBtnText = (typeof t === "function") ? t("shop.unlock_btn", "🔓 Desbloquear") : "🔓 Desbloquear";
     return `
       <div class="card" style="margin-bottom:0; text-align:center; border-color:${unlocked ? 'rgba(74,222,128,0.45)' : 'rgba(250,204,21,0.45)'};">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
           ${getRarityBadgeHtml(f.rarity)}
-          <span style="font-size:7.5px; font-weight:900; color:${unlocked ? '#4ade80' : '#facc15'};">${unlocked ? '✅ DESBLOQUEADO' : '🔒 BLOQUEADO'}</span>
+          <span style="font-size:7.5px; font-weight:900; color:${unlocked ? '#4ade80' : '#facc15'};">${unlocked ? unlockedTag : lockedTag}</span>
         </div>
         <img src="${sp.uri}" style="width:44px; height:44px; object-fit:contain; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
         <div style="font-size:9.5px; font-weight:900;">${f.name}</div>
-        <div style="font-size:8px; color:#bae6fd; margin-bottom:4px;">MP ${f.mp} · ${f.type}</div>
+        <div style="font-size:8px; color:#bae6fd; margin-bottom:4px;">MP ${f.mp} · ${locType}</div>
         <button class="btn ${unlocked ? 'secondary' : 'gold'}" style="width:100%; font-size:8px; padding:4px;" onclick="exchangeMaterialForFigure(${idx})">
-          ${unlocked ? `⬆️ +1 CLv (🔷 ${mCost.toLocaleString("en-US")})` : `🔓 Desbloquear (🔷 ${mCost.toLocaleString("en-US")})`}
+          ${unlocked ? `${clvBtnText} (🔷 ${mCost.toLocaleString("en-US")})` : `${unlockBtnText} (🔷 ${mCost.toLocaleString("en-US")})`}
         </button>
       </div>
     `;
@@ -6275,10 +6318,15 @@ renderHubAndCollection = function() {
 
   const pagBar = document.getElementById("collection-pagination-bar");
   if (pagBar) {
+    const prevText = (typeof t === "function") ? t("deck.prev", "◀ Anterior") : "◀ Anterior";
+    const nextText = (typeof t === "function") ? t("deck.next", "Próxima ▶") : "Próxima ▶";
+    const pageInfo = (typeof t === "function")
+      ? t("deck.page_info", `Mostrando ${pageItems.length} de ${filteredIndices.length} Pokémon (Pág ${collectionCurrentPage + 1}/${totalPages})`, { count: pageItems.length, total: filteredIndices.length, page: collectionCurrentPage + 1, max: totalPages })
+      : `Mostrando ${pageItems.length} de ${filteredIndices.length} Pokémon (Pág ${collectionCurrentPage + 1}/${totalPages})`;
     pagBar.innerHTML = `
-      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage <= 0 ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(-1)">◀ Anterior</button>
-      <span>Mostrando ${pageItems.length} de ${filteredIndices.length} Pokémon (Pág ${collectionCurrentPage + 1}/${totalPages})</span>
-      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage + 1 >= totalPages ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(1)">Próxima ▶</button>
+      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage <= 0 ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(-1)">${prevText}</button>
+      <span>${pageInfo}</span>
+      <button class="btn secondary" style="padding:2px 7px; font-size:8px;" ${collectionCurrentPage + 1 >= totalPages ? 'disabled style="opacity:0.4; padding:2px 7px; font-size:8px;"' : ''} onclick="changeCollectionPage(1)">${nextText}</button>
     `;
   }
 
@@ -6290,6 +6338,10 @@ renderHubAndCollection = function() {
     const inDeck = deckSlotIdx !== -1;
     const sp = AUTHENTIC_FIG_SPRITES[f.spriteKey] || AUTHENTIC_FIG_SPRITES["pikachu"];
     const maxDmg = getFigureMaxDmg(f);
+    const locType = (typeof localizeType === "function") ? localizeType(f.type) : f.type;
+    const lockedLabel = (typeof t === "function") ? t("deck.locked", "🔒 Bloqueado") : "🔒 Bloqueado";
+    const unlockShopLabel = (typeof t === "function") ? t("deck.unlock_in_shop", "🔒 Desbloquear na Loja") : "🔒 Desbloquear na Loja";
+
     const card = document.createElement("div");
     card.className = "card";
     card.style.marginBottom = "0";
@@ -6298,6 +6350,9 @@ renderHubAndCollection = function() {
     card.style.borderColor = inDeck ? "#facc15" : (unlocked ? (f.rarity === "UX" ? "#c084fc" : "rgba(56,189,248,0.38)") : "#334155");
 
     if (figureCaseViewCols === 3) {
+      const slotEquipText = inDeck
+        ? (typeof t === "function" ? t("deck.in_slot", `★ Slot #${deckSlotIdx + 1}`, { slot: deckSlotIdx + 1 }) : `★ Slot #${deckSlotIdx + 1}`)
+        : (typeof t === "function" ? t("deck.to_slot", `➔ Slot #${(currentEditingDeckSlot % 6) + 1}`, { slot: (currentEditingDeckSlot % 6) + 1 }) : `➔ Slot #${(currentEditingDeckSlot % 6) + 1}`);
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; gap:2px;">
           ${getRarityBadgeHtml(f.rarity)}
@@ -6312,17 +6367,20 @@ renderHubAndCollection = function() {
         <div style="display:flex; gap:3px; margin-top:2px;">
           ${unlocked ? `
             <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:7.4px; padding:3px 2px;" onclick="toggleDeckEquip(${idx})">
-              ${inDeck ? `★ Slot #${deckSlotIdx + 1}` : `➔ Slot #${(currentEditingDeckSlot % 6) + 1}`}
+              ${slotEquipText}
             </button>
             <button class="btn purple" style="font-size:7.2px; padding:3px 4px;" onclick="fuseFigure(${idx})" title="Fusão / +CLv">⚡</button>
           ` : `
             <button class="btn secondary" style="flex:1; font-size:7px; padding:3px 2px; color:#fde047; border-color:#ca8a04;" onclick="switchDrawerTab('shop')">
-              🔒 Loja
+              ${unlockShopLabel}
             </button>
           `}
         </div>
       `;
     } else {
+      const slotEquipText = inDeck
+        ? (typeof t === "function" ? t("deck.in_slot", `★ No Slot #${deckSlotIdx + 1}`, { slot: deckSlotIdx + 1 }) : `★ No Slot #${deckSlotIdx + 1}`)
+        : (typeof t === "function" ? t("deck.to_slot", `➔ Equipar Slot #${(currentEditingDeckSlot % 6) + 1}`, { slot: (currentEditingDeckSlot % 6) + 1 }) : `➔ Equipar Slot #${(currentEditingDeckSlot % 6) + 1}`);
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <strong style="font-size:9.2px; color:${unlocked ? '#fff' : '#94a3b8'};">${unlocked ? '' : '🔒 '}${f.name}</strong>
@@ -6334,20 +6392,20 @@ renderHubAndCollection = function() {
         <div style="display:flex; align-items:center; gap:6px; margin:4px 0; cursor:pointer;" onclick="openFigureDetailsModal(${idx})">
           <img src="${sp.uri}" style="width:42px; height:42px; object-fit:contain; ${unlocked ? '' : 'filter:grayscale(0.85) brightness(0.55);'}">
           <div class="small-muted" style="flex:1; min-width:0;">
-            ${unlocked ? `<span style="color:#4ade80; font-weight:800;">✅ Lv.${f.level}/10 · CLv+${f.clv}</span>` : `<span style="color:#facc15; font-weight:800;">🔒 Bloqueado</span>`}<br>
-            ${f.type} · 💥Máx ${maxDmg}<br>
+            ${unlocked ? `<span style="color:#4ade80; font-weight:800;">✅ Lv.${f.level}/10 · CLv+${f.clv}</span>` : `<span style="color:#facc15; font-weight:800;">${lockedLabel}</span>`}<br>
+            ${locType} · 💥Máx ${maxDmg}<br>
             ${getWheelColorBarHtml(f.wheel)}
           </div>
         </div>
         <div style="display:flex; gap:4px;">
           ${unlocked ? `
             <button class="btn ${inDeck ? 'gold' : 'secondary'}" style="flex:1; font-size:8px; padding:3.5px;" onclick="toggleDeckEquip(${idx})">
-              ${inDeck ? `★ No Slot #${deckSlotIdx + 1}` : `➔ Equipar Slot #${(currentEditingDeckSlot % 6) + 1}`}
+              ${slotEquipText}
             </button>
             <button class="btn purple" style="font-size:8px; padding:3.5px 6px;" onclick="fuseFigure(${idx})">+CLv</button>
           ` : `
             <button class="btn secondary" style="flex:1; font-size:7.8px; padding:3.5px; color:#fde047; border-color:#ca8a04;" onclick="switchDrawerTab('shop')">
-              🔒 Obter na Loja
+              ${unlockShopLabel}
             </button>
           `}
         </div>
