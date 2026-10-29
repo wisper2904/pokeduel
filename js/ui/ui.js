@@ -1426,6 +1426,10 @@ function initHomeV380Assets() {
   if (typeof updatePedestalToggleButton === "function") updatePedestalToggleButton();
 }
 setTimeout(initHomeV380Assets, 0);
+if (typeof window !== "undefined") {
+  window.addEventListener("DOMContentLoaded", initHomeV380Assets);
+  window.addEventListener("load", initHomeV380Assets);
+}
 
 // PERSISTENT REAL-TIME TIME BOOSTERS ENGINE (`localStorage` + `Date.now()` Wall-Clock Timestamps!)
 const TB_STORAGE_KEY = "pdr_realtime_boosters_v420";
