@@ -159,9 +159,61 @@
 
     <div id="fdet-moves-table" style="background:#060a12; border:1px solid #334155; border-radius:6px; padding:5px; margin-bottom:8px; font-size:9.5px;"></div>
 
+    <!-- Authentic Deck Placement Action Bar (Image 1 & 2) -->
+    <div id="fdet-deck-actions" style="margin-bottom:8px;"></div>
+
     <div style="display:flex; gap:6px;">
       <button onclick="openFusionForDetailedFig()" style="flex:1; height:32px; border-radius:6px; background:linear-gradient(180deg,#38bdf8,#0284c7); border:1.5px solid #e0f2fe; color:#090d16; font-weight:900; font-size:11px; cursor:pointer;">🧬 Expandir Roleta (Fusion)</button>
       <button onclick="closeFigureDetailsModal()" style="width:90px; height:32px; border-radius:6px; background:linear-gradient(180deg,#fef08a,#eab308); border:1.5px solid #ffffff; color:#090d16; font-weight:900; font-size:11px; cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTHENTIC SLOT CHOOSER MODAL (SELECT TEAM SLOT 1..6 - MATCHING IMAGE 4) -->
+<div id="slot-chooser-modal" style="display:none; position:fixed; inset:0; z-index:270; background:rgba(4,7,14,0.92); flex-direction:column; align-items:center; justify-content:center; padding:12px;">
+  <div style="width:100%; max-width:350px; background:linear-gradient(180deg,#162032 0%,#090d16 100%); border:2px solid #facc15; border-radius:12px; padding:12px; box-shadow:0 16px 45px rgba(0,0,0,0.95); color:#f8fafc; text-align:center;">
+    <div style="font-size:12px; font-weight:900; color:#fde047; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;" id="slot-chooser-title">Escolha o Espaço no Time</div>
+    <div style="font-size:9.5px; color:#94a3b8; margin-bottom:10px;" id="slot-chooser-subtitle">Toque no slot desejado para colocar a figura:</div>
+    <div id="slot-chooser-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px;"></div>
+    <div id="slot-chooser-warning" style="font-size:9.5px; color:#f87171; font-weight:800; min-height:16px; margin-bottom:8px;"></div>
+    <button onclick="closeSlotChooserModal()" style="width:100%; height:34px; border-radius:6px; background:#334155; border:1px solid #64748b; color:#fff; font-weight:900; font-size:12px; cursor:pointer;">Cancelar</button>
+  </div>
+</div>
+
+<!-- AUTHENTIC POKÉMON DUEL PLATE DETAILS MODAL -->
+<div id="plate-details-modal" style="display:none; position:fixed; inset:0; z-index:260; background:rgba(4,7,14,0.92); flex-direction:column; align-items:center; justify-content:center; padding:12px;">
+  <div style="width:100%; max-width:330px; background:linear-gradient(180deg,#162032 0%,#090d16 100%); border:2px solid #cbd5e1; border-radius:12px; padding:12px; box-shadow:0 16px 45px rgba(0,0,0,0.95); color:#f8fafc; text-align:center;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:6px; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span id="pldet-rarity" class="ex-gold-badge">R</span>
+        <strong id="pldet-name" style="font-size:15px; color:#ffffff;">Double Chance</strong>
+      </div>
+      <button onclick="closePlateDetailsModal()" style="background:#dc2626; border:1px solid #fca5a5; color:#fff; font-weight:900; border-radius:4px; padding:2px 8px; cursor:pointer;">✕</button>
+    </div>
+    
+    <div style="background:radial-gradient(circle at 50% 50%, #1e293b 0%, #090d16 100%); border:1.5px solid #475569; border-radius:10px; padding:12px; display:inline-block; margin-bottom:10px; box-shadow:0 4px 15px rgba(0,0,0,0.8);">
+      <div id="pldet-icon" style="width:72px; height:72px; display:flex; align-items:center; justify-content:center; margin:0 auto;"></div>
+    </div>
+    
+    <div id="pldet-deck-badge" style="display:inline-block; margin-bottom:8px; font-size:9.5px; font-weight:900; padding:2px 8px; border-radius:99px; background:#1e293b; color:#94a3b8; border:1px solid #334155;">
+      Deck: 0/6 Equipadas
+    </div>
+    
+    <div style="background:#090e17; border:1px solid #334155; border-radius:8px; padding:8px 10px; text-align:left; margin-bottom:12px;">
+      <div style="font-size:8.5px; font-weight:900; color:#38bdf8; letter-spacing:0.4px; margin-bottom:3px;">EFEITO DA PLATE / TACTICAL RULE</div>
+      <div id="pldet-desc" style="font-size:11px; color:#e2e8f0; line-height:1.4;">Permite girar a roleta novamente se o primeiro giro for desfavorável.</div>
+    </div>
+
+    <div style="display:flex; gap:6px;">
+      <button id="pldet-use-btn" onclick="addCurrentModalPlateToDeck()" style="flex:1.4; height:36px; border-radius:6px; background:linear-gradient(180deg,#fef08a,#eab308); border:1.5px solid #ffffff; color:#090d16; font-weight:900; font-size:12px; cursor:pointer;">
+        Usar no Deck
+      </button>
+      <button id="pldet-remove-btn" onclick="removeCurrentModalPlateFromDeck()" style="display:none; flex:1; height:36px; border-radius:6px; background:#dc2626; border:1.5px solid #fca5a5; color:#ffffff; font-weight:900; font-size:11px; cursor:pointer;">
+        Remover
+      </button>
+      <button onclick="closePlateDetailsModal()" style="flex:0.8; height:36px; border-radius:6px; background:#334155; border:1px solid #64748b; color:#cbd5e1; font-weight:800; font-size:11px; cursor:pointer;">
+        Fechar
+      </button>
     </div>
   </div>
 </div>
@@ -1237,52 +1289,159 @@
       </div>
     </div>
 
-    <!-- TAB 2: `DECKS` (AUTHENTIC DECK CASE UX: 3 DECK PRESETS + 6 SLOTS WITH EVO/[UX] SUB-SLOTS + 6-COST PLATE BUILDER) -->
+    <!-- TAB 2: `DECKS` (AUTHENTIC DECK CASE UX: ASSEMBLED OVERVIEW [Image 4] + EDIT FIGURES [Image 3] + EDIT PLATES) -->
     <div id="dtab-deck" class="dtab-content" style="display:none; padding:8px; overflow-y:auto;">
-      <div class="card" style="background:linear-gradient(180deg,#13233f,#091120); border-color:#38bdf8;">
-        <!-- Dynamic Progression Team Switcher Header (Starts with ONLY 1 Team!) -->
-        <div id="collection-progress-banner" style="background:linear-gradient(90deg,#0f172a,#1e1b4b); border:1px solid #facc15; border-radius:6px; padding:5px 8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:6px;">
-          <div style="font-size:9.5px; font-weight:900; color:#fde047;" id="collection-progress-lbl">🔓 Coleção: 6/17 Pokémon · 1 Time Ativo</div>
-          <button id="deck-victory-box-btn" class="btn gold" style="padding:3px 7px; font-size:8.5px; display:none;" onclick="openEarnedVictoryBox()">🎁 Abrir Caixa Ganha (0)</button>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; gap:4px;">
-          <div id="deck-presets-bar" style="display:flex; flex-direction:column; gap:4px; flex:1;"></div>
-          <span id="editing-slot-indicator" style="font-size:9px; font-weight:900; color:#facc15; white-space:nowrap; margin-top:2px;">Slot #1 Ativo</span>
-        </div>
-
-        <!-- 6 Figure Pedestal Slots + Circular `[+ Evo / UX Mega]` Sub-Slots below each figure -->
-        <div id="hub-deck-showcase" style="display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin-bottom:8px;"></div>
-
-        <!-- Interactive Plate Case Cost Bar (`Cost: 6/6 ◆◆◆◆◆◆`) -->
-        <div style="border-top:1px solid rgba(56,189,248,0.28); padding-top:6px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <span style="font-size:9.5px; font-weight:900; color:#38bdf8;">⚡ PLATE CASE (Toque para ativar/desativar no Deck):</span>
-            <span id="plate-cost-bar" style="font-size:9.5px; font-weight:900; color:#fde047;">COST 6/6 ◆◆◆◆◆◆</span>
+      
+      <!-- ==================== VIEW 1: ASSEMBLED DECK OVERVIEW (MATCHING USER IMAGE 4) ==================== -->
+      <div id="deck-overview-view">
+        <!-- Top Duelist Banner -->
+        <div style="background:linear-gradient(90deg,#0b1528 0%,#172554 50%,#0b1528 100%); border:1.5px solid #38bdf8; border-radius:10px; padding:6px 10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 14px rgba(0,0,0,0.7);">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#ca8a04,#fef08a); border:2px solid #ffffff; display:flex; align-items:center; justify-content:center; font-size:18px;">🎭</div>
+            <div>
+              <div style="font-size:12px; font-weight:900; color:#ffffff;">Treinador Pokémon</div>
+              <div style="font-size:9px; font-weight:800; color:#fde047;">🏆 Liga Carmonte · Rating <span id="deck-duelist-rating">3790</span></div>
+            </div>
           </div>
-          <div id="deck-plates-selector" style="display:flex; gap:4px; flex-wrap:wrap;"></div>
+          <div id="deck-presets-bar-overview" style="display:flex; gap:3px;"></div>
+        </div>
+
+        <!-- FIGURES PANEL (2 ROWS OF 3 COLUMNS = 6 FIGURES, MATCHING IMAGE 4) -->
+        <div style="background:linear-gradient(180deg,#111b2e 0%,#080e1a 100%); border:2px solid #475569; border-radius:12px; padding:8px 10px; margin-bottom:8px; box-shadow:0 8px 24px rgba(0,0,0,0.85);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; padding-bottom:5px; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <strong style="color:#ffffff; font-size:13px; font-weight:900; letter-spacing:0.5px;">Figures</strong>
+              <span id="deck-figures-count-badge" style="background:#0284c7; color:#fff; font-size:8.5px; font-weight:900; padding:1px 6px; border-radius:99px;">6 / 6</span>
+            </div>
+            <button onclick="switchToEditFiguresView()" class="btn blue" style="padding:4px 12px; font-size:9.5px; font-weight:900; border-radius:6px;">
+              ✏️ Editar Figuras
+            </button>
+          </div>
+
+          <!-- 2x3 Grid of 6 Figures on authentic 3D circular pedestals -->
+          <div id="deck-figures-2x3-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:4px;"></div>
+          
+          <div id="deck-balance-indicators" style="display:flex; justify-content:center; gap:8px; font-size:8px; font-weight:900; color:#94a3b8; margin-top:6px; flex-wrap:wrap;"></div>
+        </div>
+
+        <!-- PLATES PANEL (1 ROW OF 6 SLOTS, MATCHING IMAGE 4) -->
+        <div style="background:linear-gradient(180deg,#111b2e 0%,#080e1a 100%); border:2px solid #475569; border-radius:12px; padding:8px 10px; margin-bottom:10px; box-shadow:0 8px 24px rgba(0,0,0,0.85);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; padding-bottom:5px; margin-bottom:8px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <strong style="color:#ffffff; font-size:13px; font-weight:900; letter-spacing:0.5px;">Plates</strong>
+              <span id="deck-plates-count-badge" style="background:#7c3aed; color:#fff; font-size:8.5px; font-weight:900; padding:1px 6px; border-radius:99px;">6 / 6</span>
+              <span style="font-size:7.5px; color:#94a3b8; font-weight:800;">(Sem custo · máx 6 plates)</span>
+            </div>
+            <button onclick="switchToEditPlatesView()" class="btn purple" style="padding:4px 12px; font-size:9.5px; font-weight:900; border-radius:6px;">
+              🎴 Editar Plates
+            </button>
+          </div>
+
+          <!-- 1x6 Row of Plates -->
+          <div id="deck-plates-1x6-row" style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; margin-bottom:4px;"></div>
+        </div>
+
+        <!-- CLOSE BUTTON (MATCHING IMAGE 4 YELLOW BUTTON) -->
+        <div style="text-align:center; margin-top:8px; margin-bottom:12px;">
+          <button onclick="switchDrawerTab('hub')" style="width:140px; height:38px; border-radius:8px; background:linear-gradient(180deg,#fef08a 0%,#facc15 50%,#ca8a04 100%); border:2px solid #ffffff; color:#090d16; font-size:14px; font-weight:900; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.8);">
+            Close
+          </button>
         </div>
       </div>
 
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="color:#38bdf8; font-size:11px;" data-i18n="deck.figure_case">📦 FIGURE CASE (`FigureMasters` — Toque em ⓘ para Detalhes ou Equipar no Slot)</strong>
-          <div style="display:flex; gap:3px; flex-wrap:wrap;">
-            <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.all" onclick="filterFigureCase('ALL')">TODOS (217)</button>
-            <button class="btn green" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.owned" onclick="filterFigureCase('UNLOCKED')">✅ MEUS</button>
-            <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.missing" onclick="filterFigureCase('LOCKED')">🔒 FALTAM</button>
-            <button class="btn purple" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('UX')">UX</button>
-            <button class="btn gold" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('EX')">EX</button>
-            <button class="btn" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('R')">R</button>
-            <button class="btn" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('UC')">UC</button>
-            <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('C')">C</button>
+      <!-- ==================== VIEW 2: EDIT FIGURES VIEW (MATCHING USER IMAGE 3) ==================== -->
+      <div id="deck-edit-figures-view" style="display:none;">
+        <div class="card" style="background:linear-gradient(180deg,#13233f,#091120); border-color:#38bdf8; margin-bottom:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:4px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button onclick="switchToDeckOverview()" class="btn secondary" style="padding:3px 8px; font-size:9px; font-weight:900;">
+                ◀ Voltar ao Deck
+              </button>
+              <strong style="color:#fde047; font-size:11.5px;">Edit Figures (6/6)</strong>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <button onclick="clearTeamSlots()" class="btn secondary" style="padding:3px 7px; font-size:8px; color:#f87171; border-color:#ef4444;" title="Limpar todos os Pokémon do Time">
+                🗑️ Limpar Time
+              </button>
+              <span id="editing-slot-indicator" style="font-size:9px; font-weight:900; color:#facc15; display:none;"></span>
+            </div>
+          </div>
+
+          <!-- 6 Figure Pedestals Preview Row -->
+          <div id="hub-deck-showcase" style="display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin-bottom:6px;"></div>
+          <div style="font-size:8px; color:#94a3b8; text-align:center;">💡 Toque em qualquer Pokémon abaixo para ver a <strong>Data (Detalhes)</strong> e escolher onde equipar no time!</div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:4px;">
+            <strong style="color:#38bdf8; font-size:11px;" data-i18n="deck.figure_case">📦 FIGURE CASE (`FigureMasters`)</strong>
+            <div style="display:flex; gap:3px; flex-wrap:wrap;" id="v540-figcase-toolbar">
+              <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.all" onclick="filterFigureCase('ALL')">TODOS</button>
+              <button class="btn green" style="padding:2px 5px; font-size:7.5px;" data-i18n="deck.owned" onclick="filterFigureCase('UNLOCKED')">✅ MEUS</button>
+              <button class="btn purple" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('UX')">UX</button>
+              <button class="btn gold" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('EX')">EX</button>
+              <button class="btn" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('R')">R</button>
+              <button class="btn" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('UC')">UC</button>
+              <button class="btn secondary" style="padding:2px 5px; font-size:7.5px;" onclick="filterFigureCase('C')">C</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:5px; margin-bottom:6px; align-items:center;">
+            <input id="collection-search-inp" type="text" data-i18n-placeholder="deck.search_placeholder" placeholder="🔍 Buscar entre os 217 Pokémon (nome, tipo, #dex)..." oninput="onCollectionSearchInput(this.value)" style="flex:1; background:#050912; border:1px solid #38bdf8; color:#fff; border-radius:5px; padding:4px 8px; font-size:9.5px; font-weight:700;">
+          </div>
+          <div id="collection-pagination-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:8.5px; color:#bae6fd; font-weight:800;"></div>
+          <div class="grid-cards" id="collection-grid"></div>
+
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <button onclick="switchToEditPlatesView()" class="btn purple" style="flex:1; padding:5px; font-size:10px; font-weight:900;">
+              🎴 Editar Plates
+            </button>
+            <button onclick="switchToDeckOverview()" class="btn secondary" style="flex:1; padding:5px; font-size:10px; font-weight:900;">
+              ◀ Voltar ao Deck
+            </button>
           </div>
         </div>
-        <div style="display:flex; gap:5px; margin-bottom:6px; align-items:center;">
-          <input id="collection-search-inp" type="text" data-i18n-placeholder="deck.search_placeholder" placeholder="🔍 Buscar entre os 217 Pokémon (nome, tipo, #dex)..." oninput="onCollectionSearchInput(this.value)" style="flex:1; background:#050912; border:1px solid #38bdf8; color:#fff; border-radius:5px; padding:4px 8px; font-size:9.5px; font-weight:700;">
-        </div>
-        <div id="collection-pagination-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:8.5px; color:#bae6fd; font-weight:800;"></div>
-        <div class="grid-cards" id="collection-grid"></div>
       </div>
+
+      <!-- ==================== VIEW 3: EDIT PLATES VIEW ==================== -->
+      <div id="deck-edit-plates-view" style="display:none;">
+        <div class="card" style="background:linear-gradient(180deg,#1e1b4b,#090d16); border-color:#a855f7; margin-bottom:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:4px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button onclick="switchToDeckOverview()" class="btn secondary" style="padding:3px 8px; font-size:9px; font-weight:900;">
+                ◀ Voltar ao Deck
+              </button>
+              <strong style="color:#e9d5ff; font-size:11.5px;">Edit Plates (<span id="edit-plates-count-lbl">0</span>/6 no Deck)</strong>
+            </div>
+            <button onclick="clearAllDeckPlates()" class="btn secondary" style="padding:3px 7px; font-size:8px; color:#f87171; border-color:#ef4444;">
+              🗑️ Limpar Todas
+            </button>
+          </div>
+
+          <!-- 6 Plates Slots Preview Row -->
+          <div id="edit-plates-preview-row" style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; margin-bottom:6px;"></div>
+          <div style="font-size:8px; color:#c084fc; text-align:center;">💡 Toque em qualquer Plate para ver os <strong>Detalhes</strong> e escolher se deseja usar ou remover do Deck!</div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="color:#c084fc; font-size:11px;">⚡ PLATE CATALOG (Catálogo de Plates)</strong>
+            <span id="plate-cost-bar" style="font-size:9px; font-weight:900; color:#fde047;">MÁX 6 PLATES</span>
+          </div>
+          <div id="deck-plates-catalog-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:8px;"></div>
+          <div id="deck-plates-selector" style="display:none;"></div>
+
+          <div style="display:flex; gap:6px; margin-top:8px;">
+            <button onclick="switchToEditFiguresView()" class="btn blue" style="flex:1; padding:5px; font-size:10px; font-weight:900;">
+              ✏️ Editar Figuras
+            </button>
+            <button onclick="switchToDeckOverview()" class="btn secondary" style="flex:1; padding:5px; font-size:10px; font-weight:900;">
+              ◀ Voltar ao Deck
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
     </div>
 
     <!-- TAB 3: `FUSION` (AUTHENTIC DISK EXPANSION & FUSION CHAMBER WITH INTERACTIVE WHEEL CANVAS) -->
