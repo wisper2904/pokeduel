@@ -815,6 +815,9 @@ function spawnPortalParticles(x, y, color) {
 }
 
 function sendToPC(unit) {
+  if (unit.origDittoData && typeof revertDittoTransformation === "function") {
+    revertDittoTransformation(unit);
+  }
   const pods = unit.owner === "p1" ? REVIVER_PODS_P1 : REVIVER_PODS_P2;
   const q = unit.owner === "p1" ? state.reviverQueueP1 : state.reviverQueueP2;
   const targetPod = pods[Math.min(q.length, 1)] || pods[0];
@@ -943,6 +946,92 @@ function revertMegaEvolution(u) {
   setLogText(`⏳ MEGA EVOLUÇÃO TERMINOU! ${oldMegaName} reverteu para ${u.name} após 5 turnos.`);
 }
 window.revertMegaEvolution = revertMegaEvolution;
+
+function applyDittoTransformation(dittoUnit, oppUnit) {
+  if (!dittoUnit || !oppUnit) return;
+  if (!dittoUnit.origDittoData) {
+    dittoUnit.origDittoData = {
+      name: dittoUnit.name,
+      spriteKey: dittoUnit.spriteKey,
+      baseIdx: dittoUnit.baseIdx,
+      baseId: dittoUnit.baseId,
+      type: dittoUnit.type,
+      rarity: dittoUnit.rarity,
+      mp: dittoUnit.baseMp || dittoUnit.mp,
+      baseMp: dittoUnit.baseMp || dittoUnit.mp,
+      c1: dittoUnit.c1,
+      c2: dittoUnit.c2,
+      arch: dittoUnit.arch,
+      canPassThrough: dittoUnit.canPassThrough
+    };
+  }
+
+  const oldDittoName = dittoUnit.name;
+  dittoUnit.name = oppUnit.name;
+  dittoUnit.spriteKey = oppUnit.spriteKey;
+  dittoUnit.baseIdx = oppUnit.baseIdx;
+  dittoUnit.baseId = oppUnit.baseId;
+  dittoUnit.type = oppUnit.type;
+  dittoUnit.rarity = oppUnit.rarity;
+  dittoUnit.c1 = oppUnit.c1;
+  dittoUnit.c2 = oppUnit.c2;
+  dittoUnit.arch = oppUnit.arch;
+  dittoUnit.canPassThrough = oppUnit.canPassThrough;
+
+  const wBonus = (typeof hasWeeklyTypeBuff === "function" && hasWeeklyTypeBuff(oppUnit)) ? 1 : 0;
+  dittoUnit.mp = (oppUnit.baseMp || oppUnit.mp || 2) + wBonus;
+  dittoUnit.baseMp = dittoUnit.mp;
+  dittoUnit.transformTurns = 3; // Permanece transformado por exatamente 3 turnos!
+  dittoUnit.isDittoTransformed = true;
+
+  if (dittoUnit.location === "board" && dittoUnit.nodeId !== null && typeof BOARD_NODES !== "undefined" && BOARD_NODES[dittoUnit.nodeId]) {
+    const n = BOARD_NODES[dittoUnit.nodeId];
+    if (typeof spawnPortalParticles === "function") {
+      spawnPortalParticles(n.x, n.y, "#f472b6");
+    }
+  }
+  if (typeof playSfx === "function") playSfx("portal");
+  if (typeof BgmEngine !== "undefined" && typeof BgmEngine.playFanfare === "function") {
+    BgmEngine.playFanfare("booster");
+  }
+  if (typeof setLogText === "function") {
+    setLogText(`🧬 TRANSFORMAÇÃO! Ditto venceu com Transform Mirror e copiou a forma de ${oppUnit.name} por 3 turnos!`);
+  }
+}
+window.applyDittoTransformation = applyDittoTransformation;
+
+function revertDittoTransformation(dittoUnit) {
+  if (!dittoUnit || !dittoUnit.origDittoData) return;
+  const copiedName = dittoUnit.name;
+  const orig = dittoUnit.origDittoData;
+  dittoUnit.name = orig.name;
+  dittoUnit.spriteKey = orig.spriteKey;
+  dittoUnit.baseIdx = orig.baseIdx;
+  dittoUnit.baseId = orig.baseId;
+  dittoUnit.type = orig.type;
+  dittoUnit.rarity = orig.rarity;
+  dittoUnit.mp = orig.mp;
+  dittoUnit.baseMp = orig.baseMp;
+  dittoUnit.c1 = orig.c1;
+  dittoUnit.c2 = orig.c2;
+  dittoUnit.arch = orig.arch;
+  dittoUnit.canPassThrough = orig.canPassThrough;
+  dittoUnit.transformTurns = 0;
+  dittoUnit.origDittoData = null;
+  dittoUnit.isDittoTransformed = false;
+
+  if (dittoUnit.location === "board" && dittoUnit.nodeId !== null && typeof BOARD_NODES !== "undefined" && BOARD_NODES[dittoUnit.nodeId]) {
+    const n = BOARD_NODES[dittoUnit.nodeId];
+    if (typeof spawnPortalParticles === "function") {
+      spawnPortalParticles(n.x, n.y, "#c084fc");
+    }
+  }
+  if (typeof playSfx === "function") playSfx("portal");
+  if (typeof setLogText === "function") {
+    setLogText(`🧬 TRANSFORMAÇÃO TERMINOU! ${copiedName} voltou a ser Ditto após 3 turnos.`);
+  }
+}
+window.revertDittoTransformation = revertDittoTransformation;
 
 function evolveUnitInMatch(unit) {
   if (!unit) return;
@@ -1163,12 +1252,13 @@ function computeReachableWithPaths(unit) {
         visited.set(en.id, 1); // Entrar em campo pelo Entry Point consome exatamente 1 MP
         paths[en.id] = [{ type: "portal", fromNode: en.id, toNode: en.id }];
         queue.push({ id: en.id, dist: 1 });
-      } else if (state.longThrowActive) {
+      } else if (state.longThrowActive || unit.baseId === "gengar" || unit.baseId === "mega_gengar" || (unit.name && unit.name.includes("Gengar"))) {
         (ADJ[en.id] || []).forEach(adjId => {
           if (!unitAtNode(adjId)) {
             openEntries++;
-            visited.set(adjId, mp);
-            paths[adjId] = [{ type: "portal", fromNode: adjId, toNode: adjId }];
+            visited.set(adjId, Math.min(mp, 2));
+            paths[adjId] = [{ type: "portal", fromNode: en.id, toNode: adjId }];
+            queue.push({ id: adjId, dist: 2 });
           }
         });
       }
@@ -1193,7 +1283,7 @@ function computeReachableWithPaths(unit) {
           paths[nxt] = [...paths[cur.id], { type: "walk", fromNode: cur.id, toNode: nxt }];
           queue.push({ id: nxt, dist: cur.dist + 1 });
         }
-      } else if (canJumpOver && (state.abilityJumpActive || !(occ.owner !== unit.owner && (occ.baseId === "palkia_o" || occ.baseId === "gardevoir")))) {
+      } else if (canJumpOver && (state.abilityJumpActive || !(occ.owner !== unit.owner && (occ.baseId === "palkia_o" || occ.baseId === "gardevoir" || (occ.baseId === "snorlax" && occ.condition === PokemonCondition.Sleep))))) {
         // Rule 6: Palkia-O / Gardevoir Warp Hole blocks pass-through jumps unless using Hurdle Jump plate!
         // Section 1.2: CÁLCULO ESTRITO DE SALTO (A CASA PULADA CONTA = 2 MP!)
         // Passo 1: O nó ocupado da peça pulada (nxt) conta como 1 MP gasto.
@@ -1914,6 +2004,13 @@ function drawAuthenticFigurine(u, x, y, zHeight, scale, rotation, shadowX, shado
     ctx.beginPath(); ctx.ellipse(0, 1, 19, 11, 0, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
+  if (u.transformTurns && u.transformTurns > 0) {
+    ctx.save();
+    ctx.strokeStyle = "#c084fc";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.ellipse(0, 1, 19, 11, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
   if (isSelected) {
     const pulse = 1 + Math.sin(performance.now() * 0.01) * 0.1;
     ctx.strokeStyle = "#4ade80";
@@ -1942,6 +2039,15 @@ function drawAuthenticFigurine(u, x, y, zHeight, scale, rotation, shadowX, shado
     ctx.beginPath(); ctx.arc(13, -14, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     ctx.fillStyle = "#fde047"; ctx.font = "bold 7px sans-serif"; ctx.textAlign = "center";
     ctx.fillText("W" + u.waitTurns, 13, -11.5);
+  }
+
+  if (u.transformTurns && u.transformTurns > 0) {
+    ctx.fillStyle = "rgba(147, 51, 234, 0.92)";
+    ctx.strokeStyle = "#f3e8ff";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(-13, -14, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ffffff"; ctx.font = "bold 6.8px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("T" + u.transformTurns, -13, -11.5);
   }
   const condBadge = CONDITION_BADGES[u.condition];
   if (condBadge) {

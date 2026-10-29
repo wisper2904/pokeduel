@@ -17,6 +17,7 @@ function getActiveWheel(unit) {
   const isWeeklyBuffed = (typeof hasWeeklyTypeBuff === "function") && hasWeeklyTypeBuff(unit);
   const weeklyDmgBonus = isWeeklyBuffed ? 10 : 0;
   const weeklyStarBonus = isWeeklyBuffed ? 1 : 0;
+  const lucarioBonus = (unit.baseId === "lucario" || unit.name === "Lucario") ? (unit.lucarioBonus || 0) : 0;
   const segs = fig.wheel.map((seg, sIdx) => {
     const sliceClv = (fig.clvAlloc && typeof fig.clvAlloc[sIdx] === "number") ? fig.clvAlloc[sIdx] : (sIdx === 0 ? Math.min(10, unit.clv || 0) : 0);
     let color = seg.color;
@@ -29,7 +30,7 @@ function getActiveWheel(unit) {
       ...seg,
       name,
       color,
-      dmg: seg.dmg > 0 ? seg.dmg + sliceClv + meadowBonus + evoDmgBonus + xAtkBonus + gymCupBonus + weeklyDmgBonus : 0,
+      dmg: seg.dmg > 0 ? seg.dmg + sliceClv + meadowBonus + evoDmgBonus + xAtkBonus + gymCupBonus + weeklyDmgBonus + lucarioBonus : 0,
       stars: color === "purple" ? (seg.stars || 1) + evoStarBonus + weeklyStarBonus : 0
     };
   });
@@ -1115,6 +1116,24 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       ddCanClose = true;
       const winUnit = outcome.winner === "atk" ? atkUnit : (outcome.winner === "def" ? defUnit : null);
       const loser   = outcome.winner === "atk" ? defUnit : (outcome.winner === "def" ? atkUnit : null);
+      const winSpin = outcome.winner === "atk" ? atkSpin.chosen : (outcome.winner === "def" ? defSpin.chosen : null);
+
+      // Ditto Transform Mirror ability: Se vencer o combate usando Transform Mirror, transforma-se no oponente por 3 turnos!
+      const isTransformSpin = winSpin && (winSpin.name.toLowerCase().includes("transform") || winSpin.effect === "transform");
+      const isDittoFigure = winUnit && (winUnit.baseId === "ditto" || (winUnit.origDittoData && winUnit.origDittoData.baseId === "ditto") || (winUnit.name && winUnit.name.toLowerCase().includes("ditto")));
+      if (winUnit && loser && (isTransformSpin || isDittoFigure && winSpin && winSpin.name.toLowerCase().includes("transform"))) {
+        if (typeof applyDittoTransformation === "function") {
+          applyDittoTransformation(winUnit, loser);
+        } else if (typeof window.applyDittoTransformation === "function") {
+          window.applyDittoTransformation(winUnit, loser);
+        }
+      }
+
+      // Lucario Inner Focus / Steadfast victory aura: ganha +10 DMG de vitória acumulado
+      if (winUnit && (winUnit.baseId === "lucario" || winUnit.name === "Lucario")) {
+        winUnit.lucarioBonus = (winUnit.lucarioBonus || 0) + 10;
+        setLogText(`✨ Lucario fortaleceu sua Aura com a vitória (+${winUnit.lucarioBonus} DANO acumulado)!`);
+      }
 
       const defWasFrozen = (defUnit.condition === PokemonCondition.Freeze);
       if (atkSpin.chosen.color === "blue") atkUnit.condition = PokemonCondition.Normal;
@@ -1129,10 +1148,18 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
           paralyze: PokemonCondition.Paralyze, burn: PokemonCondition.Burn
         };
         if (effMap[outcome.effect]) {
-          loser.condition = effMap[outcome.effect];
+          if (loser.baseId === "snorlax" && (outcome.effect.includes("poison") || outcome.effect === "burn")) {
+            setLogText(`🛡️ Snorlax resistiu a ${outcome.effect} por sua Habilidade Imunidade/Corpo Robusto!`);
+          } else {
+            loser.condition = effMap[outcome.effect];
+          }
           evolveUnitInMatch(winUnit);
         } else if (outcome.effect === "bench") {
           loser.location = "bench"; loser.nodeId = null; loser.waitTurns = 2;
+          if (loser.baseId === "lucario") {
+            loser.waitTurns = 0;
+            setLogText(`🛡️ Lucario resistiu à condição de Espera com Foco Interno!`);
+          }
           spawnPortalParticles(BOARD_NODES[winUnit.nodeId || 0].x, BOARD_NODES[winUnit.nodeId || 0].y, "#38bdf8");
           evolveUnitInMatch(winUnit);
         } else if (outcome.effect === "heal") {
@@ -1144,9 +1171,17 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
           if (openAdj !== undefined) {
             loser.nodeId = openAdj;
             loser.waitTurns = 2;
+            if (loser.baseId === "lucario") {
+              loser.waitTurns = 0;
+              setLogText(`🛡️ Lucario resistiu à condição de Espera com Foco Interno!`);
+            }
             spawnPortalParticles(BOARD_NODES[openAdj].x, BOARD_NODES[openAdj].y, "#c084fc");
           } else {
             loser.location = "bench"; loser.nodeId = null; loser.waitTurns = 2;
+            if (loser.baseId === "lucario") {
+              loser.waitTurns = 0;
+              setLogText(`🛡️ Lucario resistiu à condição de Espera com Foco Interno!`);
+            }
           }
           evolveUnitInMatch(winUnit);
         } else if (outcome.effect === "swap") {
@@ -1580,6 +1615,16 @@ function applyExplicitTurn(nextTurn, nextCounter) {
         } else {
           u.name = (u.preMegaName || u.name).replace(/^Mega\s+/, "");
           u.mp = u.baseMp || u.mp;
+        }
+      }
+    }
+    if (u.transformTurns && u.transformTurns > 0) {
+      u.transformTurns--;
+      if (u.transformTurns === 0) {
+        if (typeof revertDittoTransformation === "function") {
+          revertDittoTransformation(u);
+        } else if (typeof window.revertDittoTransformation === "function") {
+          window.revertDittoTransformation(u);
         }
       }
     }

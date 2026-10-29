@@ -5872,9 +5872,9 @@ function openCarmonteQuestsModal() {
 }
 
 
-// --- 17.2: STRICT 6-COST PLATE CASE LIMIT WITH DUPLICATE DOUBLED COST (`MAX_PLATE_COST = 6`) ---
+// --- 17.2: STRICT 10-COST PLATE CASE LIMIT WITH DUPLICATE DOUBLED COST (`MAX_PLATE_COST = 10`) ---
 const EQUIPPED_PLATES_KEY = "pdr_equipped_plates_v510";
-const MAX_DECK_PLATE_COST = 6;
+const MAX_DECK_PLATE_COST = 10;
 
 const BASE_PLATE_CATALOG = (Array.isArray(state.plates) ? state.plates : []).map(p => ({
   ...p,
@@ -5895,8 +5895,8 @@ function getSavedEquippedPlateIds() {
       if (Array.isArray(arr)) return arr;
     }
   } catch (e) {}
-  // Default 6-cost starter loadout: Hurdle Jump (2) + Double Chance (1) + X Attack (1) + Goal Block (2) = 6/6 ◆
-  return ["hurdle", "double", "xatk", "goalblock"];
+  // Default 10-cost starter loadout: Hurdle Jump (2) + Double Chance (1) + X Attack (1) + Goal Block (2) + X Speed (1) = 7/10 ◆
+  return ["hurdle", "double", "xatk", "goalblock", "xspeed"];
 }
 
 function saveEquippedPlateIds(explicitIds) {
@@ -6008,8 +6008,8 @@ function addPlateCopyToDeck(plateId) {
     if (msgEl) {
       msgEl.style.color = "#f87171";
       msgEl.textContent = info.count > 0
-        ? `⚠️ A ${info.count + 1}ª cópia de [${info.basePlate.name}] tem custo dobrado (${info.nextCopyCost}◆) e você já usa ${usedCost}/6 ◆! Remova outra Plate primeiro.`
-        : `⚠️ Limite 6/6 ◆ atingido! Você usa ${usedCost}/6 ◆ e [${info.basePlate.name}] custa ${info.nextCopyCost}◆.`;
+        ? `⚠️ A ${info.count + 1}ª cópia de [${info.basePlate.name}] tem custo dobrado (${info.nextCopyCost}◆) e você já usa ${usedCost}/${MAX_DECK_PLATE_COST} ◆! Remova outra Plate primeiro.`
+        : `⚠️ Limite ${MAX_DECK_PLATE_COST}/${MAX_DECK_PLATE_COST} ◆ atingido! Você usa ${usedCost}/${MAX_DECK_PLATE_COST} ◆ e [${info.basePlate.name}] custa ${info.nextCopyCost}◆.`;
     }
     return;
   }
@@ -6024,8 +6024,8 @@ function addPlateCopyToDeck(plateId) {
     const newUsed = state.plates.filter(x => !x.disabledInDeck).reduce((s, x) => s + x.cost, 0);
     msgEl.style.color = "#4ade80";
     msgEl.textContent = info.count > 0
-      ? `✅ ${info.count + 1}ª cópia de [${info.basePlate.name}] equipada com custo dobrado (${info.nextCopyCost}◆)! Total: ${newUsed}/6 ◆.`
-      : `✅ [${info.basePlate.name} (${info.nextCopyCost}◆)] equipada no Deck! Total: ${newUsed}/6 ◆.`;
+      ? `✅ ${info.count + 1}ª cópia de [${info.basePlate.name}] equipada com custo dobrado (${info.nextCopyCost}◆)! Total: ${newUsed}/${MAX_DECK_PLATE_COST} ◆.`
+      : `✅ [${info.basePlate.name} (${info.nextCopyCost}◆)] equipada no Deck! Total: ${newUsed}/${MAX_DECK_PLATE_COST} ◆.`;
   }
   renderHubAndCollection();
   renderPlatesTray();
@@ -6060,7 +6060,7 @@ function clearAllDeckPlates() {
   const msgEl = ensurePlateWarningBanner();
   if (msgEl) {
     msgEl.style.color = "#38bdf8";
-    msgEl.textContent = "🔄 Todas as Plates foram desequipadas (0/6 ◆). Escolha suas Plates (cópias repetidas dobram de custo)!";
+    msgEl.textContent = `🔄 Todas as Plates foram desequipadas (0/${MAX_DECK_PLATE_COST} ◆). Escolha suas Plates (cópias repetidas dobram de custo)!`;
   }
   renderHubAndCollection();
   renderPlatesTray();
@@ -6574,7 +6574,7 @@ refreshStrictPlateCaseUI = function() {
   const remBudget = Math.max(0, MAX_DECK_PLATE_COST - usedCost);
 
   if (pBar) {
-    pBar.innerHTML = `<span style="color:${usedCost === 6 ? '#4ade80' : '#fde047'};">COST ${usedCost}/6</span> <span style="letter-spacing:1px; color:#38bdf8;">${"◆".repeat(Math.min(6, usedCost))}${"◇".repeat(remBudget)}</span> <button onclick="event.stopPropagation(); clearAllDeckPlates();" style="margin-left:4px; background:#1e293b; border:1px solid #475569; color:#cbd5e1; border-radius:4px; padding:1px 5px; font-size:7px; font-weight:900; cursor:pointer;" title="Limpar todas as Plates equipadas">🔄 Limpar</button>`;
+    pBar.innerHTML = `<span style="color:${usedCost === MAX_DECK_PLATE_COST ? '#4ade80' : '#fde047'};">COST ${usedCost}/${MAX_DECK_PLATE_COST}</span> <span style="letter-spacing:1px; color:#38bdf8;">${"◆".repeat(Math.min(MAX_DECK_PLATE_COST, usedCost))}${"◇".repeat(remBudget)}</span> <button onclick="event.stopPropagation(); clearAllDeckPlates();" style="margin-left:4px; background:#1e293b; border:1px solid #475569; color:#cbd5e1; border-radius:4px; padding:1px 5px; font-size:7px; font-weight:900; cursor:pointer;" title="Limpar todas as Plates equipadas">🔄 Limpar</button>`;
   }
 
   pSel.innerHTML = BASE_PLATE_CATALOG.map((baseP, pIdx) => {

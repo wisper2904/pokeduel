@@ -2572,6 +2572,11 @@ const CORE_FIGURE_ABILITIES_I18N = {
     "pt": "[UX] Corrente Delta: Ascensão do Dragão 150 Dourado e Velocidade Extrema 100 Dourado; neutraliza fraquezas de voo.",
     "en": "[UX] Delta Stream: Dragon Ascent 150 Gold & Extreme Speed 100 Gold; neutralizes flying weaknesses.",
     "es": "[UX] Ráfaga Delta: Ascenso Draco 150 Dorado y Velocidad Extrema 100 Dorado; neutraliza debilidades de vuelo."
+  },
+  "ditto": {
+    "pt": "Impostor / Transform: Ao vencer uma batalha tirando o golpe Roxo Transform Mirror ★★★, o Ditto se transforma no Pokémon adversário por 3 turnos, copiando aparência, wheel de golpes, MP e tipo!",
+    "en": "Imposter / Transform: Upon winning combat spinning the Purple move Transform Mirror ★★★, Ditto transforms into the opponent figure, wheel, MP, and attributes for 3 turns!",
+    "es": "Impostor / Transform: ¡Al ganar un combate con Transform Mirror ★★★, Ditto se transforma en el Pokémon rival durante 3 turnos, copiando apariencia, ruleta, PM y tipo!"
   }
 };
 
