@@ -1180,6 +1180,7 @@ function applyUnitEvolutionNow(unit) {
   }
   playSfx("portal");
   if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+  if (window.Juice) Juice.onEvolution(unit, isMega);
 
   if (isMega) {
     setLogText(`🧬 MEGA EVOLUÇÃO EM PARTIDA! ${oldName} Mega Evoluiu para ${unit.name} por 5 turnos (+20 DMG, +1★, +1 MP e Pass-Through)!`);
@@ -1978,7 +1979,7 @@ function drawAuthenticFigurine(u, x, y, zHeight, scale, rotation, shadowX, shado
   }
 
   ctx.translate(x, y);
-  ctx.scale(scale, scale);
+  ctx.scale(scale * (window.__jxSX || 1), scale * (window.__jxSY || 1));
   ctx.rotate(rotation);
 
   const pSkin = (window.trainerProfileData && window.trainerProfileData.equippedCosmetics && window.trainerProfileData.equippedCosmetics.pedestalSkin) || "Royal_Crystal_Plate";
@@ -2219,11 +2220,13 @@ function drawFullTabletopFrame() {
         ctx.fillRect(activePieceAnim.x - 16, 120, 32, activePieceAnim.shadowY - 115);
         ctx.restore();
       }
+      if (window.Juice) { const sq = Juice.squash(activePieceAnim); window.__jxSX = sq.sx; window.__jxSY = sq.sy; }
       drawAuthenticFigurine(
         u, activePieceAnim.x, activePieceAnim.y - activePieceAnim.z,
         activePieceAnim.z, activePieceAnim.scale, activePieceAnim.rot,
         activePieceAnim.shadowX, activePieceAnim.shadowY, true
       );
+      window.__jxSX = 1; window.__jxSY = 1;
     }
   }
 
@@ -2624,6 +2627,7 @@ function showWinResultScreen(winner) {
   state.isMatchActive = false;
   state.matchFinished = true;
   const didWin = (winner === getBottomRole());
+  if (window.Juice) Juice.onMatchEnd(didWin);
   const ov = document.getElementById("win-result-overlay");
   const t = document.getElementById("win-result-title");
   if (t) {
@@ -3113,7 +3117,7 @@ function animatePieceAlongSegments(unit, segments, onComplete) {
         const sc = p < 0.7 ? 0.4 + (p / 0.7) * 0.75 : 1.15 - ((p - 0.7) / 0.3) * 0.15;
         activePieceAnim = {
           uid: unit.uid, x: nTo.x, y: nTo.y, z: dropZ, scale: sc,
-          rot: (1 - p) * 0.25, shadowX: nTo.x, shadowY: nTo.y, portalAlpha: 1 - p
+          rot: (1 - p) * 0.25, shadowX: nTo.x, shadowY: nTo.y, portalAlpha: 1 - p, zmax: 65, p
         };
       } else if (seg.type === "jump") {
         const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
@@ -3124,7 +3128,7 @@ function animatePieceAlongSegments(unit, segments, onComplete) {
         const rot = Math.sin(p * Math.PI * 2) * 0.22;
         activePieceAnim = {
           uid: unit.uid, x: cx, y: cy, z: jumpArcZ, scale: sc, rot,
-          shadowX: cx, shadowY: cy, portalAlpha: 0
+          shadowX: cx, shadowY: cy, portalAlpha: 0, zmax: 56, p
         };
       } else {
         const cx = nFrom.x + (nTo.x - nFrom.x) * p;
@@ -3133,12 +3137,14 @@ function animatePieceAlongSegments(unit, segments, onComplete) {
         activePieceAnim = {
           uid: unit.uid, x: cx, y: cy, z: hopZ,
           scale: 1 + Math.sin(p * Math.PI) * 0.07, rot: Math.sin(p * Math.PI * 2) * 0.1,
-          shadowX: cx, shadowY: cy, portalAlpha: 0
+          shadowX: cx, shadowY: cy, portalAlpha: 0, zmax: 12, p
         };
       }
+      if (window.Juice) Juice.boardTrail(activePieceAnim.x, activePieceAnim.y, unit, seg.type);
       if (p < 1) requestAnimationFrame(stepFrame);
       else {
         boardShockwaves.push({ x: nTo.x, y: nTo.y, r: 3, maxR: 16, alpha: 0.65, color: "#ffffff" });
+        if (window.Juice) Juice.boardLand(nTo.x, nTo.y, seg.type);
         runNextSegment();
       }
     }

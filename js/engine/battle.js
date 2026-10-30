@@ -986,7 +986,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     const wobble = p < 0.97 ? Math.sin(p * 52) * 0.14 * (1 - p) : 0;
 
     if (!allSpinStagesFinished && now - lastTick > 55 + p * 165 && p < 0.97) {
-      playSfx("tick");
+      if (window.Juice) Juice.tick(p); else playSfx("tick");
       lastTick = now;
     }
 
@@ -1013,6 +1013,10 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
         stageHoldAnnounced = true;
         const anyMultiHitThisStage = (isMyWheelSpinningThisStage && myActiveStep.isMultiHit) || (isOppWheelSpinningThisStage && oppActiveStep.isMultiHit);
         playSfx(anyMultiHitThisStage ? "portal" : "hit");
+        if (window.Juice) {
+          if (isMyWheelSpinningThisStage) Juice.onWheelStop({ cx: MY_WHEEL_CX, cy: MY_WHEEL_CY, slice: (mySpin.segs || [])[myActiveStep.idx] });
+          if (isOppWheelSpinningThisStage) Juice.onWheelStop({ cx: OPP_WHEEL_CX, cy: OPP_WHEEL_CY, slice: (oppSpin.segs || [])[oppActiveStep.idx] });
+        }
 
         // Vampire Survivors Style: Floating Combat Text & Particle Bursts for Multiplier Hits & Chain End!
         if (isMyWheelSpinningThisStage && (myActiveStep.isMultiHit || myActiveStep.stoppedChain)) {
@@ -1117,6 +1121,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       const winUnit = outcome.winner === "atk" ? atkUnit : (outcome.winner === "def" ? defUnit : null);
       const loser   = outcome.winner === "atk" ? defUnit : (outcome.winner === "def" ? atkUnit : null);
       const winSpin = outcome.winner === "atk" ? atkSpin.chosen : (outcome.winner === "def" ? defSpin.chosen : null);
+      if (window.Juice) Juice.onImpact({ outcome, winUnit, loser, winSpin, isZMove: Boolean(winSpin && winSpin.isZMove) });
 
       // Ditto Transform Mirror ability: Se vencer o combate usando Transform Mirror, transforma-se no oponente por 3 turnos!
       const isTransformSpin = winSpin && (winSpin.name.toLowerCase().includes("transform") || winSpin.effect === "transform");
