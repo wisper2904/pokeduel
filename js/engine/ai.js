@@ -1,40 +1,74 @@
 // ============================================================================
-// ADAPTIVE COUNTER-TEAM & 2-PLY MINIMAX LOOKAHEAD AI ENGINE
+// ADAPTIVE COUNTER-TEAM & 2-PLY MINIMAX LOOKAHEAD AI ENGINE (v5.8.5 UNIFIED)
 // ============================================================================
-// SECTION 18: v5.3.0 ADAPTIVE STRATEGIC RANKED AI (GRAPH-BFS, 2-PLY LOOKAHEAD,
-// COUNTER-DECK BUILDER, AI PLATE USAGE & PLAYSTYLE LEARNING MEMORY) +
-// FAIR 50/50 FIRST-TURN ROULETTE
+// UNIFIED ADAPTIVE STRATEGIC RANKED AI:
+// - 28-Node Exact Heatmap & Move Transition Predictor (fromNode -> toNode)
+// - 3-Turn Adaptive Opening Book & Counter-Deploy Engine
+// - Mid-Match Live Telemetry Adaptation & Carry-Unit Threat Targeting
+// - Progressive Difficulty Scaling (Elastic Noise, Dynamic Lv/CLv & Streak Scaling)
+// - 2-Ply Minimax Lookahead + Counter-Deck Builder + Tactical Plates
 // ============================================================================
-const AI_BRAIN_STORAGE_KEY = "pdr_adaptive_ai_brain_v570";
+
+const AI_BRAIN_STORAGE_KEY = "pdr_adaptive_ai_brain_v580";
+const LEGACY_BRAIN_KEY     = "pdr_adaptive_ai_brain_v570";
 const FIRST_TURN_HIST_KEY  = "pdr_first_turn_hist_v530";
 
 function loadAdaptiveAIBrain() {
   const defaultBrain = {
-    version: "5.7.0",
+    version: "5.8.5",
     matchesAnalyzed: 0,
     aiWins: 0,
     playerWins: 0,
+    playerWinStreak: 0,
+    // Escala de dificuldade dinâmica: 0.0 (Iniciante) até 1.0 (Grandmaster Implacável)
+    difficultyScale: 0.35,
+    // Ruído tático (quanto maior, mais sub-ótimo o bot joga; cai para 0 conforme você vence)
+    tacticalNoise: 3200,
     laneHeatmap: { left: 2, center: 2, right: 2 },
+    // Frequência exata em cada um dos 28 nós do grafo
+    nodeHeatmap: {},
+    // Matriz de hábito de movimento: { "from_to": contagem } ex: { "7_14": 5 }
+    transitionHabits: {},
+    // Histórico de uso de Plates pelo jogador para antecipar saltos e ataques
+    playerPlateHabits: { hurdle: 0, double: 0, xatk: 0, goalblock: 0, other: 0 },
     playerGoalRushMoves: 0,
     playerEntryBlockMoves: 0,
     playerSurroundKOs: 0,
     playerPlateUses: 0,
     playerAttacks: 0,
     playerFavBaseIds: {},
+    // Registro de quais figuras do jogador mais causam KOs ou vitórias
+    playerCarryKills: {},
+    // Livro de Abertura Adaptativo (3 primeiros turnos)
+    openingBook: {
+      nodes: {}
+    },
     weights: {
-      goalDefense: 1.85,
-      antiSurround: 1.35,
-      entryLockdown: 1.50,
-      combatAggression: 1.65,
-      speedRush: 1.95
+      goalDefense: 1.65,
+      antiSurround: 1.30,
+      entryLockdown: 1.45,
+      combatAggression: 1.55,
+      speedRush: 1.75,
+      habitIntercept: 1.50
     }
   };
+
   try {
-    const raw = localStorage.getItem(AI_BRAIN_STORAGE_KEY);
+    const raw = localStorage.getItem(AI_BRAIN_STORAGE_KEY) || localStorage.getItem(LEGACY_BRAIN_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.laneHeatmap && parsed.weights) {
-        return { ...defaultBrain, ...parsed, weights: { ...defaultBrain.weights, ...parsed.weights } };
+      if (parsed && parsed.weights) {
+        return {
+          ...defaultBrain,
+          ...parsed,
+          version: "5.8.5",
+          laneHeatmap: { ...defaultBrain.laneHeatmap, ...(parsed.laneHeatmap || {}) },
+          nodeHeatmap: { ...defaultBrain.nodeHeatmap, ...(parsed.nodeHeatmap || {}) },
+          transitionHabits: { ...defaultBrain.transitionHabits, ...(parsed.transitionHabits || {}) },
+          playerPlateHabits: { ...defaultBrain.playerPlateHabits, ...(parsed.playerPlateHabits || {}) },
+          openingBook: parsed.openingBook || defaultBrain.openingBook,
+          weights: { ...defaultBrain.weights, ...(parsed.weights || {}) }
+        };
       }
     }
   } catch (e) {}
@@ -48,6 +82,15 @@ function saveAdaptiveAIBrain() {
     localStorage.setItem(AI_BRAIN_STORAGE_KEY, JSON.stringify(adaptiveAIBrain));
   } catch (e) {}
 }
+
+// Utilitário no console para inspecionar ou resetar a evolução da IA
+window.inspectAIBrain = () => adaptiveAIBrain;
+window.resetAIBrain = () => {
+  localStorage.removeItem(AI_BRAIN_STORAGE_KEY);
+  localStorage.removeItem(LEGACY_BRAIN_KEY);
+  adaptiveAIBrain = loadAdaptiveAIBrain();
+  return adaptiveAIBrain;
+};
 
 // Precompute exact 28x28 Shortest-Path Graph BFS distance matrix on the 28-node topology
 const NODE_BFS_DIST = Array.from({ length: 28 }, () => Array(28).fill(99));
@@ -81,794 +124,220 @@ function getPlayerPreferredLane() {
   return "center";
 }
 
-// Analyze Player's current 6-figure Deck (state.deckP1) and build an intelligent Counter-Deck for P2!
-function analyzePlayerDeckAndBuildCounterTeam() {
-  const p1Indices = (state.deckP1 && state.deckP1.length === 6) ? state.deckP1 : [1, 2, 3, 4, 6, 0];
-  let totalPurpleSlices = 0;
-  let totalGoldSlices   = 0;
-  let totalWhiteHeavy   = 0;
-  let runner3MpCount    = 0;
-  let avgPlayerLevel    = 1;
-  let avgPlayerClv      = 0;
-
-  p1Indices.forEach(idx => {
-    const f = FIGURES_DB[idx % FIGURES_DB.length] || FIGURES_DB[0];
-    avgPlayerLevel += (f.level || 1);
-    avgPlayerClv   += (f.clv || 0);
-    if (f.mp >= 3) runner3MpCount++;
-    adaptiveAIBrain.playerFavBaseIds[f.id] = (adaptiveAIBrain.playerFavBaseIds[f.id] || 0) + 1;
-    (f.wheel || []).forEach(w => {
-      if (w.color === "purple") totalPurpleSlices += (w.size || 0);
-      if (w.color === "gold")   totalGoldSlices   += (w.size || 0);
-      if ((w.color === "white" || w.color === "gold") && (w.dmg || 0) >= 100) totalWhiteHeavy += (w.size || 0);
-    });
-  });
-  avgPlayerLevel = Math.round(avgPlayerLevel / 6);
-  avgPlayerClv   = Math.round(avgPlayerClv / 6);
-  saveAdaptiveAIBrain();
-
-  // Score every figure in FIGURES_DB as a counter-pick to the player's current deck!
-  const pElo = (window.trainerProfileData && window.trainerProfileData.rankRating) ? window.trainerProfileData.rankRating : 1000;
-  const allowHighTier = (pElo >= 1100 || adaptiveAIBrain.matchesAnalyzed >= 2 || totalWhiteHeavy > 80);
-
-  const scoredCandidates = FIGURES_DB.map((f, idx) => {
-    let score = 0;
-    const wList = f.wheel || [];
-    const goldSize   = wList.filter(w => w.color === "gold").reduce((s, w) => s + (w.size || 0), 0);
-    const purpleSize = wList.filter(w => w.color === "purple").reduce((s, w) => s + (w.size || 0), 0);
-    const blueSize   = wList.filter(w => w.color === "blue").reduce((s, w) => s + (w.size || 0), 0);
-    const maxDmg     = wList.reduce((m, w) => Math.max(m, w.dmg || 0), 0);
-    const maxStars   = wList.reduce((m, w) => Math.max(m, w.stars || 0), 0);
-
-    // 1. If player uses lots of Purple -> prioritize Gold attackers (Gold breaks Purple!)
-    if (totalPurpleSlices >= 90 && goldSize >= 20) score += goldSize * 1.8;
-    // 2. If player uses heavy White attackers -> prioritize 2-3 star Purple & Blue Dodge!
-    if (totalWhiteHeavy >= 120 && (purpleSize >= 24 || maxStars >= 2)) score += purpleSize * 1.5 + maxStars * 18;
-    // 3. If player uses many 3-MP runners -> prioritize anti-jump / high-defense blockers & 3-MP interceptors
-    if (runner3MpCount >= 3 && (f.id === "gardevoir" || f.id === "palkia_o" || blueSize >= 16 || maxDmg >= 110)) score += 45;
-
-    // Base quality + slight randomization so the AI brings varied meta counter-teams
-    score += maxDmg * 0.4 + goldSize * 0.5 + purpleSize * 0.4 + blueSize * 0.4 + (Math.random() * 25);
-    if (!allowHighTier && (f.rarity === "UX" || maxDmg >= 150)) score -= 60;
-    return { idx, f, score, mp: f.mp, goldSize, purpleSize, maxDmg };
-  });
-
-  scoredCandidates.sort((a, b) => b.score - a.score);
-
-  // Assemble a balanced 6-figure Tactical AI Team:
-  // - 2 Runners (3 MP) for lane control / Entry lockdown / Surround speed
-  // - 2 Gold / High-DMG Breakers to counter Purple & White
-  // - 1 Purple / Status Controller
-  // - 1 Heavy Goal Guardian / Tank (2 MP or 1 MP with high DMG/Blue)
-  const chosenIndices = [];
-  const pickWhere = (pred) => {
-    for (const cand of scoredCandidates) {
-      if (!chosenIndices.includes(cand.idx) && pred(cand)) {
-        chosenIndices.push(cand.idx);
-        return;
-      }
-    }
-  };
-
-  pickWhere(c => c.mp >= 3 && c.goldSize >= 16);
-  pickWhere(c => c.mp >= 3);
-  pickWhere(c => c.goldSize >= 20 && c.maxDmg >= 90);
-  pickWhere(c => c.purpleSize >= 24);
-  pickWhere(c => c.maxDmg >= 110 && c.mp === 2);
-  while (chosenIndices.length < 6) {
-    pickWhere(() => true);
-  }
-
-  state.deckP2 = chosenIndices.slice(0, 6);
-
-  // Name the AI opponent according to the player's ELO League & detected style
-  const prefLane = getPlayerPreferredLane();
-  const laneNames = { left: "Anti-Flanco Esq.", right: "Anti-Flanco Dir.", center: "Guardião Central" };
-  const aiNamesByTier = [
-    { min: 2300, name: "Karolin [IA Master]" },
-    { min: 1900, name: "No.9 [IA Champion]" },
-    { min: 1500, name: "Don Roger [IA Leader]" },
-    { min: 1150, name: "Luca [IA Adaptativa]" },
-    { min: 0,    name: "Carlo [IA Tática]" }
-  ];
-  const tierObj = aiNamesByTier.find(t => pElo >= t.min) || aiNamesByTier[aiNamesByTier.length - 1];
-  window.adaptiveAIOpponentName = tierObj.name;
-  window.adaptiveAIDiagnosticSummary = `${tierObj.name} (${laneNames[prefLane]})`;
-
-  return { chosenIndices, avgPlayerLevel, avgPlayerClv, pElo };
+// Retorna o fator de hábito (0.0 a 1.0) de um nó específico baseado no histórico do jogador
+function getNodeHabitFactor(nodeId) {
+  const map = adaptiveAIBrain.nodeHeatmap || {};
+  const vals = Object.values(map);
+  if (vals.length === 0) return 0;
+  const maxVal = Math.max(1, ...vals);
+  return (map[nodeId] || 0) / maxVal;
 }
 
-// Fair 50/50 First-Turn Roulette Roll with Anti-Streak Balancing!
-function rollFairFirstTurnWinner() {
-  if (state.matchKind === "tutorial") return "p1";
-  let hist = [];
-  try {
-    const raw = localStorage.getItem(FIRST_TURN_HIST_KEY);
-    if (raw) hist = JSON.parse(raw) || [];
-  } catch (e) {}
+// Prevê quais nós o jogador tem maior probabilidade de pisar no próximo turno com base nos seus vícios de rota
+function getPredictedPlayerNextNodes(enemyRole) {
+  const predicted = {};
+  const habits = adaptiveAIBrain.transitionHabits || {};
+  const enemyUnits = state.units.filter(u => u.owner === enemyRole && u.location === "board" && typeof u.nodeId === "number");
 
-  let winner;
-  const n = hist.length;
-  if (n >= 2 && hist[n - 1] === hist[n - 2]) {
-    // If the same side got First Turn twice in a row, force alternation so it never gets stuck on one player!
-    winner = (hist[n - 1] === "p1") ? "p2" : "p1";
-  } else if (n === 0) {
-    // On the very first match after installing v5.3.0, let P2 (the AI) go first so the player immediately sees the fixed roulette in action!
-    winner = "p2";
-  } else {
-    winner = (Math.random() < 0.5) ? "p1" : "p2";
-  }
+  enemyUnits.forEach(eu => {
+    const fromId = eu.nodeId;
+    let totalFromHere = 0;
+    const candidates = [];
 
-  hist.push(winner);
-  if (hist.length > 6) hist = hist.slice(-6);
-  try { localStorage.setItem(FIRST_TURN_HIST_KEY, JSON.stringify(hist)); } catch (e) {}
-  return winner;
-}
-
-// Initialize AI's 6-cost Tactical Plate Loadout for the match
-function initAITacticalPlates() {
-  state.aiPlates = [
-    { id: "hurdle",    name: "Hurdle Jump", cost: 2, used: false },
-    { id: "goalblock", name: "Goal Block",  cost: 2, used: false },
-    { id: "xatk",      name: "X Attack",    cost: 1, used: false },
-    { id: "xspeed",    name: "X Speed",     cost: 1, used: false }
-  ];
-}
-
-// Hook startVideoAuthenticMatch so every AI match builds the adaptive counter-team and rolls the 50/50 First-Turn Roulette!
-const _v521StartVideoAuthenticMatch = startVideoAuthenticMatch;
-startVideoAuthenticMatch = function() {
-  state.currentMatchTelemetry = {
-    playerGoalRushes: 0,
-    playerEntryThreats: 0,
-    playerSurroundThreats: 0,
-    playerAttacks: 0,
-    laneMoves: { left: 0, center: 0, right: 0 }
-  };
-
-  const meta = analyzePlayerDeckAndBuildCounterTeam();
-  _v521StartVideoAuthenticMatch();
-  initAITacticalPlates();
-
-  // Scale AI unit levels & CLv to match player's progression & ELO
-  const eloBonusLv  = Math.min(9, Math.floor(Math.max(0, meta.pElo - 950) / 180));
-  const targetAiLv  = Math.max(1, Math.min(10, Math.max(meta.avgPlayerLevel, 1 + eloBonusLv)));
-  const targetAiClv = Math.max(0, Math.min(10, Math.max(meta.avgPlayerClv, Math.floor(eloBonusLv * 0.8))));
-
-  state.units.filter(u => u.owner === "p2").forEach(u => {
-    u.level = targetAiLv;
-    u.clv   = targetAiClv;
-  });
-
-  // Roll the true 50/50 First-Turn Roulette!
-  const firstTurnWinner = rollFairFirstTurnWinner();
-  state.turn = firstTurnWinner;
-  state.turnCounter = 300;
-  state.preMatchAnim = {
-    t0: performance.now(),
-    firstWinner: firstTurnWinner,
-    aiFired: false
-  };
-
-  const oppName = window.adaptiveAIOpponentName || "IA Estratégica";
-  if (firstTurnWinner === "p1") {
-    setLogText(`🎲 Roleta: VOCÊ começa o duelo (1º Turno: -1 MP) contra ${oppName}!`);
-  } else {
-    setLogText(`🎲 Roleta: ${oppName} ganhou o 1º Turno (-1 MP) e vai começar!`);
-  }
-};
-
-// Observe every move made by the human player (P1) to update the AI's Playstyle Learning Memory in real time!
-const _v521ExecuteMove = executeMove;
-executeMove = function(uid, targetNodeId, broadcast, customSegments, remotePacket) {
-  const u = state.units.find(x => x.uid === uid);
-  if (u && u.owner === "p1" && state.matchKind !== "tutorial" && typeof targetNodeId === "number") {
-    if (!state.currentMatchTelemetry) {
-      state.currentMatchTelemetry = {
-        playerGoalRushes: 0,
-        playerEntryThreats: 0,
-        playerSurroundThreats: 0,
-        playerAttacks: 0,
-        laneMoves: { left: 0, center: 0, right: 0 }
-      };
-    }
-    const lane = getNodeLaneCategory(targetNodeId);
-    adaptiveAIBrain.laneHeatmap[lane] = (adaptiveAIBrain.laneHeatmap[lane] || 0) + 1;
-    state.currentMatchTelemetry.laneMoves[lane] = (state.currentMatchTelemetry.laneMoves[lane] || 0) + 1;
-
-    // Detect Goal Rush: player moves within 3 steps of AI goal (node 3)
-    if (NODE_BFS_DIST[targetNodeId][3] <= 3) {
-      adaptiveAIBrain.playerGoalRushMoves = (adaptiveAIBrain.playerGoalRushMoves || 0) + 1;
-      adaptiveAIBrain.weights.goalDefense = Math.min(2.8, (adaptiveAIBrain.weights.goalDefense || 1.20) + 0.08);
-      state.currentMatchTelemetry.playerGoalRushes += 1;
-    }
-
-    // Detect Entry Block Threat: player moves onto or adjacent to nodes 0 or 6
-    if (targetNodeId === 0 || targetNodeId === 6 || NODE_BFS_DIST[targetNodeId][0] <= 1 || NODE_BFS_DIST[targetNodeId][6] <= 1) {
-      adaptiveAIBrain.playerEntryBlockMoves = (adaptiveAIBrain.playerEntryBlockMoves || 0) + 1;
-      adaptiveAIBrain.weights.entryLockdown = Math.min(2.6, (adaptiveAIBrain.weights.entryLockdown || 1.15) + 0.07);
-      state.currentMatchTelemetry.playerEntryThreats += 1;
-    }
-    saveAdaptiveAIBrain();
-  }
-  return _v521ExecuteMove(uid, targetNodeId, broadcast, customSegments, remotePacket);
-};
-
-// Also track when the player Surround-KOs an AI unit so the AI increases its anti-surround caution weight!
-const _v521SendToPC = sendToPC;
-sendToPC = function(unit) {
-  if (unit && unit.owner === "p2") {
-    state.questEnemyKOs = (state.questEnemyKOs || 0) + 1;
-    if (state.matchKind !== "tutorial") {
-      adaptiveAIBrain.playerSurroundKOs = (adaptiveAIBrain.playerSurroundKOs || 0) + 1;
-      adaptiveAIBrain.weights.antiSurround = Math.min(2.8, (adaptiveAIBrain.weights.antiSurround || 1.25) + 0.08);
-      if (state.currentMatchTelemetry) {
-        state.currentMatchTelemetry.playerSurroundThreats = (state.currentMatchTelemetry.playerSurroundThreats || 0) + 1;
-      }
-      saveAdaptiveAIBrain();
-    }
-  }
-  return _v521SendToPC(unit);
-};
-
-// Track human player attacks in combat to adapt AI aggression and counter-blocking
-if (typeof triggerCombat === "function") {
-  const _v560TriggerCombat = triggerCombat;
-  triggerCombat = function(atkUnit, defUnit, broadcast, forcedSpins) {
-    if (atkUnit && atkUnit.owner === "p1" && state.matchKind !== "tutorial") {
-      adaptiveAIBrain.playerAttacks = (adaptiveAIBrain.playerAttacks || 0) + 1;
-      adaptiveAIBrain.weights.combatAggression = Math.min(2.6, (adaptiveAIBrain.weights.combatAggression || 1.10) + 0.05);
-      if (state.currentMatchTelemetry) {
-        state.currentMatchTelemetry.playerAttacks = (state.currentMatchTelemetry.playerAttacks || 0) + 1;
-      }
-      saveAdaptiveAIBrain();
-    }
-    return _v560TriggerCombat(atkUnit, defUnit, broadcast, forcedSpins);
-  };
-}
-
-// Helper: Check if a given player ('p1' or 'p2') can reach `targetNodeId` in 1 turn from the current board/bench
-function canSideReachNodeNextTurn(sideOwner, targetNodeId, ignoreUnitUid) {
-  const units = state.units.filter(u =>
-    u.owner === sideOwner &&
-    u.uid !== ignoreUnitUid &&
-    u.location !== "pc" &&
-    u.location !== "ultra_space" &&
-    u.waitTurns === 0 &&
-    u.condition !== PokemonCondition.Sleep &&
-    u.condition !== PokemonCondition.Freeze
-  );
-  for (const u of units) {
-    if (u.location === "bench") {
-      const entries = sideOwner === "p1" ? [7, 13] : [0, 6];
-      for (const en of entries) {
-        if (!unitAtNode(en) && NODE_BFS_DIST[en][targetNodeId] <= Math.max(0, u.mp - 1)) {
-          return true;
-        }
-      }
-    } else if (u.location === "board" && typeof u.nodeId === "number") {
-      if (NODE_BFS_DIST[u.nodeId][targetNodeId] <= u.mp) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-// ============================================================================
-// MASTER STRATEGIC AI ENGINE (`triggerPlayerAIMove` v5.3.0)
-// ============================================================================
-triggerPlayerAIMove = function() {
-  if (state.matchKind === "tutorial" || state.isAnimating || state.winCelebrationAnim) return;
-  if (state.mode !== "ai" || state.turn !== "p2") return;
-
-  // If currently in postMoveAttackMode (e.g. player tapped AI button after moving P1), evaluate smart attack
-  if (state.postMoveAttackMode) {
-    const sel = state.units.find(x => x.uid === state.selectedUnitId);
-    let bestTargetNid = null;
-    let bestNet = -999;
-    (state.attackTargets || []).forEach(tNid => {
-      const occ = unitAtNode(tNid);
-      if (sel && occ) {
-        const odds = computeDuelDbOdds(sel, occ);
-        const net = odds.win - odds.loss;
-        if (net > bestNet) { bestNet = net; bestTargetNid = tNid; }
-      }
-    });
-    if (bestTargetNid !== null && bestNet >= -5) {
-      onNodeClicked(bestTargetNid);
-      return;
-    }
-    finishPostMoveWithoutAttack();
-    return;
-  }
-
-  const owner     = state.turn; // 'p2' (or 'p1' if user clicked [AI] button)
-  const enemyRole = owner === "p1" ? "p2" : "p1";
-  const oppGoalId = owner === "p1" ? 3 : 10;
-  const myGoalId  = owner === "p1" ? 10 : 3;
-  const oppEntryIds = owner === "p1" ? [0, 6] : [7, 13];
-  const myEntryIds  = owner === "p1" ? [7, 13] : [0, 6];
-
-  const wGoalDef = (adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)   || 1.2;
-  const wAntiSur = (adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)  || 1.25;
-  const wEntryLk = (adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown) || 1.15;
-  const prefPlayerLane = getPlayerPreferredLane();
-
-  const myUnits = state.units.filter(u =>
-    u.owner === owner &&
-    u.location !== "pc" &&
-    u.location !== "ultra_space" &&
-    u.waitTurns === 0 &&
-    u.condition !== PokemonCondition.Sleep &&
-    u.condition !== PokemonCondition.Freeze
-  );
-  const enemyBoardUnits = state.units.filter(u => u.owner === enemyRole && u.location === "board");
-
-  if (myUnits.length === 0) {
-    skipOrDemoTurn();
-    return;
-  }
-
-  // 1. CHECK IF OUR GOAL (`myGoalId`) IS UNDER IMMEDIATE 1-TURN OR 2-TURN THREAT!
-  let minEnemyStepsToMyGoal = 99;
-  let threateningEnemies = [];
-  enemyBoardUnits.forEach(eu => {
-    const d = NODE_BFS_DIST[eu.nodeId][myGoalId];
-    if (d < minEnemyStepsToMyGoal) minEnemyStepsToMyGoal = d;
-    if (d <= eu.mp + 1) threateningEnemies.push(eu);
-  });
-  const goalInDanger = (minEnemyStepsToMyGoal <= 3 || threateningEnemies.length > 0);
-  const myGoalOccupant = unitAtNode(myGoalId);
-
-  // 2. CHECK IF AI CAN WIN IMMEDIATELY USING `HURDLE JUMP` PLATE!
-  const aiPlates = (owner === "p2" && Array.isArray(state.aiPlates)) ? state.aiPlates : [];
-  const hurdlePlate = aiPlates.find(p => p.id === "hurdle" && !p.used);
-  const goalBlockPlate = aiPlates.find(p => p.id === "goalblock" && !p.used);
-  const xAtkPlate = aiPlates.find(p => p.id === "xatk" && !p.used);
-  const xSpdPlate = aiPlates.find(p => p.id === "xspeed" && !p.used);
-
-  if (hurdlePlate) {
-    state.abilityJumpActive = true;
-    for (const u of myUnits) {
-      if (u.location === "board") {
-        const jumpRes = computeReachableWithPaths(u);
-        if (jumpRes.nodes.includes(oppGoalId)) {
-          hurdlePlate.used = true;
-          playSfx("portal");
-          setLogText(`🧠 ${window.adaptiveAIOpponentName || "IA"} ativou Plate [🦘 Hurdle Jump] para conquistar o Goal Point!`);
-          state.aiHoldPositionNoAttack = true;
-          state.aiPlannedAttackNode = null;
-          state.aiExecutingNow = true;
-          executeMove(u.uid, oppGoalId, true, jumpRes.paths[oppGoalId]);
-          state.aiExecutingNow = false;
-          return;
+    for (let toId = 0; toId < 28; toId++) {
+      if (toId !== fromId && NODE_BFS_DIST[fromId][toId] <= (eu.mp || 2)) {
+        const count = habits[`${fromId}_${toId}`] || 0;
+        if (count > 0) {
+          totalFromHere += count;
+          candidates.push({ toId, count });
         }
       }
     }
-    state.abilityJumpActive = false;
-  }
 
-  // 3. EVALUATE ALL NORMAL MOVES (INCLUDING 0-STEP STANDING ATTACKS & POSITIONAL MOVES)
-  let bestAction = null;
-  let bestScore  = -999999;
+    if (totalFromHere > 0) {
+      candidates.forEach(c => {
+        const prob = c.count / totalFromHere;
+        predicted[c.toId] = Math.max(predicted[c.toId] || 0, prob);
+      });
+    }
+  });
 
-  // Helper: simulate whether placing `movingUnit` at `destNid` causes any Surround KOs
-  function evaluateSimulatedBoardAt(movingUnit, destNid) {
-    const getOccSim = (nid) => {
-      if (nid === destNid) return movingUnit;
-      const occ = unitAtNode(nid);
-      if (occ && occ.uid === movingUnit.uid) return null;
-      return occ;
+  return predicted;
+}
+
+// ============================================================================
+// ADAPTIVE 3-TURN OPENING BOOK & COUNTER-DEPLOY ENGINE (v5.8.5)
+// ============================================================================
+
+(function ensureOpeningBookSchema() {
+  if (!adaptiveAIBrain.openingBook) {
+    adaptiveAIBrain.openingBook = {
+      nodes: {}
     };
+    saveAdaptiveAIBrain();
+  }
+})();
 
-    // Check if `movingUnit` itself would be surrounded at `destNid`!
-    // Strict rule: surrounded if and only if EVERY neighbor is occupied by an enemy!
-    const destNbs = ADJ[destNid] || [];
-    const selfSurrounded = destNbs.length > 0 &&
-      destNbs.every(nb => {
-        const o = getOccSim(nb);
-        return o !== null && o.owner !== owner;
-      });
-    if (selfSurrounded) {
-      return { selfSurrounded: true, enemyKOs: [], allyVulnerableCount: 0 };
-    }
+function getOpeningSeqNode(seqKey) {
+  if (!adaptiveAIBrain.openingBook) {
+    adaptiveAIBrain.openingBook = { nodes: {} };
+  }
+  if (!adaptiveAIBrain.openingBook.nodes[seqKey]) {
+    adaptiveAIBrain.openingBook.nodes[seqKey] = {
+      total: 0,
+      lossesAgainst: 0,
+      nextMoves: {},
+      aiResponses: {}
+    };
+  }
+  return adaptiveAIBrain.openingBook.nodes[seqKey];
+}
 
-    // Check which enemy units get Surround-KO'd when `movingUnit` lands on `destNid`
-    // All neighbors of eu must be occupied by pieces friendly to `owner` (enemies to eu)
-    const enemyKOs = [];
-    enemyBoardUnits.forEach(eu => {
-      const nbs = ADJ[eu.nodeId] || [];
-      if (nbs.length > 0 && nbs.every(nb => {
-        const o = getOccSim(nb);
-        return o !== null && o.owner === owner;
-      })) {
-        enemyKOs.push(eu);
-      }
-    });
+// Calcula a diretriz tática do Livro de Aberturas para o turno atual da IA
+function computeOpeningBookDirective(owner, enemyRole) {
+  const tele = state.currentMatchTelemetry || {};
+  const p1Seq = tele.p1OpeningSeq || [];
+  const aiHist = tele.aiOpeningHistory || [];
 
-    // Check 1-turn Lookahead Surround Vulnerability:
-    // After `movingUnit` lands on `destNid`, does `movingUnit` (or any friendly board unit) have ONLY 1 open neighbor
-    // while all other neighbors are ALREADY occupied by enemies AND the opponent can reach that last open neighbor next turn?
-    let allyVulnerableCount = 0;
-    const allMyBoard = state.units.filter(u => u.owner === owner && (u.location === "board" || u.uid === movingUnit.uid));
-    allMyBoard.forEach(au => {
-      const curNid = (au.uid === movingUnit.uid) ? destNid : au.nodeId;
-      if (typeof curNid !== "number") return;
-      const nbs = ADJ[curNid] || [];
-      const openNbs = nbs.filter(nb => getOccSim(nb) === null || enemyKOs.some(ko => ko.nodeId === nb));
-      const enemyNbs = nbs.filter(nb => {
-        const o = getOccSim(nb);
-        return o && o.owner !== owner && !enemyKOs.includes(o);
-      });
-      // Can only be surrounded next turn if ALL other occupied neighbors are enemies!
-      if (openNbs.length === 1 && enemyNbs.length === (nbs.length - 1)) {
-        const emptyEscapeNode = openNbs[0];
-        if (canSideReachNodeNextTurn(enemyRole, emptyEscapeNode, null)) {
-          allyVulnerableCount++;
-        }
-      }
-    });
-
-    return { selfSurrounded: false, enemyKOs, allyVulnerableCount };
+  // Só atua durante a fase de abertura (primeiros 3 turnos de cada lado)
+  if (owner !== "p2" || aiHist.length >= 3 || p1Seq.length > 3) {
+    return null;
   }
 
-  myUnits.forEach(u => {
-    const res = computeReachableWithPaths(u);
-    const candidateNodes = [...res.nodes];
-    // Also consider 0-step standing position if already on the board and adjacent to an enemy!
-    if (u.location === "board" && typeof u.nodeId === "number") {
-      const hasAdjEnemyNow = (ADJ[u.nodeId] || []).some(nb => {
-        const occ = unitAtNode(nb);
-        return occ && occ.owner !== owner;
-      });
-      if (hasAdjEnemyNow) candidateNodes.push(u.nodeId);
-    }
+  const seqKey = p1Seq.length === 0 ? "START" : p1Seq.join("|");
+  const bookEntry = getOpeningSeqNode(seqKey);
 
-    // Check if `u` is currently in a 1-neighbor surround trap on the board right now
-    let currentlyInSurroundTrap = false;
-    if (u.location === "board" && typeof u.nodeId === "number") {
-      const curNbs = ADJ[u.nodeId] || [];
-      const openCur = curNbs.filter(nb => unitAtNode(nb) === null);
-      const enCur = curNbs.filter(nb => { const o = unitAtNode(nb); return o && o.owner !== owner; });
-      if (openCur.length === 1 && enCur.length === (curNbs.length - 1) && canSideReachNodeNextTurn(enemyRole, openCur[0], null)) {
-        currentlyInSurroundTrap = true;
+  // A) Descobre qual é a próxima jogada favorita do jogador a partir desta sequência
+  let predictedNextNode = null;
+  let predictedConfidence = 0;
+  const nextMoves = bookEntry.nextMoves || {};
+  const totalNext = Object.values(nextMoves).reduce((a, b) => a + b, 0);
+
+  if (totalNext > 0) {
+    let bestToken = null;
+    let bestCount = 0;
+    for (const [token, count] of Object.entries(nextMoves)) {
+      if (count > bestCount) {
+        bestCount = count;
+        bestToken = token;
       }
     }
-
-    candidateNodes.forEach(nid => {
-      const isStandingAttack = (u.location === "board" && nid === u.nodeId);
-      const sim = evaluateSimulatedBoardAt(u, nid);
-      if (sim.selfSurrounded) return; // Never suicide into a self-surround!
-
-      let moveScore = 0;
-      let reasonTag = "Posicionamento Tático";
-
-      // A. Instant Goal Capture!
-      if (nid === oppGoalId) {
-        moveScore += 60000;
-        reasonTag = "Conquista do Goal Point!";
+    if (bestToken) {
+      const parts = bestToken.split("_");
+      const parsedTarget = parseInt(parts[1], 10);
+      if (!isNaN(parsedTarget)) {
+        predictedNextNode = parsedTarget;
+        predictedConfidence = bestCount / totalNext;
       }
+    }
+  }
 
-      // B. Surround KOs achieved by landing on `nid`!
-      if (!isStandingAttack && sim.enemyKOs.length > 0) {
-        sim.enemyKOs.forEach(koUnit => {
-          moveScore += 7200;
-          if (koUnit.nodeId === oppGoalId) moveScore += 50000; // Goal Surround Win!
-          if (threateningEnemies.includes(koUnit)) moveScore += 5500 * wGoalDef;
-          if (myEntryIds.includes(koUnit.nodeId)) moveScore += 3200;
-        });
-        reasonTag = `Cerco Tático (Surround KO em ${sim.enemyKOs[0].name})`;
-      }
+  // B) Identifica a última casa ocupada pelo P1 na abertura e a peça usada
+  let lastP1Node = null;
+  let lastP1Unit = null;
+  if (p1Seq.length > 0) {
+    const lastToken = p1Seq[p1Seq.length - 1];
+    const parsedLast = parseInt(lastToken.split("_")[1], 10);
+    if (!isNaN(parsedLast)) {
+      lastP1Node = parsedLast;
+      lastP1Unit = unitAtNode(lastP1Node);
+    }
+  }
 
-      // C. Penalize leaving our unit (or an ally) in a 1-turn surround trap!
-      if (sim.allyVulnerableCount > 0) {
-        moveScore -= 4200 * wAntiSur * sim.allyVulnerableCount;
-      }
-      // Reward escaping an existing surround trap!
-      if (currentlyInSurroundTrap && !isStandingAttack && sim.allyVulnerableCount === 0) {
-        moveScore += 3800 * wAntiSur;
-        reasonTag = `Evasão de Cerco com ${u.name}`;
-      }
+  // C) Calcula os "Chokepoints" (nós que trancam o caminho entre o ataque do P1 e os pontos vitais 0, 6 e 3 da IA)
+  const vitalAINodes = [0, 6, 3];
+  const chokepointScores = {};
+  const threatNodes = [lastP1Node, predictedNextNode].filter(n => typeof n === "number");
 
-      // D. Leaving our own Goal Point (`myGoalId`) undefended when enemies are nearby is forbidden!
-      if (u.location === "board" && u.nodeId === myGoalId && nid !== myGoalId && goalInDanger) {
-        moveScore -= 18000;
-      }
-
-      // E. Emergency Goal Defense (`myGoalId` or its immediate neighbors `2` and `4` / `9` and `11`)
-      const distToMyGoal  = NODE_BFS_DIST[nid][myGoalId];
-      const distToOppGoal = NODE_BFS_DIST[nid][oppGoalId];
-
-      if (goalInDanger) {
-        if (nid === myGoalId && !myGoalOccupant) {
-          moveScore += 19000 * wGoalDef;
-          reasonTag = `Defesa do Goal Point com ${u.name}`;
-        } else if (distToMyGoal === 1) {
-          moveScore += 6500 * wGoalDef;
-          reasonTag = `Bloqueio de Rota do Goal com ${u.name}`;
+  threatNodes.forEach((tNode, idx) => {
+    const weight = (idx === 1 ? (0.7 + predictedConfidence) : 1.0);
+    vitalAINodes.forEach(vitalId => {
+      const currentDist = NODE_BFS_DIST[tNode][vitalId];
+      for (let cand = 0; cand < 28; cand++) {
+        // Se 'cand' está exatamente no caminho mais curto entre a ameaça do P1 e o ponto vital da IA
+        if (
+          NODE_BFS_DIST[tNode][cand] >= 1 &&
+          NODE_BFS_DIST[tNode][cand] <= 2 &&
+          NODE_BFS_DIST[tNode][cand] + NODE_BFS_DIST[cand][vitalId] === currentDist
+        ) {
+          chokepointScores[cand] = (chokepointScores[cand] || 0) + (8500 * weight);
         }
-        // Extra bonus for placing a piece directly adjacent to the threatening enemy to block its path
-        threateningEnemies.forEach(te => {
-          if (NODE_BFS_DIST[nid][myGoalId] < NODE_BFS_DIST[te.nodeId][myGoalId] && NODE_BFS_DIST[nid][te.nodeId] === 1) {
-            moveScore += 4800 * wGoalDef;
-          }
-        });
-      }
-
-      // F. Offensive Graph Progression toward Opponent's Goal (`oppGoalId`) & Entry Points (`oppEntryIds`)
-      moveScore += (12 - distToOppGoal) * 115;
-      if (oppEntryIds.includes(nid)) {
-        const otherEntry = oppEntryIds.find(id => id !== nid);
-        const otherTaken = otherEntry !== undefined && unitAtNode(otherEntry) && unitAtNode(otherEntry).owner === owner;
-        moveScore += (otherTaken ? 4600 : 1650) * wEntryLk;
-        reasonTag = otherTaken ? `Bloqueio Duplo de Entry Points (Pressão Wait Win!)` : `Ocupação de Entry Point com ${u.name}`;
-      }
-
-      // G. Adaptive Lane Counter-Positioning (reinforce the lane the human player prefers!)
-      const destLane = getNodeLaneCategory(nid);
-      if (destLane === prefPlayerLane) {
-        moveScore += 340;
-      }
-
-      // H. Deploying from Bench vs Over-moving same piece
-      if (u.location === "bench") {
-        const myBoardCount = state.units.filter(x => x.owner === owner && x.location === "board").length;
-        if (myBoardCount < 4) moveScore += 480;
-        if (u.mp >= 3 && state.turnCounter >= 294) moveScore += 320; // Open with 3-MP Runners early!
-      }
-
-      // I. Evaluate Combat Options at `nid` (Attack Best Target vs Hold Position Without Attacking!)
-      const adjEnemiesAtDest = [];
-      (ADJ[nid] || []).forEach(adjId => {
-        const occ = unitAtNode(adjId);
-        if (occ && occ.owner !== owner && !sim.enemyKOs.includes(occ)) {
-          adjEnemiesAtDest.push({ nodeId: adjId, unit: occ });
-        }
-      });
-
-      if (adjEnemiesAtDest.length === 0) {
-        if (!isStandingAttack && moveScore > bestScore) {
-          bestScore = moveScore;
-          bestAction = {
-            type: "move",
-            uid: u.uid,
-            unitName: u.name,
-            nid,
-            segs: res.paths[nid],
-            holdNoAttack: true,
-            attackNode: null,
-            plateToUse: null,
-            reasonTag
-          };
-        }
-      } else {
-        // 1) Option 1: Move to `nid` and HOLD POSITION (do not attack) — only valid if not a 0-step standing action
-        if (!isStandingAttack) {
-          // Holding position next to an enemy is great for setting up a surround or blocking their advance if our attack odds are risky!
-          let holdScore = moveScore + 180;
-          // Check if moving next to `occ` puts `occ` down to 1 open neighbor (setting up a Surround threat!)
-          adjEnemiesAtDest.forEach(({ unit: eu }) => {
-            const euNbs = ADJ[eu.nodeId] || [];
-            const euOpenAfter = euNbs.filter(nb => nb !== nid && unitAtNode(nb) === null);
-            if (euOpenAfter.length === 1) {
-              holdScore += 950;
-            }
-          });
-          if (holdScore > bestScore) {
-            bestScore = holdScore;
-            bestAction = {
-              type: "move",
-              uid: u.uid,
-              unitName: u.name,
-              nid,
-              segs: res.paths[nid],
-              holdNoAttack: true,
-              attackNode: null,
-              plateToUse: null,
-              reasonTag: `${reasonTag} (Bloqueio Tático)`
-            };
-          }
-        }
-
-        // 2) Option 2: Attack the most favorable adjacent enemy at `nid` (with optional X Attack / X Speed Plate!)
-        adjEnemiesAtDest.forEach(({ nodeId: enemyNid, unit: eu }) => {
-          const baseOdds = computeDuelDbOdds(u, eu);
-          const netOdds  = baseOdds.win - baseOdds.loss;
-          const isHighPriorityTarget = (
-            eu.nodeId === myGoalId ||
-            myEntryIds.includes(eu.nodeId) ||
-            threateningEnemies.includes(eu) ||
-            eu.nodeId === oppGoalId
-          );
-
-          let chosenPlate = null;
-          let effectiveNet = netOdds;
-
-          // Check if using X Attack (+30 DMG) or X Speed (White -> Gold vs Purple) turns a close fight into a winning strike!
-          const euWheel = getActiveWheel(eu);
-          const euPurpleRatio = euWheel.filter(w => w.color === "purple").reduce((s, w) => s + (w.size || 0), 0) / 96;
-          if (xSpdPlate && euPurpleRatio >= 0.28 && baseOdds.win < 68) {
-            chosenPlate = xSpdPlate;
-            effectiveNet += 26;
-          } else if (xAtkPlate && (isHighPriorityTarget || (netOdds >= -18 && netOdds <= 22))) {
-            chosenPlate = xAtkPlate;
-            effectiveNet += 22;
-          }
-
-          // Only attack if odds are favorable OR target is an urgent threat (and never risk attacking FROM our own Goal Point unless odds > 65%!)
-          const standingOnMyGoal = (nid === myGoalId);
-          if (standingOnMyGoal && baseOdds.loss > 25 && !chosenPlate) {
-            return; // Do not gamble away our Goal Point defender!
-          }
-
-          if (effectiveNet >= -8 || isHighPriorityTarget) {
-            let atkScore = moveScore + effectiveNet * 18 + (baseOdds.win * 9);
-            if (isHighPriorityTarget) atkScore += 2600;
-            if (atkScore > bestScore) {
-              bestScore = atkScore;
-              bestAction = {
-                type: isStandingAttack ? "standing_attack" : "move_attack",
-                uid: u.uid,
-                unitName: u.name,
-                nid,
-                segs: isStandingAttack ? [] : res.paths[nid],
-                holdNoAttack: false,
-                attackNode: enemyNid,
-                enemyUnit: eu,
-                plateToUse: chosenPlate,
-                reasonTag: `Combate Tático (${u.name} vs ${eu.name} · ${Math.round(baseOdds.win)}% Win)`
-              };
-            }
-          }
-        });
       }
     });
   });
 
-  // 4. EMERGENCY `GOAL BLOCK` PLATE CHECK:
-  // If `goalInDanger` is true, `myGoalId` is STILL empty (`!myGoalOccupant`), and `bestAction` does NOT land on `myGoalId`
-  // or eliminate the threatening enemy while an enemy is 1 turn from capturing `myGoalId`, use `Goal Block` Plate!
-  if (goalInDanger && !myGoalOccupant && minEnemyStepsToMyGoal <= 2 && goalBlockPlate) {
-    const savesGoal = bestAction && (bestAction.nid === myGoalId || bestScore >= 14000);
-    if (!savesGoal) {
-      const fieldAllies = myUnits.filter(u => u.location === "board");
-      if (fieldAllies.length > 0) {
-        // Pick the field ally furthest from `oppGoalId` to teleport to `myGoalId`
-        fieldAllies.sort((a, b) => NODE_BFS_DIST[b.nodeId][oppGoalId] - NODE_BFS_DIST[a.nodeId][oppGoalId]);
-        const savior = fieldAllies[0];
-        goalBlockPlate.used = true;
-        playSfx("portal");
-        spawnPortalParticles(BOARD_NODES[myGoalId].x, BOARD_NODES[myGoalId].y, "#38bdf8");
-        savior.nodeId = myGoalId;
-        savior.waitTurns = 1;
-        setLogText(`🛡️ ${window.adaptiveAIOpponentName || "IA"} ativou Plate [Goal Block] e teleportou ${savior.name} para defender o Goal!`);
-        endTurn(true, enemyRole, Math.max(0, state.turnCounter - 1));
-        return;
+  return {
+    seqKey,
+    bookEntry,
+    predictedNextNode,
+    predictedConfidence,
+    lastP1Node,
+    lastP1Unit,
+    chokepointScores
+  };
+}
+
+// Avalia o bônus/penalidade de um movimento candidato da IA durante os 3 primeiros turnos
+function scoreOpeningBookCandidateMove(u, destNid, directive) {
+  if (!directive) return { bonus: 0, tag: null };
+
+  let bonus = 0;
+  let tag = null;
+  const fromKey = (u.location === "board" && typeof u.nodeId === "number") ? u.nodeId : "bench";
+  const aiMoveToken = `${fromKey}_${destNid}`;
+  const respStats = (directive.bookEntry.aiResponses || {})[aiMoveToken];
+
+  // 1) Memória de Reforço: Evita respostas que já perderam antes e prioriza as que venceram
+  if (respStats) {
+    const netRecord = (respStats.wins || 0) - (respStats.losses || 0);
+    if (netRecord < 0) {
+      // Penalidade severa para a IA não repetir a mesma abertura que já levou derrota contra você
+      bonus -= Math.abs(netRecord) * 18000;
+    } else if (netRecord > 0) {
+      bonus += netRecord * 9500;
+      tag = `📖 Livro de Abertura: Resposta Comprovada (${u.name} → nó ${destNid})`;
+    }
+  }
+
+  // 2) Roubo de Casa Prevista: Ocupa exatamente o nó que você costuma usar no próximo turno
+  if (directive.predictedNextNode !== null && destNid === directive.predictedNextNode && directive.predictedConfidence >= 0.35) {
+    bonus += 16500 * (0.5 + directive.predictedConfidence);
+    tag = `📖 Leitura de Abertura (${Math.round(directive.predictedConfidence * 100)}%): Trancando nó ${destNid} com ${u.name}!`;
+  }
+
+  // 3) Posicionamento em Chokepoint (Corta a linha de infiltração para os Entry Points 0/6 e Goal 3)
+  if (directive.chokepointScores[destNid]) {
+    bonus += directive.chokepointScores[destNid];
+    if (!tag) {
+      tag = `📖 Contra-Abertura: Bloqueando corredor no nó ${destNid} com ${u.name}`;
+    }
+  }
+
+  // 4) Counter-Deploy Inteligente do Banco: Escolhe a peça da IA que ganha na roleta contra a sua peça de abertura
+  if (u.location === "bench" && directive.lastP1Unit && typeof directive.lastP1Node === "number") {
+    const distToP1Opener = NODE_BFS_DIST[destNid][directive.lastP1Node];
+    if (distToP1Opener <= 3) {
+      const odds = computeDuelDbOdds(u, directive.lastP1Unit);
+      const netAdvantage = odds.win - odds.loss;
+      if (netAdvantage >= 10) {
+        bonus += netAdvantage * 260;
+        tag = `📖 Counter-Deploy: ${u.name} (${Math.round(odds.win)}% Win) para caçar ${directive.lastP1Unit.name}!`;
+      } else if (netAdvantage <= -15) {
+        // Evita descer uma peça do banco que seja presa fácil para o seu runner de abertura
+        bonus -= Math.abs(netAdvantage) * 220;
       }
     }
   }
 
-  // 5. EXECUTE THE CHOSEN STRATEGIC ACTION!
-  if (bestAction) {
-    const u = state.units.find(x => x.uid === bestAction.uid);
-    const aiTitle = window.adaptiveAIOpponentName || "IA Estratégica";
+  return { bonus, tag };
+}
 
-    if (bestAction.plateToUse) {
-      bestAction.plateToUse.used = true;
-      state.activePlate = bestAction.plateToUse.id;
-      playSfx("portal");
-    }
-
-    const plateBadge = bestAction.plateToUse ? ` + Plate [${bestAction.plateToUse.name}]` : "";
-    setLogText(`🧠 ${aiTitle}: ${bestAction.reasonTag}${plateBadge}`);
-
-    if (bestAction.type === "standing_attack" && bestAction.enemyUnit) {
-      const nextTurnVal = owner === "p1" ? "p2" : "p1";
-      const nextCounterVal = Math.max(0, state.turnCounter - 1);
-      const atkSpin = spinWheelForUnit(u, true);
-      const defSpin = spinWheelForUnit(bestAction.enemyUnit, false);
-      setTimeout(() => {
-        triggerCombat(u, bestAction.enemyUnit, false, {
-          atkSpin,
-          defSpin,
-          nextTurn: nextTurnVal,
-          nextTurnCounter: nextCounterVal
-        });
-      }, 240);
-      return;
-    }
-
-    state.aiHoldPositionNoAttack = Boolean(bestAction.holdNoAttack);
-    state.aiPlannedAttackNode    = bestAction.attackNode;
-    state.aiExecutingNow         = true;
-    executeMove(bestAction.uid, bestAction.nid, true, bestAction.segs);
-    state.aiExecutingNow         = false;
-    state.aiHoldPositionNoAttack = false;
-    state.aiPlannedAttackNode    = null;
-  } else {
-    skipOrDemoTurn();
-  }
-};
-
-// Update adaptive learning weights at the end of every Ranked or AI match!
-const _v521ShowWinResultScreen = showWinResultScreen;
-showWinResultScreen = function(winner) {
-  if (state.matchKind === "league" || state.mode === "ai") {
-    adaptiveAIBrain.matchesAnalyzed = (adaptiveAIBrain.matchesAnalyzed || 0) + 1;
-    if (winner === "p1") {
-      adaptiveAIBrain.playerWins = (adaptiveAIBrain.playerWins || 0) + 1;
-      // When the player beats the AI, sharpen goal defense, anti-surround, and tactical counter-measures!
-      adaptiveAIBrain.weights.goalDefense = Math.min(3.2, (adaptiveAIBrain.weights.goalDefense || 1.85) + 0.20);
-      adaptiveAIBrain.weights.antiSurround = Math.min(2.8, (adaptiveAIBrain.weights.antiSurround || 1.35) + 0.15);
-      adaptiveAIBrain.weights.speedRush = Math.min(3.5, (adaptiveAIBrain.weights.speedRush || 1.95) + 0.08);
-      adaptiveAIBrain.weights.combatAggression = Math.min(3.2, (adaptiveAIBrain.weights.combatAggression || 1.65) + 0.08);
-      adaptiveAIBrain.weights.entryLockdown = Math.min(3.2, (adaptiveAIBrain.weights.entryLockdown || 1.50) + 0.08);
-    } else {
-      adaptiveAIBrain.aiWins = (adaptiveAIBrain.aiWins || 0) + 1;
-      adaptiveAIBrain.weights.speedRush = Math.min(3.5, (adaptiveAIBrain.weights.speedRush || 2.00) + 0.08);
-      adaptiveAIBrain.weights.combatAggression = Math.min(3.2, (adaptiveAIBrain.weights.combatAggression || 1.70) + 0.08);
-    }
-    saveAdaptiveAIBrain();
-  }
-  return _v521ShowWinResultScreen(winner);
-};
-
-
-// Ensure leaving the board or starting any normal match always cleans up tutorial state!
-const _v531OpenDrawer = openDrawer;
-openDrawer = function(tab) {
-  if (state.matchKind === "tutorial") {
-    tutorialStepBusy = false;
-    currentTutorialStep = 0;
-    hideTutorialCoachHud();
-    state.matchKind = "league";
-    state.mode = "ai";
-  }
-  return _v531OpenDrawer(tab);
-};
-
-const _v531TriggerVoluntaryForfeit = triggerVoluntaryForfeit;
-triggerVoluntaryForfeit = function() {
-  if (state.matchKind === "tutorial") {
-    exitInteractiveTutorial();
-    return;
-  }
-  return _v531TriggerVoluntaryForfeit();
-};
-
-const _v531StartVideoAuthenticMatch = startVideoAuthenticMatch;
-startVideoAuthenticMatch = function() {
-  tutorialStepBusy = false;
-  currentTutorialStep = 0;
-  hideTutorialCoachHud();
-  const tourHud = document.getElementById("tutorial-hub-tour-hud");
-  if (tourHud) tourHud.style.display = "none";
-  if (state.matchKind === "tutorial") {
-    state.matchKind = "league";
-  }
-  state.isAnimating = false;
-  activePieceAnim = null;
-  return _v531StartVideoAuthenticMatch();
-};
-
-
-// ============================================================================
-
-
-// SECTION 20: v5.5.0 GRANDMASTER RANKED AI ENGINE (2-PLY MINIMAX LOOKAHEAD,
-// FULL LV.8-10 + CLv+6..+10 + EVO +10 DMG/+1★ WHEEL SCALING, 6-COST TACTICAL
-// PLATES WITH DOUBLE CHANCE RE-SPIN, MAX REVIVE, MEGA UX & GOAL LOCKDOWN)
-// ============================================================================
-
-// 1. Upgrade `getActiveWheel` so unit-level `unit.level` (Miss reduction -> largest attack)
-// and `unit.clv` (+DMG to primary attacks) apply directly to AI units (P2) as well as P1!
+// 1. Upgrade `getActiveWheel` so unit-level `unit.level` and `unit.clv` apply to AI units
 const _v540GetActiveWheel = getActiveWheel;
 getActiveWheel = function(unit) {
   const segs = _v540GetActiveWheel(unit).map(s => ({ ...s }));
   if (!unit) return segs;
 
-  // Apply unit-specific Level Miss Reduction (Lv.2..10 reduces Red Miss up to -9 slices and adds to best non-red slice!)
   const uLv = Math.max(1, Math.min(10, unit.level || 1));
   if (uLv > 1) {
     let missReduceRem = uLv - 1;
@@ -892,21 +361,19 @@ getActiveWheel = function(unit) {
     });
   }
 
-  // Ensure AI units (`owner === 'p2'`) always receive their full `unit.clv` (+1 DMG per CLv) on all damaging white/gold attacks!
   if (unit.owner === "p2" && (unit.clv || 0) > 0) {
     const extraClv = Math.min(10, unit.clv || 0);
     segs.forEach((s, idx) => {
-      if (s.dmg > 0) {
-        // Note: _v540GetActiveWheel already added clv to sIdx===0 if fig.clvAlloc wasn't set, so add to remaining damaging slices and +4 bonus on primary!
-        if (idx > 0) s.dmg += extraClv;
+      if (s.dmg > 0 && idx > 0) {
+        s.dmg += extraClv;
       }
     });
   }
   return segs;
 };
 
-// 2. Build an Unforgiving Grandmaster Counter-Deck for Ranked AI (`analyzePlayerDeckAndBuildCounterTeam`)
-analyzePlayerDeckAndBuildCounterTeam = function() {
+// 2. Build an Adaptive Counter-Deck that scales with the AI's learned difficulty & player's favorite units
+function analyzePlayerDeckAndBuildCounterTeam() {
   const p1Indices = (state.deckP1 && state.deckP1.length === 6) ? state.deckP1 : [1, 2, 3, 4, 6, 0];
   let totalPurpleSlices = 0;
   let totalGoldSlices   = 0;
@@ -921,18 +388,24 @@ analyzePlayerDeckAndBuildCounterTeam = function() {
     if ((f.clv || 0) > maxPlayerClv) maxPlayerClv = f.clv;
     if (f.mp >= 3) runner3MpCount++;
     adaptiveAIBrain.playerFavBaseIds[f.id] = (adaptiveAIBrain.playerFavBaseIds[f.id] || 0) + 1;
+
+    // Se essa figura é um "carry" frequente do jogador, dobra o peso de contra-ataque para o perfil dela
+    const carryMultiplier = 1 + Math.min(1.5, ((adaptiveAIBrain.playerCarryKills[f.id] || 0) * 0.15));
+
     (f.wheel || []).forEach(w => {
-      if (w.color === "purple") totalPurpleSlices += (w.size || 0);
-      if (w.color === "gold")   totalGoldSlices   += (w.size || 0);
-      if ((w.color === "white" || w.color === "gold") && (w.dmg || 0) >= 100) totalWhiteHeavy += (w.size || 0);
+      if (w.color === "purple") totalPurpleSlices += (w.size || 0) * carryMultiplier;
+      if (w.color === "gold")   totalGoldSlices   += (w.size || 0) * carryMultiplier;
+      if ((w.color === "white" || w.color === "gold") && (w.dmg || 0) >= 100) {
+        totalWhiteHeavy += (w.size || 0) * carryMultiplier;
+      }
     });
   });
   saveAdaptiveAIBrain();
 
   const pElo = (window.trainerProfileData && window.trainerProfileData.rankRating) ? window.trainerProfileData.rankRating : 1000;
   const isRankedMatch = (state.matchKind === "league");
+  const diffScale = Math.max(0.2, Math.min(1.0, adaptiveAIBrain.difficultyScale || 0.35));
 
-  // Score all 306 figures in FIGURES_DB to select the deadliest EX/UX Counter-Team!
   const scoredCandidates = FIGURES_DB.map((f, idx) => {
     const wList = f.wheel || [];
     const goldSize   = wList.filter(w => w.color === "gold").reduce((s, w) => s + (w.size || 0), 0);
@@ -941,28 +414,26 @@ analyzePlayerDeckAndBuildCounterTeam = function() {
     const missSize   = wList.filter(w => w.color === "red").reduce((s, w) => s + (w.size || 0), 0);
     const maxDmg     = wList.reduce((m, w) => Math.max(m, w.dmg || 0), 0);
     const maxStars   = wList.reduce((m, w) => Math.max(m, w.stars || 0), 0);
-    const rarBonus   = (f.rarity === "UX" ? 95 : (f.rarity === "EX" ? 75 : (f.rarity === "R" ? 30 : 0)));
+    const rarBonus   = (f.rarity === "UX" ? 95 : (f.rarity === "EX" ? 75 : (f.rarity === "R" ? 30 : 0))) * diffScale;
 
     let score = rarBonus + maxDmg * 0.85 + maxStars * 26 + goldSize * 0.95 + purpleSize * 0.75 + blueSize * 0.80 - missSize * 1.2;
 
-    // Hard counter weights based on Player's active deck!
-    if (totalPurpleSlices >= 60 && goldSize >= 20) score += goldSize * 2.4;
-    if (totalWhiteHeavy >= 90 && (purpleSize >= 24 || maxStars >= 3 || maxDmg >= 140)) score += purpleSize * 1.8 + maxStars * 25;
-    if (runner3MpCount >= 2 && (f.canPassThrough || f.mp >= 3 || blueSize >= 20 || maxDmg >= 130)) score += 55;
-    if (f.canPassThrough) score += 45; // Pass-through Ghost/Soar/Teleport figures are lethal in Grandmaster play!
+    // Pesos de counter-pick proporcionais ao nível de adaptação do bot
+    if (totalPurpleSlices >= 60 && goldSize >= 20) score += goldSize * 2.5 * diffScale;
+    if (totalWhiteHeavy >= 90 && (purpleSize >= 24 || maxStars >= 3 || maxDmg >= 140)) {
+      score += (purpleSize * 1.8 + maxStars * 25) * diffScale;
+    }
+    if (runner3MpCount >= 2 && (f.canPassThrough || f.mp >= 3 || blueSize >= 20 || maxDmg >= 130)) {
+      score += 55 * diffScale;
+    }
+    if (f.canPassThrough) score += 45 * diffScale;
 
-    // Small controlled jitter among top meta picks so each match feels fresh yet brutal
-    score += (Math.random() * 14);
+    score += (Math.random() * (28 - diffScale * 16));
     return { idx, f, score, mp: f.mp, goldSize, purpleSize, blueSize, maxDmg, maxStars, pass: Boolean(f.canPassThrough) };
   });
 
   scoredCandidates.sort((a, b) => b.score - a.score);
 
-  // Assemble Grandmaster 6-Figure Meta Lineup:
-  // 1) 2 High-Tier 3-MP Infiltrators / Gold Runners (for Entry Point Blitz, Surround Traps & Goal Pressure)
-  // 2) 2 Heavy EX/UX Bruisers (130–160+ DMG + Gold/Purple)
-  // 3) 1 3-Star Purple / Status Controller
-  // 4) 1 Impenetrable Goal Guardian / Anchor (High DMG + Blue Dodge / Purple)
   let chosenIndices = [];
   if (state.isBotDeckLocked && Array.isArray(state.deckP2) && state.deckP2.length === 6) {
     chosenIndices = [...state.deckP2];
@@ -998,51 +469,271 @@ analyzePlayerDeckAndBuildCounterTeam = function() {
 
   const prefLane = getPlayerPreferredLane();
   const laneNames = { left: "Anti-Flanco Esq.", right: "Anti-Flanco Dir.", center: "Tranca Central" };
+  const adaptPct = Math.round(diffScale * 100);
   const aiNamesByTier = [
-    { min: 2100, name: "Karolin [IA Grandmaster]" },
-    { min: 1600, name: "No.9 [IA Grandmaster]" },
-    { min: 1200, name: "Don Roger [IA Master]" },
-    { min: 0,    name: "N.O.V.A. [IA Grandmaster]" }
+    { min: 2100, name: `Karolin [IA Grandmaster · ${adaptPct}%]` },
+    { min: 1600, name: `No.9 [IA Adaptativa · ${adaptPct}%]` },
+    { min: 1200, name: `Don Roger [IA Master · ${adaptPct}%]` },
+    { min: 0,    name: `N.O.V.A. [IA Evolutiva · ${adaptPct}%]` }
   ];
   const tierObj = aiNamesByTier.find(t => pElo >= t.min) || aiNamesByTier[aiNamesByTier.length - 1];
   window.adaptiveAIOpponentName = tierObj.name;
   window.adaptiveAIDiagnosticSummary = `${tierObj.name} (${laneNames[prefLane]})`;
 
-  const targetAiLv  = isRankedMatch ? Math.min(10, Math.max(8, maxPlayerLevel + 2)) : Math.max(5, maxPlayerLevel);
-  const targetAiClv = isRankedMatch ? Math.min(10, Math.max(6, maxPlayerClv + 3))   : Math.max(2, maxPlayerClv);
+  // Escala progressiva de Level e CLv baseada nas vitórias do jogador e difficultyScale
+  const bonusLv  = Math.round(diffScale * 4);
+  const bonusClv = Math.round(diffScale * 6);
+  const targetAiLv  = isRankedMatch ? Math.min(10, Math.max(4, maxPlayerLevel - 1 + bonusLv)) : Math.max(3, maxPlayerLevel);
+  const targetAiClv = isRankedMatch ? Math.min(10, Math.max(1, maxPlayerClv - 1 + bonusClv))   : Math.max(1, maxPlayerClv);
 
-  return { chosenIndices, avgPlayerLevel: targetAiLv, avgPlayerClv: targetAiClv, pElo, isRankedMatch };
-};
+  return { chosenIndices, avgPlayerLevel: targetAiLv, avgPlayerClv: targetAiClv, pElo, isRankedMatch, diffScale };
+}
 
-// 3. Equip AI with a Full 6/6◆ Grandmaster Plate Arsenal!
-initAITacticalPlates = function() {
+// Fair 50/50 First-Turn Roulette Roll with Anti-Streak Balancing
+function rollFairFirstTurnWinner() {
+  if (state.matchKind === "tutorial") return "p1";
+  let hist = [];
+  try {
+    const raw = localStorage.getItem(FIRST_TURN_HIST_KEY);
+    if (raw) hist = JSON.parse(raw) || [];
+  } catch (e) {}
+
+  let winner;
+  const n = hist.length;
+  if (n >= 2 && hist[n - 1] === hist[n - 2]) {
+    winner = (hist[n - 1] === "p1") ? "p2" : "p1";
+  } else if (n === 0) {
+    winner = "p2";
+  } else {
+    winner = (Math.random() < 0.5) ? "p1" : "p2";
+  }
+
+  hist.push(winner);
+  if (hist.length > 6) hist = hist.slice(-6);
+  try { localStorage.setItem(FIRST_TURN_HIST_KEY, JSON.stringify(hist)); } catch (e) {}
+  return winner;
+}
+
+// 3. Equip AI with Tactical Plates (libera arsenal completo conforme difficultyScale sobe)
+function initAITacticalPlates() {
+  const diffScale = adaptiveAIBrain.difficultyScale || 0.35;
   state.aiPlates = [
     { id: "hurdle",    name: "Hurdle Jump",     cost: 2, used: false },
     { id: "goalblock", name: "Goal Block",      cost: 2, used: false },
-    { id: "megaplate", name: "Mega Plate [UX]", cost: 1, used: false },
-    { id: "double",    name: "Double Chance",   cost: 1, used: false },
     { id: "xatk",      name: "X Attack",        cost: 1, used: false },
     { id: "xspeed",    name: "X Speed",         cost: 1, used: false }
   ];
-};
+  // Desbloqueia Double Chance e Mega Plate conforme o bot evolui contra você
+  if (diffScale >= 0.45) {
+    state.aiPlates.push({ id: "double", name: "Double Chance", cost: 1, used: false });
+  }
+  if (diffScale >= 0.65) {
+    state.aiPlates.push({ id: "megaplate", name: "Mega Plate [UX]", cost: 1, used: false });
+  }
+}
 
-// Apply Grandmaster Stats (Lv.8-10, CLv+6..+10, EvoStage +1 = +10 DMG & +1★) to AI units on match start!
-const _v540StartVideoAuthenticMatch = startVideoAuthenticMatch;
+// Unified startVideoAuthenticMatch Hook (com Opening Book tracking)
+const _v580StartVideoAuthenticMatch = startVideoAuthenticMatch;
 startVideoAuthenticMatch = function() {
-  _v540StartVideoAuthenticMatch();
-  const isRanked = (state.matchKind === "league");
-  const pElo = (window.trainerProfileData && window.trainerProfileData.rankRating) ? window.trainerProfileData.rankRating : 1000;
-  const gmLv  = isRanked ? Math.min(10, 8 + Math.floor(Math.max(0, pElo - 1000) / 250)) : 5;
-  const gmClv = isRanked ? Math.min(10, 6 + Math.floor(Math.max(0, pElo - 1000) / 200)) : 3;
+  tutorialStepBusy = false;
+  currentTutorialStep = 0;
+  if (typeof hideTutorialCoachHud === "function") hideTutorialCoachHud();
+  const tourHud = document.getElementById("tutorial-hub-tour-hud");
+  if (tourHud) tourHud.style.display = "none";
+  if (state.matchKind === "tutorial") {
+    state.matchKind = "league";
+  }
+  state.isAnimating = false;
+  activePieceAnim = null;
+
+  state.currentMatchTelemetry = {
+    playerGoalRushes: 0,
+    playerEntryThreats: 0,
+    playerSurroundThreats: 0,
+    playerAttacks: 0,
+    laneMoves: { left: 0, center: 0, right: 0 },
+    unitDangerScore: {}, // Rastreia qual peça do jogador está dominando a partida atual
+    p1OpeningSeq: [],    // Até 3 tokens: ex ["bench_14", "14_20", "bench_16"]
+    p1OpeningUnits: [],  // UIDs das peças que o P1 moveu na abertura
+    aiOpeningHistory: [] // Respostas dadas pela IA nos 3 primeiros turnos
+  };
+
+  const meta = analyzePlayerDeckAndBuildCounterTeam();
+  _v580StartVideoAuthenticMatch();
+  initAITacticalPlates();
 
   state.units.filter(u => u.owner === "p2").forEach(u => {
-    u.level    = gmLv;
-    u.clv      = gmClv;
-    u.evoStage = isRanked ? 1 : 0; // +10 DMG and +1★ across all attacks in Ranked!
+    u.level    = meta.avgPlayerLevel;
+    u.clv      = meta.avgPlayerClv;
+    u.evoStage = (meta.isRankedMatch && meta.diffScale >= 0.55) ? 1 : 0;
   });
+
+  const firstTurnWinner = rollFairFirstTurnWinner();
+  state.turn = firstTurnWinner;
+  state.turnCounter = 300;
+  state.preMatchAnim = {
+    t0: performance.now(),
+    firstWinner: firstTurnWinner,
+    aiFired: false
+  };
+
+  const oppName = window.adaptiveAIOpponentName || "IA Estratégica";
+  if (firstTurnWinner === "p1") {
+    setLogText(`🎲 Roleta: VOCÊ começa o duelo (1º Turno: -1 MP) contra ${oppName}!`);
+  } else {
+    setLogText(`🎲 Roleta: ${oppName} ganhou o 1º Turno (-1 MP) e vai começar!`);
+  }
 };
 
-// 4. Helper: Can ANY P1 unit reach `targetNodeId` in 1 turn from a simulated board state (including P1's Pass-Through or Hurdle Jump)?
+// Observe every move made by P1 to update 28-node heatmap, transition habits & 3-turn opening book
+const _v580ExecuteMove = executeMove;
+executeMove = function(uid, targetNodeId, broadcast, customSegments, remotePacket) {
+  const u = state.units.find(x => x.uid === uid);
+  const prevNodeId = (u && typeof u.nodeId === "number") ? u.nodeId : "bench";
+
+  if (u && state.matchKind !== "tutorial" && typeof targetNodeId === "number") {
+    if (!state.currentMatchTelemetry) {
+      state.currentMatchTelemetry = {
+        playerGoalRushes: 0,
+        playerEntryThreats: 0,
+        playerSurroundThreats: 0,
+        playerAttacks: 0,
+        laneMoves: { left: 0, center: 0, right: 0 },
+        unitDangerScore: {},
+        p1OpeningSeq: [],
+        p1OpeningUnits: [],
+        aiOpeningHistory: []
+      };
+    }
+    const tele = state.currentMatchTelemetry;
+    if (!Array.isArray(tele.p1OpeningSeq)) tele.p1OpeningSeq = [];
+    if (!Array.isArray(tele.p1OpeningUnits)) tele.p1OpeningUnits = [];
+    if (!Array.isArray(tele.aiOpeningHistory)) tele.aiOpeningHistory = [];
+
+    const moveToken = `${prevNodeId}_${targetNodeId}`;
+
+    if (u.owner === "p1") {
+      // 1. Atualiza Heatmap da Lane e do Nó Exato (0..27)
+      const lane = getNodeLaneCategory(targetNodeId);
+      adaptiveAIBrain.laneHeatmap[lane] = (adaptiveAIBrain.laneHeatmap[lane] || 0) + 1;
+      adaptiveAIBrain.nodeHeatmap[targetNodeId] = (adaptiveAIBrain.nodeHeatmap[targetNodeId] || 0) + 1;
+      tele.laneMoves[lane] = (tele.laneMoves[lane] || 0) + 1;
+
+      // 2. Registra hábito de transição (origem -> destino) para prever próximos passos
+      adaptiveAIBrain.transitionHabits[moveToken] = (adaptiveAIBrain.transitionHabits[moveToken] || 0) + 1;
+
+      // 3. Detecta Uso de Hurdle Jump pelo jogador
+      if (state.abilityJumpActive) {
+        adaptiveAIBrain.playerPlateHabits.hurdle = (adaptiveAIBrain.playerPlateHabits.hurdle || 0) + 1;
+        adaptiveAIBrain.weights.antiSurround = Math.min(3.4, (adaptiveAIBrain.weights.antiSurround || 1.30) + 0.06);
+      }
+
+      // 4. Detecta Goal Rush: jogador a até 3 passos do Goal da IA (nó 3)
+      if (NODE_BFS_DIST[targetNodeId][3] <= 3) {
+        adaptiveAIBrain.playerGoalRushMoves = (adaptiveAIBrain.playerGoalRushMoves || 0) + 1;
+        adaptiveAIBrain.weights.goalDefense = Math.min(3.5, (adaptiveAIBrain.weights.goalDefense || 1.65) + 0.06);
+        tele.playerGoalRushes += 1;
+        tele.unitDangerScore[u.uid] = (tele.unitDangerScore[u.uid] || 0) + 25;
+      }
+
+      // 5. Detecta Ameaça de Bloqueio de Entry Point (nós 0 ou 6)
+      if (targetNodeId === 0 || targetNodeId === 6 || NODE_BFS_DIST[targetNodeId][0] <= 1 || NODE_BFS_DIST[targetNodeId][6] <= 1) {
+        adaptiveAIBrain.playerEntryBlockMoves = (adaptiveAIBrain.playerEntryBlockMoves || 0) + 1;
+        adaptiveAIBrain.weights.entryLockdown = Math.min(3.2, (adaptiveAIBrain.weights.entryLockdown || 1.45) + 0.06);
+        tele.playerEntryThreats += 1;
+        tele.unitDangerScore[u.uid] = (tele.unitDangerScore[u.uid] || 0) + 18;
+      }
+
+      // 6. Livro de Abertura: Registra sequência dos 3 primeiros turnos do P1
+      if (tele.p1OpeningSeq.length < 3) {
+        const seqKey = tele.p1OpeningSeq.length === 0 ? "START" : tele.p1OpeningSeq.join("|");
+        const bookEntry = getOpeningSeqNode(seqKey);
+        bookEntry.total = (bookEntry.total || 0) + 1;
+        bookEntry.nextMoves[moveToken] = (bookEntry.nextMoves[moveToken] || 0) + 1;
+
+        tele.p1OpeningSeq.push(moveToken);
+        tele.p1OpeningUnits.push({ uid: u.uid, targetNodeId });
+      }
+
+      saveAdaptiveAIBrain();
+    } else if (u.owner === "p2" && tele.aiOpeningHistory.length < 3) {
+      const activeSeqKey = tele.p1OpeningSeq.length === 0 ? "START" : tele.p1OpeningSeq.join("|");
+      tele.aiOpeningHistory.push({
+        seqKey: activeSeqKey,
+        aiMoveToken: moveToken,
+        destNid: targetNodeId
+      });
+    }
+  }
+  return _v580ExecuteMove(uid, targetNodeId, broadcast, customSegments, remotePacket);
+};
+
+// Track when an AI unit is sent to PC to learn anti-surround caution
+const _v521SendToPC = sendToPC;
+sendToPC = function(unit) {
+  if (unit && unit.owner === "p2") {
+    state.questEnemyKOs = (state.questEnemyKOs || 0) + 1;
+    if (state.matchKind !== "tutorial") {
+      adaptiveAIBrain.playerSurroundKOs = (adaptiveAIBrain.playerSurroundKOs || 0) + 1;
+      adaptiveAIBrain.weights.antiSurround = Math.min(3.4, (adaptiveAIBrain.weights.antiSurround || 1.30) + 0.07);
+      if (state.currentMatchTelemetry) {
+        state.currentMatchTelemetry.playerSurroundThreats = (state.currentMatchTelemetry.playerSurroundThreats || 0) + 1;
+      }
+      saveAdaptiveAIBrain();
+    }
+  }
+  return _v521SendToPC(unit);
+};
+
+// Track human player attacks & identify the player's carry unit
+if (typeof triggerCombat === "function") {
+  const _v560TriggerCombat = triggerCombat;
+  triggerCombat = function(atkUnit, defUnit, broadcast, forcedSpins) {
+    if (atkUnit && atkUnit.owner === "p1" && state.matchKind !== "tutorial") {
+      adaptiveAIBrain.playerAttacks = (adaptiveAIBrain.playerAttacks || 0) + 1;
+      adaptiveAIBrain.weights.combatAggression = Math.min(3.2, (adaptiveAIBrain.weights.combatAggression || 1.55) + 0.04);
+      if (atkUnit.id) {
+        adaptiveAIBrain.playerCarryKills[atkUnit.id] = (adaptiveAIBrain.playerCarryKills[atkUnit.id] || 0) + 1;
+      }
+      if (state.currentMatchTelemetry) {
+        state.currentMatchTelemetry.playerAttacks = (state.currentMatchTelemetry.playerAttacks || 0) + 1;
+        state.currentMatchTelemetry.unitDangerScore[atkUnit.uid] = (state.currentMatchTelemetry.unitDangerScore[atkUnit.uid] || 0) + 20;
+      }
+      saveAdaptiveAIBrain();
+    }
+    return _v560TriggerCombat(atkUnit, defUnit, broadcast, forcedSpins);
+  };
+}
+
+// Helper: Check if a given player ('p1' or 'p2') can reach `targetNodeId` in 1 turn
+function canSideReachNodeNextTurn(sideOwner, targetNodeId, ignoreUnitUid) {
+  const units = state.units.filter(u =>
+    u.owner === sideOwner &&
+    u.uid !== ignoreUnitUid &&
+    u.location !== "pc" &&
+    u.location !== "ultra_space" &&
+    u.waitTurns === 0 &&
+    u.condition !== PokemonCondition.Sleep &&
+    u.condition !== PokemonCondition.Freeze
+  );
+  for (const u of units) {
+    if (u.location === "bench") {
+      const entries = sideOwner === "p1" ? [7, 13] : [0, 6];
+      for (const en of entries) {
+        if (!unitAtNode(en) && NODE_BFS_DIST[en][targetNodeId] <= Math.max(0, u.mp - 1)) {
+          return true;
+        }
+      }
+    } else if (u.location === "board" && typeof u.nodeId === "number") {
+      if (NODE_BFS_DIST[u.nodeId][targetNodeId] <= u.mp) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// Helper: Can ANY P1 unit reach `targetNodeId` in 1 turn from a simulated board state
 function canEnemyReachNodeInSim(enemyRole, targetNodeId, getOccSimFn, includeHurdleJump) {
   const enemyUnits = state.units.filter(u =>
     u.owner === enemyRole &&
@@ -1052,7 +743,12 @@ function canEnemyReachNodeInSim(enemyRole, targetNodeId, getOccSimFn, includeHur
     u.condition !== PokemonCondition.Sleep &&
     u.condition !== PokemonCondition.Freeze
   );
-  const p1HasUnusedHurdle = includeHurdleJump && state.plates && state.plates.some(p => !p.disabledInDeck && !p.used && p.id === "hurdle");
+  // Se o jogador tem hábito alto de usar Hurdle Jump, a IA sempre simula o salto como precaução
+  const playerAbusesHurdle = ((adaptiveAIBrain.playerPlateHabits && adaptiveAIBrain.playerPlateHabits.hurdle) || 0) >= 2;
+  const p1HasUnusedHurdle = includeHurdleJump && (
+    playerAbusesHurdle ||
+    (state.plates && state.plates.some(p => !p.disabledInDeck && !p.used && p.id === "hurdle"))
+  );
 
   for (const eu of enemyUnits) {
     const mp = Math.max(1, eu.mp - (eu.condition === PokemonCondition.Paralyze ? 1 : 0));
@@ -1069,7 +765,6 @@ function canEnemyReachNodeInSim(enemyRole, targetNodeId, getOccSimFn, includeHur
         }
       });
     } else if (eu.location === "board") {
-      // Check if eu was Surround-KO'd in simulation
       if (getOccSimFn(eu.nodeId) !== eu) continue;
       visited.set(eu.nodeId, 0);
       queue.push({ id: eu.nodeId, dist: 0 });
@@ -1106,12 +801,21 @@ function canEnemyReachNodeInSim(enemyRole, targetNodeId, getOccSimFn, includeHur
   return false;
 }
 
-// 5. GRANDMASTER 2-PLY MINIMAX AI ENGINE (`triggerPlayerAIMove` v5.5.0)
+// 6. Hook pass-through de computeReachableWithPaths
+const _v580ComputeReachableHook = computeReachableWithPaths;
+computeReachableWithPaths = function(unit) {
+  return _v580ComputeReachableHook(unit);
+};
+
+// ============================================================================
+// MASTER ADAPTIVE 2-PLY MINIMAX AI ENGINE (`triggerPlayerAIMove` v5.8.5)
+// ============================================================================
 triggerPlayerAIMove = function() {
   if (state.matchKind === "tutorial" || state.isAnimating || state.winCelebrationAnim) return;
+  // Segurança estrita: A IA só move para o bot P2 no modo solo 'ai', jamais em multiplayer ou vez do jogador!
   if (state.mode !== "ai" || state.turn !== "p2") return;
 
-  // Handle post-move attack prompt if human clicked [AI] mid-turn
+  // Handle post-move attack prompt if triggered
   if (state.postMoveAttackMode) {
     const sel = state.units.find(x => x.uid === state.selectedUnitId);
     let bestTargetNid = null;
@@ -1132,15 +836,15 @@ triggerPlayerAIMove = function() {
     return;
   }
 
-  const owner       = state.turn; // 'p2' (or 'p1' if user tapped AI button)
+  const owner       = state.turn;
   const enemyRole   = owner === "p1" ? "p2" : "p1";
   const oppGoalId   = owner === "p1" ? 3 : 10;
   const myGoalId    = owner === "p1" ? 10 : 3;
   const oppEntryIds = owner === "p1" ? [0, 6] : [7, 13];
   const myEntryIds  = owner === "p1" ? [7, 13] : [0, 6];
-  const aiTitle     = window.adaptiveAIOpponentName || "IA Grandmaster";
+  const aiTitle     = window.adaptiveAIOpponentName || "IA Adaptativa";
 
-  const aiPlates = (owner === "p2" && Array.isArray(state.aiPlates)) ? state.aiPlates : [];
+  const aiPlates       = (owner === "p2" && Array.isArray(state.aiPlates)) ? state.aiPlates : [];
   const hurdlePlate    = aiPlates.find(p => p.id === "hurdle"    && !p.used);
   const goalBlockPlate = aiPlates.find(p => p.id === "goalblock" && !p.used);
   const megaPlate      = aiPlates.find(p => p.id === "megaplate" && !p.used);
@@ -1163,7 +867,7 @@ triggerPlayerAIMove = function() {
     return;
   }
 
-  // STEP 1: CHECK IF AI CAN WIN IMMEDIATELY THIS TURN (NORMAL MOVE OR `HURDLE JUMP` PLATE)!
+  // STEP 1: CHECK IF AI CAN WIN IMMEDIATELY THIS TURN (NORMAL MOVE OR `HURDLE JUMP` PLATE)
   for (const u of myUnits) {
     const normRes = computeReachableWithPaths(u);
     if (normRes.nodes.includes(oppGoalId)) {
@@ -1198,7 +902,7 @@ triggerPlayerAIMove = function() {
     state.abilityJumpActive = false;
   }
 
-  // STEP 2: ASSESS THREAT LEVEL AGAINST AI'S GOAL POINT (`myGoalId = 3`)
+  // STEP 2: ASSESS THREAT LEVEL & MID-MATCH TELEMETRY
   const myGoalOccupant = unitAtNode(myGoalId);
   const myGoalDefended = Boolean(myGoalOccupant && myGoalOccupant.owner === owner);
 
@@ -1210,54 +914,48 @@ triggerPlayerAIMove = function() {
     if (d <= eu.mp + 1) threateningEnemies.push(eu);
   });
 
-  // Dynamic Threat Level Classification:
-  // Level 3 (CRITICAL): Enemy can capture goal next turn, or is adjacent to defended goal threatening surround
-  // Level 2 (HIGH): Goal is undefended and enemy is within 3-4 steps, or enemy approaching within mp + 1
-  // Level 1 (MODERATE): Enemy has crossed into AI's half (dist <= 5)
-  // Level 0 (SAFE): Goal is securely defended and enemies are contained on player's half
   let threatLevel = 0;
   if (!myGoalDefended) {
     if (minEnemyStepsToMyGoal <= 2 || threateningEnemies.some(eu => NODE_BFS_DIST[eu.nodeId][myGoalId] <= eu.mp)) {
-      threatLevel = 3; // CRITICAL: Enemy can take goal right now!
+      threatLevel = 3;
     } else if (minEnemyStepsToMyGoal <= 4 || threateningEnemies.length > 0) {
-      threatLevel = 2; // HIGH: Goal is naked and enemy is closing in!
+      threatLevel = 2;
     } else if (minEnemyStepsToMyGoal <= 6) {
-      threatLevel = 1; // MODERATE: Enemy advancing
+      threatLevel = 1;
     }
   } else {
-    // Goal is occupied by our defender
     if (minEnemyStepsToMyGoal === 1) {
-      threatLevel = 3; // Enemy right next to our goal defender (nodes 2 or 4)!
+      threatLevel = 3;
     } else if (minEnemyStepsToMyGoal <= 2) {
-      threatLevel = 2; // Enemy 2 steps away
+      threatLevel = 2;
     } else if (minEnemyStepsToMyGoal <= 4) {
       threatLevel = 1;
     }
   }
 
   const goalInDanger = (threatLevel >= 2);
-  const goalInCritical = (threatLevel >= 3);
   const prefPlayerLane = getPlayerPreferredLane();
+  const predictedPlayerNextNodes = getPredictedPlayerNextNodes(enemyRole);
+  const tele = state.currentMatchTelemetry || {};
 
-  // Dynamic Real-Time Threat-Responsive Weights:
-  let wGoalDef   = Math.min(3.5, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)   || 1.85));
-  let wAntiSur   = Math.min(2.8, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)  || 1.35));
-  let wEntryLk   = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown) || 1.50));
-  let wCombatAgg = Math.min(3.2, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.combatAggression) || 1.65));
-  let wSpeedRush = Math.min(3.5, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.speedRush) || 1.95));
+  // Pesos combinam a memória persistente + o que o jogador está fazendo NESTA partida em tempo real
+  let wGoalDef    = Math.min(3.8, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.goalDefense)      || 1.65) + (tele.playerGoalRushes || 0) * 0.12);
+  let wAntiSur    = Math.min(3.4, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.antiSurround)     || 1.30) + (tele.playerSurroundThreats || 0) * 0.15);
+  let wEntryLk    = Math.min(3.4, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.entryLockdown)    || 1.45) + (tele.playerEntryThreats || 0) * 0.12);
+  let wCombatAgg  = Math.min(3.4, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.combatAggression) || 1.55) + (tele.playerAttacks || 0) * 0.08);
+  let wSpeedRush  = Math.min(3.6, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.speedRush)        || 1.75));
+  let wHabitBlock = Math.min(3.5, ((adaptiveAIBrain.weights && adaptiveAIBrain.weights.habitIntercept)   || 1.50));
 
-  // When threat level rises, pivot intelligently to lock down the goal!
   if (threatLevel === 3) {
-    wGoalDef   *= 2.5; // Top priority: save the goal!
+    wGoalDef   *= 2.5;
     wAntiSur   *= 1.8;
-    wSpeedRush *= 0.45; // Do not blind-rush while goal is under immediate fatal threat!
+    wSpeedRush *= 0.45;
   } else if (threatLevel === 2) {
     wGoalDef   *= 1.8;
     wAntiSur   *= 1.4;
     wSpeedRush *= 0.75;
   }
 
-  // Helper: Calculate fastest turns needed to reach opponent's Goal Point from a given node
   function computeFastestTurnsToWin(unit, fromNode) {
     if (fromNode === oppGoalId) return 0;
     const effectiveMp = Math.max(1, (unit.baseMp || unit.mp) - (unit.condition === PokemonCondition.Paralyze ? 1 : 0));
@@ -1295,7 +993,6 @@ triggerPlayerAIMove = function() {
     return minTurns;
   }
 
-  // Helper: Full 2-Ply Simulation when AI moves `movingUnit` to `destNid`
   function simulate2PlyAfterAIMove(movingUnit, destNid) {
     const getOccAfterMove = (nid) => {
       if (nid === destNid) return movingUnit;
@@ -1304,7 +1001,6 @@ triggerPlayerAIMove = function() {
       return occ;
     };
 
-    // 1) Does `movingUnit` Surround-KO itself at `destNid`?
     const destNbs = ADJ[destNid] || [];
     const selfSurrounded = destNbs.length > 0 &&
       destNbs.every(nb => {
@@ -1315,7 +1011,6 @@ triggerPlayerAIMove = function() {
       return { selfSurrounded: true };
     }
 
-    // 2) Which enemy units are immediately Surround-KO'd when `movingUnit` lands on `destNid`?
     const enemyKOs = [];
     enemyBoardUnits.forEach(eu => {
       const nbs = ADJ[eu.nodeId] || [];
@@ -1333,11 +1028,13 @@ triggerPlayerAIMove = function() {
       return o;
     };
 
-    // 3) CRITICAL 2-PLY CHECK: After `movingUnit` lands on `destNid`, can enemy capture or surround our Goal next turn?
+    // Nos níveis iniciais (difficultyScale < 0.3), a IA ainda não simula o Hurdle Jump do jogador no 2-Ply
+    const simHurdleAware = (adaptiveAIBrain.difficultyScale || 0.35) >= 0.30;
+
     const goalOccupantAfter = getOccPostKO(myGoalId);
     let enemyCanCaptureMyGoalNextTurn = false;
     if (!goalOccupantAfter) {
-      enemyCanCaptureMyGoalNextTurn = canEnemyReachNodeInSim(enemyRole, myGoalId, getOccPostKO, true);
+      enemyCanCaptureMyGoalNextTurn = canEnemyReachNodeInSim(enemyRole, myGoalId, getOccPostKO, simHurdleAware);
     }
 
     let enemyCanSurroundMyGoalNextTurn = false;
@@ -1345,14 +1042,13 @@ triggerPlayerAIMove = function() {
       const gNbs = ADJ[myGoalId] || [];
       const openGNbs = gNbs.filter(nb => getOccPostKO(nb) === null);
       const enemyGNbs = gNbs.filter(nb => { const o = getOccPostKO(nb); return o && o.owner !== owner; });
-      if (openGNbs.length === 1 && enemyGNbs.length === (gNbs.length - 1) && canEnemyReachNodeInSim(enemyRole, openGNbs[0], getOccPostKO, true)) {
+      if (openGNbs.length === 1 && enemyGNbs.length === (gNbs.length - 1) && canEnemyReachNodeInSim(enemyRole, openGNbs[0], getOccPostKO, simHurdleAware)) {
         enemyCanSurroundMyGoalNextTurn = true;
       } else if (openGNbs.length === 0 && enemyGNbs.length === gNbs.length) {
         enemyCanSurroundMyGoalNextTurn = true;
       }
     }
 
-    // 4) 1-turn surround trap checks
     let allySurroundTrapsNextTurn = 0;
     const allMyBoard = state.units.filter(u => u.owner === owner && (u.location === "board" || u.uid === movingUnit.uid));
     allMyBoard.forEach(au => {
@@ -1365,7 +1061,7 @@ triggerPlayerAIMove = function() {
         return o && o.owner !== owner;
       });
       if (openNbs.length === 1 && enemyNbs.length === (nbs.length - 1)) {
-        if (canEnemyReachNodeInSim(enemyRole, openNbs[0], getOccPostKO, true)) {
+        if (canEnemyReachNodeInSim(enemyRole, openNbs[0], getOccPostKO, simHurdleAware)) {
           allySurroundTrapsNextTurn += 2;
         }
       }
@@ -1395,9 +1091,13 @@ triggerPlayerAIMove = function() {
     };
   }
 
-  // STEP 3: EVALUATE ALL CANDIDATE MOVES WITH HIGHEST TEMPO & FASTEST-WIN CALCULATION
+  // STEP 3: EVALUATE ALL CANDIDATE MOVES WITH HABIT INTERCEPTION & ELASTIC NOISE
   let bestAction = null;
   let bestScore  = -9999999;
+  const currentNoiseMax = Math.max(0, adaptiveAIBrain.tacticalNoise || 0);
+
+  // Diretriz do Livro de Abertura para os primeiros turnos
+  const openingDirective = computeOpeningBookDirective(owner, enemyRole);
 
   function evaluateUnitMoveSet(u, usingHurdlePlate) {
     if (usingHurdlePlate) state.abilityJumpActive = true;
@@ -1439,23 +1139,24 @@ triggerPlayerAIMove = function() {
       }
 
       let moveScore = usingHurdlePlate ? -300 : 0;
-      let reasonTag = usingHurdlePlate ? `Salto Ofensivo [Hurdle Jump] com ${u.name}` : `Avanço Rápido com ${u.name}`;
+      let reasonTag = usingHurdlePlate ? `Salto Ofensivo [Hurdle Jump] com ${u.name}` : `Avanço Tático com ${u.name}`;
 
       // 1. ABSOLUTE 2-PLY GOAL SAFETY
       if (nid !== oppGoalId) {
         if (sim.enemyCanCaptureMyGoalNextTurn) {
-          moveScore -= 500000; // Fatal blunder veto: enemy wins next turn!
+          moveScore -= 500000;
         }
         if (sim.enemyCanSurroundMyGoalNextTurn) {
-          moveScore -= 380000; // Fatal surround loss on goal!
+          moveScore -= 380000;
         }
       }
 
-      // 2. SURROUND KOs ACHIEVED (Guaranteed eliminations)
+      // 2. SURROUND KOs ACHIEVED
       if (!isStandingAttack && sim.enemyKOs.length > 0) {
         sim.enemyKOs.forEach(koUnit => {
-          moveScore += 22000 * wCombatAgg;
-          if (koUnit.nodeId === oppGoalId) moveScore += 120000; // Goal Surround Win!
+          const carryBonus = (tele.unitDangerScore && tele.unitDangerScore[koUnit.uid]) ? tele.unitDangerScore[koUnit.uid] * 120 : 0;
+          moveScore += (22000 + carryBonus) * wCombatAgg;
+          if (koUnit.nodeId === oppGoalId) moveScore += 120000;
           if (threateningEnemies.includes(koUnit)) moveScore += 18000;
           if (oppEntryIds.includes(koUnit.nodeId)) moveScore += 14000 * wEntryLk;
         });
@@ -1468,7 +1169,7 @@ triggerPlayerAIMove = function() {
       }
       if (currentlyTrapped && !isStandingAttack && sim.allySurroundTrapsNextTurn === 0) {
         moveScore += 6000 * wAntiSur;
-        reasonTag = `Fuga Rápida com ${u.name}`;
+        reasonTag = `Evasão Anti-Cerco com ${u.name}`;
       }
 
       // 4. OFFENSIVE PINCER SETUP
@@ -1476,10 +1177,35 @@ triggerPlayerAIMove = function() {
         moveScore += 4500 * sim.enemyPinnedCount * wCombatAgg;
       }
 
-      // 5. FASTEST-WIN TURN METRIC (CALCULA A JOGADA PARA GANHAR NO MENOR TEMPO POSSÍVEL)
+      // 5. INTERCEPTAÇÃO DE HÁBITOS DO JOGADOR (28 NÓS + TRANSIÇÕES + LANE PREFERIDA)
+      const destLane = getNodeLaneCategory(nid);
+      if (destLane === prefPlayerLane) {
+        moveScore += 1800 * wHabitBlock;
+      }
+      const nodeHabit = getNodeHabitFactor(nid);
+      if (nodeHabit > 0.25) {
+        moveScore += nodeHabit * 4200 * wHabitBlock;
+      }
+      if (predictedPlayerNextNodes[nid]) {
+        moveScore += predictedPlayerNextNodes[nid] * 7500 * wHabitBlock;
+        if (predictedPlayerNextNodes[nid] >= 0.4 && reasonTag.startsWith("Avanço")) {
+          reasonTag = `Leitura de Hábito: Bloqueando rota de ${u.name} no nó ${nid}`;
+        }
+      }
+
+      // 5B. LIVRO DE ABERTURAS ADAPTATIVO (3 PRIMEIROS TURNOS)
+      if (openingDirective && !isStandingAttack) {
+        const openEval = scoreOpeningBookCandidateMove(u, nid, openingDirective);
+        moveScore += openEval.bonus;
+        if (openEval.tag && openEval.bonus >= 8000) {
+          reasonTag = openEval.tag;
+        }
+      }
+
+      // 6. FASTEST-WIN TURN METRIC
       const turnsToWin = computeFastestTurnsToWin(u, nid);
       if (nid === oppGoalId) {
-        moveScore += 250000; // Instant Victory!
+        moveScore += 250000;
         reasonTag = `🏆 Vitória Imediata no Goal Point com ${u.name}!`;
       } else if (turnsToWin === 1) {
         moveScore += 88000 * wSpeedRush;
@@ -1493,7 +1219,7 @@ triggerPlayerAIMove = function() {
         moveScore += 14000 * wSpeedRush;
       }
 
-      // 6. EXPONENTIAL FORWARD GOAL PULL (PUXADA AGRESSIVA PARA O GOL ADVERSÁRIO)
+      // 7. EXPONENTIAL FORWARD GOAL PULL
       const distToOppGoal = NODE_BFS_DIST[nid][oppGoalId];
       const goalPull = Math.pow(Math.max(0, 13 - distToOppGoal), 3.2) * 26 * wSpeedRush;
       moveScore += goalPull;
@@ -1503,32 +1229,30 @@ triggerPlayerAIMove = function() {
         reasonTag = `Ameaça Imediata ao Goal Inimigo com ${u.name}!`;
       }
 
-      // 7. ENTRY POINT LOCKDOWN (ASFIXIA TOTAL & WAIT WIN RÁPIDO)
+      // 8. ENTRY POINT LOCKDOWN
       if (oppEntryIds.includes(nid)) {
         const otherEntry = oppEntryIds.find(id => id !== nid);
         const otherOcc = otherEntry !== undefined ? unitAtNode(otherEntry) : null;
         const otherTakenByAI = Boolean(otherOcc && otherOcc.owner === owner);
         moveScore += (otherTakenByAI ? 95000 : 42000) * wEntryLk;
         reasonTag = otherTakenByAI
-          ? `🔒 Asfixia Dupla dos Entry Points (${u.name}) — Vitória por Wait-Win!`
+          ? `🔒 Asfixia Dupla dos Entry Points (${u.name}) — Pressão Wait-Win!`
           : `⚡ Invasão do Entry Point Inimigo com ${u.name}!`;
       }
 
-      // 8. GOAL DEFENSE & DEFENDER DISCIPLINE
+      // 9. GOAL DEFENSE & DEFENDER DISCIPLINE
       const distToMyGoal = NODE_BFS_DIST[nid][myGoalId];
 
-      // A. The Goal Defender standing on `myGoalId` MUST NOT abandon the goal unless winning right now!
       if (u.location === "board" && u.nodeId === myGoalId && nid !== myGoalId) {
         if (nid !== oppGoalId) {
           if (threatLevel >= 1 || minEnemyStepsToMyGoal <= 4) {
-            moveScore -= 450000; // Strict Veto: never abandon goal when enemies are on the board!
+            moveScore -= 450000;
           } else {
             moveScore -= 150000;
           }
         }
       }
 
-      // B. If Goal is undefended, establishing/moving onto `myGoalId` is maximum priority!
       if (!myGoalDefended) {
         if (nid === myGoalId && !sim.enemyCanCaptureMyGoalNextTurn) {
           const baseGoalWeight = (threatLevel >= 2 ? 180000 : 95000);
@@ -1539,18 +1263,16 @@ triggerPlayerAIMove = function() {
           reasonTag = `Guarda da Entrada do Goal com ${u.name}`;
         }
       } else if (myGoalDefended && u.nodeId !== myGoalId) {
-        // Goal already has a keeper. If an enemy approaches within 2 steps, reinforcing guard on neighbor nodes (2/4) prevents surround!
         if (distToMyGoal === 1 && minEnemyStepsToMyGoal <= 2 && !sim.enemyCanCaptureMyGoalNextTurn) {
           moveScore += 55000 * wGoalDef;
           reasonTag = `Suporte Anti-Cerco ao Goal Defender com ${u.name}`;
         }
       }
 
-      // 9. OPENING & BENCH DEPLOYMENT
+      // 10. OPENING & BENCH DEPLOYMENT
       if (u.location === "bench") {
         const myBoardCount = state.units.filter(x => x.owner === owner && x.location === "board").length;
         if (myBoardCount < 3) moveScore += 2400;
-        // Deploying a defender toward the goal when undefended
         if (!myGoalDefended && distToMyGoal <= 3) {
           moveScore += 28000 * wGoalDef;
         }
@@ -1560,7 +1282,12 @@ triggerPlayerAIMove = function() {
         }
       }
 
-      // 10. EVALUATE COMBAT (BREAKTHROUGH ATTACKS VS TACTICAL HOLD)
+      // Aplicando Ruído Elástico (diminui até 0 conforme o bot aprende a jogar contra você)
+      if (currentNoiseMax > 0 && nid !== oppGoalId && !sim.enemyCanCaptureMyGoalNextTurn) {
+        moveScore += (Math.random() * 2 - 1) * currentNoiseMax;
+      }
+
+      // 11. EVALUATE COMBAT (BREAKTHROUGH ATTACKS VS TACTICAL HOLD)
       const adjEnemiesAtDest = [];
       (ADJ[nid] || []).forEach(adjId => {
         const occ = unitAtNode(adjId);
@@ -1585,7 +1312,6 @@ triggerPlayerAIMove = function() {
           };
         }
       } else {
-        // Combat vs Hold: Assess each enemy target
         let bestTargetForThisMove = null;
         let bestAtkScoreForThisMove = -9999999;
 
@@ -1594,6 +1320,8 @@ triggerPlayerAIMove = function() {
           const isGoalDefender = (eu.nodeId === oppGoalId);
           const isEntryDefender = oppEntryIds.includes(eu.nodeId);
           const isDirectBlocker = (NODE_BFS_DIST[eu.nodeId][oppGoalId] < distToOppGoal);
+          // Prioridade extra para caçar a peça "carry" do jogador na partida atual
+          const unitThreatBonus = (tele.unitDangerScore && tele.unitDangerScore[eu.uid]) ? tele.unitDangerScore[eu.uid] * 140 : 0;
 
           let chosenPlate = usingHurdlePlate ? hurdlePlate : null;
           let effectiveWin = baseOdds.win;
@@ -1625,16 +1353,13 @@ triggerPlayerAIMove = function() {
 
           const effectiveNet = effectiveWin - effectiveLoss;
 
-          // Never gamble away our own Goal defender with high loss chance!
           if (nid === myGoalId) {
             const mustAttackToSurvive = sim.enemyCanSurroundMyGoalNextTurn;
             if (!mustAttackToSurvive && (effectiveWin < 72 || effectiveLoss > 14)) {
-              return; // Hold ground on the goal! Don't gamble!
+              return;
             }
           }
 
-          // Highly aggressive thresholds for breakthrough:
-          // If attacking enemy on Goal Point: MUST ATTACK to win in minimum turns!
           const shouldAttack = (
             (isGoalDefender && effectiveWin >= 30) ||
             (isEntryDefender && effectiveWin >= 38) ||
@@ -1643,9 +1368,9 @@ triggerPlayerAIMove = function() {
           );
 
           if (shouldAttack) {
-            let atkScore = moveScore + (effectiveNet * 32 + effectiveWin * 24) * wCombatAgg;
+            let atkScore = moveScore + (effectiveNet * 32 + effectiveWin * 24) * wCombatAgg + unitThreatBonus;
             if (isGoalDefender) {
-              atkScore += 70000 * wSpeedRush; // Knocking out the goal defender is game-winning!
+              atkScore += 70000 * wSpeedRush;
             } else if (isEntryDefender) {
               atkScore += 32000 * wEntryLk;
             } else if (isDirectBlocker) {
@@ -1667,7 +1392,6 @@ triggerPlayerAIMove = function() {
           }
         });
 
-        // If an attack was selected, compare attack vs hold
         if (bestTargetForThisMove) {
           if (bestAtkScoreForThisMove > bestScore) {
             bestScore = bestAtkScoreForThisMove;
@@ -1685,10 +1409,9 @@ triggerPlayerAIMove = function() {
             };
           }
         } else {
-          // If no good attack odds, hold position to block, defend or surround next turn!
           let holdScore = moveScore;
           if (sim.enemyPinnedCount > 0) holdScore += 3000 * wAntiSur;
-          if (nid === myGoalId) holdScore += 65000 * wGoalDef; // Holding ground on goal point is top-tier play!
+          if (nid === myGoalId) holdScore += 65000 * wGoalDef;
           if (holdScore > bestScore) {
             bestScore = holdScore;
             bestAction = {
@@ -1717,9 +1440,7 @@ triggerPlayerAIMove = function() {
     }
   });
 
-  // STEP 4: EMERGENCY `GOAL BLOCK` PLATE CHECK!
-  // If after evaluating all moves, our best action STILL leaves `myGoalId` undefended and under threat,
-  // immediately activate `Goal Block` plate to teleport our strongest defender onto `myGoalId`!
+  // STEP 4: EMERGENCY `GOAL BLOCK` PLATE CHECK
   if (!myGoalOccupant && goalBlockPlate) {
     const bestLandsOnGoal = (bestAction && bestAction.nid === myGoalId);
     const needEmergencyGoalBlock = !bestLandsOnGoal && (
@@ -1752,7 +1473,7 @@ triggerPlayerAIMove = function() {
     }
   }
 
-  // STEP 5: EXECUTE THE CHOSEN GRANDMASTER ACTION!
+  // STEP 5: EXECUTE THE CHOSEN ACTION
   if (bestAction) {
     const u = state.units.find(x => x.uid === bestAction.uid);
 
@@ -1791,7 +1512,6 @@ triggerPlayerAIMove = function() {
       const nextCounterVal = Math.max(0, state.turnCounter - 1);
       let atkSpin = spinWheelForUnit(u, true);
       const defSpin = spinWheelForUnit(bestAction.enemyUnit, false);
-      // Apply AI Double Chance Re-Spin on standing attack if first spin doesn't win!
       if (state.activePlate === "double") {
         const firstEval = evaluateCombat(u, bestAction.enemyUnit, atkSpin, defSpin);
         if (firstEval.winner !== "atk") {
@@ -1821,6 +1541,93 @@ triggerPlayerAIMove = function() {
   }
 };
 
-
 // ============================================================================
+// POST-MATCH TELEMETRY LEARNING & DIFFICULTY EVOLUTION (`showWinResultScreen`)
+// ============================================================================
+const _v580ShowWinResultScreen = showWinResultScreen;
+showWinResultScreen = function(winner) {
+  if (state.matchKind === "league" || state.mode === "ai") {
+    adaptiveAIBrain.matchesAnalyzed = (adaptiveAIBrain.matchesAnalyzed || 0) + 1;
+    const tele = state.currentMatchTelemetry || {};
 
+    if (winner === "p1") {
+      adaptiveAIBrain.playerWins = (adaptiveAIBrain.playerWins || 0) + 1;
+      adaptiveAIBrain.playerWinStreak = (adaptiveAIBrain.playerWinStreak || 0) + 1;
+
+      // Sobe a escala de dificuldade e reduz o ruído tático mais rápido em caso de win streak
+      const streakBoost = Math.min(0.18, 0.08 + adaptiveAIBrain.playerWinStreak * 0.03);
+      adaptiveAIBrain.difficultyScale = Math.min(1.0, (adaptiveAIBrain.difficultyScale || 0.35) + streakBoost);
+      adaptiveAIBrain.tacticalNoise   = Math.max(0, (adaptiveAIBrain.tacticalNoise || 3200) - 850);
+
+      // Evolui exatamente os pesos das táticas que você usou para derrotá-la nesta partida
+      const rushFactor    = Math.min(0.35, 0.10 + (tele.playerGoalRushes || 0) * 0.04);
+      const surrFactor    = Math.min(0.35, 0.08 + (tele.playerSurroundThreats || 0) * 0.06);
+      const entryFactor   = Math.min(0.35, 0.08 + (tele.playerEntryThreats || 0) * 0.05);
+      const combatFactor  = Math.min(0.30, 0.06 + (tele.playerAttacks || 0) * 0.02);
+
+      adaptiveAIBrain.weights.goalDefense      = Math.min(3.8, (adaptiveAIBrain.weights.goalDefense || 1.65) + rushFactor);
+      adaptiveAIBrain.weights.antiSurround     = Math.min(3.5, (adaptiveAIBrain.weights.antiSurround || 1.30) + surrFactor);
+      adaptiveAIBrain.weights.entryLockdown    = Math.min(3.5, (adaptiveAIBrain.weights.entryLockdown || 1.45) + entryFactor);
+      adaptiveAIBrain.weights.combatAggression = Math.min(3.4, (adaptiveAIBrain.weights.combatAggression || 1.55) + combatFactor);
+      adaptiveAIBrain.weights.habitIntercept   = Math.min(3.6, (adaptiveAIBrain.weights.habitIntercept || 1.50) + 0.18);
+      adaptiveAIBrain.weights.speedRush        = Math.min(3.6, (adaptiveAIBrain.weights.speedRush || 1.75) + 0.12);
+    } else {
+      adaptiveAIBrain.aiWins = (adaptiveAIBrain.aiWins || 0) + 1;
+      adaptiveAIBrain.playerWinStreak = 0;
+
+      // Se a IA venceu, alivia levemente o ruído e desacelera apenas um pouco para manter o duelo justo
+      adaptiveAIBrain.difficultyScale = Math.max(0.25, (adaptiveAIBrain.difficultyScale || 0.35) - 0.03);
+      adaptiveAIBrain.tacticalNoise   = Math.min(3800, (adaptiveAIBrain.tacticalNoise || 0) + 300);
+    }
+
+    // Atualiza o histórico de vitórias/derrotas de cada resposta que a IA tentou na abertura desta partida
+    const aiHist = tele.aiOpeningHistory || [];
+    aiHist.forEach(({ seqKey, aiMoveToken }) => {
+      const bookEntry = getOpeningSeqNode(seqKey);
+      if (!bookEntry.aiResponses[aiMoveToken]) {
+        bookEntry.aiResponses[aiMoveToken] = { wins: 0, losses: 0 };
+      }
+      if (winner === "p1") {
+        bookEntry.lossesAgainst = (bookEntry.lossesAgainst || 0) + 1;
+        bookEntry.aiResponses[aiMoveToken].losses += 1;
+      } else {
+        bookEntry.aiResponses[aiMoveToken].wins += 1;
+      }
+    });
+
+    // Se o jogador venceu rápido (em menos de 20 turnos totais), dobra a penalidade na abertura da IA!
+    if (winner === "p1" && state.turnCounter >= 280 && aiHist.length > 0) {
+      aiHist.forEach(({ seqKey, aiMoveToken }) => {
+        const bookEntry = getOpeningSeqNode(seqKey);
+        if (bookEntry.aiResponses[aiMoveToken]) {
+          bookEntry.aiResponses[aiMoveToken].losses += 1;
+        }
+      });
+    }
+
+    saveAdaptiveAIBrain();
+  }
+  return _v580ShowWinResultScreen(winner);
+};
+
+// Clean up tutorial state on navigation or forfeit
+const _v531OpenDrawer = openDrawer;
+openDrawer = function(tab) {
+  if (state.matchKind === "tutorial") {
+    tutorialStepBusy = false;
+    currentTutorialStep = 0;
+    if (typeof hideTutorialCoachHud === "function") hideTutorialCoachHud();
+    state.matchKind = "league";
+    state.mode = "ai";
+  }
+  return _v531OpenDrawer(tab);
+};
+
+const _v531TriggerVoluntaryForfeit = triggerVoluntaryForfeit;
+triggerVoluntaryForfeit = function() {
+  if (state.matchKind === "tutorial") {
+    exitInteractiveTutorial();
+    return;
+  }
+  return _v531TriggerVoluntaryForfeit();
+};
