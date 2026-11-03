@@ -360,6 +360,7 @@ function canSideReachNodeNextTurn(sideOwner, targetNodeId, ignoreUnitUid) {
 // ============================================================================
 triggerPlayerAIMove = function() {
   if (state.matchKind === "tutorial" || state.isAnimating || state.winCelebrationAnim) return;
+  if (state.mode !== "ai" || state.turn !== "p2") return;
 
   // If currently in postMoveAttackMode (e.g. player tapped AI button after moving P1), evaluate smart attack
   if (state.postMoveAttackMode) {
@@ -1108,6 +1109,7 @@ function canEnemyReachNodeInSim(enemyRole, targetNodeId, getOccSimFn, includeHur
 // 5. GRANDMASTER 2-PLY MINIMAX AI ENGINE (`triggerPlayerAIMove` v5.5.0)
 triggerPlayerAIMove = function() {
   if (state.matchKind === "tutorial" || state.isAnimating || state.winCelebrationAnim) return;
+  if (state.mode !== "ai" || state.turn !== "p2") return;
 
   // Handle post-move attack prompt if human clicked [AI] mid-turn
   if (state.postMoveAttackMode) {

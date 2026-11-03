@@ -1814,27 +1814,23 @@ function drawHDVectorBoardAndChrome() {
 
 // (Z-Move Gauge e Botão removidos)
 
-  // 8. Crisp 1080p Golden-Bronze [AI] Button OR Glowing Blue [End Turn ⏭️] Button during 2-Step Post-Move Target Selection!
-  const aiGrad = ctx.createLinearGradient(118, 446, 118, 475);
+  // 8. Glowing Blue [End Turn ⏭️] Button during 2-Step Post-Move Target Selection ONLY (AI Button removed)
   if (state.postMoveAttackMode) {
-    aiGrad.addColorStop(0, "#0284c7");
-    aiGrad.addColorStop(0.5, "#0369a1");
-    aiGrad.addColorStop(1, "#1e3a8a");
-  } else {
-    aiGrad.addColorStop(0, "#78440c");
-    aiGrad.addColorStop(0.5, "#5c3309");
-    aiGrad.addColorStop(1, "#3d2005");
+    const endGrad = ctx.createLinearGradient(118, 446, 118, 475);
+    endGrad.addColorStop(0, "#0284c7");
+    endGrad.addColorStop(0.5, "#0369a1");
+    endGrad.addColorStop(1, "#1e3a8a");
+    ctx.fillStyle = endGrad;
+    ctx.strokeStyle = "#7dd3fc";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(118, 446, 117, 28, 4); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 12.5px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const endTurnLbl = (typeof t === "function") ? t("battle.end_turn", "End Turn ⏭️") : "End Turn ⏭️";
+    ctx.fillText(endTurnLbl, 176.5, 460.5);
   }
-  ctx.fillStyle = aiGrad;
-  ctx.strokeStyle = state.postMoveAttackMode ? "#7dd3fc" : "#a16207";
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.roundRect(118, 446, 117, 28, 4); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = "#ffffff";
-  ctx.font = state.postMoveAttackMode ? "900 12.5px sans-serif" : "800 15px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  const endTurnLbl = (typeof t === "function") ? t("battle.end_turn", "End Turn ⏭️") : "End Turn ⏭️";
-  ctx.fillText(state.postMoveAttackMode ? endTurnLbl : "AI", 176.5, 460.5);
 
   // 9. Crisp 1080p Bottom 2-Button Bar ([Forfeit] · [Activate Ability]) - Rewind removed!
   const drawBotBtn = (x, y, w, h, lbl, isBlue, hasDot) => {
@@ -2790,13 +2786,9 @@ canvas.addEventListener("pointerdown", e => {
 
   // (Top HUD e Z-Move click listeners removidos)
 
-  // 4. Golden-brown [AI] button OR Blue [End Turn ⏭️] button during 2-Step Attack Target Selection!
-  if (sx >= 116 && sx <= 236 && sy >= 444 && sy <= 478) {
-    if (state.postMoveAttackMode) {
-      finishPostMoveWithoutAttack();
-    } else {
-      triggerPlayerAIMove();
-    }
+  // 4. Blue [End Turn ⏭️] button during 2-Step Attack Target Selection ONLY (AI Button removed)!
+  if (state.postMoveAttackMode && sx >= 116 && sx <= 236 && sy >= 444 && sy <= 478) {
+    finishPostMoveWithoutAttack();
     return;
   }
 
@@ -3332,6 +3324,7 @@ function skipOrDemoTurn() {
 }
 
 function triggerPlayerAIMove() {
+  if (state.mode !== "ai" || state.turn !== "p2") return;
   if (state.isAnimating) return;
   if (state.postMoveAttackMode) {
     const sel = state.units.find(x => x.uid === state.selectedUnitId);

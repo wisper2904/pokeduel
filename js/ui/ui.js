@@ -9911,10 +9911,11 @@ function updateTutorialCoachUI() {
   }
 }
 
-// Block AI auto-moves and premature Wait-Win / Turn-Switch while in Tutorial mode!
+// Block AI auto-moves and premature Wait-Win / Turn-Switch while in Tutorial mode or multiplayer/human turns!
 const _v520TriggerPlayerAIMove = triggerPlayerAIMove;
 triggerPlayerAIMove = function() {
   if (state.matchKind === "tutorial") return;
+  if (state.mode !== "ai" || state.turn !== "p2") return;
   return _v520TriggerPlayerAIMove();
 };
 
