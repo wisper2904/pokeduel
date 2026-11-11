@@ -63,6 +63,19 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Mostra o build realmente em uso (nome do cache do Service Worker, ex.: v688) na aba Config.
+// Serve para conferir no APK/PWA se a versão nova já chegou.
+function refreshPdrBuildLabel() {
+  if (!("caches" in window)) return;
+  caches.keys().then((keys) => {
+    const k = keys.filter((x) => x.indexOf("pokeduel-pwa-") === 0).sort().pop();
+    const txt = k ? k.replace("pokeduel-pwa-", "") : "sem cache";
+    document.querySelectorAll(".pdr-build-label").forEach((el) => { el.textContent = txt; });
+  }).catch(() => {});
+}
+window.addEventListener("load", () => setTimeout(refreshPdrBuildLabel, 1500));
+if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("controllerchange", () => setTimeout(refreshPdrBuildLabel, 800));
+
 // Modo desenvolvedor: mostra ferramentas como o publicador do GitHub Pages
 try { if (localStorage.getItem("pdr_dev_mode") === "1") document.addEventListener("DOMContentLoaded", () => document.body.classList.add("pdr-dev-mode")); } catch (e) {}
 
