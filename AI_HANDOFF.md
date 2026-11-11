@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v690` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v691` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v690). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v691). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -151,6 +151,12 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · Remove botão NOTAS do hub (v691)
+- **O que:** removido o botão flutuante "📢 NOTAS v6.1.0" do hub (dois HTMLs) e a abertura automática das Notas de Atualização (`ui.js`). O modal continua acessível pelo botão "Ver Notas da Atualização" na aba Config.
+- **Por quê:** pedido do Gabriel.
+- **CACHE_NAME:** v690 → v691
+- **Verificação:** Playwright: hub abre com só o botão TUTORIAL à esquerda.
 
 ### 2026-11-11 · Claude · ELO do bot acompanha o do jogador (v690)
 - **O que:** `js/network/p2p_matchmaker.js` `triggerBotFallbackNow`: o bot da Liga mantém nome/deck do personagem, mas o ELO dele passa a ser o do jogador ±60 (mín. 800), e a liga é calculada pela mesma tabela do jogador (Beginner/Leader/Champion/Master/Legend). Os ratings fixos em `bots.js` (1890–2400) continuam lá, mas só servem para escolher o personagem.

@@ -9789,11 +9789,8 @@ try {
     setTimeout(() => {
       try { startInteractiveTutorialMatch(); } catch (e) { console.warn("[Tutorial] falhou ao iniciar:", e); finishTutorialAndShowWelcome(); }
     }, 900);
-  } else if (localStorage.getItem("pdr_viewed_changelog_v561") !== "true") {
-    setTimeout(() => {
-      openChangelogModal();
-    }, 700);
   }
+  // (v691) As Notas de Atualização não abrem mais sozinhas; ficam só na aba Config.
 } catch (e) {}
 
 // --- 21.7: DYNAMIC DEVICE DETECTION (MOBILE vs PC PROPORTIONS) ---
