@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v689` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v690` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,17 +141,23 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v689). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v690). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
-- [ ] Fallback para bot na Liga escolhe rivais com ELO muito maior (ex.: 1940 contra 1000): vitória rende ~+32 e derrota ~0. Matchmaking do bot deveria ficar perto do ELO do jogador.
 - [ ] **Dois deploys por push**: rodam o workflow `Deploy PokeDuel to GitHub Pages` (`.github/workflows/deploy-pages.yml`) e o automático `pages build and deployment`. Eles competem e às vezes um falha (76f3f3a: falha no passo Deploy; e8fc86d: startup_failure), o que gera e-mail de erro. Resolver em Settings → Pages → Source: escolher **GitHub Actions** (aí o automático para) — ou, se ficar "Deploy from a branch", apagar o workflow.
 - [ ] Não há testes automatizados de regra (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · ELO do bot acompanha o do jogador (v690)
+- **O que:** `js/network/p2p_matchmaker.js` `triggerBotFallbackNow`: o bot da Liga mantém nome/deck do personagem, mas o ELO dele passa a ser o do jogador ±60 (mín. 800), e a liga é calculada pela mesma tabela do jogador (Beginner/Leader/Champion/Master/Legend). Os ratings fixos em `bots.js` (1890–2400) continuam lá, mas só servem para escolher o personagem.
+- **Por quê:** contra um jogador 1000, o bot vinha com ~1940: vitória dava ~+32 e derrota ~0.
+- **Efeito na pontuação (simulado, 2.000 sorteios):** vitória +13 a +19 (média +16), derrota −13 a −19 (média −16), em qualquer faixa de ELO. A regra de mínimo −8 na desistência continua.
+- **CACHE_NAME:** v689 → v690
+- **Verificação:** Playwright: jogador 992 → bot "Volkner (Gym Leader)" com 1014 ELO · Beginner, mostrado no modal da fila.
 
 ### 2026-11-11 · Claude · Build visível na Config (v689)
 - **O que:** `js/app.js` `refreshPdrBuildLabel()` lê o nome do cache do Service Worker (`caches.keys()`) e mostra em "Versão v6.1.0 · Estável · Build vNNN" (aba Config, nos dois HTMLs). Atualiza também quando a versão nova assume.

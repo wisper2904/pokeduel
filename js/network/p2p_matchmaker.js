@@ -1289,6 +1289,11 @@ function triggerBotFallbackNow() {
   const selectedBot = botResult.trainer || RANKED_BOT_TRAINERS[0];
   windowCurrentSelectedBot = selectedBot;
 
+  // v689: o ELO do bot acompanha o seu (±60). Antes o bot vinha com o rating fixo do personagem
+  // (1890–2400): contra um jogador 1000, vencer dava ~+32 e perder custava ~0.
+  const botRating = Math.max(800, Math.round(pRating + (Math.random() * 120 - 60)));
+  const botTier = botRating >= 2700 ? "Legend" : (botRating >= 2300 ? "Master" : (botRating >= 1900 ? "Champion" : (botRating >= 1500 ? "Leader" : "Beginner")));
+
   playSfx("level_up");
   if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
 
@@ -1301,13 +1306,13 @@ function triggerBotFallbackNow() {
     stTitle.textContent = "🤖 BOT DA LIGA SELECIONADO";
     stTitle.style.color = "#38bdf8";
   }
-  if (stSub) stSub.textContent = `${selectedBot.name} (${selectedBot.rating} ELO · ${selectedBot.tier})`;
+  if (stSub) stSub.textContent = `${selectedBot.name} (${botRating} ELO · ${botTier})`;
   if (lLog) lLog.textContent = `⚔️ ${selectedBot.title} — Iniciando partida de treino da Liga!`;
 
   remoteOpponentProfile = {
     nickname: selectedBot.name,
-    rankRating: selectedBot.rating,
-    leagueTier: selectedBot.tier,
+    rankRating: botRating,
+    leagueTier: botTier,
     title: selectedBot.title,
     avatar: selectedBot.avatar,
     isBot: true
