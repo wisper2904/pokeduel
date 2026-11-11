@@ -150,6 +150,12 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 7. Log de alterações (mais recente no topo)
 
+### 2026-11-11 · Claude · Repositório wisper2904.github.io (APK sem barra de endereço)
+- **O que:** criado o conteúdo do repo `wisper2904/wisper2904.github.io` (repo vazio criado pelo Gabriel): `/.well-known/assetlinks.json` (pacote `io.github.wisper2904.pokeduel`, SHA-256 da chave do PWABuilder `03:72:F0:96:…:05:A4`), `.nojekyll` e `index.html` redirecionando para `/pokeduel/`.
+- **Por quê:** o APK gerado no PWABuilder (TWA) só abre em tela cheia se o domínio confirmar a assinatura via Digital Asset Links.
+- **CACHE_NAME:** inalterado (nada mudou neste repo).
+- **Pendências / avisos para o outro agente:** se o APK for gerado de novo com **outra chave** ou outro Package ID, o `assetlinks.json` precisa ser atualizado, senão a barra volta. O `.keystore` fica com o Gabriel, nunca no git.
+
 ### 2026-11-11 · Claude · Atualização automática do app (PWA)
 - **O que:**
   - `js/app.js`: registro do SW com `updateViaCache: "none"`; `reg.update()` ao abrir e em `visibilitychange`/`focus`/`online` (throttle 30 s); aviso fixo "🔄 Nova versão disponível · Recarregar" quando o novo SW assume (`controllerchange`) ou quando há um SW `waiting`. Se houver partida em andamento, o aviso diz que recarregar encerra a partida. Botão ✕ adia.
