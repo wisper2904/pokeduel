@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v687` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v688` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,18 +141,25 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v687). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v688). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
-- [ ] `startTrainingCenterMatch` define `matchKind = "training"`, mas `startVideoAuthenticMatch`/`demoFullMatchState` volta para `"league"`: o Treino ainda conta ELO e dá recompensa.
-- [ ] Bot da "Jogar com Bot" e Treino não mudam o ELO na desistência (aparece ±0) — conferir se é intencional.
-- [ ] Tour guiado do Hub (5 etapas) continua desligado (`startGuidedHubTour` só abre o hub).
+- [ ] Fallback para bot na Liga escolhe rivais com ELO muito maior (ex.: 1940 contra 1000): vitória rende ~+32 e derrota ~0. Matchmaking do bot deveria ficar perto do ELO do jogador.
 - [ ] Não há testes automatizados de regra (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · Treino/Quest/Copa, ELO na desistência e Tour do Hub (v688)
+- **O que:**
+  - `board.js` `demoFullMatchState`: não converte mais `training`, `quest` e `gym_cup` em `league`. Efeito: o **Treino** agora não dá ELO nem prêmio (tela "TREINO: FIM"); **Quest** volta a contar estrelas; **Copa de Ginásio** volta a aplicar o bônus de Fogo (+20) e, pelo `ai.js`, a pagar o troféu (+1 🏆, +100 Gems, +250 Material — esse prêmio só existia no `board.js` base, que é código morto).
+  - `ai.js`: desistir na Liga custa no mínimo `AI_FORFEIT_MIN_ELO_LOSS = 8` pontos. Pela fórmula ELO, perder para um rival muito mais forte custava 0, então desistir era de graça.
+  - `ui.js`: **Tour do Hub (5 etapas) reativado** (`startGuidedHubTour` / `stepGuidedHubTour` / `finishGuidedHubTour` restaurados de `59ad93c^`; HUD sem o `display:none !important`). Abre sozinho logo depois de criar a conta (chave `pdr_hub_tour_v687_done`). Card na aba Config para rever o tutorial ou o tour.
+- **CACHE_NAME:** v687 → v688
+- **Verificação:** Playwright, perfil limpo: pular tutorial → criar conta → tour abre e percorre Hub → Hub → Decks → Fusão → Loja → concluir (chave gravada). Treino + desistência: rating 1000 → 1000, moedas 15.000 → 15.000, tela "TREINO: FIM". Liga + desistência: rating 1000 → 992 ("-8 ↓"), salvo após recarregar.
+- **Pendências / avisos para o outro agente:** item novo em §6 sobre o ELO dos bots do fallback.
 
 ### 2026-11-11 · Claude · Primeira abertura, desistência e traduções (v687)
 - **O que:**

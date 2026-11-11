@@ -815,6 +815,7 @@ computeReachableWithPaths = function(unit) {
 // (os termos de combate ficam na casa de poucos milhares de pontos).
 const AI_NOISE_CAP = 450;
 const AI_MIN_DIFFICULTY = 0.55;
+const AI_FORFEIT_MIN_ELO_LOSS = 8;
 
 // Valor de uma peça em pontos de score (~14k a ~60k). Mede força de roleta e,
 // para peças inimigas, o quanto ela ameaça o Goal da IA.
@@ -1719,7 +1720,8 @@ showWinResultScreen = function(winner) {
   const before = selfForfeit ? {
     coins: typeof userCoins !== "undefined" ? userCoins : null,
     keys: typeof playerKeyFragments !== "undefined" ? playerKeyFragments : null,
-    gems: state.rareMetals
+    gems: state.rareMetals,
+    rating: (window.trainerProfileData && typeof window.trainerProfileData.rankRating === "number") ? window.trainerProfileData.rankRating : null
   } : null;
   const ret = _v580ShowWinResultScreen(winner);
   if (selfForfeit && before) {
@@ -1731,6 +1733,25 @@ showWinResultScreen = function(winner) {
         if (kLbl) kLbl.textContent = playerKeyFragments;
       }
       state.rareMetals = before.gems;
+      // Desistir na Liga custa no mínimo AI_FORFEIT_MIN_ELO_LOSS pontos. Pelo ELO puro, perder para um
+      // rival muito mais forte (ex.: bot 1940 vs você 1000) custava 0, então desistir saía de graça.
+      const pr = window.trainerProfileData;
+      if (pr && before.rating !== null && state.matchKind === "league" && state.mode !== "p2p_spectate") {
+        const lost = before.rating - pr.rankRating;
+        if (lost < AI_FORFEIT_MIN_ELO_LOSS) {
+          pr.rankRating = Math.max(800, before.rating - AI_FORFEIT_MIN_ELO_LOSS);
+          pr.leagueTier = pr.rankRating >= 2700 ? "Legend" : (pr.rankRating >= 2300 ? "Master" : (pr.rankRating >= 1900 ? "Champion" : (pr.rankRating >= 1500 ? "Leader" : "Beginner")));
+          const realDelta = pr.rankRating - before.rating;
+          const rv = document.getElementById("win-rating-val");
+          if (rv) rv.textContent = `${pr.rankRating} (${pr.leagueTier})`;
+          const rd = document.getElementById("win-rating-delta");
+          if (rd) { rd.textContent = realDelta < 0 ? `${realDelta} ↓` : "±0"; rd.style.color = realDelta < 0 ? "#f87171" : "#94a3b8"; }
+          const lp = document.getElementById("league-pts-lbl");
+          if (lp) lp.textContent = pr.rankRating;
+          if (typeof saveIndividualProfile === "function") saveIndividualProfile();
+          if (typeof syncIndividualProfileUI === "function") syncIndividualProfileUI();
+        }
+      }
       const tr = (k, f) => (typeof t === "function" ? t(k, f) : f);
       const kv = document.getElementById("win-keys-val");
       if (kv) kv.textContent = "+0 🔑";
@@ -1749,6 +1770,16 @@ showWinResultScreen = function(winner) {
       const nextTier = [1500, 1900, 2300, 2700].find(v => v > pr.rankRating);
       const trp = (k, f) => (typeof t === "function" ? t(k, f) : f);
       promoEl.textContent = nextTier ? `${nextTier - pr.rankRating} ${trp("result.pts", "pts")}` : trp("result.max_league", "Liga máxima");
+    }
+    // Copa de Ginásio: o prêmio ficava no board.js base, que a camada do ui.js substitui (nunca era pago)
+    if (state.matchKind === "gym_cup" && winner === getBottomRole() && typeof playerProgression !== "undefined") {
+      playerProgression.gymTrophies = (playerProgression.gymTrophies || 0) + 1;
+      state.rareMetals += 100;
+      if (typeof userMaterial !== "undefined") userMaterial += 250;
+      if (typeof saveEconomyAndUpgrades === "function") saveEconomyAndUpgrades();
+      if (typeof saveProgressionState === "function") saveProgressionState();
+      if (typeof syncAllCurrencyLabels === "function") syncAllCurrencyLabels();
+      setLogText(`🏆 Vitória na Copa de Ginásio! +1 Troféu (Total: ${playerProgression.gymTrophies} 🏆) + 100 Gems + 250 Material!`);
     }
     const rDel = document.getElementById("win-rating-delta");
     if (rDel && /^\+0(\s|$)/.test(rDel.textContent.trim())) { rDel.textContent = "±0"; rDel.style.color = "#94a3b8"; }

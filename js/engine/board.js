@@ -400,6 +400,8 @@ function demoFullMatchState() {
   } else if (state.mode === "tutorial" || state.matchKind === "tutorial") {
     state.matchKind = "tutorial";
     state.mode = "tutorial";
+  } else if (state.matchKind === "training" || state.matchKind === "quest" || state.matchKind === "gym_cup") {
+    // v687: mantém Treino / Quest / Copa de Ginásio (antes virava "league" e o Treino dava ELO e prêmio)
   } else {
     state.matchKind = "league";
   }

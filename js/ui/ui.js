@@ -5943,7 +5943,7 @@ function ensureV510ModalsInjected() {
   </div>
 
   <!-- 4. INTERACTIVE HUB SPOTLIGHT TOUR HUD (PHASE 2: 5-STEP HUB PRESENTATION) -->
-  <div id="tutorial-hub-tour-hud" style="display:none !important; position:fixed; bottom:64px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:285; background:linear-gradient(180deg,#0f2347 0%,#040b1a 100%); border:2.5px solid #38bdf8; border-radius:12px; padding:11px 12px; color:#f8fafc; box-shadow:0 10px 32px rgba(0,0,0,0.95);">
+  <div id="tutorial-hub-tour-hud" style="display:none; position:fixed; bottom:64px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:285; background:linear-gradient(180deg,#0f2347 0%,#040b1a 100%); border:2.5px solid #38bdf8; border-radius:12px; padding:11px 12px; color:#f8fafc; box-shadow:0 10px 32px rgba(0,0,0,0.95);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
       <span id="hub-tour-badge" style="background:#38bdf8; color:#04112e; font-size:9px; font-weight:900; padding:2px 7px; border-radius:4px;">🏛️ TOUR DO HUB · ETAPA 1/5</span>
       <button onclick="finishGuidedHubTour()" style="background:#334155; border:1px solid #94a3b8; color:#fff; font-size:8.5px; font-weight:800; padding:2px 6px; border-radius:4px; cursor:pointer;">✕ Fechar Tour</button>
@@ -8729,6 +8729,10 @@ async function handleWelcomeAuthSubmit() {
     try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
     openDrawer("hub");
     switchDrawerTab("hub");
+    // Conta nova: depois de criar usuário e senha, apresenta as abas do Hub
+    let tourDone = false;
+    try { tourDone = localStorage.getItem(HUB_TOUR_DONE_KEY) === "1"; } catch (e) {}
+    if (!tourDone) setTimeout(() => startGuidedHubTour(), 450);
 
   } catch (err) {
     console.error("handleWelcomeAuthSubmit error:", err);
@@ -10391,27 +10395,38 @@ function renderGuidedHubTourStep() {
   }
 }
 
+// Tour guiado do Hub (5 etapas) — restaurado do commit anterior ao 59ad93c
+const HUB_TOUR_DONE_KEY = "pdr_hub_tour_v687_done";
+
 function startGuidedHubTour() {
+  tutorialStepBusy = false;
+  currentTutorialStep = 0;
   hideTutorialCoachHud();
-  const tourHud = document.getElementById("tutorial-hub-tour-hud");
-  if (tourHud) tourHud.style.display = "none";
-  try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
-  openDrawer("hub");
-  switchDrawerTab("hub");
+  currentHubTourStep = 0;
+  playSfx("portal");
+  renderGuidedHubTourStep();
 }
 
 function stepGuidedHubTour(delta) {
-  finishGuidedHubTour();
+  playSfx("tick");
+  currentHubTourStep += delta;
+  if (currentHubTourStep < 0) currentHubTourStep = 0;
+  if (currentHubTourStep >= HUB_TOUR_STEPS.length) {
+    finishGuidedHubTour();
+    return;
+  }
+  renderGuidedHubTourStep();
 }
 
 function finishGuidedHubTour() {
   const hud = document.getElementById("tutorial-hub-tour-hud");
   if (hud) hud.style.display = "none";
-  try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+  try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); localStorage.setItem(HUB_TOUR_DONE_KEY, "1"); } catch (e) {}
   state.matchKind = "league";
   state.mode = "ai";
   openDrawer("hub");
   switchDrawerTab("hub");
+  playSfx("portal");
 }
 
 // Tutorial removed: completeWelcomeProfileSetup opens the Hub directly!
@@ -10423,9 +10438,29 @@ completeWelcomeProfileSetup = function() {
   switchDrawerTab("hub");
 };
 
-// Tutorial disabled: do not inject replay card in config menu
+// Botão na aba Config para rever o tutorial ou o tour do Hub a qualquer momento
 (function injectTutorialButtonInConfigMenu() {
-  // no-op
+  const cfgTab = document.getElementById("dtab-menu") || document.getElementById("dtab-config");
+  if (cfgTab && !document.getElementById("cfg-replay-tutorial-card")) {
+    const card = document.createElement("div");
+    card.id = "cfg-replay-tutorial-card";
+    card.className = "card";
+    card.style.cssText = "border-color:#38bdf8; margin-bottom:8px;";
+    card.innerHTML = `
+      <strong style="color:#38bdf8; font-size:11px;">🎓 TUTORIAL INTERATIVO & TOUR DO HUB</strong>
+      <div class="small-muted" style="margin:3px 0 6px;">Reveja a partida de apresentação ou o tour guiado pelas abas do Hub.</div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn" style="flex:1; padding:6px; font-size:9.5px;" onclick="startInteractiveTutorialMatch()">⚔️ Partida de Apresentação</button>
+        <button class="btn gold" style="flex:1; padding:6px; font-size:9.5px;" onclick="startGuidedHubTour()">🏛️ Tour do Hub (5 Etapas)</button>
+      </div>
+    `;
+    const banner = document.getElementById("cfg-banana-logo-banner");
+    if (banner && banner.nextSibling) {
+      cfgTab.insertBefore(card, banner.nextSibling);
+    } else {
+      cfgTab.appendChild(card);
+    }
+  }
 })();
 
 refreshStrictPlateCaseUI();
