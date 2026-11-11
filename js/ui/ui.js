@@ -556,7 +556,7 @@ const BoosterCinematic = {
     }
   },
 
-  start(pulledFigures, isMulti, title, bonusText, onFinish) {
+  start(pulledFigures, isMulti, title, bonusText, onFinish, newFlags) {
     this.init();
     if (!this.canvas || !this.ctx) {
       if (onFinish) onFinish();
@@ -575,6 +575,16 @@ const BoosterCinematic = {
     this.godRayAngle = 0;
     this.particles = [];
     this.flashAlpha = 0;
+    // v696: abertura no estilo Pokémon Duel — maleta metálica, travas, brilhos e névoa
+    this.newFlags = Array.isArray(newFlags) ? newFlags : [];
+    this.sparkles = [];
+    this.smoke = [];
+    const order = { C: 0, UC: 1, R: 2, EX: 3, UX: 4 };
+    this.bestRarity = this.pulledList.reduce((b, f) => (f && order[f.rarity] > order[b]) ? f.rarity : b, "C");
+    // Névoa: sempre forte quando vem EX/UX; nas outras, só às vezes
+    this.smokeLevel = (order[this.bestRarity] >= 3) ? 2 : (Math.random() < 0.4 ? 1 : 0);
+    const ttl = String(this.title || "").toLowerCase();
+    this.caseKind = /locked|chave|key/.test(ttl) ? "red" : (/roxo|purple|6h|6 h/.test(ttl) ? "purple" : (this.isMulti ? "gold" : "silver"));
 
     this.resize();
     this.canvas.style.display = "block";
@@ -619,27 +629,42 @@ const BoosterCinematic = {
     }
 
     if (this.phase === 'box_floating') {
-      this.phase = 'box_opening';
-      this.phaseStart = performance.now();
-      this.shakeAmt = 15;
-      playSfx("portal");
-      if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+      this.beginOpening();
     } else if (this.phase === 'box_opening') {
-      this.phase = 'figure_reveal';
+      this.phase = 'figure_silhouette';
       this.phaseStart = performance.now();
-      this.flashAlpha = 1.0;
-      playSfx("hit");
+    } else if (this.phase === 'figure_silhouette') {
+      this.revealNow();
     } else if (this.phase === 'figure_reveal') {
       if (this.currentIndex + 1 < this.pulledList.length) {
         this.currentIndex++;
-        this.phase = 'figure_reveal';
+        this.phase = 'figure_silhouette';
         this.phaseStart = performance.now();
-        this.flashAlpha = 1.0;
         playSfx("step");
       } else {
         this.finish();
       }
     }
+  },
+
+  beginOpening() {
+    this.phase = 'box_opening';
+    this.phaseStart = performance.now();
+    this.shakeAmt = 10;
+    playSfx("portal");
+    if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
+  },
+
+  revealNow() {
+    this.phase = 'figure_reveal';
+    this.phaseStart = performance.now();
+    this.flashAlpha = 1.0;
+    playSfx("hit");
+    if (window.Juice && typeof Juice.vibrate === "function") { try { Juice.vibrate(30); } catch (e) {} }
+  },
+
+  rarityColor(r) {
+    return r === "UX" ? "#c084fc" : (r === "EX" ? "#facc15" : (r === "R" ? "#38bdf8" : (r === "UC" ? "#4ade80" : "#e2e8f0")));
   },
 
   finish() {
@@ -704,63 +729,81 @@ const BoosterCinematic = {
       ctx.restore();
     }
 
-    // 1. Draw 3D Holographic Pedestal at bottom
+    // 1. Pedestal holográfico
     this.drawPedestal(ctx, cx, cy + 115, 135);
 
-    // 2. Render Phase: Box Floating, Box Opening, or Figure Reveal
-    if (this.phase === 'box_floating') {
-      const floatY = Math.sin(now * 0.003) * 12;
-      this.drawBoosterBox(ctx, cx, cy + floatY, 1.0, 0, this.isMulti);
+    const caseY = cy + 62;                      // centro da maleta (apoiada no pedestal)
+    const mouthY = caseY - 34;                  // boca da maleta
+    const curFig = this.pulledList[this.currentIndex] || this.pulledList[0];
+    const glowCol = this.rarityColor(this.bestRarity);
 
-      const pulseAlpha = 0.5 + Math.sin(now * 0.006) * 0.45;
+    // 2. Fases: maleta fechada → travas e tampa → silhueta → revelação
+    if (this.phase === 'box_floating') {
+      const wob = Math.sin(now * 0.004) * 0.02;
+      this.drawBoosterCase(ctx, cx, caseY, { open: 0, latch: 0, tilt: wob, glow: glowCol, now });
+
+      const pulseAlpha = 0.55 + Math.sin(now * 0.006) * 0.4;
       ctx.save();
       ctx.textAlign = "center";
       ctx.fillStyle = `rgba(253, 224, 71, ${pulseAlpha})`;
       ctx.font = "900 15px sans-serif";
       ctx.shadowColor = "#facc15";
       ctx.shadowBlur = 12;
-      ctx.fillText(this.isMulti ? "✨ ABRINDO PACK ESPECIAL... ✨" : "✨ ABRINDO A CAIXA... ✨", cx, cy + 195);
+      ctx.fillText("👆 Toque para abrir", cx, cy + 200);
       ctx.restore();
-
-      if (elapsed > 320) {
-        this.phase = 'box_opening';
-        this.phaseStart = performance.now();
-        this.shakeAmt = 16;
-        playSfx("portal");
-        if (typeof BgmEngine !== "undefined") BgmEngine.playFanfare("booster");
-      }
+      if (elapsed > 2600) this.beginOpening();
 
     } else if (this.phase === 'box_opening') {
-      this.godRayAngle += 0.025;
+      // 0–450 ms: travas soltam (tremor) · 450–1350 ms: tampa abre, luz, brilhos e névoa
+      const latch = Math.min(1, elapsed / 450);
+      const open = Math.max(0, Math.min(1, (elapsed - 450) / 900));
+      const ease = 1 - Math.pow(1 - open, 3);
       const shakeX = (Math.random() - 0.5) * this.shakeAmt;
-      const shakeY = (Math.random() - 0.5) * this.shakeAmt;
-      this.shakeAmt = Math.max(0, this.shakeAmt - 0.22);
+      const shakeY = (Math.random() - 0.5) * this.shakeAmt * 0.6;
+      this.shakeAmt = Math.max(0, this.shakeAmt - 0.25);
+      this.godRayAngle += 0.02;
 
-      const openProg = Math.min(1.0, elapsed / 900);
-      const lidYOffset = -openProg * 75;
-
-      this.drawGodRays(ctx, cx, cy - 10, openProg, this.godRayAngle);
-      this.drawBoosterBox(ctx, cx + shakeX, cy + shakeY, 1.0, lidYOffset, this.isMulti);
-
-      if (elapsed > 1100) {
-        this.phase = 'figure_reveal';
-        this.phaseStart = performance.now();
-        this.flashAlpha = 1.0;
-        playSfx("hit");
+      if (ease > 0.05) this.drawGodRays(ctx, cx, mouthY, ease * 0.55, this.godRayAngle, this.bestRarity === "UX");
+      this.drawBoosterCase(ctx, cx + shakeX, caseY + shakeY, { open: ease, latch, tilt: 0, glow: glowCol, now });
+      if (ease > 0.02) {
+        this.emitCaseFx(cx, mouthY, ease, glowCol);
       }
+      if (elapsed > 1700) { this.phase = 'figure_silhouette'; this.phaseStart = performance.now(); }
+
+    } else if (this.phase === 'figure_silhouette') {
+      // A figura sobe de dentro da maleta como silhueta brilhante na cor da raridade
+      this.godRayAngle += 0.02;
+      const figCol = this.rarityColor(curFig.rarity);
+      const rise = Math.min(1, elapsed / 650);
+      const er = 1 - Math.pow(1 - rise, 3);
+      this.drawGodRays(ctx, cx, mouthY, 0.5, this.godRayAngle, curFig.rarity === "UX");
+      this.drawBoosterCase(ctx, cx, caseY, { open: 1, latch: 1, tilt: 0, glow: figCol, now });
+      this.emitCaseFx(cx, mouthY, 0.6, figCol);
+      const sy = mouthY - 8 - er * (mouthY - 8 - (cy - 25));
+      this.drawSilhouette(ctx, cx, sy, 0.35 + 0.65 * er, curFig, figCol, now);
+      if (elapsed > 1250) this.revealNow();
 
     } else if (this.phase === 'figure_reveal') {
       this.godRayAngle += 0.015;
-      const curFig = this.pulledList[this.currentIndex] || this.pulledList[0];
       const isHighRarity = (curFig.rarity === 'UX' || curFig.rarity === 'EX');
 
       this.drawGodRays(ctx, cx, cy - 20, 1.0, this.godRayAngle, isHighRarity);
 
-      const riseProg = Math.min(1.0, elapsed / 500);
-      const easeScale = 0.2 + 0.8 * Math.sin(riseProg * Math.PI / 2);
+      const riseProg = Math.min(1.0, elapsed / 350);
+      const easeScale = 0.85 + 0.15 * Math.sin(riseProg * Math.PI / 2);
       const floatY = Math.sin(now * 0.0035) * 8;
 
       this.drawRevealedFigure(ctx, cx, cy - 25 + floatY, easeScale, curFig);
+      if (this.newFlags[this.currentIndex]) {
+        ctx.save();
+        ctx.translate(cx + 62, cy - 88 + floatY);
+        ctx.rotate(0.2);
+        ctx.fillStyle = "#16a34a"; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(-26, -12, 52, 24, 6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#ffffff"; ctx.font = "900 12px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("NOVO!", 0, 1);
+        ctx.restore();
+      }
 
       if (this.isMulti) {
         ctx.save();
@@ -800,6 +843,9 @@ const BoosterCinematic = {
       }
     }
 
+    // Brilhos e névoa da maleta (desenhados por cima de tudo)
+    this.updateCaseFx(ctx, cy + 118);
+
     // Top Skip Button (`[ ⏩ Pular ]`)
     ctx.save();
     ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
@@ -822,6 +868,216 @@ const BoosterCinematic = {
       this.flashAlpha *= 0.82;
     }
 
+    ctx.restore();
+  },
+
+  // Solta brilhos para cima e névoa que escorre pela frente da maleta
+  emitCaseFx(cx, mouthY, power, col) {
+    if (this.sparkles.length < 90 && Math.random() < 0.75 * power + 0.1) {
+      const n = power > 0.9 ? 2 : 1;
+      for (let i = 0; i < n; i++) {
+        this.sparkles.push({
+          x: cx + (Math.random() - 0.5) * 70, y: mouthY,
+          vx: (Math.random() - 0.5) * 3.2, vy: -3.5 - Math.random() * 5.5,
+          r: 2 + Math.random() * 3.5, life: 1, decay: 0.012 + Math.random() * 0.014,
+          rot: Math.random() * Math.PI, col: Math.random() < 0.45 ? "#ffffff" : col
+        });
+      }
+    }
+    if (this.smokeLevel > 0 && this.smoke.length < (this.smokeLevel === 2 ? 70 : 34) && Math.random() < (this.smokeLevel === 2 ? 0.7 : 0.35)) {
+      const side = Math.random() < 0.5 ? -1 : 1;
+      this.smoke.push({
+        x: cx + side * (10 + Math.random() * 45), y: mouthY + 4,
+        vx: side * (0.25 + Math.random() * 0.9), vy: -0.5 - Math.random() * 0.5,
+        r: 12 + Math.random() * 10, life: 1, decay: 0.0045 + Math.random() * 0.003, col
+      });
+    }
+  },
+
+  updateCaseFx(ctx, floorY) {
+    // Névoa: sobe um pouco, cai pela frente da maleta e se espalha no chão
+    for (let i = this.smoke.length - 1; i >= 0; i--) {
+      const p = this.smoke[i];
+      p.vy += 0.035;
+      p.x += p.vx; p.y += p.vy; p.r += 0.22; p.life -= p.decay;
+      if (p.y > floorY) { p.y = floorY; p.vy = 0; p.vx *= 1.004; }
+      if (p.life <= 0) { this.smoke.splice(i, 1); continue; }
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      const a = Math.min(0.26, p.life * 0.3);
+      g.addColorStop(0, `rgba(235, 245, 255, ${a})`);
+      g.addColorStop(0.6, `rgba(190, 215, 240, ${a * 0.5})`);
+      g.addColorStop(1, "rgba(190, 215, 240, 0)");
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    }
+    // Brilhos em estrela de 4 pontas
+    for (let i = this.sparkles.length - 1; i >= 0; i--) {
+      const p = this.sparkles[i];
+      p.vy += 0.11; p.x += p.vx; p.y += p.vy; p.rot += 0.08; p.life -= p.decay;
+      if (p.life <= 0) { this.sparkles.splice(i, 1); continue; }
+      ctx.save();
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha = Math.min(1, p.life * 1.4);
+      ctx.fillStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = 8;
+      const r = p.r * (0.6 + 0.4 * Math.sin(p.life * 20));
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const rr = k % 2 === 0 ? r * 1.9 : r * 0.45, ang = k * Math.PI / 4;
+        ctx.lineTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+  },
+
+  // Silhueta da figura, preenchida com a cor da raridade (cache por sprite + cor)
+  drawSilhouette(ctx, cx, cy, scale, fig, col, now) {
+    const img = this.figImageCache[fig.spriteKey];
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+    const pulse = 0.75 + 0.25 * Math.sin(now * 0.012);
+    const halo = ctx.createRadialGradient(0, 0, 6, 0, 0, 92);
+    halo.addColorStop(0, "rgba(255,255,255,0.75)");
+    halo.addColorStop(0.35, col);
+    halo.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.globalAlpha = 0.55 * pulse;
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(0, 0, 92, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    if (img && img.complete && img.naturalWidth) {
+      this.silCache = this.silCache || {};
+      const key = fig.spriteKey + "|" + col;
+      let sil = this.silCache[key];
+      if (!sil) {
+        sil = document.createElement("canvas");
+        sil.width = img.naturalWidth; sil.height = img.naturalHeight;
+        const sx = sil.getContext("2d");
+        sx.drawImage(img, 0, 0);
+        sx.globalCompositeOperation = "source-in";
+        sx.fillStyle = col;
+        sx.fillRect(0, 0, sil.width, sil.height);
+        this.silCache[key] = sil;
+      }
+      ctx.shadowColor = col; ctx.shadowBlur = 26 * pulse;
+      ctx.drawImage(sil, -55, -60, 110, 110);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.35;
+      ctx.globalCompositeOperation = "lighter";
+      ctx.drawImage(sil, -55, -60, 110, 110);
+    } else {
+      ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 26;
+      ctx.beginPath(); ctx.arc(0, -5, 44, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(226,232,240,0.9)"; ctx.font = "900 20px sans-serif";
+    ctx.shadowColor = col; ctx.shadowBlur = 10;
+    ctx.fillText("? ? ?", cx, cy + 96);
+    ctx.restore();
+  },
+
+  // Maleta metálica: corpo com travas, tampa que gira para trás e luz saindo de dentro
+  drawBoosterCase(ctx, cx, cy, o) {
+    const kinds = {
+      silver: { a: "#e2e8f0", b: "#94a3b8", c: "#475569", stripe: "#38bdf8" },
+      purple: { a: "#e9d5ff", b: "#a855f7", c: "#581c87", stripe: "#f0abfc" },
+      gold:   { a: "#fef08a", b: "#eab308", c: "#854d0e", stripe: "#ffffff" },
+      red:    { a: "#fecaca", b: "#dc2626", c: "#7f1d1d", stripe: "#fde047" }
+    };
+    const k = kinds[this.caseKind] || kinds.silver;
+    const bw = this.isMulti ? 150 : 132, bh = 74, lh = 26, lidDepth = 78;
+    const top = -bh / 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(o.tilt || 0);
+
+    // sombra
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.beginPath(); ctx.ellipse(0, bh / 2 + 8, bw * 0.62, 13, 0, 0, Math.PI * 2); ctx.fill();
+
+    const ang = o.open * (Math.PI * 0.58);
+    // tampa aberta (painel interno, atrás da boca)
+    if (o.open > 0.01) {
+      const lhUp = lidDepth * Math.sin(ang);
+      const topW = bw * (1 - 0.10 * Math.sin(ang));
+      const lg = ctx.createLinearGradient(0, top - lhUp, 0, top);
+      lg.addColorStop(0, k.c); lg.addColorStop(1, "#0f172a");
+      ctx.fillStyle = lg; ctx.strokeStyle = k.a; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-bw / 2, top); ctx.lineTo(-topW / 2, top - lhUp);
+      ctx.lineTo(topW / 2, top - lhUp); ctx.lineTo(bw / 2, top);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // reflexo da luz no painel
+      ctx.globalAlpha = 0.35 * o.open; ctx.fillStyle = o.glow;
+      ctx.fill(); ctx.globalAlpha = 1;
+
+      // feixe de luz saindo da boca
+      const beamH = 230 * o.open;
+      const bg = ctx.createLinearGradient(0, top, 0, top - beamH);
+      bg.addColorStop(0, "rgba(255,255,255,0.95)");
+      bg.addColorStop(0.25, o.glow);
+      bg.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalAlpha = 0.55 * o.open; ctx.fillStyle = bg;
+      ctx.beginPath();
+      ctx.moveTo(-bw * 0.40, top); ctx.lineTo(-bw * 0.72, top - beamH);
+      ctx.lineTo(bw * 0.72, top - beamH); ctx.lineTo(bw * 0.40, top);
+      ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+
+      // boca iluminada
+      ctx.save();
+      ctx.shadowColor = o.glow; ctx.shadowBlur = 30 * o.open;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.ellipse(0, top + 1, bw * 0.44, 4 + 7 * o.open, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    // corpo
+    const body = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+    body.addColorStop(0, k.c); body.addColorStop(0.22, k.a); body.addColorStop(0.5, k.b);
+    body.addColorStop(0.8, k.a); body.addColorStop(1, k.c);
+    ctx.fillStyle = body; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.roundRect(-bw / 2, top, bw, bh, 9); ctx.fill(); ctx.stroke();
+    // faixa colorida e sombreamento vertical
+    const shade = ctx.createLinearGradient(0, top, 0, bh / 2);
+    shade.addColorStop(0, "rgba(255,255,255,0.28)"); shade.addColorStop(0.5, "rgba(0,0,0,0)"); shade.addColorStop(1, "rgba(0,0,0,0.38)");
+    ctx.fillStyle = shade; ctx.beginPath(); ctx.roundRect(-bw / 2, top, bw, bh, 9); ctx.fill();
+    ctx.fillStyle = k.stripe; ctx.globalAlpha = 0.85;
+    ctx.fillRect(-bw / 2 + 4, bh / 2 - 18, bw - 8, 5); ctx.globalAlpha = 1;
+    // cantoneiras e rebites
+    ctx.fillStyle = "#1e293b";
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => {
+      ctx.beginPath(); ctx.arc(sx * (bw / 2 - 9), sy * (bh / 2 - 9), 3.2, 0, Math.PI * 2); ctx.fill();
+    });
+    // emblema central
+    ctx.fillStyle = "#0f172a"; ctx.strokeStyle = k.a; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(0, 2, 17, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    const lockCol = o.latch >= 1 ? "#4ade80" : (o.latch > 0 ? "#facc15" : "#f87171");
+    ctx.save(); ctx.shadowColor = lockCol; ctx.shadowBlur = 12;
+    ctx.fillStyle = lockCol; ctx.beginPath(); ctx.arc(0, 2, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    // travas laterais (giram para fora ao destravar)
+    [-1, 1].forEach(sd => {
+      ctx.save();
+      ctx.translate(sd * bw * 0.31, top + 4);
+      ctx.rotate(sd * -o.latch * 1.25);
+      ctx.fillStyle = "#cbd5e1"; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(-6, -13, 12, 22, 3); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    });
+
+    // tampa fechada / fechando (face frontal vai achatando conforme abre)
+    const face = lh * Math.cos(Math.min(Math.PI / 2, ang * 1.6));
+    if (face > 1) {
+      const lg2 = ctx.createLinearGradient(-bw / 2, 0, bw / 2, 0);
+      lg2.addColorStop(0, k.c); lg2.addColorStop(0.3, "#ffffff"); lg2.addColorStop(0.55, k.a); lg2.addColorStop(1, k.c);
+      ctx.fillStyle = lg2; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.roundRect(-(bw + 8) / 2, top - face - o.open * lidDepth * 0.5, bw + 8, face, 7); ctx.fill(); ctx.stroke();
+      // alça
+      if (o.open < 0.05) {
+        ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 5; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(-20, top - lh); ctx.quadraticCurveTo(0, top - lh - 20, 20, top - lh); ctx.stroke();
+      }
+    }
     ctx.restore();
   },
 
@@ -3447,7 +3703,7 @@ function unlockAndShowBoosterModal(title, pulledIndices, bonusText) {
   };
   const pulledFigures = cardData.map(c => c.fig);
   if (typeof BoosterCinematic !== "undefined") {
-    BoosterCinematic.start(pulledFigures, pulledFigures.length > 1, title, bonusText, openStaticModal);
+    BoosterCinematic.start(pulledFigures, pulledFigures.length > 1, title, bonusText, openStaticModal, cardData.map(c => c.isNew));
   } else {
     openStaticModal();
   }

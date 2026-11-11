@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v695` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v696` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v695). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v696). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -151,6 +151,17 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · Abertura de baús no estilo Pokémon Duel (v696)
+- **O que:** `js/ui/ui.js`, objeto `BoosterCinematic` (mesma API; `start()` ganhou 6º argumento opcional `newFlags`):
+  - Fases novas: `box_floating` (maleta fechada, "Toque para abrir", abre sozinha após 2,6 s) → `box_opening` (travas soltam, tampa gira para trás, feixe de luz) → `figure_silhouette` (figura sobe como silhueta na cor da raridade, "? ? ?") → `figure_reveal` (como antes + selo "NOVO!").
+  - `drawBoosterCase`: maleta metálica com travas, emblema (vermelho → verde ao destravar) e 4 cores por tipo (`caseKind`: silver padrão, gold para multi, purple se o título tiver "roxo/purple/6h", red se tiver "locked/chave").
+  - `emitCaseFx` / `updateCaseFx`: brilhos em estrela saindo da boca e névoa que escorre pela frente e se espalha no chão. Névoa sempre forte com EX/UX; nas demais, 40% de chance (`smokeLevel`).
+  - `drawSilhouette`: sprite pintado com a cor da raridade (C branco, UC verde, R azul, EX dourado, UX roxo), com cache.
+  - `drawBoosterBox` antigo ficou sem uso (pode ser apagado).
+- **Por quê:** Gabriel pediu a abertura como no Pokémon Duel original. Feito de memória + descrição dele (brilhos e, às vezes, fumaça descendo); não consegui ver o vídeo de referência — ajustar se ele apontar diferenças.
+- **CACHE_NAME:** v695 → v696
+- **Verificação:** Playwright 390×844 com [Charizard EX, Bulbasaur UC]: todas as fases renderizam, sem erro de console.
 
 ### 2026-11-11 · Claude · Hub volta ao layout original (v695)
 - **O que:** revertidas as mudanças de v693/v694 no hub (`js/ui/ui.js`, `index.html`, `PokeDuel-Web-v5.6.0.html` restaurados do commit `0ed1656`): time no "V", pedestal 3D na figura central e botão "Pedestal: 3D / Só a Peça" de volta.
