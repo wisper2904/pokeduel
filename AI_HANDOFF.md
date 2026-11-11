@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v693` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v694` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v693). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v694). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -151,6 +151,12 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · Hub sem base dupla (v694)
+- **O que:** `js/ui/ui.js`: os sprites já vêm com a base da própria figura, então tirei os mini-pedestais da fila do time (seção 4 de `renderHomeCarouselLoop`) e o pedestal 3D grande da figura central (`homeCenterpieceShowPedestal = false`, a central fica só com a base própria + anel ciano). A fila continua reta, mesma altura e mesma linha de base (`getTrimmedSpriteBox`).
+- **Por quê:** Gabriel: "não pode ter 2 bases".
+- **CACHE_NAME:** v693 → v694
+- **Verificação:** Playwright 390×844: cada figura aparece com uma base só.
 
 ### 2026-11-11 · Claude · Time do hub alinhado em pedestais (v693)
 - **O que:** `js/ui/ui.js` `renderHomeCarouselLoop`, seção 4: as 6 figuras do time saíram do "V" espalhado e agora ficam numa fila reta, cada uma no seu pedestal (`centerpiece_pedestal_3d.png` em miniatura), todas com a mesma altura e a mesma linha de base. Novo `getTrimmedSpriteBox(img)` recorta a margem transparente de cada sprite (cache em `WeakMap`) para o alinhamento ser exato. A fila deixa livre o canto direito da Pokébola. Removido o botão "🏛️ Pedestal: 3D / Só a Peça" (dois HTMLs); `homeCenterpieceShowPedestal` fixo em `true`.
