@@ -1791,8 +1791,7 @@ function cycleCenterpieceFigurine() {
   if (msg && f) msg.textContent = `★ Time em Destaque (Slot #${selectedCarouselSlot + 1}/6): [${f.rarity}] ${f.name} (MP ${f.mp})`;
 }
 
-// v694: sem pedestal extra — as figuras já têm a própria base (pedido: "não pode ter 2 bases")
-let homeCenterpieceShowPedestal = false;
+let homeCenterpieceShowPedestal = (typeof localStorage !== "undefined" && localStorage.getItem("pokeduel_show_pedestal") === "false") ? false : true;
 
 function toggleHomePedestalMode() {
   homeCenterpieceShowPedestal = !homeCenterpieceShowPedestal;
@@ -1834,33 +1833,6 @@ function updatePedestalToggleButton() {
 }
 window.toggleHomePedestalMode = toggleHomePedestalMode;
 window.updatePedestalToggleButton = updatePedestalToggleButton;
-
-// Caixa útil de cada sprite (sem a margem transparente), calculada uma vez por imagem
-const trimmedSpriteBoxCache = new WeakMap();
-function getTrimmedSpriteBox(img) {
-  const hit = trimmedSpriteBoxCache.get(img);
-  if (hit) return hit;
-  let box = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
-  try {
-    const c = document.createElement("canvas");
-    c.width = img.naturalWidth; c.height = img.naturalHeight;
-    const x = c.getContext("2d");
-    x.drawImage(img, 0, 0);
-    const d = x.getImageData(0, 0, c.width, c.height).data;
-    let minX = c.width, minY = c.height, maxX = -1, maxY = -1;
-    for (let yy = 0; yy < c.height; yy++) {
-      for (let xx = 0; xx < c.width; xx++) {
-        if (d[(yy * c.width + xx) * 4 + 3] > 16) {
-          if (xx < minX) minX = xx; if (xx > maxX) maxX = xx;
-          if (yy < minY) minY = yy; if (yy > maxY) maxY = yy;
-        }
-      }
-    }
-    if (maxX >= minX && maxY >= minY) box = { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
-  } catch (e) {}
-  trimmedSpriteBoxCache.set(img, box);
-  return box;
-}
 
 function renderHomeCarouselLoop() {
   if (hcCtx && document.getElementById("drawer-modal").classList.contains("show") &&
@@ -1998,52 +1970,58 @@ function renderHomeCarouselLoop() {
     }
     hcCtx.restore();
 
-    // 4. Time de 6 figuras em fila reta, só com a base da própria figura (sem pedestal extra), mesma altura e mesma linha de base (v694)
-    const rowCount = 6;
-    // Fila ocupa a largura menos o canto direito, onde fica a Pokébola de trocar a figura central
-    const rowW = W * 0.86;
-    const cellW = rowW / rowCount;
-    const baseLineY = H * 0.955;
-    const figMaxH = 70 * S, figMaxW = cellW * 0.96;
+    // 4. The 6 Active Deck Figurines (`state.deckP1[0..5]`) arranged in a fixed, elegant framing layout along the V-Stage floor (no 360 rotation!)
+    const slotCoords = [
+      { x: W * 0.10, y: H * 0.74, scale: 0.82 },
+      { x: W * 0.22, y: H * 0.81, scale: 0.90 },
+      { x: W * 0.34, y: H * 0.87, scale: 0.98 },
+      { x: W * 0.66, y: H * 0.87, scale: 0.98 },
+      { x: W * 0.78, y: H * 0.81, scale: 0.90 },
+      { x: W * 0.90, y: H * 0.74, scale: 0.82 }
+    ];
 
     const items = [];
-    for (let slot = 0; slot < rowCount; slot++) {
+    for (let slot = 0; slot < 6; slot++) {
+      const coord = slotCoords[slot];
       const figIdx = state.deckP1[slot % 6];
       const fig = FIGURES_DB[figIdx % FIGURES_DB.length];
-      const px = W * 0.01 + (slot + 0.5) * cellW;
-      // py = ponto usado no toque para selecionar (meio da figura)
-      items.push({ slot, px, py: baseLineY - 18 * S, scale: 1, fig });
+      items.push({ slot, px: coord.x, py: coord.y, scale: coord.scale, fig });
     }
+
     lastRenderedTeamSlots = items.map(x => ({ ...x }));
+    items.sort((a, b) => a.py - b.py);
 
     items.forEach(it => {
       const img = loadedFigImages[it.fig.spriteKey] || loadedFigImages[it.fig.id] || loadedFigImages["pikachu"];
-      const isSel = (it.slot === teamSlotIdx);
-      if (!img || !img.complete || !img.naturalWidth) return;
-      const bb = getTrimmedSpriteBox(img);
-      let dh = figMaxH;
-      let dw = dh * (bb.w / bb.h);
-      if (dw > figMaxW) { dw = figMaxW; dh = dw * (bb.h / bb.w); }
+      const isCenterSelected = (it.slot === teamSlotIdx);
       hcCtx.save();
-      // Sombra no chão
-      hcCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      hcCtx.translate(it.px, it.py);
+
+      // Floor shadow under each figurine's pedestal
+      hcCtx.fillStyle = "rgba(0, 0, 0, 0.68)";
       hcCtx.beginPath();
-      hcCtx.ellipse(it.px, baseLineY - 2 * S, dw * 0.46, 6 * S, 0, 0, Math.PI * 2);
+      hcCtx.ellipse(0, 14 * S * it.scale, 30 * S * it.scale, 9 * S * it.scale, 0, 0, Math.PI * 2);
       hcCtx.fill();
-      // Anel dourado sob a figura selecionada
-      if (isSel) {
+
+      // Glowing active gold/cyan ring on the currently selected team member
+      if (isCenterSelected) {
         hcCtx.save();
         hcCtx.strokeStyle = "#facc15";
-        hcCtx.lineWidth = 2.4 * S;
+        hcCtx.lineWidth = 2.8 * S;
         hcCtx.shadowColor = "#facc15";
-        hcCtx.shadowBlur = 10 * S;
+        hcCtx.shadowBlur = 12 * S;
         hcCtx.beginPath();
-        hcCtx.ellipse(it.px, baseLineY - 3 * S, dw * 0.5, 7 * S, 0, 0, Math.PI * 2);
+        hcCtx.ellipse(0, 13 * S * it.scale, 29 * S * it.scale, 8.5 * S * it.scale, 0, 0, Math.PI * 2);
         hcCtx.stroke();
         hcCtx.restore();
       }
-      const bob = isSel ? Math.sin(t * 2.2) * (2 * S) : 0;
-      hcCtx.drawImage(img, bb.x, bb.y, bb.w, bb.h, it.px - dw / 2, baseLineY - dh + bob, dw, dh);
+
+      if (img && img.complete) {
+        const drawW = 74 * S * it.scale;
+        const drawH = drawW * (img.naturalHeight / (img.naturalWidth || 1));
+        const bob = isCenterSelected ? Math.sin(t * 2.2) * (2.2 * S) : 0;
+        hcCtx.drawImage(img, -drawW / 2, -drawH + 18 * S * it.scale + bob, drawW, drawH);
+      }
       hcCtx.restore();
     });
 
