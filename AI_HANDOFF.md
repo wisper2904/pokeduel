@@ -33,9 +33,9 @@
 
 | Campo | Valor |
 |---|---|
-| Último commit conhecido | `ea1e16c` — "Integrate unified adaptive AI v5.8.5 with 3-turn opening book and counter-deploy engine" |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v684` |
-| Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.8.5 |
+| Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v685` |
+| Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
 | Figuras no `FIGURES_DB` | 272 (30 meta + expansão `NEW_200_FIGURES_DATA`), 25 UX |
@@ -119,7 +119,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 | `js/network/p2p_matchmaker.js` | 1.661 | PeerJS/WebRTC, sala 4 dígitos, "Salão" via MQTT-over-WebSocket, fallback para bot em 30 s, tutorial |
 | `js/ui/ui.js` | 10.369 | **monólito**: abas (hub/deck/fusion/p2p/shop/menu), booster, BGM, progressão, economia, perfil, leaderboard, feedback, tutorial |
 | `js/ui/juice.js` | 863 | game feel (shake, hit flash, dano flutuante, haptics), API `window.Juice` |
-| `js/engine/ai.js` | 1.633 | IA adaptativa v5.8.5: heatmap 28 nós, opening book 3 turnos, minimax 2-ply, counter-deck |
+| `js/engine/ai.js` | ~1.740 | IA adaptativa v5.9.0: heatmap 28 nós, opening book 3 turnos, minimax 2-ply, counter-deck + camada de valor tático (EV de combate, mapa de ameaça) |
 | `js/app.js` | 92 | bootstrap: registro do SW, BGM, `DOMContentLoaded` |
 | `sw.js` | 58 | cache-first PWA, `CORE_ASSETS` |
 
@@ -139,14 +139,26 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.8.5 · cache v684). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.0 · cache v685). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
+- [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
 - [ ] Não há testes automatizados de regra (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · IA mais difícil (v5.9.0)
+- **O que:** `js/engine/ai.js`
+  - Nova camada antes de `triggerPlayerAIMove`: `aiUnitValue`, `aiAttackEV`, `aiBuildEnemyStrikeMap`, `aiExposureInfo`, constantes `AI_NOISE_CAP = 450` e `AI_MIN_DIFFICULTY = 0.55`.
+  - `triggerPlayerAIMove`: (1) bônus de avanço (turnsToWin, goalPull, Entry Lockdown) multiplicados pela chance de a peça sobreviver ao contra-ataque (`rushSurvive`); (2) penalidade de exposição = pior ataque inimigo possível no próximo turno, incluindo peças do banco com peso 0,6; (3) decisão de ataque por valor esperado (antes atacava com 45% de vitória ou saldo ≥ −2); (4) ataque pós-movimento também por EV; (5) penalidade de armadilha de cerco 6.000 → 24.000; (6) ruído tático limitado a 450 (antes até 3.800).
+  - Aprendizado pós-partida: quando a IA vence, não aumenta mais o ruído nem baixa a dificuldade.
+  - `initAITacticalPlates`: piso de dificuldade 0,55, então Double Chance já vem desde a 1ª partida.
+- **Por quê:** Gabriel achou o bot fácil; pediu algo no nível do protótipo Xadrez Arcano. Visual, menus e arena **não** mudam (decisão dele: manter o PokeDuel como está).
+- **CACHE_NAME:** v684 → v685
+- **Verificação:** `node --check` OK. Teste headless (Playwright + relógio falso) com cenários montados: a IA antiga entrava em 7/7 casos numa casa onde levava 70–76% de nocaute; a nova evitou nos 7. Partidas completas rodando sem erro de console. Não existe ainda um oponente automático que jogue como humano, então não há taxa de vitória medida contra pessoa.
+- **Pendências / avisos para o outro agente:** se alguém achar a IA passiva demais (recuando), os botões são `rushSurvive` (piso 0,35), o peso 1,15 da exposição e o peso 0,6 das peças do banco em `aiExposureInfo`.
 
 ### 2026-11-11 · Claude · Criação do diário de bordo
 - **O que:** criados `AI_HANDOFF.md` (este arquivo) e os ponteiros `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` que mandam ler este arquivo primeiro.

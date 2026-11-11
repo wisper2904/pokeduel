@@ -1,5 +1,5 @@
 // ============================================================================
-// ADAPTIVE COUNTER-TEAM & 2-PLY MINIMAX LOOKAHEAD AI ENGINE (v5.8.5 UNIFIED)
+// ADAPTIVE COUNTER-TEAM & 2-PLY MINIMAX LOOKAHEAD AI ENGINE (v5.9.0 — camada de valor tático)
 // ============================================================================
 // UNIFIED ADAPTIVE STRATEGIC RANKED AI:
 // - 28-Node Exact Heatmap & Move Transition Predictor (fromNode -> toNode)
@@ -15,7 +15,7 @@ const FIRST_TURN_HIST_KEY  = "pdr_first_turn_hist_v530";
 
 function loadAdaptiveAIBrain() {
   const defaultBrain = {
-    version: "5.8.5",
+    version: "5.9.0",
     matchesAnalyzed: 0,
     aiWins: 0,
     playerWins: 0,
@@ -61,7 +61,7 @@ function loadAdaptiveAIBrain() {
         return {
           ...defaultBrain,
           ...parsed,
-          version: "5.8.5",
+          version: "5.9.0",
           laneHeatmap: { ...defaultBrain.laneHeatmap, ...(parsed.laneHeatmap || {}) },
           nodeHeatmap: { ...defaultBrain.nodeHeatmap, ...(parsed.nodeHeatmap || {}) },
           transitionHabits: { ...defaultBrain.transitionHabits, ...(parsed.transitionHabits || {}) },
@@ -516,7 +516,8 @@ function rollFairFirstTurnWinner() {
 
 // 3. Equip AI with Tactical Plates (libera arsenal completo conforme difficultyScale sobe)
 function initAITacticalPlates() {
-  const diffScale = adaptiveAIBrain.difficultyScale || 0.35;
+  // v5.9.0: piso de dificuldade — Double Chance liberado desde a primeira partida
+  const diffScale = Math.max(AI_MIN_DIFFICULTY, adaptiveAIBrain.difficultyScale || 0.35);
   state.aiPlates = [
     { id: "hurdle",    name: "Hurdle Jump",     cost: 2, used: false },
     { id: "goalblock", name: "Goal Block",      cost: 2, used: false },
@@ -808,6 +809,79 @@ computeReachableWithPaths = function(unit) {
 };
 
 // ============================================================================
+// v5.9.0 TACTICAL VALUE LAYER — valor de peça, EV de combate e mapa de ameaça
+// ============================================================================
+// Teto do ruído tático: acima disso a IA não distingue um ataque bom de um ruim
+// (os termos de combate ficam na casa de poucos milhares de pontos).
+const AI_NOISE_CAP = 450;
+const AI_MIN_DIFFICULTY = 0.55;
+
+// Valor de uma peça em pontos de score (~14k a ~60k). Mede força de roleta e,
+// para peças inimigas, o quanto ela ameaça o Goal da IA.
+function aiUnitValue(unit, perspectiveOwner) {
+  const w = getActiveWheel(unit) || [];
+  const tot = w.reduce((s, x) => s + (x.size || 0), 0) || 96;
+  let ev = 0;
+  w.forEach(s => {
+    const f = (s.size || 0) / tot;
+    if (s.color === "white") ev += f * (s.dmg || 0);
+    else if (s.color === "gold") ev += f * ((s.dmg || 0) + 35);
+    else if (s.color === "purple") ev += f * (55 + (s.stars || 1) * 30);
+    else if (s.color === "blue") ev += f * 45;
+  });
+  let v = 12000 + ev * 220;
+  if (unit.rarity === "UX") v += 9000; else if (unit.rarity === "EX") v += 6000;
+  if (unit.location === "board" && typeof unit.nodeId === "number") {
+    const isEnemy = unit.owner !== perspectiveOwner;
+    const goal = isEnemy ? (perspectiveOwner === "p1" ? 10 : 3) : (perspectiveOwner === "p1" ? 3 : 10);
+    const d = NODE_BFS_DIST[unit.nodeId][goal];
+    // Peça perto do Goal adversário vale mais (ataque) / peça inimiga perto do nosso Goal é prioridade
+    v += Math.max(0, 6 - d) * (isEnemy ? 4500 : 3000);
+    if (unit.nodeId === goal) v += isEnemy ? 0 : 8000;
+  }
+  return v;
+}
+
+// Expected value de um ataque em pontos: ganho esperado menos perda esperada.
+function aiAttackEV(att, def, winPct, lossPct, owner) {
+  return (winPct / 100) * aiUnitValue(def, owner) - (lossPct / 100) * aiUnitValue(att, owner) * 1.1;
+}
+
+// Para cada inimigo que pode agir no próximo turno: casas de onde ele consegue atacar.
+function aiBuildEnemyStrikeMap(enemyRole) {
+  const map = [];
+  state.units.forEach(e => {
+    if (e.owner !== enemyRole || e.location === "pc" || e.location === "ultra_space") return;
+    if (e.condition === PokemonCondition.Sleep || e.condition === PokemonCondition.Freeze) return;
+    if (e.waitTurns > 1) return;
+    const from = new Set();
+    if (e.location === "board" && typeof e.nodeId === "number") from.add(e.nodeId);
+    if (e.waitTurns === 0) {
+      try { (computeReachableWithPaths(e).nodes || []).forEach(n => from.add(n)); } catch (err) {}
+    }
+    if (from.size) map.push({ unit: e, from });
+  });
+  return map;
+}
+
+// Risco (em pontos) de deixar `unit` parada em `nid`: o pior ataque inimigo possível no próximo turno.
+function aiExposureInfo(unit, nid, strikeMap, owner, ignoreUid) {
+  const nbs = ADJ[nid] || [];
+  let risk = 0, pKill = 0;
+  strikeMap.forEach(({ unit: e, from }) => {
+    if (e.uid === ignoreUid) return;
+    if (!nbs.some(nb => from.has(nb))) return;
+    const od = computeDuelDbOdds(e, unit);
+    // Peça vinda do banco gasta o turno entrando e fica exposta: ameaça pesa menos
+    const k = e.location === "bench" ? 0.6 : 1;
+    const r = ((od.win / 100) * aiUnitValue(unit, owner) - (od.loss / 100) * aiUnitValue(e, owner) * 0.5) * k;
+    if (r > risk) risk = r;
+    if ((od.win / 100) * k > pKill) pKill = (od.win / 100) * k;
+  });
+  return { risk, pKill };
+}
+
+// ============================================================================
 // MASTER ADAPTIVE 2-PLY MINIMAX AI ENGINE (`triggerPlayerAIMove` v5.8.5)
 // ============================================================================
 triggerPlayerAIMove = function() {
@@ -824,11 +898,13 @@ triggerPlayerAIMove = function() {
       const occ = unitAtNode(tNid);
       if (sel && occ) {
         const odds = computeDuelDbOdds(sel, occ);
-        const net = odds.win - odds.loss;
+        // v5.9.0: decide pelo valor esperado (ganho - perda ponderados pelo valor das peças)
+        const goalCritical = (occ.nodeId === (sel.owner === "p1" ? 3 : 10)) ? 60000 : 0;
+        const net = aiAttackEV(sel, occ, odds.win, odds.loss, sel.owner) + (odds.win / 100) * goalCritical;
         if (net > bestNet) { bestNet = net; bestTargetNid = tNid; }
       }
     });
-    if (bestTargetNid !== null && bestNet >= -2) {
+    if (bestTargetNid !== null && bestNet > 0) {
       onNodeClicked(bestTargetNid);
       return;
     }
@@ -861,6 +937,7 @@ triggerPlayerAIMove = function() {
     u.condition !== PokemonCondition.Freeze
   );
   const enemyBoardUnits = state.units.filter(u => u.owner === enemyRole && u.location === "board");
+  const enemyStrikeMap = aiBuildEnemyStrikeMap(enemyRole);
 
   if (myUnits.length === 0) {
     skipOrDemoTurn();
@@ -1094,7 +1171,7 @@ triggerPlayerAIMove = function() {
   // STEP 3: EVALUATE ALL CANDIDATE MOVES WITH HABIT INTERCEPTION & ELASTIC NOISE
   let bestAction = null;
   let bestScore  = -9999999;
-  const currentNoiseMax = Math.max(0, adaptiveAIBrain.tacticalNoise || 0);
+  const currentNoiseMax = Math.min(AI_NOISE_CAP, Math.max(0, adaptiveAIBrain.tacticalNoise || 0));
 
   // Diretriz do Livro de Abertura para os primeiros turnos
   const openingDirective = computeOpeningBookDirective(owner, enemyRole);
@@ -1139,6 +1216,9 @@ triggerPlayerAIMove = function() {
       }
 
       let moveScore = usingHurdlePlate ? -300 : 0;
+      // v5.9.0: chance de a peça sobreviver ao contra-ataque. Bônus de avanço só contam se ela sobreviver.
+      const expo = (nid !== oppGoalId) ? aiExposureInfo(u, nid, enemyStrikeMap, owner, null) : { risk: 0, pKill: 0 };
+      const rushSurvive = Math.max(0.35, 1 - expo.pKill * 0.9);
       let reasonTag = usingHurdlePlate ? `Salto Ofensivo [Hurdle Jump] com ${u.name}` : `Avanço Tático com ${u.name}`;
 
       // 1. ABSOLUTE 2-PLY GOAL SAFETY
@@ -1165,7 +1245,7 @@ triggerPlayerAIMove = function() {
 
       // 3. 2-PLY ANTI-SURROUND DISCIPLINE
       if (sim.allySurroundTrapsNextTurn > 0) {
-        moveScore -= 6000 * sim.allySurroundTrapsNextTurn * wAntiSur;
+        moveScore -= 24000 * sim.allySurroundTrapsNextTurn * wAntiSur;
       }
       if (currentlyTrapped && !isStandingAttack && sim.allySurroundTrapsNextTurn === 0) {
         moveScore += 6000 * wAntiSur;
@@ -1208,24 +1288,24 @@ triggerPlayerAIMove = function() {
         moveScore += 250000;
         reasonTag = `🏆 Vitória Imediata no Goal Point com ${u.name}!`;
       } else if (turnsToWin === 1) {
-        moveScore += 88000 * wSpeedRush;
+        moveScore += 88000 * wSpeedRush * rushSurvive;
         reasonTag = `⚡ Xeque Letal no Goal! (Vitória em 1 Turno com ${u.name})`;
       } else if (turnsToWin === 2) {
-        moveScore += 48000 * wSpeedRush;
+        moveScore += 48000 * wSpeedRush * rushSurvive;
         reasonTag = `🚀 Rota Direta de Xeque (2 Turnos com ${u.name})`;
       } else if (turnsToWin === 3) {
-        moveScore += 26000 * wSpeedRush;
+        moveScore += 26000 * wSpeedRush * rushSurvive;
       } else if (turnsToWin === 4) {
-        moveScore += 14000 * wSpeedRush;
+        moveScore += 14000 * wSpeedRush * rushSurvive;
       }
 
       // 7. EXPONENTIAL FORWARD GOAL PULL
       const distToOppGoal = NODE_BFS_DIST[nid][oppGoalId];
       const goalPull = Math.pow(Math.max(0, 13 - distToOppGoal), 3.2) * 26 * wSpeedRush;
-      moveScore += goalPull;
+      moveScore += goalPull * rushSurvive;
 
       if (distToOppGoal === 1) {
-        moveScore += 16000 * wSpeedRush;
+        moveScore += 16000 * wSpeedRush * rushSurvive;
         reasonTag = `Ameaça Imediata ao Goal Inimigo com ${u.name}!`;
       }
 
@@ -1234,7 +1314,7 @@ triggerPlayerAIMove = function() {
         const otherEntry = oppEntryIds.find(id => id !== nid);
         const otherOcc = otherEntry !== undefined ? unitAtNode(otherEntry) : null;
         const otherTakenByAI = Boolean(otherOcc && otherOcc.owner === owner);
-        moveScore += (otherTakenByAI ? 95000 : 42000) * wEntryLk;
+        moveScore += (otherTakenByAI ? 95000 : 42000) * wEntryLk * rushSurvive;
         reasonTag = otherTakenByAI
           ? `🔒 Asfixia Dupla dos Entry Points (${u.name}) — Pressão Wait-Win!`
           : `⚡ Invasão do Entry Point Inimigo com ${u.name}!`;
@@ -1280,6 +1360,15 @@ triggerPlayerAIMove = function() {
           moveScore += 16000 * wSpeedRush;
           reasonTag = `Blitz de Abertura com ${u.name} (3 MP)`;
         }
+      }
+
+      // 10B. v5.9.0 EXPOSIÇÃO: quanto o inimigo ganha atacando esta peça no próximo turno
+      if (nid !== oppGoalId) {
+        const stayingExposure = (u.location === "board" && typeof u.nodeId === "number")
+          ? aiExposureInfo(u, u.nodeId, enemyStrikeMap, owner, null).risk : 0;
+        // Penaliza o risco novo; sair de uma casa perigosa vira bônus
+        moveScore -= expo.risk * 1.15 * wAntiSur;
+        if (!isStandingAttack) moveScore += stayingExposure * 0.6;
       }
 
       // Aplicando Ruído Elástico (diminui até 0 conforme o bot aprende a jogar contra você)
@@ -1360,15 +1449,18 @@ triggerPlayerAIMove = function() {
             }
           }
 
+          // v5.9.0: ataque só quando o valor esperado compensa (ou quando é estratégico)
+          const attackEV = aiAttackEV(u, eu, effectiveWin, effectiveLoss, owner);
+          const enemyThreatensMyGoal = !myGoalDefended && NODE_BFS_DIST[eu.nodeId][myGoalId] <= (eu.mp || 2);
           const shouldAttack = (
+            attackEV > 0 ||
             (isGoalDefender && effectiveWin >= 30) ||
-            (isEntryDefender && effectiveWin >= 38) ||
-            (isDirectBlocker && effectiveWin >= 42) ||
-            (effectiveNet >= -2 || effectiveWin >= 45)
+            (enemyThreatensMyGoal && effectiveWin >= 35 && attackEV > -8000)
           );
 
           if (shouldAttack) {
-            let atkScore = moveScore + (effectiveNet * 32 + effectiveWin * 24) * wCombatAgg + unitThreatBonus;
+            let atkScore = moveScore + attackEV * wCombatAgg + unitThreatBonus;
+            if (enemyThreatensMyGoal) atkScore += (effectiveWin / 100) * 30000 * wGoalDef;
             if (isGoalDefender) {
               atkScore += 70000 * wSpeedRush;
             } else if (isEntryDefender) {
@@ -1575,9 +1667,9 @@ showWinResultScreen = function(winner) {
       adaptiveAIBrain.aiWins = (adaptiveAIBrain.aiWins || 0) + 1;
       adaptiveAIBrain.playerWinStreak = 0;
 
-      // Se a IA venceu, alivia levemente o ruído e desacelera apenas um pouco para manter o duelo justo
-      adaptiveAIBrain.difficultyScale = Math.max(0.25, (adaptiveAIBrain.difficultyScale || 0.35) - 0.03);
-      adaptiveAIBrain.tacticalNoise   = Math.min(3800, (adaptiveAIBrain.tacticalNoise || 0) + 300);
+      // v5.9.0: a IA não "afrouxa" mais depois de vencer (antes subia o ruído até 3800 e caía a dificuldade)
+      adaptiveAIBrain.difficultyScale = Math.max(AI_MIN_DIFFICULTY, adaptiveAIBrain.difficultyScale || 0.35);
+      adaptiveAIBrain.tacticalNoise   = Math.min(AI_NOISE_CAP, adaptiveAIBrain.tacticalNoise || 0);
     }
 
     // Atualiza o histórico de vitórias/derrotas de cada resposta que a IA tentou na abertura desta partida
