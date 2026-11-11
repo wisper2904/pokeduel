@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v685` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v686` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -133,13 +133,14 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 - Mudanças de regra de combate ou movimento precisam ser **determinísticas** (usar `nextDeterministicRandom`, nunca `Math.random`) senão o P2P dessincroniza.
 - Pacotes P2P (`sendP2PPacket`) passam por `seenP2PPacketIds` (deduplicação). Tipo de pacote novo precisa ser tratado em `handleP2PPacket` nos dois lados.
 - `ui.js` é enorme: preferir `grep -n` + edição cirúrgica a reescrever blocos.
+- Atualização automática (desde v686): o app checa o `sw.js` ao abrir, ao voltar para a tela, no `focus` e no `online` (no máx. 1×/30 s) e mostra o aviso "Nova versão disponível · Recarregar". **Ou seja: se esquecer de subir o `CACHE_NAME`, ninguém recebe a atualização.**
 - `.md` não entra em `CORE_ASSETS`. Editar só este arquivo **não** exige bump de `CACHE_NAME`.
 
 ---
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.0 · cache v685). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.0 · cache v686). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -148,6 +149,16 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · Atualização automática do app (PWA)
+- **O que:**
+  - `js/app.js`: registro do SW com `updateViaCache: "none"`; `reg.update()` ao abrir e em `visibilitychange`/`focus`/`online` (throttle 30 s); aviso fixo "🔄 Nova versão disponível · Recarregar" quando o novo SW assume (`controllerchange`) ou quando há um SW `waiting`. Se houver partida em andamento, o aviso diz que recarregar encerra a partida. Botão ✕ adia.
+  - `sw.js`: o install baixa `CORE_ASSETS` com `cache: "reload"` (antes podia pegar arquivo velho do cache HTTP de 10 min do GitHub Pages).
+  - `index.html` + `PokeDuel-Web-v5.6.0.html`: removido o botão **ATUALIZAR 1-Toque** do hub (pedido do Gabriel). Ficam como reserva o botão "Atualizar Agora" na aba Config e o "Recarregar e Atualizar Agora" no modal de Notas (`triggerInAppUpdateAction`, que limpa cache e SW à força).
+- **Por quê:** Gabriel quer o app no celular puxando as atualizações do git sem baixar APK nem apertar botão.
+- **CACHE_NAME:** v685 → v686
+- **Verificação:** Playwright com SW real: app controlado pelo SW v686 → `sw.js` trocado para v999 no servidor → `reg.update()` → cache v999 instalado e aviso exibido; clique em Recarregar abre a versão nova. HTMLs idênticos, `node --check` OK.
+- **Pendências / avisos para o outro agente:** nenhuma. Só lembrar de sempre subir o `CACHE_NAME`.
 
 ### 2026-11-11 · Claude · IA mais difícil (v5.9.0)
 - **O que:** `js/engine/ai.js`
