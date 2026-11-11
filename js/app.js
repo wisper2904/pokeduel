@@ -63,6 +63,9 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Modo desenvolvedor: mostra ferramentas como o publicador do GitHub Pages
+try { if (localStorage.getItem("pdr_dev_mode") === "1") document.addEventListener("DOMContentLoaded", () => document.body.classList.add("pdr-dev-mode")); } catch (e) {}
+
 // BGM Auto-start and Audio Unlocking
 (function initBgmEngineAutoStart() {
   if (typeof BgmEngine !== "undefined") {

@@ -1814,6 +1814,20 @@ function drawHDVectorBoardAndChrome() {
 
 // (Z-Move Gauge e Botão removidos)
 
+  // 7B. Mascara o botão "AI" que vem desenhado na imagem da arena (não tinha função nenhuma)
+  if (!state.postMoveAttackMode) {
+    ctx.save();
+    const aiMaskGrad = ctx.createLinearGradient(0, 441, 0, 479);
+    aiMaskGrad.addColorStop(0, "#16171c");
+    aiMaskGrad.addColorStop(0.5, "#101115");
+    aiMaskGrad.addColorStop(1, "#07090d");
+    ctx.fillStyle = aiMaskGrad;
+    ctx.beginPath();
+    ctx.roundRect(112, 441, 129, 38, 6);
+    ctx.fill();
+    ctx.restore();
+  }
+
   // 8. Glowing Blue [End Turn ⏭️] Button during 2-Step Post-Move Target Selection ONLY (AI Button removed)
   if (state.postMoveAttackMode) {
     const endGrad = ctx.createLinearGradient(118, 446, 118, 475);
@@ -2397,7 +2411,7 @@ function drawVideoMatchOverlays() {
       ctx.beginPath(); ctx.moveTo(0, 54); ctx.lineTo(353, 54); ctx.moveTo(0, 80); ctx.lineTo(353, 80); ctx.stroke();
       ctx.fillStyle = "#ffffff"; ctx.font = "900 13px sans-serif";
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
-      ctx.fillText(isMy ? "My turn" : "Opponent turn", 176.5, 67);
+      ctx.fillText(isMy ? ((typeof t === "function") ? t("battle.banner_my_turn", "Sua vez") : "Sua vez") : ((typeof t === "function") ? t("battle.banner_opp_turn", "Vez do oponente") : "Vez do oponente"), 176.5, 67);
       ctx.restore();
     }
   }
@@ -2580,7 +2594,7 @@ function drawVideoMatchOverlays() {
       ctx.font = "900 44px sans-serif";
       ctx.textAlign = "center"; ctx.textBaseline = "middle";
       ctx.shadowColor = "#22c55e"; ctx.shadowBlur = 18;
-      ctx.fillText("START", 176.5, 265);
+      ctx.fillText(((typeof t === "function") ? t("battle.start", "START") : "START"), 176.5, 265);
       ctx.restore();
     } else {
       const shouldFireAI = (state.turn === "p2" && state.mode === "ai" && state.matchKind !== "tutorial" && !state.preMatchAnim.aiFired);
@@ -2601,15 +2615,22 @@ function drawVideoMatchOverlays() {
   // 3. `04:38` Giant Gold `WIN` + Fireworks Celebration on Goal Point!
   if (state.winCelebrationAnim) {
     const elapsed = now - state.winCelebrationAnim.t0;
+    // Mostra VITÓRIA ou DERROTA do ponto de vista de quem está embaixo (no pass-and-play, diz quem venceu)
+    const celebWinner = state.winCelebrationAnim.winner;
+    const celebIsPass = state.mode === "pass";
+    const celebDidWin = celebIsPass || celebWinner === getBottomRole();
+    const winWord = (typeof t === "function") ? t("result.win", "VITÓRIA") : "VITÓRIA";
+    const loseWord = (typeof t === "function") ? t("result.lose", "DERROTA") : "DERROTA";
+    const celebText = celebIsPass ? `${celebWinner.toUpperCase()} ${winWord}` : (celebDidWin ? winWord : loseWord);
     ctx.save();
-    ctx.fillStyle = "#facc15";
-    ctx.strokeStyle = "#78350f";
+    ctx.fillStyle = celebDidWin ? "#facc15" : "#f87171";
+    ctx.strokeStyle = celebDidWin ? "#78350f" : "#450a0a";
     ctx.lineWidth = 3;
-    ctx.font = "900 46px sans-serif";
+    ctx.font = celebText.length > 6 ? "900 38px sans-serif" : "900 46px sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.shadowColor = "#f59e0b"; ctx.shadowBlur = 20;
-    ctx.strokeText("WIN", 176.5, 250);
-    ctx.fillText("WIN", 176.5, 250);
+    ctx.shadowColor = celebDidWin ? "#f59e0b" : "#dc2626"; ctx.shadowBlur = 20;
+    ctx.strokeText(celebText, 176.5, 250);
+    ctx.fillText(celebText, 176.5, 250);
     ctx.restore();
     if (elapsed > 1450) {
       const winner = state.winCelebrationAnim.winner;
@@ -2627,7 +2648,7 @@ function showWinResultScreen(winner) {
   const ov = document.getElementById("win-result-overlay");
   const t = document.getElementById("win-result-title");
   if (t) {
-    t.textContent = didWin ? "WIN" : "LOSE";
+    t.textContent = didWin ? (typeof window.t === "function" ? window.t("result.win", "VITÓRIA") : "VITÓRIA") : (typeof window.t === "function" ? window.t("result.lose", "DERROTA") : "DERROTA");
     t.style.color = didWin ? "#facc15" : "#f87171";
   }
   if (typeof BgmEngine !== "undefined") {
@@ -2657,10 +2678,17 @@ function showWinResultScreen(winner) {
     const lPts = document.getElementById("league-pts-lbl");
     if (rVal) rVal.textContent = `${p.rankRating} (${p.leagueTier})`;
     if (rDel) {
-      rDel.textContent = (delta >= 0 ? `+${delta} ↑` : `${delta} ↓`);
-      rDel.style.color = delta >= 0 ? "#4ade80" : "#f87171";
+      rDel.textContent = delta > 0 ? `+${delta} ↑` : (delta < 0 ? `${delta} ↓` : "±0");
+      rDel.style.color = delta > 0 ? "#4ade80" : (delta < 0 ? "#f87171" : "#94a3b8");
     }
     if (lPts) lPts.textContent = p.rankRating;
+    // Quantos pontos faltam para a próxima liga (antes mostrava um 1215 fixo)
+    const promoEl = document.getElementById("win-promo-val");
+    if (promoEl) {
+      const nextTier = [1500, 1900, 2300, 2700].find(v => v > p.rankRating);
+      const trp = (k, f) => (typeof window.t === "function" ? window.t(k, f) : f);
+      promoEl.textContent = nextTier ? `${nextTier - p.rankRating} ${trp("result.pts", "pts")}` : trp("result.max_league", "Liga máxima");
+    }
   }
   // Award Key Fragments for Locked Booster (+3 on Win, +1 on Loss) & refill an empty Time Booster slot on Win!
   playerKeyFragments = Math.min(10, playerKeyFragments + (didWin ? 3 : 1));
@@ -2682,6 +2710,38 @@ function showWinResultScreen(winner) {
     if (emptySlot !== -1) awardNewRealTimeBoosterToSlot(emptySlot);
   }
   if (ov) ov.style.display = "flex";
+}
+
+// Confirmação antes de desistir (antes, um toque encerrava a partida na hora)
+function requestForfeitConfirm() {
+  if (state.matchKind === "tutorial" || !state.isMatchActive || state.winCelebrationAnim || state.matchFinished) {
+    triggerVoluntaryForfeit();
+    return;
+  }
+  const tr = (k, f) => (typeof t === "function" ? t(k, f) : f);
+  let ov = document.getElementById("forfeit-confirm-modal");
+  if (!ov) {
+    ov = document.createElement("div");
+    ov.id = "forfeit-confirm-modal";
+    ov.style.cssText = "position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,0.82);display:flex;align-items:center;justify-content:center;padding:20px;";
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = `
+    <div role="dialog" aria-modal="true" style="width:100%;max-width:320px;background:linear-gradient(180deg,#1e293b,#0b1120);border:2px solid #ef4444;border-radius:12px;padding:16px;text-align:center;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.7);">
+      <div style="font-size:26px;margin-bottom:6px;">🏳️</div>
+      <div style="font-size:15px;font-weight:900;margin-bottom:6px;">${tr("battle.forfeit_confirm_title", "Desistir da partida?")}</div>
+      <div style="font-size:11.5px;color:#cbd5e1;line-height:1.45;margin-bottom:14px;">${tr("battle.forfeit_confirm_body", "Você perde a partida e os pontos de ranking, e não ganha moedas nem fragmentos de chave.")}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button id="forfeit-cancel-btn" style="padding:10px 6px;border-radius:8px;background:linear-gradient(180deg,#22c55e,#15803d);border:1.5px solid #86efac;color:#fff;font-weight:900;font-size:12px;cursor:pointer;">${tr("battle.forfeit_cancel", "Continuar jogando")}</button>
+        <button id="forfeit-ok-btn" style="padding:10px 6px;border-radius:8px;background:#1e293b;border:1.5px solid #ef4444;color:#fca5a5;font-weight:900;font-size:12px;cursor:pointer;">${tr("battle.forfeit_ok", "Desistir")}</button>
+      </div>
+    </div>`;
+  ov.style.display = "flex";
+  playSfx("tick");
+  const close = () => { ov.style.display = "none"; };
+  document.getElementById("forfeit-cancel-btn").onclick = close;
+  document.getElementById("forfeit-ok-btn").onclick = () => { close(); triggerVoluntaryForfeit(); };
+  ov.onclick = (e) => { if (e.target === ov) close(); };
 }
 
 function closeWinResultOverlay() {
@@ -2795,7 +2855,7 @@ canvas.addEventListener("pointerdown", e => {
   // 5. Bottom Button Bar: [Forfeit] | [Plates] | [Z-Power]
   if (sy >= 490) {
     if (sx <= 90) {
-      triggerVoluntaryForfeit();
+      requestForfeitConfirm();
     } else if (sx >= 92 && sx <= 212) {
       togglePlatesTray();
     } else if (sx >= 214 && sx <= 348) {
@@ -3275,7 +3335,7 @@ function executeMove(uid, targetNodeId, broadcast, customSegments, remotePacket)
       state.attackTargets = liveAdjEnemies;
       state.reachableNodes = [];
       state.pendingPostMoveTurn = { nextTurn: nextTurnVal, nextTurnCounter: nextCounterVal };
-      setLogText(`Tap red target 🎯 to attack or tap [End Turn ⏭️]!`);
+      setLogText(((typeof t === "function") ? t("battle.tap_target", "Toque no alvo vermelho 🎯 para atacar ou em [Encerrar Turno ⏭️]!") : "Toque no alvo vermelho 🎯 para atacar ou em [Encerrar Turno ⏭️]!"));
       return;
     }
 

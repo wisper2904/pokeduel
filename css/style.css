@@ -596,3 +596,7 @@
   max-height: 28px;
   overflow-y: auto;
 }
+
+/* Ferramentas de desenvolvedor: escondidas para jogadores. Ativar no console: localStorage.setItem("pdr_dev_mode","1") */
+.pdr-dev-only { display: none !important; }
+body.pdr-dev-mode .pdr-dev-only { display: block !important; }

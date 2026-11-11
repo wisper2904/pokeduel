@@ -1638,6 +1638,21 @@ triggerPlayerAIMove = function() {
 // ============================================================================
 const _v580ShowWinResultScreen = showWinResultScreen;
 showWinResultScreen = function(winner) {
+  // v5.9.1: Tutorial, Treino e Quest usam a tela própria (sem ELO, sem caixa da Liga)
+  if ((state.matchKind === "tutorial" || state.matchKind === "training" || state.matchKind === "quest") &&
+      typeof window.__pdrSpecialResultScreen === "function") {
+    state.forfeitBy = null;
+    const sr = window.__pdrSpecialResultScreen(winner);
+    try {
+      const promoEl = document.getElementById("win-promo-val");
+      const pr = window.trainerProfileData;
+      if (promoEl && pr && typeof pr.rankRating === "number") {
+        const nextTier = [1500, 1900, 2300, 2700].find(v => v > pr.rankRating);
+        promoEl.textContent = nextTier ? `${nextTier - pr.rankRating} ${typeof t === "function" ? t("result.pts", "pts") : "pts"}` : (typeof t === "function" ? t("result.max_league", "Liga máxima") : "Liga máxima");
+      }
+    } catch (e) {}
+    return sr;
+  }
   if (state.matchKind === "league" || state.mode === "ai") {
     adaptiveAIBrain.matchesAnalyzed = (adaptiveAIBrain.matchesAnalyzed || 0) + 1;
     const tele = state.currentMatchTelemetry || {};
@@ -1699,7 +1714,51 @@ showWinResultScreen = function(winner) {
 
     saveAdaptiveAIBrain();
   }
-  return _v580ShowWinResultScreen(winner);
+  // v5.9.1: quem desiste não ganha moedas, gemas nem fragmentos de chave (antes ganhava o prêmio de consolação)
+  const selfForfeit = state.forfeitBy && state.forfeitBy === getBottomRole() && state.mode !== "pass";
+  const before = selfForfeit ? {
+    coins: typeof userCoins !== "undefined" ? userCoins : null,
+    keys: typeof playerKeyFragments !== "undefined" ? playerKeyFragments : null,
+    gems: state.rareMetals
+  } : null;
+  const ret = _v580ShowWinResultScreen(winner);
+  if (selfForfeit && before) {
+    try {
+      if (before.coins !== null) userCoins = before.coins;
+      if (before.keys !== null) {
+        playerKeyFragments = before.keys;
+        const kLbl = document.getElementById("key-frag-lbl");
+        if (kLbl) kLbl.textContent = playerKeyFragments;
+      }
+      state.rareMetals = before.gems;
+      const tr = (k, f) => (typeof t === "function" ? t(k, f) : f);
+      const kv = document.getElementById("win-keys-val");
+      if (kv) kv.textContent = "+0 🔑";
+      const gv = document.getElementById("win-gems-val");
+      if (gv) gv.textContent = tr("result.forfeit_no_reward", "Nenhuma (desistência)");
+      if (typeof saveEconomyAndUpgrades === "function") saveEconomyAndUpgrades();
+      if (typeof syncAllCurrencyLabels === "function") syncAllCurrencyLabels();
+    } catch (e) {}
+  }
+  state.forfeitBy = null;
+  // Quantos pontos faltam para a próxima liga (antes mostrava um 1215 fixo)
+  try {
+    const promoEl = document.getElementById("win-promo-val");
+    const pr = window.trainerProfileData;
+    if (promoEl && pr && typeof pr.rankRating === "number") {
+      const nextTier = [1500, 1900, 2300, 2700].find(v => v > pr.rankRating);
+      const trp = (k, f) => (typeof t === "function" ? t(k, f) : f);
+      promoEl.textContent = nextTier ? `${nextTier - pr.rankRating} ${trp("result.pts", "pts")}` : trp("result.max_league", "Liga máxima");
+    }
+    const rDel = document.getElementById("win-rating-delta");
+    if (rDel && /^\+0(\s|$)/.test(rDel.textContent.trim())) { rDel.textContent = "±0"; rDel.style.color = "#94a3b8"; }
+    const titleEl = document.getElementById("win-result-title");
+    if (titleEl && typeof t === "function") {
+      const didWinNow = winner === getBottomRole();
+      titleEl.textContent = didWinNow ? t("result.win", "VITÓRIA") : t("result.lose", "DERROTA");
+    }
+  } catch (e) {}
+  return ret;
 };
 
 // Clean up tutorial state on navigation or forfeit

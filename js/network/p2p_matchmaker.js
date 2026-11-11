@@ -445,6 +445,7 @@ function triggerVoluntaryForfeit() {
   const forfeiter = getBottomRole();
   const winner = forfeiter === "p1" ? "p2" : "p1";
   playSfx("hit");
+  state.forfeitBy = forfeiter; // usado para não dar moedas/fragmentos a quem desistiu
   if (state.mode === "p2p") {
     sendP2PPacket({ type: "P2P_FORFEIT", loser: forfeiter, winner });
   }
@@ -1444,18 +1445,18 @@ showWinResultScreen = function(winner) {
     const boxDescEl  = document.getElementById("win-box-desc");
     const boxBtnEl   = document.getElementById("win-open-box-btn");
     if (boxBadgeEl) {
-      boxBadgeEl.textContent = "🏛️ PRÓXIMA FASE: TOUR GUIADO DO HUB!";
+      boxBadgeEl.textContent = "🎉 TUTORIAL CONCLUÍDO!";
       boxBadgeEl.style.color = "#fde047";
     }
     if (boxDescEl) {
-      boxDescEl.textContent = "Excelente! Você dominou o tabuleiro, salto de 2 MP, Plates, Data Disk de 96 fatias e Surround KO. Agora vamos conhecer o Hub!";
+      boxDescEl.textContent = "Você aprendeu a entrar em campo, saltar, usar Plates, girar a roleta, cercar e conquistar o Goal. Agora crie sua conta para salvar seu progresso!";
     }
     if (boxBtnEl) {
       boxBtnEl.style.display = "block";
-      boxBtnEl.textContent = "🏛️ INICIAR TOUR DO HUB (5 ETAPAS) ➔";
+      boxBtnEl.textContent = "👤 CRIAR MINHA CONTA ➔";
       boxBtnEl.onclick = function() {
         closeWinResultOverlay();
-        startGuidedHubTour();
+        finishTutorialAndShowWelcome();
       };
     }
     if (ov) ov.style.display = "flex";
@@ -1588,11 +1589,14 @@ showWinResultScreen = function(winner) {
   if (boxBtnEl) boxBtnEl.onclick = openVictoryBoxFromWinScreen;
   _v500ShowWinResultScreen(winner);
 };
+// Guarda esta versão: o ui.js substitui showWinResultScreen por completo depois, e sem isto
+// o tratamento de Tutorial/Treino/Quest abaixo nunca rodava (ganhava ELO e recompensa no tutorial).
+window.__pdrSpecialResultScreen = showWinResultScreen;
 
 
 // --- 17.4: INTERACTIVE NEW-ACCOUNT TUTORIAL (6-STEP PRESENTATION MATCH + 5-STEP HUB TOUR, v5.2.1 FIXED) ---
 const TUTORIAL_COMPLETED_KEY = "pdr_tutorial_v510_completed";
-try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+// (v686+) Não marca mais como concluído em toda abertura: quem nunca jogou cai direto no tutorial.
 let currentTutorialStep = 0;
 let currentHubTourStep  = 0;
 let tutorialStepBusy    = false;

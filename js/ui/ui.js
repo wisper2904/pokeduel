@@ -5444,7 +5444,8 @@ showWinResultScreen = function(winner) {
 };
 
 syncIndividualProfileUI();
-if (!window.trainerProfileData || (!window.trainerProfileData.isSetupDone && !window.trainerProfileData.nickname)) {
+if ((function(){ try { return localStorage.getItem(TUTORIAL_COMPLETED_KEY) === "1"; } catch (e) { return true; } })() &&
+    (!window.trainerProfileData || (!window.trainerProfileData.isSetupDone && !window.trainerProfileData.nickname))) {
   setTimeout(() => {
     const wm = document.getElementById("welcome-profile-modal");
     if (wm) wm.style.display = "flex";
@@ -5926,11 +5927,11 @@ function ensureV510ModalsInjected() {
   </div>
 
   <!-- 3. INTERACTIVE BOARD TUTORIAL COACH HUD (PHASE 1: 6-STEP PRESENTATION MATCH) -->
-  <div id="tutorial-coach-hud" style="display:none !important; position:fixed; top:44px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:260; background:linear-gradient(180deg,rgba(15,35,71,0.97) 0%,rgba(6,16,36,0.98) 100%); border:2px solid #facc15; border-radius:11px; padding:9px 11px; color:#f8fafc; box-shadow:0 8px 26px rgba(0,0,0,0.92);">
+  <div id="tutorial-coach-hud" style="display:none; position:fixed; top:44px; left:50%; transform:translateX(-50%); width:95%; max-width:410px; z-index:260; background:linear-gradient(180deg,rgba(15,35,71,0.97) 0%,rgba(6,16,36,0.98) 100%); border:2px solid #facc15; border-radius:11px; padding:9px 11px; color:#f8fafc; box-shadow:0 8px 26px rgba(0,0,0,0.92);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
       <span id="tut-step-badge" style="background:#facc15; color:#090d16; font-size:9px; font-weight:900; padding:2px 6px; border-radius:4px;">🎓 TUTORIAL · PASSO 1/6</span>
       <div style="display:flex; gap:5px;">
-        <button onclick="startGuidedHubTour()" style="background:#0284c7; border:1px solid #7dd3fc; color:#fff; font-size:8.5px; font-weight:800; padding:2px 6px; border-radius:4px; cursor:pointer;">⏭️ Ir ao Tour do Hub</button>
+        <button onclick="exitInteractiveTutorial()" style="background:#0284c7; border:1px solid #7dd3fc; color:#fff; font-size:8.5px; font-weight:800; padding:2px 6px; border-radius:4px; cursor:pointer;">⏭️ Pular Tutorial</button>
         <button onclick="exitInteractiveTutorial()" style="background:#334155; border:1px solid #94a3b8; color:#fff; font-size:8.5px; font-weight:800; padding:2px 6px; border-radius:4px; cursor:pointer;">✕ Sair</button>
       </div>
     </div>
@@ -8448,7 +8449,7 @@ function openCloudAccountModal() {
         <div style="display:flex; flex-direction:column; gap:7px; margin-bottom:9px;">
           <div>
             <label style="font-size:8.5px; color:#7dd3fc; font-weight:800;">👤 Seu Login / Usuário:</label>
-            <input id="modal-cloud-user" type="text" maxlength="24" placeholder="Ex: wisper2904" oninput="syncCloudInputs('modal-cloud-user','modal-cloud-pass')" style="width:100%; margin-top:3px; padding:7px 9px; border-radius:6px; background:#040812; border:1.5px solid #38bdf8; color:#fff; font-size:11px; font-weight:900;">
+            <input id="modal-cloud-user" type="text" maxlength="24" placeholder="Ex: treinador123" oninput="syncCloudInputs('modal-cloud-user','modal-cloud-pass')" style="width:100%; margin-top:3px; padding:7px 9px; border-radius:6px; background:#040812; border:1.5px solid #38bdf8; color:#fff; font-size:11px; font-weight:900;">
           </div>
           <div>
             <label style="font-size:8.5px; color:#7dd3fc; font-weight:800;">🔑 Sua Senha:</label>
@@ -8771,7 +8772,7 @@ async function handleWelcomeAuthSubmit() {
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:6px;">
       <div>
         <label style="font-size:8px; color:#7dd3fc; font-weight:800;">👤 Login (Usuário):</label>
-        <input id="cloud-login-user" type="text" maxlength="24" placeholder="Ex: wisper2904" oninput="syncCloudInputs('cloud-login-user','cloud-login-pass')" style="width:100%; margin-top:2px; padding:5px 7px; border-radius:5px; background:#040812; border:1px solid #38bdf8; color:#fff; font-size:9.5px; font-weight:900;">
+        <input id="cloud-login-user" type="text" maxlength="24" placeholder="Ex: treinador123" oninput="syncCloudInputs('cloud-login-user','cloud-login-pass')" style="width:100%; margin-top:2px; padding:5px 7px; border-radius:5px; background:#040812; border:1px solid #38bdf8; color:#fff; font-size:9.5px; font-weight:900;">
       </div>
       <div>
         <label style="font-size:8px; color:#7dd3fc; font-weight:800;">🔑 Senha:</label>
@@ -8789,8 +8790,8 @@ async function handleWelcomeAuthSubmit() {
 
     <div id="cross-save-status-msg" style="font-size:8.5px; font-weight:800; color:#bae6fd; margin:4px 0 6px; min-height:13px; line-height:1.35;"></div>
 
-    <!-- 1-CLICK GITHUB PAGES MONOLITHIC PUBLISHER -->
-    <details style="background:#050c1a; border:1px solid #38bdf8; border-radius:7px; padding:6px 8px; margin-bottom:6px;">
+    <!-- 1-CLICK GITHUB PAGES MONOLITHIC PUBLISHER (só aparece no modo desenvolvedor: localStorage pdr_dev_mode = "1") -->
+    <details class="pdr-dev-only" style="background:#050c1a; border:1px solid #38bdf8; border-radius:7px; padding:6px 8px; margin-bottom:6px;">
       <summary style="cursor:pointer; font-size:9.5px; font-weight:900; color:#fde047;">
         🚀 Publicar / Atualizar Site no GitHub Pages (1 Toque · Monolítico Seguro)
       </summary>
@@ -9776,9 +9777,15 @@ async function triggerInAppUpdateAction() {
   }, 450);
 }
 
-// Auto-show changelog once on home screen
+// Primeira abertura: vai direto para o tutorial interativo (sem mostrar as Notas de Atualização).
+// Depois do tutorial, a tela de boas-vindas pede para criar usuário e senha.
 try {
-  if (localStorage.getItem("pdr_viewed_changelog_v561") !== "true") {
+  if (localStorage.getItem(TUTORIAL_COMPLETED_KEY) !== "1") {
+    localStorage.setItem("pdr_viewed_changelog_v561", "true");
+    setTimeout(() => {
+      try { startInteractiveTutorialMatch(); } catch (e) { console.warn("[Tutorial] falhou ao iniciar:", e); finishTutorialAndShowWelcome(); }
+    }, 900);
+  } else if (localStorage.getItem("pdr_viewed_changelog_v561") !== "true") {
     setTimeout(() => {
       openChangelogModal();
     }, 700);
@@ -10093,14 +10100,79 @@ function setupTutorialStepBoardHighlights() {
 }
 
 function startInteractiveTutorialMatch() {
-  hideTutorialCoachHud();
+  // Restaurado (removido no commit 59ad93c): partida de apresentação em 6 aulas para quem nunca jogou
+  ensureV510ModalsInjected();
   const tourHud = document.getElementById("tutorial-hub-tour-hud");
   if (tourHud) tourHud.style.display = "none";
+  const cl = document.getElementById("changelog-modal");
+  if (cl) cl.style.display = "none";
+
+  // Decks fixos da apresentação
+  state.deckP1 = [1, 2, 3, 4, 6, 0];
+  state.deckP2 = [5, 6, 7, 0, 2, 8];
+
+  // Modo dedicado: a IA nunca joga sozinha no tutorial
+  setGameMode("ai");
+  demoFullMatchState();
+  state.matchKind = "tutorial";
+  state.mode = "tutorial";
+  state.preMatchAnim = null;
+  state.winCelebrationAnim = null;
+  state.isMatchActive = true;
+  state.matchFinished = false;
+  closeDrawer();
+  playSfx("portal");
+
+  state.turn = "p1";
+  state.turnCounter = 299;
+
+  const p1Units = state.units.filter(u => u.owner === "p1");
+  const p2Units = state.units.filter(u => u.owner === "p2");
+  const pikachu      = p1Units.find(u => u.baseId === "pikachu")   || p1Units[0];
+  const bulbasaur    = p1Units.find(u => u.baseId === "bulbasaur" && u !== pikachu) || p1Units[1];
+  const charizard    = p1Units.find(u => u.baseId === "charizard" && u !== pikachu && u !== bulbasaur) || p1Units[2];
+  const charmanderP2 = p2Units.find(u => u.baseId === "charmander") || p2Units[0];
+  const squirtleP2   = p2Units.find(u => u.baseId === "squirtle" && u !== charmanderP2) || p2Units[1];
+
+  if (pikachu)      { pikachu.name = "Pikachu"; pikachu.mp = 3; pikachu.baseId = "pikachu"; pikachu.spriteKey = "pikachu"; }
+  if (bulbasaur)    { bulbasaur.name = "Bulbasaur"; bulbasaur.baseId = "bulbasaur"; bulbasaur.spriteKey = "bulbasaur"; }
+  if (charizard)    { charizard.name = "Charizard"; charizard.baseId = "charizard"; charizard.spriteKey = "charizard"; }
+  if (charmanderP2) { charmanderP2.name = "Charmander"; charmanderP2.baseId = "charmander"; charmanderP2.spriteKey = "charmander"; }
+  if (squirtleP2)   { squirtleP2.name = "Squirtle"; squirtleP2.baseId = "squirtle"; squirtleP2.spriteKey = "squirtle_p2"; }
+
+  state.tutorialUnits = { pikachu, bulbasaur, charizard, charmanderP2, squirtleP2 };
+  tutorialStepBusy = false;
+  currentTutorialStep = 1;
+  setupTutorialStepBoardHighlights();
+  setLogText("🎓 AULA 1/6 — Toque no Nó 7 (ou no botão verde) para entrar em campo!");
+}
+
+// Se o jogador tocar em "Próximo" no fim do tutorial (em vez de "Criar minha conta"), também abre as boas-vindas
+const _v687CloseWinResultOverlay = closeWinResultOverlay;
+closeWinResultOverlay = function() {
+  const wasTutorial = state.matchKind === "tutorial";
+  _v687CloseWinResultOverlay();
+  if (wasTutorial) finishTutorialAndShowWelcome();
+};
+
+// Fim do tutorial (concluído ou pulado): marca como feito e pede para criar a conta
+function finishTutorialAndShowWelcome() {
   try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+  hideTutorialCoachHud();
   state.matchKind = "league";
   state.mode = "ai";
   openDrawer("hub");
   switchDrawerTab("hub");
+  // Perfil novo já nasce com isSetupDone = true, então o critério é ter (ou não) uma conta salva
+  const hasAccount = typeof getSavedCloudSession === "function" && !!getSavedCloudSession();
+  if (!hasAccount) {
+    setTimeout(() => {
+      const wm = document.getElementById("welcome-profile-modal");
+      if (wm) wm.style.display = "flex";
+      const inp = document.getElementById("welcome-nick-inp");
+      if (inp) inp.focus();
+    }, 300);
+  }
 }
 
 function executeCurrentTutorialStepAction() {
@@ -10248,10 +10320,9 @@ function exitInteractiveTutorial() {
   hideTutorialCoachHud();
   const tourHud = document.getElementById("tutorial-hub-tour-hud");
   if (tourHud) tourHud.style.display = "none";
-  state.matchKind = "league";
-  state.mode = "ai";
-  openDrawer("hub");
-  switchDrawerTab("hub");
+  state.isMatchActive = false;
+  state.matchFinished = true;
+  finishTutorialAndShowWelcome();
 }
 
 // PHASE 2: 5-STEP GUIDED HUB TOUR

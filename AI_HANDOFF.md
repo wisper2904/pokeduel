@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v686` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v687` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -133,6 +133,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 - Mudanças de regra de combate ou movimento precisam ser **determinísticas** (usar `nextDeterministicRandom`, nunca `Math.random`) senão o P2P dessincroniza.
 - Pacotes P2P (`sendP2PPacket`) passam por `seenP2PPacketIds` (deduplicação). Tipo de pacote novo precisa ser tratado em `handleP2PPacket` nos dois lados.
 - `ui.js` é enorme: preferir `grep -n` + edição cirúrgica a reescrever blocos.
+- **`showWinResultScreen` tem 7 camadas** e a do `ui.js` linha ~3491 **substitui** tudo que veio antes (não chama a anterior). Por isso o tratamento de Tutorial/Treino/Quest do `p2p_matchmaker.js` nunca rodava. Desde v687 essa versão fica em `window.__pdrSpecialResultScreen` e a camada de fora (`ai.js`) desvia para ela quando `matchKind` é `tutorial`, `training` ou `quest`. A conta do "Para a próxima liga" e o título VITÓRIA/DERROTA também são feitos no `ai.js`, porque o código equivalente no `board.js` é código morto.
 - Atualização automática (desde v686): o app checa o `sw.js` ao abrir, ao voltar para a tela, no `focus` e no `online` (no máx. 1×/30 s) e mostra o aviso "Nova versão disponível · Recarregar". **Ou seja: se esquecer de subir o `CACHE_NAME`, ninguém recebe a atualização.**
 - `.md` não entra em `CORE_ASSETS`. Editar só este arquivo **não** exige bump de `CACHE_NAME`.
 
@@ -140,15 +141,30 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.0 · cache v686). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v687). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
+- [ ] `startTrainingCenterMatch` define `matchKind = "training"`, mas `startVideoAuthenticMatch`/`demoFullMatchState` volta para `"league"`: o Treino ainda conta ELO e dá recompensa.
+- [ ] Bot da "Jogar com Bot" e Treino não mudam o ELO na desistência (aparece ±0) — conferir se é intencional.
+- [ ] Tour guiado do Hub (5 etapas) continua desligado (`startGuidedHubTour` só abre o hub).
 - [ ] Não há testes automatizados de regra (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · Primeira abertura, desistência e traduções (v687)
+- **O que:**
+  - **Tutorial interativo restaurado** (tinha sido removido no commit `59ad93c`): `ui.js` `startInteractiveTutorialMatch` volta a montar a partida de 6 aulas; `p2p_matchmaker.js` não marca mais `pdr_tutorial_v510_completed` em toda abertura. Na **primeira abertura** (sem essa chave) o jogo pula as Notas e entra direto no tutorial. Novo `finishTutorialAndShowWelcome()`: ao terminar (botão "Criar minha conta", "Próximo" ou "Pular Tutorial") marca o tutorial como feito e, se não houver conta salva (`getSavedCloudSession`), abre o `welcome-profile-modal` (usuário + senha, texto "Bem-vindo, Treinador!"). Botão do HUD "Ir ao Tour do Hub" virou "Pular Tutorial".
+  - **Desistir**: `board.js` `requestForfeitConfirm()` com modal "Desistir da partida?" antes de `triggerVoluntaryForfeit`. `p2p_matchmaker.js` grava `state.forfeitBy`; `ai.js` (camada de fora do `showWinResultScreen`) desfaz moedas, gemas e fragmentos de quem desistiu e mostra "Recompensas: Nenhuma (desistência)".
+  - **Tabuleiro**: VITÓRIA/DERROTA (vermelho) no lugar do "WIN" fixo; no pass-and-play mostra "P1/P2 VITÓRIA". Botão "AI" (vinha desenhado na imagem da arena, sem função) mascarado no canvas.
+  - **Traduções** (`i18n.js`, pt/en/es): Encerrar Turno, 1º TURNO, Sua vez / Vez do oponente, INÍCIO, dica "Toque no alvo vermelho…", textos do modal de desistência, tela de resultado inteira (RESULTADO, Classificação, Fragmentos de chave, Recompensas, Para a próxima liga, Próximo) via `data-i18n` nos dois HTMLs. "+0 ↑" virou "±0". "League promotion in 1215" (número fixo) agora calcula os pontos até a próxima liga.
+  - **Config**: o publicador "GitHub Pages (1 Toque · Monolítico)" ficou escondido (`.pdr-dev-only`). Para ver: `localStorage.setItem("pdr_dev_mode","1")` e recarregar. Placeholders "Ex: wisper2904" trocados por "Ex: treinador123".
+- **Por quê:** teste de UX com jogador novo (Gabriel pediu os itens).
+- **CACHE_NAME:** v686 → v687
+- **Verificação:** Playwright, perfil limpo, 390×844: abre direto na Aula 1 → 6 aulas → "Partida concluída" sem ELO/recompensa → "Criar minha conta" → modal de boas-vindas → conta criada → recarregar abre o hub sem tutorial. Partida vs bot: modal de desistência (Continuar fecha; Desistir encerra), tabuleiro mostra DERROTA, moedas 15.000 → 15.000 e fragmentos 0 → 0. `node --check` OK, HTMLs idênticos.
+- **Pendências / avisos para o outro agente:** ver itens novos em §6 (Treino volta para "league"; Tour do Hub desligado).
 
 ### 2026-11-11 · Claude · Repositório wisper2904.github.io (APK sem barra de endereço)
 - **O que:** criado o conteúdo do repo `wisper2904/wisper2904.github.io` (repo vazio criado pelo Gabriel): `/.well-known/assetlinks.json` (pacote `io.github.wisper2904.pokeduel`, SHA-256 da chave do PWABuilder `03:72:F0:96:…:05:A4`), `.nojekyll` e `index.html` redirecionando para `/pokeduel/`.

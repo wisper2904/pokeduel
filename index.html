@@ -80,17 +80,17 @@
 <!-- AUTHENTIC `RESULT: WIN` POST-MATCH SCREEN (`04:41`–`04:46` IN VIDEO!) -->
 <div id="win-result-overlay" style="display:none; position:fixed; inset:0; background:radial-gradient(circle at 50% 25%,#141821 0%,#07090e 75%,#020305 100%); z-index:98; flex-direction:column; align-items:center; justify-content:space-between; padding:24px 16px;">
   <div style="text-align:center; margin-top:10px;">
-    <div style="font-size:12px; font-weight:900; color:#cbd5e1; letter-spacing:1.5px;">RESULT</div>
-    <div id="win-result-title" style="font-size:38px; font-weight:900; color:#facc15; text-shadow:0 0 18px rgba(250,204,21,0.65); letter-spacing:2px;">WIN</div>
+    <div style="font-size:12px; font-weight:900; color:#cbd5e1; letter-spacing:1.5px;" data-i18n="result.result">RESULTADO</div>
+    <div id="win-result-title" style="font-size:38px; font-weight:900; color:#facc15; text-shadow:0 0 18px rgba(250,204,21,0.65); letter-spacing:2px;">VITÓRIA</div>
   </div>
 
   <div style="width:100%; max-width:340px; display:flex; flex-direction:column; gap:12px;">
     <div style="background:#0b0e14; border:1.5px solid #334155; border-radius:6px; padding:12px 16px; text-align:center; box-shadow:inset 0 1px 4px rgba(0,0,0,0.8);">
       <div style="font-size:13px; font-weight:800; color:#f8fafc; margin-bottom:4px;">
-        Rating: <span style="color:#facc15;" id="win-rating-val">85</span> <span style="color:#38bdf8;" id="win-rating-delta">+15 ↑</span>
+        <span data-i18n="result.rating">Classificação:</span> <span style="color:#facc15;" id="win-rating-val">85</span> <span style="color:#38bdf8;" id="win-rating-delta">+15 ↑</span>
       </div>
       <div style="font-size:12.5px; font-weight:800; color:#e2e8f0;">
-        Key Fragment: <span style="color:#fde047;" id="win-keys-val">+3 🔑</span> · Gems: <span style="color:#38bdf8;" id="win-gems-val">+50 🔻</span>
+        <span data-i18n="result.keys">Fragmentos de chave:</span> <span style="color:#fde047;" id="win-keys-val">+3 🔑</span> · <span data-i18n="result.rewards">Recompensas:</span> <span style="color:#38bdf8;" id="win-gems-val">+50 🔻</span>
       </div>
     </div>
 
@@ -105,13 +105,13 @@
     <div style="background:#0b0e14; border:1.5px solid #334155; border-radius:6px; padding:10px 14px; display:flex; align-items:center; gap:12px;">
       <div style="width:46px; height:36px; border-radius:4px; background:linear-gradient(180deg,#38bdf8 0%,#bae6fd 55%,#d97706 100%); border:1px solid #fff; flex-shrink:0;"></div>
       <div style="font-size:12px; font-weight:800; color:#f8fafc;">
-        League promotion in <span style="color:#facc15;" id="win-promo-val">1215</span>
+        <span data-i18n="result.promo">Para a próxima liga:</span> <span style="color:#facc15;" id="win-promo-val">—</span>
       </div>
     </div>
   </div>
 
-  <button onclick="closeWinResultOverlay()" style="width:126px; height:40px; border-radius:6px; background:linear-gradient(180deg,#fef08a 0%,#facc15 45%,#ca8a04 100%); border:2px solid #ffffff; color:#090d16; font-size:14px; font-weight:900; cursor:pointer; margin-bottom:16px; box-shadow:0 4px 14px rgba(0,0,0,0.8);">
-    Next
+  <button onclick="closeWinResultOverlay()" style="width:126px; height:40px; border-radius:6px; background:linear-gradient(180deg,#fef08a 0%,#facc15 45%,#ca8a04 100%); border:2px solid #ffffff; color:#090d16; font-size:14px; font-weight:900; cursor:pointer; margin-bottom:16px; box-shadow:0 4px 14px rgba(0,0,0,0.8);" data-i18n="result.next">
+    Próximo
   </button>
 </div>
 
@@ -681,14 +681,14 @@
   <!-- MODAL DE BOAS-VINDAS / IDENTIFICAÇÃO DO TREINADOR (1ª VEZ OU APÓS RESET) -->
   <div id="welcome-profile-modal" style="display:none; position:fixed; inset:0; z-index:285; background:rgba(2,6,23,0.96); align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px);">
     <div style="width:100%; max-width:345px; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #facc15; border-radius:14px; padding:16px; text-align:center; color:#f8fafc; box-shadow:0 0 45px rgba(250,204,21,0.38);">
-      <div style="font-size:15px; font-weight:900; color:#fde047; margin-bottom:4px;">👤 ENTRAR OU CRIAR TREINADOR</div>
+      <div style="font-size:15px; font-weight:900; color:#fde047; margin-bottom:4px;">🎉 BEM-VINDO, TREINADOR!</div>
       <div style="font-size:10px; color:#cbd5e1; margin-bottom:12px; line-height:1.4;">
-        Digite seu nome de usuário. Se o nome já existir, é obrigatório digitar a senha correspondente ou escolher outro nome.
+        Crie seu usuário e senha para salvar seu progresso e jogar em outros aparelhos. Já tem conta? Digite o mesmo usuário e a sua senha.
       </div>
 
       <div style="text-align:left; margin-bottom:9px;">
         <label style="font-size:9.5px; font-weight:800; color:#7dd3fc;">Nome de Usuário / Apelido:</label>
-        <input id="welcome-nick-inp" type="text" maxlength="20" placeholder="Ex: wisper" oninput="onWelcomeUserInput(this.value)" style="width:100%; margin-top:3px; padding:8px 10px; border-radius:7px; border:1.5px solid #38bdf8; background:#050912; color:#ffffff; font-size:12px; font-weight:900;">
+        <input id="welcome-nick-inp" type="text" maxlength="20" placeholder="Ex: treinador123" oninput="onWelcomeUserInput(this.value)" style="width:100%; margin-top:3px; padding:8px 10px; border-radius:7px; border:1.5px solid #38bdf8; background:#050912; color:#ffffff; font-size:12px; font-weight:900;">
         <div id="welcome-user-status" style="font-size:8.5px; font-weight:800; color:#93c5fd; min-height:13px; margin-top:3px;"></div>
       </div>
 
