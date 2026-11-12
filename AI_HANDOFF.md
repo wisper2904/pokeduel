@@ -34,11 +34,11 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v699` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v700` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
-| Figuras no `FIGURES_DB` | 272 (30 meta + expansão `NEW_200_FIGURES_DATA`), 25 UX |
+| Figuras no `FIGURES_DB` | **600** (272 originais + 328 oficiais do Pokémon Duel, índices 272–599, id `duel<Nº>`) |
 | Deploy | GitHub Pages via Actions, branch `main`, raiz `/` |
 
 ---
@@ -141,19 +141,26 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v699). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v700). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
 - [ ] **Dois deploys por push**: rodam o workflow `Deploy PokeDuel to GitHub Pages` (`.github/workflows/deploy-pages.yml`) e o automático `pages build and deployment`. Eles competem e às vezes um falha (76f3f3a: falha no passo Deploy; e8fc86d: startup_failure), o que gera e-mail de erro. Resolver em Settings → Pages → Source: escolher **GitHub Actions** (aí o automático para) — ou, se ficar "Deploy from a branch", apagar o workflow.
 - [ ] 42 figuras do `FIGURES_DB` sem arte nem roleta oficial porque nunca existiram no Pokémon Duel (Kabutops, Starmie, Staryu, Lopunny, Ditto, Jirachi, Togekiss, Porygon…): mantêm sprite e roleta antigos. Lapras, Popplio, Poliwrath e Tentacruel têm arte oficial, mas a roleta da Bulbapedia está incompleta (não soma 96) → roleta antiga mantida. Pré-existente: 6 roletas que não somam 96 (Lapras, Kabutops, Mega Starmie, Mega Lopunny, Palkia/Dialga Origin).
 - [ ] Efeito roxo `none` (40 fatias): efeitos especiais do jogo original ainda não implementados (marcadores, MP −2, mover a si mesmo etc.) — vencem o duelo sem nocautear. Texto original em `effectText`.
-- [ ] 422 das 652 imagens oficiais em `assets/figures_duel/` não têm figura correspondente no `FIGURES_DB` (seriam figuras novas: precisam de entrada nova no FINAL do `FIGURES_DB`).
+- [ ] 42 figuras oficiais da Library ficaram de fora: 27 sem imagem correspondente na categoria e 15 com roleta incompleta na Bulbapedia. Figuras novas não têm habilidade implementada (só `officialAbilityText`) nem cadeia de evolução/Mega ligada.
 - [ ] Não há testes automatizados de regra (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Coleções novas: +328 figuras oficiais (v700)
+- **O que:** `js/data/official_disks.js` ganhou `OFFICIAL_DUEL_NEW_FIGURES` e `OFFICIAL_DUEL_NEW_SPRITES`: as figuras da Library do Pokémon Duel que não existiam no jogo entram no **final** do `FIGURES_DB` (índices 272–599). Cada uma: `id`/`spriteKey` = `duel<Nº oficial>`, nome oficial (repetido → sufixo "(NºN)"), raridade/tipo/MP/roleta oficiais, `canPassThrough` para Voador/Fantasma, cor pelo tipo (`WEEKLY_BUFF_TYPES`). Distribuição: 39 C, 114 UC, 67 R, 48 EX, 60 UX. Sprites com carregamento sob demanda (getter em `loadedFigImages`); o SW guarda em cache no primeiro uso.
+- Começam bloqueadas e entram nos sorteios de baú (`rollFiguresForBox` percorre o `FIGURES_DB` inteiro), na coleção do Deck (25 páginas) e nos bots.
+- **CACHE_NAME:** v699 → v700
+- **Verificação:** Playwright: FIGURES_DB = 600, ids únicos; abertura de baú com Bagon / Alolan Grimer / Bidoof; coleção "24 de 600"; partida bot × bot sem erro.
+- **Atenção:** a chance de cada figura antiga sair num baú caiu (pool 2,2× maior). Habilidades das novas não estão implementadas.
 
 ### 2026-11-12 · Claude · Arte oficial em todas as figuras do Duel + roletas restantes (v699)
 - **O que:** `js/data/official_disks.js` regerado:
