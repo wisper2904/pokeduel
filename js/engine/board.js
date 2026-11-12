@@ -1901,7 +1901,8 @@ function drawHDVectorBoardAndChrome() {
   const forfeitLbl = (typeof t === "function") ? t("battle.forfeit", "🏳️ Desistir") : "🏳️ Desistir";
   const platesWord = (typeof t === "function") ? t("battle.plates", "🎴 Cartas") : "🎴 Cartas";
   drawBotBtn(16, 497, 72, 26, forfeitLbl, false, false);
-  drawBotBtn(94, 497, 114, 26, `${platesWord} (${unUsedPlates})`, true, unUsedPlates > 0);
+  // v720: com a arena do original as plates ficam na carta do canto; o botão Cartas sai
+  if (!window.PDR_ARENA3D) drawBotBtn(94, 497, 114, 26, `${platesWord} (${unUsedPlates})`, true, unUsedPlates > 0);
 
   // Draw Z-Move 7.0 Button (x: 214, y: 497, w: 130, h: 26) - Strictly 1x Per Match!
   ctx.save();
@@ -2873,7 +2874,7 @@ canvas.addEventListener("pointerdown", e => {
     if (sx <= 90) {
       requestForfeitConfirm();
     } else if (sx >= 92 && sx <= 212) {
-      togglePlatesTray();
+      if (!window.PDR_ARENA3D) togglePlatesTray();
     } else if (sx >= 214 && sx <= 348) {
       toggleZMoveFromTray();
     }

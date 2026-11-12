@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v719` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v720` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -156,6 +156,9 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Botão "Cartas" removido da barra de baixo (v720)
+- `board.js`: com `window.PDR_ARENA3D` o botão "🎴 Cartas" não é desenhado e o toque nessa área não abre mais a bandeja. As plates abrem pela carta do canto (arena3d.js).
 
 ### 2026-11-12 · Claude · Arena refeita pelo layout das capturas do original (v719)
 - Gabriel mandou 6 capturas do Pokémon Duel e disse que a v718 ficou pior (mesa inclinada, P.C. e plates fora do lugar). `js/engine/arena3d.js` reescrito:
