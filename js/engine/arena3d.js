@@ -28,7 +28,7 @@
   const L = {
     topBench: [[136, 123], [191, 123], [251, 123], [162, 141], [221, 141], [278, 141]],
     botBench: [[60, 389], [123, 389], [189, 389], [91, 414], [157, 414], [225, 414]],
-    topPods: [[58, 146], [99, 146]], botPods: [[266, 397], [312, 397]]
+    topPods: [[62, 144], [94, 144]], botPods: [[272, 395], [305, 395]]
   };
   const setXY = (o, p) => { o.x = p[0]; o.y = p[1]; };
   P2_BENCH_COORDS.forEach((s, i) => setXY(s, L.topBench[i]));
@@ -214,7 +214,7 @@
   }
 
   // ------------------------------------------------------------------ P.C.: cúpulas verdes
-  const DW = 19.5, DH = 58;
+  const DW = 14.5, DH = 42; // v721: cúpulas menores
   function domePath(x, base) { ctx.beginPath(); ctx.moveTo(x - DW, base); ctx.lineTo(x - DW, base - DH + DW); ctx.ellipse(x, base - DH + DW, DW, DW * 1.05, 0, Math.PI, 0); ctx.lineTo(x + DW, base); ctx.ellipse(x, base, DW, DW * 0.32, 0, 0, Math.PI); ctx.closePath(); }
   function domeBack(p, T, k, filled) {
     const x = p.x, base = p.y + 4;
@@ -256,7 +256,7 @@
   }
   function drawPC(pods, queue, T, seed) {
     pods.forEach((p, i) => domeBack(p, T, i + seed, !!queue[i]));
-    queue.forEach((uid, i) => { const p = pods[i], u = state.units.find((x) => x.uid === uid); if (p && u && i < 2) drawAuthenticFigurine(u, p.x, p.y - 6, 0, 0.82, 0, p.x, p.y, state.selectedUnitId === u.uid); });
+    queue.forEach((uid, i) => { const p = pods[i], u = state.units.find((x) => x.uid === uid); if (p && u && i < 2) drawAuthenticFigurine(u, p.x, p.y - 4, 0, 0.62, 0, p.x, p.y, state.selectedUnitId === u.uid); });
     pods.forEach((p) => domeFront(p));
   }
 
