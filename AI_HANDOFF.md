@@ -151,11 +151,27 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 - [ ] 42 figuras oficiais da Library ficaram de fora: 27 sem imagem correspondente na categoria e 15 com roleta incompleta na Bulbapedia.
 - [ ] Habilidades oficiais: das 448 com texto, só ~110 têm alguma mecânica simulada (`fx` em `js/engine/abilities.js`); o resto é texto (efeitos com marcadores, condições, Ultra Space, troca de posição etc.). Fatias Brancas/Douradas com efeito: 170 de 476 simuladas (`OFFICIAL_DUEL_SLICE_FX`). 40 fatias roxas com efeito `none`.
 - [ ] Travessia seletiva ("atravessa suas peças e as do tipo X") não simulada; só travessia total.
+- [ ] **QA 2026-11-12 (Claude, relatório completo no chat):**
+  - Sprites trocadas em `assets/sprites/`: `oddish.webp`=Victini, `gloom.webp`=Serperior, `persian.webp`=Samurott, `machoke.webp`=Chandelure, `dodrio.webp`=Terrakion, `cubone.webp`=Virizion, `porygon.webp`=Kyurem.
+  - `PDRSound.play("tick")` em `arena3d.js:558` e `battle_scene.js:140-141` → 404 em `assets/sfx/tick.mp3` (não existe; usar `select`/`spin_tick`).
+  - `i18n_runtime.js:124` `/\bMiss\b/` casa dentro de "Missões" (o `\b` do JS não vê letra acentuada) → aba P2P mostra "🏨 Falhaões / Arenas / Mônaco". Vale para todas as regex `\b` dessa lista.
+  - PT: Thunder Shock e Thunderbolt viram os dois "Choque do Trovão" (Pikachu mostra 3 golpes iguais com dano 40/100/40); Crobat: Poison Fang e Noxious Fang viram os dois "Presa Venenosa".
+  - `#ds-z-modal` (Z-Move) não fecha no fim da partida: fica sobre a tela de vitória e na partida seguinte. Também abre junto com o prompt do Double Chance e com o `#ds-evo-modal` (modal em cima de modal).
+  - Mensagens de fim de partida em inglês no modo PT: "Opponent reached your Goal!", "Reached the Goal! WIN!".
+  - HUD: nome do rival cortado com `slice(0,13)` sem reticências ("N.O.V.A. [IA").
+  - Hub em paisagem (navegador) quebra: botão Jogar some e a aba Config fica cortada (o manifest só trava retrato no app instalado).
+  - Banner do tutorial cortado à direita; sair do tutorial abre o cadastro, mas ao recarregar o cadastro é pulado (fica "Treinador" sem conta).
+  - Sobre/Conta: "POKEDUEL v5.4.0", "Versão v6.1.0" e "306 Figuras/Pokémon" (o DB tem 629).
+  - Arte de aura cortada na borda da imagem: Entei, Ho-Oh e Shiny Ho-Oh.
 - [ ] Não há testes automatizados de regra no repositório (os testes de v701 rodaram fora, via Playwright/Node em /home/claude/ux) (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · QA geral (sem mudança de código)
+- Teste de estresse com Playwright: ~87 partidas contra a IA (61 com P1 aleatório e 26 com P1 heurístico, com deck de 6 figuras e plates sorteados a cada partida), ~800 figuras sorteadas, ~200 combates, ~66 plates usadas. **0 erros de JS** e 0 violações de estado (unidades duplicadas no mesmo nó, contagem diferente de 6, nó inválido).
+- Varredura das 629 sprites (carga, transparência, enquadramento) e dos dados das roletas (soma 96, cores, dano e ★): sem erro de dados. Bugs encontrados registrados em §6.
 
 ### 2026-11-12 · Claude · Ícones das abas de baixo limpos (v724)
 - Os `assets/ui/tab_*.png` (recortes de captura do original) traziam o fundo azul quadrado e pedaços do texto em inglês cortados embaixo. Versões limpas em `assets/ui/tabs/` (texto cortado, fundo transparente por preenchimento a partir da borda; engrenagem por saturação). `sprites.js HOME_V380_UI_ASSETS` aponta para elas. Originais mantidos.
