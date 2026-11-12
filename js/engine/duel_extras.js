@@ -45,7 +45,7 @@
       if (!o || o.owner !== u.owner || o === u) return false;
       if (tagBlockedFor(u, o)) return false;
       const hasCond = abHasStatus(o) && !permafrostKeeps(o);
-      const hasMark = MARKER_TAGGERS.includes(idOf(u)) && (o._cracked || o._lockOn || o._curse);
+      const hasMark = (MARKER_TAGGERS.includes(idOf(u)) && (o._cracked || o._lockOn || o._curse)) || (window.PDRSlice && PDRSlice.hasMarker(o));
       return hasCond || hasMark;
     });
   }
@@ -53,6 +53,7 @@
     const cured = stOf(o);
     o.condition = PokemonCondition.Normal;
     if (MARKER_TAGGERS.includes(idOf(u))) { o._cracked = false; o._lockOn = false; o._curse = false; }
+    if (window.PDRSlice) PDRSlice.clearMarkers(o);
     fx(o, "#4ade80"); snd("cured");
     log(`💚 ${u.name} fez Tag em ${o.name}${cured ? " e curou " + cured : ""}!`);
     if (!remote) send({ type: "P2P_TAG", tagger: u.uid, target: o.uid });

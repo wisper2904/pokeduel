@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v712` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v713` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -47,7 +47,7 @@
 
 | Agente | Desde | Tarefa | Arquivos tocados |
 |---|---|---|---|
-| — | — | nenhuma tarefa aberta | — |
+| Claude | 2026-11-12 | i18n completo PT/EN/ES (varredura de textos fixos) | `js/data/i18n.js` + módulos de UI/engine |
 
 ---
 
@@ -156,6 +156,18 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Fatias Roxas "sem efeito" + marcadores MP + Trick Room + Ultra Stack completo (v713)
+- **Novo `js/engine/slice_effects.js`** (depois de `duel_extras.js`; no `sw.js` e nos 2 HTMLs).
+  - Marcadores: `_mpMk` (MP −1, máx −2; aplicado depois do Trick Room em `getEffectiveUnitMp`, mínimo 0), `_finalSong` (KO 5 turnos depois), `_pumpkin` (outros atravessam), `_imprison` (aquela fatia vira Miss). `window.PDRSlice {mpMarker, clearMarkers, hasMarker}`.
+  - Tag agora remove marcadores (`duel_extras.js`: `tagTargets`/`doTag`). Sair do campo limpa tudo (wrapper de `endTurn`).
+  - Trick Room: `state.__sfx713.trick = {end, owner}` (turnCounter decresce); Dourado → Miss na roleta e na batalha; MP ≥3 → 1, ≤1 → 3. Ultra Stack (523): duração e dano de aura ×(X+1).
+  - King Spike (561) Dourado→Branco / Barbed Horns (537) Dourado→Miss para quem tem `_mpMk`.
+  - Z-Move: `battle.js` consulta `window.PDRSliceZExempt(defUnit)` antes do Z-Break (Azuis de Aço do dono de um Stakataka que ainda não batalhou).
+  - 37 fatias implementadas (106 ocorrências): Fly/Fly Away, Teleport/Rainbow Wing, Dig, Push Away, Overhead Toss, Flame Kinesis, Draining Wind, String Wrap, Glaciate/Icy Wind, Taunt, Energy Ball/Acid Spray, Baby-Doll Eyes, Leer, Imprison, Torment, Fake Sleep, Future Sight, Explosion, Cyclone Kick, Rock Wrecker, Swinging Throw, Fissure, Mind Blown, Belly Drum, Fairy/Dark Mist, Synthesis, Tailwind, Trick-or-Treat, Trick Room, Smack Down, Plate Gnawing, Nasty Plot, Sphere Trick (copia plates X do oponente), Mystery Scent, Dark Moon, Magic Coat.
+  - Casas escolhidas automaticamente e de forma determinística (perto do Goal adversário, nunca num Goal) → igual nos dois aparelhos no P2P. RNG semeado por turnCounter+uids.
+  - Tipos que vinham como ícone vazio no texto: Glaciate/Icy Wind = Aço, Fissure = Voador, Tailwind = Voador, Synthesis = Planta, Fairy/Dark Mist = Fada/Sombrio.
+- Testes: `/tmp/sfx713.py` (15 checagens), wheels 7.548 / 0 problemas, evo, 3 partidas bot × bot, lotes antigos sem erro.
 
 ### 2026-11-12 · Claude · Últimas habilidades + plates do original + Tag + Charge + bot usa habilidades (v712)
 - **Novo `js/engine/duel_extras.js`** (depois de `plates_extra.js`).

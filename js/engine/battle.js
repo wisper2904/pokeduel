@@ -739,14 +739,16 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       atkSpin.spinSteps[0].landedName = zMoveSlice.name;
     }
     // Z-Break mechanic: Z-Move breaks defender's Blue defense slices into Miss!
-    defSpin.segs.forEach(s => {
+    // (Ultra Stack: Azuis dos Pokémon de Aço do dono do Stakataka não quebram até a 1ª batalha dele)
+    const __zExempt = typeof window.PDRSliceZExempt === "function" && window.PDRSliceZExempt(defUnit);
+    if (!__zExempt) defSpin.segs.forEach(s => {
       if (s.color === "blue") {
         s.color = "red";
         s.name = "Miss (Z-Break)";
         s.dmg = 0;
       }
     });
-    if (defSpin.chosen.color === "blue") {
+    if (!__zExempt && defSpin.chosen.color === "blue") {
       defSpin.chosen = { name: "Miss (Z-Break)", color: "red", dmg: 0, stars: 0, size: defSpin.chosen.size };
     }
     playSfx("portal");
