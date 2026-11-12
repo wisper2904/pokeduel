@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v722` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v723` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -156,6 +156,9 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Caixa preta também no botão "Prêmio Diário" do Início (v723)
+- `shop_screen.js`: o atalho do Início (Prêmio Diário) usa `assets/ui/boosters/black.png` no lugar do 🎁.
 
 ### 2026-11-12 · Claude · Sprites do cofre e da recompensa diária (v722)
 - Início: o Locked Booster usa `assets/ui/boosters/locked.png` (sprite do Gabriel), com fita vermelha e contador de chaves em HTML (`.lk-ribbon`, `.lk-keys`, sempre visível) nos 2 HTMLs; `ui.js` não troca mais a imagem (`locked_booster_top` saiu do `initHomeV380Assets`).

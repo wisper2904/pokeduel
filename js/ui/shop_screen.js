@@ -262,7 +262,7 @@
     g.style.background = ready ? "linear-gradient(180deg,#22c55e,#15803d)" : "linear-gradient(180deg,#334155,#1e293b)";
     g.style.border = ready ? "1.5px solid #bbf7d0" : "1.5px solid #475569";
     g.style.animation = ready ? "shPulse 1.2s ease-in-out infinite" : "none";
-    g.innerHTML = `<span style="font-size:14px">🎁</span><div style="display:flex;flex-direction:column;line-height:1.1"><span style="font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 2px #000">${ready ? tt("sh.hub_ready", "PRÊMIO DIÁRIO!") : tt("sh.hub_daily", "PRÊMIO DIÁRIO")}</span><span style="font-size:7.5px;font-weight:800;color:${ready ? "#dcfce7" : "#94a3b8"}">${ready ? tt("sh.hub_tap", "Toque para resgatar") : hms(left)}</span></div>`;
+    g.innerHTML = `<img src="assets/ui/boosters/black.png" alt="" style="width:24px;height:auto;display:block;filter:drop-shadow(0 1px 2px #000)"><div style="display:flex;flex-direction:column;line-height:1.1"><span style="font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 2px #000">${ready ? tt("sh.hub_ready", "PRÊMIO DIÁRIO!") : tt("sh.hub_daily", "PRÊMIO DIÁRIO")}</span><span style="font-size:7.5px;font-weight:800;color:${ready ? "#dcfce7" : "#94a3b8"}">${ready ? tt("sh.hub_tap", "Toque para resgatar") : hms(left)}</span></div>`;
   }
 
   // relógios (recompensa diária e virada do mercado)
