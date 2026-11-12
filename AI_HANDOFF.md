@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v703` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v704` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v703). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v704). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,26 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Telas estilo original: Fusão/Data/Disk Expansion, Evolve?, Z-Move, animação de ataque (v704)
+- **Novo `js/ui/duel_screens.js`** (carrega depois de `app.js`):
+  - **Fusão:** a aba `#dtab-fusion` é refeita em runtime.
+    - Telas: grade de figuras (busca + filtro de raridade) → **Data** (roleta grande clicável, ID/Lv/CLv, tipo, habilidade, evoluções em pedestais, tabela Wheel Piece com o efeito de cada ataque, Z-Moves, botões de fundir) → **Disk Expansion / Damage Reallocation** (disco grande que gira até o ponteiro, Recommended / + / −, Confirm, Reset).
+    - Os elementos antigos (`fusion-target-select` etc.) continuam escondidos em `#ds-legacy` porque `applyFusionMaterial` lê eles.
+  - **Evolve?:** wrapper em `evolveUnitInMatch`.
+    - Substitui o modal antigo por roleta atual ↓ roleta nova (via `getActiveWheel` de uma cópia), raridade, MP, Stage/Mega, notas e Sim/Não.
+    - Espera o `#wheel-overlay` fechar antes de abrir.
+  - **Z-Move:** `toggleZMoveFromTray` abre um seletor (peça + Z-Move oficial, até 2 por figura).
+    - Fica salvo em `state.zMoveChoice {uid, idx}`. `getFigureZMove` usa os Z-Moves oficiais (o bot escolhe o mais forte).
+    - Só a peça escolhida converte a roleta (wrappers em `getActiveWheel` e `triggerCombat`).
+  - **Animação de ataque:** wrapper em `Juice.onImpact`.
+    - As duas figuras aparecem sobre as roletas; o vencedor investe ou dispara um projétil da cor do tipo; corte + recuo do perdedor; depois o burst antigo.
+    - `battle.js` soma `window.__pdrAtkAnimMs` ao `closeWaitMs`.
+- **Novo `js/data/official_extra.js`:** `OFFICIAL_DUEL_EXTRA[officialDuelId] = {z:[{n,c,d,s,e,t}], fx:{ataque: texto}}` (566 figuras, Bulbapedia).
+- **Hub:** badge "Buff da Semana" movido para baixo do botão Tutorial (coluna esquerda). Pedido do usuário.
+- **Arquivos:** os acima + `index.html`, `PokeDuel-Web-v5.6.0.html`, `js/engine/battle.js` (closeWaitMs), `sw.js`.
+- **Testes:** 7.548 batalhas 0 problemas; 251 evoluções 0 falhas; partidas bot×bot 0 erros; prints de todas as telas.
+- **CACHE_NAME:** v703 → v704
 
 ### 2026-11-12 · Claude · Motor de habilidades por cláusulas + 29 Shiny (v703)
 - **O quê:** `abilities.js` reescrito. Cada habilidade oficial agora é uma lista `ef` de cláusulas `{k, c}`.

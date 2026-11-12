@@ -1134,6 +1134,22 @@
             <span style="font-size:7.5px; font-weight:800; color:#e9d5ff;">Guia</span>
           </div>
         </div>
+        <!-- Weekly Type Buff Notice Badge (abaixo do Tutorial) -->
+        <div id="weekly-type-buff-hub-badge" onclick="openWeeklyBuffInfoModal()" title="Ver Detalhes do Buff Semanal de Tipo" style="cursor:pointer; background:linear-gradient(180deg,#78350f 0%,#451a03 100%); border:1.5px solid #fbbf24; border-radius:8px; padding:5px 7px; display:flex; flex-direction:column; align-items:flex-start; gap:2px; box-shadow:0 3px 10px rgba(0,0,0,0.85), 0 0 10px rgba(251,191,36,0.35); width:fit-content; margin-top:1px;">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span id="wtb-hub-icon" style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">🪨</span>
+            <div style="display:flex; flex-direction:column; line-height:1.05; text-align:left;">
+              <span style="font-size:7px; font-weight:900; color:#fde047; letter-spacing:0.3px;">BUFF DA SEMANA</span>
+              <span id="wtb-hub-type" style="font-size:9.5px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000;">TIPO: PEDRA</span>
+            </div>
+          </div>
+          <div id="wtb-hub-stats" style="font-size:7px; font-weight:900; color:#fef08a; background:rgba(0,0,0,0.5); padding:1.5px 4px; border-radius:4px; white-space:nowrap;">
+            +10 DMG · +1★ · +1 MP
+          </div>
+          <div id="wtb-hub-timer" style="font-size:6.5px; font-weight:800; color:#fed7aa;">
+            ⏳ 7d restantes
+          </div>
+        </div>
       </div>
 
       <!-- Right Floating `Locked Booster` Safe (`🔑 0/10`) & `NEW` Training Dumbbell Button (`1001314047.jpg`) -->
@@ -1151,22 +1167,6 @@
           <div style="display:flex; flex-direction:column; line-height:1.1;">
             <span style="font-size:9.5px; font-weight:900; color:#fff; text-shadow:0 1px 2px #000;">FEEDBACK</span>
             <span style="font-size:7.5px; font-weight:800; color:#bae6fd;">Ideias/Bugs</span>
-          </div>
-        </div>
-        <!-- Weekly Type Buff Notice Badge (Right Below Feedback!) -->
-        <div id="weekly-type-buff-hub-badge" onclick="openWeeklyBuffInfoModal()" title="Ver Detalhes do Buff Semanal de Tipo" style="cursor:pointer; background:linear-gradient(180deg,#78350f 0%,#451a03 100%); border:1.5px solid #fbbf24; border-radius:8px; padding:5px 7px; display:flex; flex-direction:column; align-items:flex-end; gap:2px; box-shadow:0 3px 10px rgba(0,0,0,0.85), 0 0 10px rgba(251,191,36,0.35); width:fit-content; margin-top:1px;">
-          <div style="display:flex; align-items:center; gap:4px;">
-            <span id="wtb-hub-icon" style="font-size:13px; filter:drop-shadow(0 1px 2px #000);">🪨</span>
-            <div style="display:flex; flex-direction:column; line-height:1.05; text-align:right;">
-              <span style="font-size:7px; font-weight:900; color:#fde047; letter-spacing:0.3px;">BUFF DA SEMANA</span>
-              <span id="wtb-hub-type" style="font-size:9.5px; font-weight:900; color:#ffffff; text-shadow:0 1px 2px #000;">TIPO: PEDRA</span>
-            </div>
-          </div>
-          <div id="wtb-hub-stats" style="font-size:7px; font-weight:900; color:#fef08a; background:rgba(0,0,0,0.5); padding:1.5px 4px; border-radius:4px; white-space:nowrap;">
-            +10 DMG · +1★ · +1 MP
-          </div>
-          <div id="wtb-hub-timer" style="font-size:6.5px; font-weight:800; color:#fed7aa;">
-            ⏳ 7d restantes
           </div>
         </div>
       </div>
@@ -1808,6 +1808,7 @@
 <script src="js/data/sprites.js"></script>
 <script src="js/data/figures.js"></script>
   <script src="js/data/official_disks.js"></script>
+  <script src="js/data/official_extra.js"></script>
 <script src="js/data/bots.js"></script>
 <script src="js/audio/audio.js"></script>
 <script src="js/engine/board.js"></script>
@@ -1818,5 +1819,6 @@
 <script src="js/engine/ai.js"></script>
 <script src="js/engine/abilities.js"></script>
 <script src="js/app.js"></script>
+<script src="js/ui/duel_screens.js"></script>
 </body>
 </html>

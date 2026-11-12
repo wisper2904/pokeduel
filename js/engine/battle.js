@@ -1580,7 +1580,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
     ddCtx.restore();
 
     // Auto-close battle screen after wheels finish spinning and outcome is clearly shown
-    const closeWaitMs = (totalStages > 1) ? 1900 : 1500;
+    const closeWaitMs = ((totalStages > 1) ? 1900 : 1500) + (window.__pdrAtkAnimMs || 0);
     if (allSpinStagesFinished && postElapsed > closeWaitMs && ddCanClose && !state.doubleChanceWaitingChoice && !isRespinningAttacker) {
       closeBattleOverlay();
       return;
