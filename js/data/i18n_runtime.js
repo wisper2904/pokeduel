@@ -125,6 +125,11 @@
     es: [[/\bDMG\b/g, "DAÑO"], [/\bDANO\b/g, "DAÑO"], [/\bMP\b/g, "PM"], [/\bLv\.?(?=\s?\d)/g, "Nv."], [/\bMiss\b/g, "Fallo"], [/\bEntry Points?\b/g, "Punto de entrada"], [/\bGoal Point\b/g, "Meta"], [/\bPlates\b/g, "Placas"], [/\bPlate\b/g, "Placa"], [/\bZ-Move\b/g, "Movimiento Z"], [/\bWait\b(?=\s?\d)/g, "Espera"]],
     en: [[/\bDANO\b/g, "DMG"], [/\bNv\.(?=\s?\d)/g, "Lv."]],
   };
+  // v725: o \b do JS só conhece A–Z, então "Miss" casava dentro de "Missões" (virava "Falhaões").
+  // Troca cada \b por limites que entendem letras acentuadas.
+  Object.keys(GLOSS).forEach((k) => {
+    GLOSS[k] = GLOSS[k].map(([re, to]) => [new RegExp(re.source.replace(/^\\b/, "(?<![\\p{L}\\p{N}_])").replace(/\\b/g, "(?![\\p{L}\\p{N}_])"), "gu"), to]);
+  });
   function gloss(r, Lg) { const g = GLOSS[Lg]; if (!g || !r) return r; for (const [re, to] of g) r = r.replace(re, to); return r; }
   function L(s, forceLang) {
     if (s == null) return s;

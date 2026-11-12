@@ -401,8 +401,10 @@
     panel(true, !blueMine, myTurn()); panel(false, blueMine, !myTurn());
     avatar(0, y0, 34, y1 - y0, !blueMine); avatar(W - 34, y0, 34, y1 - y0, blueMine);
     ctx.save(); ctx.fillStyle = "#fff"; ctx.textBaseline = "middle"; ctx.font = "800 10px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.textAlign = "left"; ctx.fillText(String(myName).slice(0, 13), 39, 27);
-    ctx.textAlign = "right"; ctx.fillText(String(opName).slice(0, 13), W - 39, 27);
+    // v725: corta pela largura e põe reticências (antes slice(0,13) deixava "N.O.V.A. [IA" sem fechar)
+    const fitName = (str, maxW) => { str = String(str); if (ctx.measureText(str).width <= maxW) return str; while (str.length > 1 && ctx.measureText(str + "…").width > maxW) str = str.slice(0, -1); return str.trimEnd() + "…"; };
+    ctx.textAlign = "left"; ctx.fillText(fitName(myName, 108), 39, 27);
+    ctx.textAlign = "right"; ctx.fillText(fitName(opName, 108), W - 39, 27);
     ctx.font = "900 14px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillStyle = myClock < 60000 ? "#fca5a5" : "#fff"; ctx.textAlign = "right"; ctx.fillText(fmt(myClock), 154, 41.5);
     ctx.fillStyle = opClock < 60000 ? "#fca5a5" : "#fff"; ctx.textAlign = "left"; ctx.fillText(fmt(opClock), 199, 41.5);
@@ -555,7 +557,7 @@
   function openUnitInfo(u) {
     if (!window.PDRDuelScreens || !PDRDuelScreens.showDataReadOnly) return;
     try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
-    try { if (window.PDRSound) PDRSound.play("tick"); } catch (e) {}
+    try { if (window.PDRSound) PDRSound.play("select"); } catch (e) {}
     let ov = document.getElementById("pd-unit-info"); if (ov) ov.remove();
     ov = document.createElement("div"); ov.id = "pd-unit-info";
     ov.style.cssText = "position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.94);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 8px 24px;animation:pdInfoIn .18s ease-out";

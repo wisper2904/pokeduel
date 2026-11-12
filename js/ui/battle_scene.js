@@ -137,8 +137,8 @@
     fm.animate([{ transform: "translate(-40px,30px) scale(.85)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.2,.9,.2,1)", fill: "forwards" });
     fo.animate([{ transform: "translate(40px,-20px) scale(.85)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 380, delay: 80, easing: "cubic-bezier(.2,.9,.2,1)", fill: "forwards" });
     // faixas e golpes
-    at(300, () => { band(layer, "4%", "#f472b6", "#fdf2f8", true); label(layer, oppC, "top"); try { if (window.PDRSound) PDRSound.play("tick"); } catch (e) {} });
-    at(620, () => { band(layer, "74%", "#38bdf8", "#e0f2fe", false); label(layer, mineC, "bot"); try { if (window.PDRSound) PDRSound.play("tick"); } catch (e) {} });
+    at(300, () => { band(layer, "4%", "#f472b6", "#fdf2f8", true); label(layer, oppC, "top"); try { if (window.PDRSound) PDRSound.play("spin_tick"); } catch (e) {} });
+    at(620, () => { band(layer, "74%", "#38bdf8", "#e0f2fe", false); label(layer, mineC, "bot"); try { if (window.PDRSound) PDRSound.play("spin_tick"); } catch (e) {} });
     // avanço e choque
     const rm = fm.getBoundingClientRect(), ro = fo.getBoundingClientRect();
     const mx = (rm.left + rm.width / 2 + ro.left + ro.width / 2) / 2, my = (rm.top + rm.height * 0.6 + ro.top + ro.height * 0.6) / 2;

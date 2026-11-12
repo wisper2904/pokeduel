@@ -1550,7 +1550,30 @@ function drawHDVectorBoardAndChrome() {
   ctx.font = "700 10.2px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
-  ctx.fillText(state.logText, 6, 9.5);
+  // v725: mensagem longa era cortada na direita. Primeiro diminui a fonte (até 7.5px); se ainda não couber, rola devagar.
+  {
+    ctx.save();
+    const logTxt = String(state.logText || ""), maxW = LOGICAL_W - 12;
+    let w = ctx.measureText(logTxt).width;
+    if (w > maxW) {
+      let fs = Math.max(7.5, 10.2 * maxW / w * 0.98);
+      for (;;) {
+        ctx.font = `700 ${fs.toFixed(2)}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+        w = ctx.measureText(logTxt).width;
+        if (w <= maxW || fs <= 7.5) break;
+        fs = Math.max(7.5, fs - 0.25);
+      }
+    }
+    if (w > maxW) {
+      const gap = 40, span = w + gap, off = ((performance.now() / 1000) * 28) % span;
+      ctx.beginPath(); ctx.rect(4, 0, LOGICAL_W - 8, 18.5); ctx.clip();
+      ctx.fillText(logTxt, 6 - off, 9.5);
+      ctx.fillText(logTxt, 6 - off + span, 9.5);
+    } else {
+      ctx.fillText(logTxt, 6, 9.5);
+    }
+    ctx.restore();
+  }
 
   if (!window.PDR_ARENA3D) {
   // 2. Crisp 1080p Trainer Names & Seat Colors (swaps when viewing from P2's seat across the table!)

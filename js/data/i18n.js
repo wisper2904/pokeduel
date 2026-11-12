@@ -2240,7 +2240,7 @@ const POKEMON_MOVES_I18N = {
     "es": "Onda Trueno"
   },
   "thunderbolt": {
-    "pt": "Choque do Trovão",
+    "pt": "Relâmpago",
     "es": "Rayo"
   },
   "thunderous blow": {

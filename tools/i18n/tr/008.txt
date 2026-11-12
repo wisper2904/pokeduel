@@ -48,7 +48,7 @@
 1351|=|📲 Install App|📲 Instalar app
 1352|=|Create or access your account with just a|Crea o accede a tu cuenta solo con
 1353|=|Login and Password|usuario y contraseña
-1354|para sincronizar seus 306 Pokémon, Decks, Gemas, ELO e Pacotes de Tempo entre o|to sync your 306 Pokémon, Decks, Gems, ELO and Time Boosters between|para sincronizar tus 306 Pokémon, mazos, gemas, ELO y Sobres de Tiempo entre
+1354|para sincronizar seus {0} Pokémon, Decks, Gemas, ELO e Pacotes de Tempo entre o|to sync your {0} Pokémon, Decks, Gems, ELO and Time Boosters between|para sincronizar tus {0} Pokémon, mazos, gemas, ELO y Sobres de Tiempo entre
 1357|=|👤 Login (User):|👤 Usuario:
 1358|=|🔑 Password:|🔑 Contraseña:
 1359|📥 Entrar / Baixar progresso|📥 Log In / Download Save|📥 Entrar / Descargar partida
@@ -119,7 +119,7 @@
 1437|• Na parte de baixo do Início ficam os 3 espaços de Pacote de Tempo: sempre que você vence uma partida ranqueada (Partida de Liga), ganha uma caixa (1h Prata ou 6h Roxa) que abre quando o cronômetro chega a 00:00:00.|• At the bottom of the Hub are the 3 Time Booster Slots: whenever you win a ranked match (League Match), you get a box (1h Silver or 6h Purple) that opens when the timer reaches 00:00:00.|• En la parte inferior del Inicio están las 3 casillas de Sobre de Tiempo: cada vez que ganas una partida clasificatoria (Partida de Liga), recibes una caja (1 h Plata o 6 h Morada) que se abre cuando el temporizador llega a 00:00:00.
 1438|• No canto superior direito fica o Pacote Trancado: junte 10/10 Fragmentos de Chave (🔑) em partidas de Liga para abri-lo!|• In the top right corner is the Locked Booster: collect 10/10 Key Fragments (🔑) in League matches to open it!|• En la esquina superior derecha está el Sobre Cerrado: ¡junta 10/10 Fragmentos de Llave (🔑) en partidas de Liga para abrirlo!
 1439|🏛️ TOUR DO INÍCIO · ETAPA 3/5|🏛️ HUB TOUR · STEP 3/5|🏛️ RECORRIDO DEL INICIO · PASO 3/5
-1440|3. Aba [Decks] — 306 Pokémon e limite de custo 6/6 ◆ nas Placas|3. [Decks] Tab — 306 Pokémon and the 6/6 ◆ Cost Limit on Plates|3. Pestaña [Mazos] — 306 Pokémon y límite de coste 6/6 ◆ en las Placas
+1440|3. Aba [Decks] — {0} Pokémon e limite de custo 6/6 ◆ nas Placas|3. [Decks] Tab — {0} Pokémon and the 6/6 ◆ Cost Limit on Plates|3. Pestaña [Mazos] — {0} Pokémon y límite de coste 6/6 ◆ en las Placas
 1441|=|• Here in [Decks] you build your team with up to 6 unlocked Pokémon and set up their Evolutions/Mega UX.|• Aquí en [Mazos] montas tu equipo con hasta 6 Pokémon desbloqueados y configuras sus Evoluciones/Mega UX.
 1442|• Na seção ⚡ ESTOJO DE PLACAS logo abaixo do time, cada carta tática tem um custo em diamantes (1◆ ou 2◆). O limite máximo oficial é 6/6 ◆ — escolha a combinação tática ideal até somar 6◆!|• In the ⚡ PLATE CASE section right below the team, each tactical card has a diamond cost (1◆ or 2◆). The official maximum is 6/6 ◆ — pick the ideal tactical combo up to 6◆!|• En la sección ⚡ ESTUCHE DE PLACAS justo debajo del equipo, cada carta táctica tiene un coste en diamantes (1◆ o 2◆). El máximo oficial es 6/6 ◆ — ¡elige la combinación táctica ideal hasta sumar 6◆!
 1443|🏛️ TOUR DO INÍCIO · ETAPA 4/5|🏛️ HUB TOUR · STEP 4/5|🏛️ RECORRIDO DEL INICIO · PASO 4/5
@@ -130,7 +130,7 @@
 1448|3) Nível de Corrente (CLv 1–10): exige 🟩 Cubo Verde + 🪙 Moedas para somar +1 de dano!|3) Chain Level (CLv 1–10): needs 🟩 Green Cube + 🪙 Coins to add +1 Damage!|3) Nivel de Cadena (CLv 1–10): ¡requiere 🟩 Cubo Verde + 🪙 Monedas para sumar +1 de daño!
 1449|🏛️ TOUR DO INÍCIO · ETAPA 5/5|🏛️ HUB TOUR · STEP 5/5|🏛️ RECORRIDO DEL INICIO · PASO 5/5
 1450|5. Aba [Loja] e modos de jogo no botão [Jogar]|5. [Shop] Tab and Game Modes on the [Play] Button|5. Pestaña [Tienda] y modos de juego en el botón [Jugar]
-1451|• Na [Loja], você pode abrir Pacotes com Gemas, usar a Loja de Moedas ou trocar Materiais por qualquer um dos 306 Pokémon.|• In the [Shop], you can open Boosters with Gems, use the Coin Shop or trade Material for any of the 306 Pokémon.|• En la [Tienda], puedes abrir Sobres con Gemas, usar la Tienda de Monedas o cambiar Materiales por cualquiera de los 306 Pokémon.
+1451|• Na [Loja], você pode abrir Pacotes com Gemas, usar a Loja de Moedas ou trocar Materiais por qualquer um dos {0} Pokémon.|• In the [Shop], you can open Boosters with Gems, use the Coin Shop or trade Material for any of the {0} Pokémon.|• En la [Tienda], puedes abrir Sobres con Gemas, usar la Tienda de Monedas o cambiar Materiales por cualquiera de los {0} Pokémon.
 1452|• Ao tocar em [Jogar] no Início, escolha entre: 🏆 Partida de Liga (ranqueada), 🌐 Partida em Sala P2P (2 celulares em lados opostos), 🗺️ Missões (usa ⚡15 da barra verde) ou 🏋️ Centro de Treinamento (treino livre sem pontos nem recompensas)!|• When you tap [Play] in the Hub, choose between: 🏆 League Match (Ranked), 🌐 Room Match P2P (2 phones on opposite sides), 🗺️ Quests (uses ⚡15 from the green bar) or 🏋️ Training Center (free practice, no points or rewards)!|• Al tocar [Jugar] en el Inicio, elige entre: 🏆 Partida de Liga (clasificatoria), 🌐 Partida en Sala P2P (2 móviles en lados opuestos), 🗺️ Misiones (usa ⚡15 de la barra verde) o 🏋️ Centro de Entrenamiento (práctica libre sin puntos ni recompensas)!
 1453|=|Next Step ({0}/{1}) ➔|Siguiente paso ({0}/{1}) ➔
 1454|=|✅ Finish Tutorial and Play!|✅ ¡Terminar tutorial y jugar!

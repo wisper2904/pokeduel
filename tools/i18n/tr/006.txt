@@ -131,7 +131,7 @@
 1054|=|Game Saved and Closed|Juego guardado y cerrado
 1055|=|Your whole individual profile, points and Pokémon were saved safely.|Todo tu perfil individual, puntos y Pokémon se guardaron de forma segura.
 1056|=|🔄 Log In Again|🔄 Entrar de nuevo
-1059|306 Figuras 3D Kaiyodo · Pacotes de Tempo em tempo real · Multijogador P2P|306 Kaiyodo 3D Figures · Real-Time Time Boosters · P2P Multiplayer|306 figuras 3D Kaiyodo · Sobres de Tiempo en tiempo real · Multijugador P2P
+1059|{0} Figuras 3D Kaiyodo · Pacotes de Tempo em tempo real · Multijogador P2P|{0} Kaiyodo 3D Figures · Real-Time Time Boosters · P2P Multiplayer|{0} figuras 3D Kaiyodo · Sobres de Tiempo en tiempo real · Multijugador P2P
 1060|=|READY|LISTO
 1061|🎁 Abrir no Início ({0})|🎁 Open in the Hub ({0})|🎁 Abrir en el Inicio ({0})
 1062|=|⏱️ View Timers ({0}/3)|⏱️ Ver temporizadores ({0}/3)

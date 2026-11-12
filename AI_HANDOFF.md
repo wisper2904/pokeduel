@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v724` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v725` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -151,23 +151,26 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 - [ ] 42 figuras oficiais da Library ficaram de fora: 27 sem imagem correspondente na categoria e 15 com roleta incompleta na Bulbapedia.
 - [ ] Habilidades oficiais: das 448 com texto, só ~110 têm alguma mecânica simulada (`fx` em `js/engine/abilities.js`); o resto é texto (efeitos com marcadores, condições, Ultra Space, troca de posição etc.). Fatias Brancas/Douradas com efeito: 170 de 476 simuladas (`OFFICIAL_DUEL_SLICE_FX`). 40 fatias roxas com efeito `none`.
 - [ ] Travessia seletiva ("atravessa suas peças e as do tipo X") não simulada; só travessia total.
-- [ ] **QA 2026-11-12 (Claude, relatório completo no chat):**
-  - Sprites trocadas em `assets/sprites/`: `oddish.webp`=Victini, `gloom.webp`=Serperior, `persian.webp`=Samurott, `machoke.webp`=Chandelure, `dodrio.webp`=Terrakion, `cubone.webp`=Virizion, `porygon.webp`=Kyurem.
-  - `PDRSound.play("tick")` em `arena3d.js:558` e `battle_scene.js:140-141` → 404 em `assets/sfx/tick.mp3` (não existe; usar `select`/`spin_tick`).
-  - `i18n_runtime.js:124` `/\bMiss\b/` casa dentro de "Missões" (o `\b` do JS não vê letra acentuada) → aba P2P mostra "🏨 Falhaões / Arenas / Mônaco". Vale para todas as regex `\b` dessa lista.
-  - PT: Thunder Shock e Thunderbolt viram os dois "Choque do Trovão" (Pikachu mostra 3 golpes iguais com dano 40/100/40); Crobat: Poison Fang e Noxious Fang viram os dois "Presa Venenosa".
-  - `#ds-z-modal` (Z-Move) não fecha no fim da partida: fica sobre a tela de vitória e na partida seguinte. Também abre junto com o prompt do Double Chance e com o `#ds-evo-modal` (modal em cima de modal).
-  - Mensagens de fim de partida em inglês no modo PT: "Opponent reached your Goal!", "Reached the Goal! WIN!".
-  - HUD: nome do rival cortado com `slice(0,13)` sem reticências ("N.O.V.A. [IA").
-  - Hub em paisagem (navegador) quebra: botão Jogar some e a aba Config fica cortada (o manifest só trava retrato no app instalado).
-  - Banner do tutorial cortado à direita; sair do tutorial abre o cadastro, mas ao recarregar o cadastro é pulado (fica "Treinador" sem conta).
-  - Sobre/Conta: "POKEDUEL v5.4.0", "Versão v6.1.0" e "306 Figuras/Pokémon" (o DB tem 629).
-  - Arte de aura cortada na borda da imagem: Entei, Ho-Oh e Shiny Ho-Oh.
+- [ ] **Sprites trocadas em `assets/sprites/`** (achado no QA de 2026-11-12; o Gabriel vai mandar as certas): `oddish.webp`=Victini, `gloom.webp`=Serperior, `persian.webp`=Samurott, `machoke.webp`=Chandelure, `dodrio.webp`=Terrakion, `cubone.webp`=Virizion, `porygon.webp`=Kyurem.
+- [ ] Arte de aura cortada na borda da imagem: Entei, Ho-Oh e Shiny Ho-Oh (`assets/figures_duel/`).
+- [ ] `tools/i18n/build.py`, citado no README de `tools/i18n/` e no handoff, **não existe no repo**. Até recriar, edite o `js/data/i18n_dict.js` à mão e o lote `tools/i18n/tr/*.txt` junto, para não divergirem.
+- [ ] O tabuleiro em celular deitado (modo mobile) estica na horizontal. O Hub foi corrigido na v725; a partida não.
 - [ ] Não há testes automatizados de regra no repositório (os testes de v701 rodaram fora, via Playwright/Node em /home/claude/ux) (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Correções do QA (v725)
+- **Z-Move**: `#ds-z-modal` fecha ao reiniciar a partida (`demoFullMatchState`) e quando a tela de resultado aparece (wrapper de `showWinResultScreen` em `duel_screens.js`). Não abre durante o Double Chance, com o Evoluir aberto, com a roleta na tela nem depois do fim da partida (`zPickerBlocked`). O Evoluir fecha o Z antes de abrir. `window.pdrCloseMatchModals()` fecha os dois.
+- **Tradução**: `i18n_runtime.js` troca o `\b` das regras do `GLOSS` por limites Unicode (`(?<![\p{L}\p{N}_])` / `(?![\p{L}\p{N}_])`), então "Missões" não vira mais "Falhaões". Thunderbolt PT = "Relâmpago" (`i18n.js`); Noxious Fang = "Presa Tóxica" / "Colmillo Tóxico" (`i18n_dict.js` + `tr/012.txt` id 2183).
+- **Som**: `PDRSound.play("tick")` (arquivo inexistente, dava 404) → `"select"` em `arena3d.js` e `"spin_tick"` em `battle_scene.js`.
+- **Barra de log do topo** (`board.js drawHDVectorBoardAndChrome`): texto longo diminui a fonte até 7.5px; se ainda não couber, rola. Antes cortava na direita (ex.: título do tutorial).
+- **HUD** (`arena3d.js drawHUD`): nomes cortados pela largura (108) com "…" em vez de `slice(0,13)`.
+- **Hub em tela deitada e baixa** (< 600 px de altura): classe `pdr-short-land` no `<html>` + `--pdr-dscale` (IIFE no fim de `ui.js`); o `#drawer-modal` é desenhado em 400×600 e reduzido por escala (`css/style.css`, fim do arquivo). Retrato não muda.
+- **Cadastro**: sair do tutorial grava `pdr_welcome_pending_v725`; enquanto não houver conta salva, o cadastro reabre ao recarregar. A chave é limpa ao criar a conta ou em `completeWelcomeProfileSetup`.
+- **Sobre/Conta/Tour**: tirado o "v5.4.0" do cabeçalho; "306 Figuras/Pokémon" virou `${FIGURES_DB.length}` (dicionário com `{0}`, lotes `tr/006.txt` e `tr/008.txt` atualizados).
+- Falso positivo descartado: "Opponent reached your Goal!" aparece traduzido na tela (o robô de QA lia `state.logText` antes da tradução).
 
 ### 2026-11-12 · Claude · QA geral (sem mudança de código)
 - Teste de estresse com Playwright: ~87 partidas contra a IA (61 com P1 aleatório e 26 com P1 heurístico, com deck de 6 figuras e plates sorteados a cada partida), ~800 figuras sorteadas, ~200 combates, ~66 plates usadas. **0 erros de JS** e 0 violações de estado (unidades duplicadas no mesmo nó, contagem diferente de 6, nó inválido).

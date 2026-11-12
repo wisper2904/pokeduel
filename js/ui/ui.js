@@ -5597,6 +5597,7 @@ function completeWelcomeProfileSetup() {
   const nick = (inp && inp.value.trim()) ? inp.value.trim().slice(0, 16) : ("Treinador_" + Math.floor(100 + Math.random() * 900));
   window.trainerProfileData.nickname = nick;
   window.trainerProfileData.isSetupDone = true;
+  try { localStorage.removeItem("pdr_welcome_pending_v725"); } catch (e) {}
   saveIndividualProfile();
   syncIndividualProfileUI();
   const wm = document.getElementById("welcome-profile-modal");
@@ -5817,8 +5818,8 @@ saveProgressionState();
     banner.style.cssText = "display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#09152b,#0f2942);border:1.5px solid #38bdf8;border-radius:10px;padding:8px 12px;margin-bottom:8px;box-shadow:0 4px 12px rgba(0,0,0,0.5);";
     banner.innerHTML = `<img src="${POKEDUEL_BANANA_LOGO_URI}" style="width:48px;height:48px;border-radius:11px;border:1.5px solid #facc15;flex-shrink:0;">
       <div style="text-align:left;">
-        <div style="font-size:13px;font-weight:900;color:#fde047;letter-spacing:0.5px;">POKEDUEL <span style="font-size:9px;color:#38bdf8;">v5.4.0</span></div>
-        <div style="font-size:9px;color:#cbd5e1;">306 Figuras 3D Kaiyodo · Time Boosters em Tempo Real · Multiplayer P2P</div>
+        <div style="font-size:13px;font-weight:900;color:#fde047;letter-spacing:0.5px;">POKEDUEL</div>
+        <div style="font-size:9px;color:#cbd5e1;">${FIGURES_DB.length} Figuras 3D Kaiyodo · Time Boosters em Tempo Real · Multiplayer P2P</div>
       </div>`;
     cfgTab.insertBefore(banner, cfgTab.firstChild);
   }
@@ -9049,7 +9050,7 @@ async function handleWelcomeAuthSubmit() {
     setMsg(`🎉 Conta criada com sucesso para @${creds.username}!`, false);
     const wm = document.getElementById("welcome-profile-modal");
     if (wm) wm.style.display = "none";
-    try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); } catch (e) {}
+    try { localStorage.setItem(TUTORIAL_COMPLETED_KEY, "1"); localStorage.removeItem("pdr_welcome_pending_v725"); } catch (e) {}
     openDrawer("hub");
     switchDrawerTab("hub");
     // Conta nova: depois de criar usuário e senha, apresenta as abas do Hub
@@ -9094,7 +9095,7 @@ async function handleWelcomeAuthSubmit() {
       </div>
     </div>
     <div class="small-muted" style="margin-bottom:6px; line-height:1.35;">
-      Crie ou acesse sua conta apenas com <b>Login e Senha</b> para sincronizar seus 306 Pokémon, Decks, Gemas, ELO e Time Boosters entre o <b>.APK</b>, <b>iPhone (PWA)</b> e <b>PC (GitHub Pages)</b>:
+      Crie ou acesse sua conta apenas com <b>Login e Senha</b> para sincronizar seus ${FIGURES_DB.length} Pokémon, Decks, Gemas, ELO e Time Boosters entre o <b>.APK</b>, <b>iPhone (PWA)</b> e <b>PC (GitHub Pages)</b>:
     </div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:6px;">
       <div>
@@ -10490,6 +10491,7 @@ function finishTutorialAndShowWelcome() {
   // Perfil novo já nasce com isSetupDone = true, então o critério é ter (ou não) uma conta salva
   const hasAccount = typeof getSavedCloudSession === "function" && !!getSavedCloudSession();
   if (!hasAccount) {
+    try { localStorage.setItem("pdr_welcome_pending_v725", "1"); } catch (e) {}
     setTimeout(() => {
       const wm = document.getElementById("welcome-profile-modal");
       if (wm) wm.style.display = "flex";
@@ -10666,7 +10668,7 @@ const HUB_TOUR_STEPS = [
   {
     badge: "🏛️ TOUR DO HUB · ETAPA 3/5",
     tab: "deck",
-    title: "3. Aba [Decks] — 306 Pokémon e Limite de Custo 6/6 ◆ nas Plates",
+    title: `3. Aba [Decks] — ${FIGURES_DB.length} Pokémon e Limite de Custo 6/6 ◆ nas Plates`,
     desc: "• Aqui em [Decks] você monta seu time com até 6 Pokémon desbloqueados e configura suas Evoluções/Mega UX.\n• Na seção ⚡ PLATE CASE logo abaixo do time, cada carta tática tem um custo em diamantes (1◆ ou 2◆). O limite máximo oficial é 6/6 ◆ — escolha a combinação tática ideal até somar 6◆!"
   },
   {
@@ -10679,7 +10681,7 @@ const HUB_TOUR_STEPS = [
     badge: "🏛️ TOUR DO HUB · ETAPA 5/5",
     tab: "shop",
     title: "5. Aba [Shop] e Modos de Jogo no Botão [Play]",
-    desc: "• Na [Shop], você pode abrir Boosters com Gemas, usar a Loja de Moedas (Coin Shop) ou trocar Material por qualquer um dos 306 Pokémon.\n• Ao tocar em [Play] no Hub, escolha entre: 🏆 League Match (Ranqueado), 🌐 Room Match P2P (2 celulares em mesa oposta), 🗺️ Quests (usa ⚡15 da barra verde) ou 🏋️ Training Center (treino livre sem pontos ou recompensas)!"
+    desc: `• Na [Shop], você pode abrir Boosters com Gemas, usar a Loja de Moedas (Coin Shop) ou trocar Material por qualquer um dos ${FIGURES_DB.length} Pokémon.\n• Ao tocar em [Play] no Hub, escolha entre: 🏆 League Match (Ranqueado), 🌐 Room Match P2P (2 celulares em mesa oposta), 🗺️ Quests (usa ⚡15 da barra verde) ou 🏋️ Training Center (treino livre sem pontos ou recompensas)!`
   }
 ];
 
@@ -10793,3 +10795,33 @@ renderPlatesTray();
 
 // ============================================================================
 
+
+// v725: Hub em tela deitada e baixa — ver ":root.pdr-short-land" no style.css
+(function pdrShortLandscapeDrawer() {
+  const DESIGN_H = 600, DESIGN_W = 400;
+  function apply() {
+    const w = window.innerWidth, h = window.innerHeight, root = document.documentElement;
+    const on = w > h && h < DESIGN_H;
+    root.classList.toggle("pdr-short-land", on);
+    if (on) root.style.setProperty("--pdr-dscale", String(Math.min(h / DESIGN_H, w / DESIGN_W)));
+    else root.style.removeProperty("--pdr-dscale");
+  }
+  window.addEventListener("resize", apply);
+  window.addEventListener("orientationchange", () => setTimeout(apply, 150));
+  apply();
+})();
+
+// v725: quem sai do tutorial vê o cadastro; se recarregar antes de criar a conta, o cadastro volta
+// (antes era pulado e a pessoa ficava como "Treinador" sem conta, porque o perfil novo já nasce com isSetupDone).
+(function pdrReopenPendingWelcome() {
+  let pending = false;
+  try { pending = localStorage.getItem("pdr_welcome_pending_v725") === "1"; } catch (e) {}
+  if (!pending) return;
+  const hasAccount = typeof getSavedCloudSession === "function" && !!getSavedCloudSession();
+  if (hasAccount) { try { localStorage.removeItem("pdr_welcome_pending_v725"); } catch (e) {} return; }
+  setTimeout(() => {
+    if (state && state.matchKind === "tutorial") return;
+    const wm = document.getElementById("welcome-profile-modal");
+    if (wm) wm.style.display = "flex";
+  }, 450);
+})();

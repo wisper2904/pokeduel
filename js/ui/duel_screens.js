@@ -577,6 +577,7 @@
     injectCss();
     const old = $("evolution-prompt-modal"); if (old) old.style.display = "none";
     let m = $("ds-evo-modal"); if (m) m.remove();
+    { const zm = $("ds-z-modal"); if (zm) zm.remove(); } // v725: não empilha o Evoluir em cima do Z-Move
     const cf = FIGURES_DB[unit.baseIdx] || {};
     const curSegs = (() => { const s = state.zMoveArmed; state.zMoveArmed = false; try { return unitWheelPreview(unit); } finally { state.zMoveArmed = s; } })();
     const stage = (unit.evoStage || 0) + (pv.isMega ? 0 : 1);
@@ -738,7 +739,16 @@
   }
   function renderPlatesSafe() { try { if (typeof renderPlatesTray === "function") renderPlatesTray(); } catch (e) {} }
   const _oldToggleZ = (typeof toggleZMoveFromTray === "function") ? toggleZMoveFromTray : function () {};
+  // v725: o seletor de Z-Move não abre por cima de outra escolha pendente (Double Chance, Evoluir, roleta) nem fora da partida
+  function zPickerBlocked() {
+    if (!state || state.winCelebrationAnim || state.matchFinished) return true;
+    if (state.doubleChanceWaitingChoice || $("ds-evo-modal")) return true;
+    const ov = $("wheel-overlay");
+    return !!(ov && ov.classList.contains("show"));
+  }
+  window.pdrCloseMatchModals = function () { ["ds-z-modal", "ds-evo-modal"].forEach((id) => { const el = $(id); if (el) el.remove(); }); };
   const newToggleZ = function () {
+    if (zPickerBlocked()) { const zm = $("ds-z-modal"); if (zm) zm.remove(); return; }
     if (state.zMoveUsedP1 || Math.min(100, state.zGaugeP1 || 0) < 100) return _oldToggleZ.apply(this, arguments);
     showZPicker();
   };
@@ -747,8 +757,16 @@
   // Zera a escolha quando a partida reinicia
   if (typeof demoFullMatchState === "function") {
     const _r = demoFullMatchState;
-    const rr = function () { const o = _r.apply(this, arguments); if (state) state.zMoveChoice = null; return o; };
+    const rr = function () { const o = _r.apply(this, arguments); if (state) state.zMoveChoice = null; window.pdrCloseMatchModals(); return o; };
     try { demoFullMatchState = rr; } catch (e) {}
+  }
+
+  // v725: fecha Z-Move/Evoluir quando a tela de resultado aparece (antes o Z ficava por cima e passava para a partida seguinte)
+  if (typeof showWinResultScreen === "function") {
+    const _w = showWinResultScreen;
+    const w2 = function () { try { window.pdrCloseMatchModals(); } catch (e) {} return _w.apply(this, arguments); };
+    try { showWinResultScreen = w2; } catch (e) {}
+    window.showWinResultScreen = w2;
   }
 
   // ============================================================= 4. ANIMAÇÃO DE ATAQUE

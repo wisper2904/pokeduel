@@ -74,7 +74,7 @@
 2180|Agarrar|=|Agarre
 2181|Nevasca de Pétalas|=|Tormenta Floral
 2182|Ar Quente|=|Aire Caliente
-2183|Presa Venenosa|=|Colmillo Ven
+2183|Presa Tóxica|=|Colmillo Tóxico
 2184|Sobrepor|=|Anular
 2185|Luz Guia|=|Luz Guía
 2186|Tambor de Barriga|=|Tambor

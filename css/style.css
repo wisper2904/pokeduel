@@ -600,3 +600,18 @@
 /* Ferramentas de desenvolvedor: escondidas para jogadores. Ativar no console: localStorage.setItem("pdr_dev_mode","1") */
 .pdr-dev-only { display: none !important; }
 body.pdr-dev-mode .pdr-dev-only { display: block !important; }
+
+/* v725: tela deitada e baixa (< 600 px de altura): o Hub/menus não cabiam (botão Jogar sumia, aba Config cortada).
+   Desenha o drawer no tamanho de projeto 400×600 e reduz por escala (--pdr-dscale, calculado em ui.js). Retrato não muda. */
+:root.pdr-short-land body #drawer-modal {
+  position: fixed !important;
+  top: 50% !important; left: 50% !important; right: auto !important; bottom: auto !important;
+  width: 400px !important; max-width: none !important;
+  height: 600px !important; max-height: none !important;
+  aspect-ratio: unset !important;
+  transform: translate(-50%, -50%) scale(var(--pdr-dscale, 1)) !important;
+  transform-origin: 50% 50% !important;
+  border-left: 2px solid rgba(56, 189, 248, 0.35) !important;
+  border-right: 2px solid rgba(56, 189, 248, 0.35) !important;
+  border-radius: 14px !important;
+}
