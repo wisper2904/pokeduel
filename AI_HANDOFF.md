@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v702` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v703` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v702). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v703). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,17 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Motor de habilidades por cláusulas + 29 Shiny (v703)
+- **O quê:** `abilities.js` reescrito. Cada habilidade oficial agora é uma lista `ef` de cláusulas `{k, c}`.
+  - Condições `c`: noStatus, evolved, first, myturn, oppturn, vsType.
+  - Tipos `k`: dmg (com contagem por campo/vizinhas/PC), pass, passSel, mp, immune, noWait, immovable, noKo, koToBench, noKoGold, halveIn, lessIn, oppBlueMiss, oppGoldToWhite, nullOpp, whiteToGold, missShift, battleOppStatus, koTransform.
+  - Cobertura: ~187 de 448 habilidades com alguma mecânica (73 completas); o resto é só texto (habilidades sob medida).
+  - +29 figuras no fim do FIGURES_DB (27 Shiny + Dawn Wings Necrozma Nº647/648, total 629), com famílias Shiny automáticas.
+- **Arquivos:** `js/engine/abilities.js`, `js/data/official_disks.js`, `assets/figures_duel/Shiny*.webp`, `sw.js`.
+- **Wrappers novos:** `getEffectiveUnitMp`, `computeReachableWithPaths` (passSel), `executeMove` (marca `_abBattled`).
+- **Testes:** 7.548 batalhas 0 problemas; 251 evoluções 0 falhas; 6 partidas bot×bot 0 erros.
+- **CACHE_NAME:** v702 → v703
 
 ### 2026-11-12 · Claude · Habilidades, efeitos de fatia e evoluções (v701–v702)
 - **O que:** novo `js/engine/abilities.js` (depois do `ai.js`, nos dois HTMLs e em `CORE_ASSETS`):
