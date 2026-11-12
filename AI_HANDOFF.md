@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v716` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v717` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -156,6 +156,13 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Tela de Configurações refeita (v717)
+- **Novo `js/ui/settings_screen.js`** (depois de `icons.js`; nos 2 HTMLs e no `sw.js`). Monta `#st-root` dentro de `#dtab-menu` quando a aba abre (wrapper de `switchDrawerTab`).
+  - Abas: Áudio (música on/off, fonte Web Audio/YouTube, sons on/off + volume, vibração) · Vídeo (qualidade 8-Bit/16-Bit/Suave, efeitos, tremor, formato Automático/Celular/PC, tema da arena em 6 blocos) · Jogo (idioma, tutorial, tour, P2P, 2 jogadores, hotéis da campanha, personalizar sprites) · Conta (perfil, Save na Nuvem) · Sobre (banner, versão, notas, atualizar, sair).
+  - **Os controles antigos continuam no DOM, escondidos em `#st-legacy`**: as linhas novas clicam neles ou chamam as mesmas funções (`toggleWebAudioBgm`, `cyclePixelArtMode`, `cycleDeviceLayoutMode`, `selectArenaThemeFromMenu`, `PDRSound`, `Juice.cfg`…). Blocos movidos inteiros (mesmos ids): `#cfg-cross-save-pwa-card`, `#msec-quests`, `#cfg-banana-logo-banner`, `<details>` de `#live-sprite-target`. Card novo injetado no menu depois → vai para o legado.
+  - Aba lembrada em `localStorage.pdr_settings_tab`. Trocar idioma remonta a tela. `window.PDRSettings {render, open(tab), refresh}`.
+- i18n: 61 linhas em `900_manual.txt`.
 
 ### 2026-11-12 · Claude · Ícones oficiais do Bulbagarden (v716)
 - Gabriel baixou pelo Chrome um .zip com 47 arquivos de `archives.bulbagarden.net` (Category:Pokémon Duel + rarity icons). Recortados e reduzidos (PIL).
