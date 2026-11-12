@@ -28,6 +28,7 @@
   .sh-daily{position:relative;overflow:hidden;display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;border-radius:14px;padding:10px 12px;
     background:radial-gradient(circle at 18% 40%,rgba(250,204,21,.35),transparent 55%),linear-gradient(135deg,#7c2d12,#a16207 45%,#422006);border:2px solid #fde047;box-shadow:0 0 22px rgba(250,204,21,.35)}
   .sh-daily.done{background:linear-gradient(135deg,#1e293b,#0f172a);border-color:#334155;box-shadow:none}
+  .sh-daily .gift img{width:92px;height:auto;display:block;margin:0 auto}
   .sh-daily .gift{font-size:62px;text-align:center;filter:drop-shadow(0 6px 8px rgba(0,0,0,.6));animation:shBob 1.6s ease-in-out infinite}
   .sh-daily.done .gift{animation:none;filter:grayscale(.7) opacity(.7)}
   .sh-daily h3{margin:0;font-size:17px;font-weight:900;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.6)}
@@ -183,7 +184,7 @@
       <div class="ds-title"><span>${tt("sh.title", "Loja")}</span></div>
       <div class="sh-wallet"><span style="color:#fde047">🪙 ${n(coins())}</span><span style="color:#f472b6">🔻 ${n(gems())}</span><span style="color:#93c5fd">🧱 ${n(typeof userMaterial !== "undefined" ? userMaterial : 0)}</span></div>
       <div class="sh-daily ${ready ? "" : "done"}">
-        <div class="gift">🎁</div>
+        <div class="gift"><img src="assets/ui/boosters/black.png" alt=""></div>
         <div><h3>${tt("sh.daily", "Recompensa Diária")}</h3>
           <div class="rw"><span>🔻 +50</span><span>🪙 +1,500</span><span>🟦 +1 Rare Metal</span></div>
           <button id="sh-daily-btn">${ready ? tt("sh.claim", "RESGATAR!") : "⏳ " + hms(left)}</button></div>

@@ -1728,7 +1728,7 @@ function initHomeV380Assets() {
     "home-prof-emblem": "profile_emblem",
     "home-prof-avatar": "profile_avatar",
     "prof-modal-avatar": "profile_avatar",
-    "home-locked-booster-img": "locked_booster_top",
+    // v722: cofre usa assets/ui/boosters/locked.png (sprite enviado pelo Gabriel) com fita e contador em HTML
     "home-training-btn-img": "new_training_btn",
     "home-black-pokeball-img": "black_pokeball_btn",
     "tb-img-0": "booster_silver",
@@ -2004,7 +2004,7 @@ function openLockedBooster() {
   const kLbl = document.getElementById("key-frag-lbl");
   const kWrap = document.getElementById("locked-key-badge-wrap");
   if (kLbl) kLbl.textContent = playerKeyFragments;
-  if (kWrap) kWrap.style.display = playerKeyFragments > 0 ? "block" : "none";
+  if (kWrap) kWrap.style.display = "flex";
   openBoosterChest("Locked Booster (10/10 Keys Desbloqueado!)");
 }
 
@@ -3852,7 +3852,7 @@ showWinResultScreen = function(winner) {
   const kLbl = document.getElementById("key-frag-lbl");
   const kWrap = document.getElementById("locked-key-badge-wrap");
   if (kLbl) kLbl.textContent = playerKeyFragments;
-  if (kWrap) kWrap.style.display = playerKeyFragments > 0 ? "block" : "none";
+  if (kWrap) kWrap.style.display = "flex";
 
   const keysValEl = document.getElementById("win-keys-val");
   const gemsValEl = document.getElementById("win-gems-val");
