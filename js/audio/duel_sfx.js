@@ -8,7 +8,7 @@
 (function () {
   "use strict";
   const BASE = "assets/sfx/";
-  const VOL = { spin_tick: 0.35, spin: 0.55, confirm: 0.6, select: 0.7, deselect: 0.6, move: 0.7, win: 0.85, lose: 0.85, cheer: 0.5 };
+  const VOL = { spin_tick: 0.16, spin: 0.45, confirm: 0.45, select: 0.4, move: 0.4, win: 0.8, lose: 0.8, cheer: 0.35, plate_cancel: 0.35 };
   const buffers = {}, loading = {};
   let master = null, lastPlay = {};
   const settings = (() => { try { return Object.assign({ on: true, vol: 0.8 }, JSON.parse(localStorage.getItem("pdr_sfx") || "{}")); } catch (e) { return { on: true, vol: 0.8 }; } })();
@@ -69,7 +69,8 @@
   const overlayOpen = () => { const o = document.getElementById("wheel-overlay"); return !!(o && o.classList.contains("show")); };
 
   // ---------------------------------------------------------------- playSfx antigo → sons originais
-  const MAP = { tick: "confirm", select: "select", back: "cancel", step: "move", jump: "move", portal: "plate_ok", level_up: "levelup" };
+  const MAP = { tick: "select", select: "select", back: "cancel", step: "move", jump: "move", portal: "confirm", level_up: "levelup" };
+  const inMatchNow = () => { const dr = document.getElementById("drawer-modal"); return !(dr && dr.classList.contains("show")); };
   if (typeof playSfx === "function") {
     const _synth = playSfx;
     const wrapped = function (type) {
@@ -79,8 +80,11 @@
         if (overlayOpen()) return;
         if (play("plate_cancel", { vol: 0.6 })) return;
       } else if (type === "tick" && overlayOpen()) {
-        if (play("spin_tick")) return;
-      } else if (MAP[type] && play(MAP[type])) return;
+        if (play("spin_tick", { gap: 70 })) return;
+      } else if ((type === "portal" || type === "tick") && inMatchNow()) {
+        return; // na partida esses avisos genéricos tocavam a toda hora
+      } else if ((type === "step" || type === "jump") && play("move", { gap: 700 })) return;
+      else if (MAP[type] && play(MAP[type])) return;
       return _synth.apply(this, arguments);
     };
     try { playSfx = wrapped; } catch (e) {}
@@ -131,13 +135,13 @@
     if (!window.Juice || Juice.__sfx705) return;
     Juice.__sfx705 = true;
     const _tick = Juice.tick;
-    Juice.tick = function (p) { if (settings.on && play("spin_tick", { gap: 30, rate: 0.9 + (p || 0) * 0.3 })) return; return _tick.apply(Juice, arguments); };
+    Juice.tick = function (p) { if (settings.on && play("spin_tick", { gap: 70 })) return; return _tick.apply(Juice, arguments); };
     const _stop = Juice.onWheelStop;
     Juice.onWheelStop = function () { play("spin_stop", { gap: 120 }); return _stop.apply(Juice, arguments); };
     const _evo = Juice.onEvolution;
     Juice.onEvolution = function (unit, isMega) { play(isMega ? "form_b" : "form_a"); return _evo.apply(Juice, arguments); };
     const _end = Juice.onMatchEnd;
-    Juice.onMatchEnd = function (didWin) { play(didWin ? "win" : "lose", { gap: 3000 }); if (didWin) play("cheer", { delay: 0.6, gap: 3000 }); return _end.apply(Juice, arguments); };
+    Juice.onMatchEnd = function (didWin) { play(didWin ? "win" : "lose", { gap: 3000 }); return _end.apply(Juice, arguments); };
     const _bk = Juice.boosterReveal;
     Juice.boosterReveal = function (fig) { const r = fig && fig.rarity; play(r === "UX" || r === "EX" ? "rare_booster" : "new_figure", { gap: 200 }); return _bk.apply(Juice, arguments); };
     // Impacto sem a animação (ex.: empate / defesa): sons de Miss, Empate, Defesa
@@ -155,8 +159,7 @@
   if (typeof triggerCombat === "function") {
     const _tc = triggerCombat;
     const tc = function () {
-      play("begin_attack", { gap: 300 });
-      play("spin", { delay: 0.25, gap: 300 });
+      play("spin", { gap: 300 });
       return _tc.apply(this, arguments);
     };
     try { triggerCombat = tc; } catch (e) {}
@@ -175,7 +178,7 @@
   // Fim de turno
   if (typeof endTurn === "function") {
     const _et = endTurn;
-    const et = function () { play("end_turn", { gap: 400, vol: 0.55 }); return _et.apply(this, arguments); };
+    const et = function () { return _et.apply(this, arguments); };
     try { endTurn = et; } catch (e) {}
   }
   // Cartas
@@ -217,14 +220,14 @@
       if (inMatch && !last.inMatch) play("duel_start", { gap: 4000 });
       if (inMatch && last.turn != null && state.turn !== last.turn && !state.winner) {
         const bottom = (typeof getBottomRole === "function") ? getBottomRole() : "p1";
-        if (state.turn === bottom) play("new_turn", { vol: 0.6, gap: 800 });
+        if (state.turn === bottom && last.turn != null) play("turn_order", { vol: 0.3, gap: 1500 });
       }
       if (inMatch && state.selectedUnitId !== last.sel) {
-        if (state.selectedUnitId != null && last.sel == null) play("select", { gap: 60 });
-        else if (state.selectedUnitId == null && last.sel != null) play("deselect", { gap: 60 });
+        if (state.selectedUnitId != null && last.sel == null) play("select", { gap: 150 });
+
       }
       const pc = state.units.filter((u) => u.location === "pc").length;
-      if (inMatch && last.pc != null && pc > last.pc && !overlayOpen()) play("surrounded", { gap: 1000 });
+
       last = { turn: state.turn, counter: state.turnCounter, sel: state.selectedUnitId, inMatch, pc };
     } catch (e) {}
   }, 120);

@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokeduel-pwa-v705";
+const CACHE_NAME = "pokeduel-pwa-v706";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -261,7 +261,9 @@ const CORE_ASSETS = [
   "./js/engine/abilities.js",
   "./js/app.js",
   "./js/audio/duel_sfx.js",
-  "./js/ui/duel_screens.js"
+  "./js/engine/plates_extra.js",
+  "./js/ui/duel_screens.js",
+  "./js/ui/deck_screen.js"
 ];
 
 self.addEventListener("install", (event) => {

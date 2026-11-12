@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v705` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v706` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v705). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v706). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,26 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Deck estilo Clash Royale, plates novas, Mega Plate real, sons mais leves (v706)
+- **Novo `js/ui/deck_screen.js`:** a aba `#dtab-deck` é refeita em runtime no visual da Fusão (o DOM antigo fica escondido em `#dk-legacy`).
+  - Topo fixo: times, limites MEGA/UX/EX e 6 slots.
+  - Embaixo: Plates e Coleção.
+  - Interações: arrastar a figura até um slot (segurar 220 ms ou mover de lado); tocar → menu Info/Usar → tocar no slot; arrastar slot sobre slot troca os dois; tocar no slot abre a Info.
+  - A lógica continua a antiga (`toggleDeckEquip`, `switchDeckPreset`, `autoBuildBalancedTeamV540`, `openPlateDetailsModal`).
+- **Info só leitura:** `PDRDuelScreens.showDataReadOnly(root, idx, opts)` é a tela Data sem Disk Expansion/Fundir, usada pelo Deck. Pedido do usuário.
+- **Novo `js/engine/plates_extra.js`:**
+  - **Mega Plate** agora troca pela figura Mega oficial (arte/roleta/MP) por 7 turnos, com reversão pelo `revertMegaEvolution` (campos `preMega*`). Sem forma Mega: "Poder Mega", +30 de dano e ★+1 por 3 turnos (`megaPowerTurns`).
+  - Pede alvo: usa a peça selecionada ou espera um toque (`state.pendingPlateAction = "px:<id>"`, wrapper em `selectUnit`).
+  - O bot (`ai.js`) e o P2P (`handleP2PPacket`) usam o mesmo `PDRPlates.applyPlate`.
+  - **8 plates novas** (do Duel original): fullheal, focusband, xdefend, xspatk, xaccuracy, scoopup, desperate, recycle. Ícones SVG gerados em `BANANA_PLATE_SPRITES`.
+- **Armadilha:** o `ui.js` roda `enforceStrict6CostPlates()` na carga, antes do catálogo estendido, e apagava as plates novas do save. Correção: backup em `localStorage pdr_plates_full_v706`, restaurado na carga.
+- **Sons mais leves (pedido):**
+  - tick → select (0,16 s); portal e tick mudos dentro da partida; move no máximo 1 vez a cada 0,7 s; spin_tick com volume 0,16.
+  - Removidos: begin_attack, end_turn, new_turn (virou turn_order baixo), deselect, surrounded (disparava errado) e cheer.
+- **i18n:** textos de `plate.megaplate.sub` atualizados (PT/EN/ES).
+- **Testes:** 7.548 batalhas 0 problemas; 251 evoluções; 2 partidas bot×bot 0 erros; arrastar/trocar/usar no Deck; Mega real (Charizard → Mega Charizard X), Poder Mega, Focus Band, Recycle; plates novas sobrevivem ao reload.
+- **CACHE_NAME:** v705 → v706
 
 ### 2026-11-12 · Claude · Sons originais do Pokémon Duel + Deoxys corrigidos (v705)
 - **Sons:** 94 efeitos convertidos para `assets/sfx/*.mp3` (mono 80 kbps, 2,1 MB), dos pacotes Common / Duels / Cutscenes do The Sounds Resource (anexados pelo usuário). Não há música de fundo nesses pacotes.

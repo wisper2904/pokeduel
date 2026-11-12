@@ -1574,11 +1574,12 @@ triggerPlayerAIMove = function() {
       bestAction.plateToUse.used = true;
       playSfx("portal");
       if (bestAction.plateToUse.id === "megaplate" && u) {
-        if (!u.name.startsWith("Mega ")) u.name = "Mega " + u.name;
-        u.megaTurns = 5;
-        u.mp = Math.min(3, (u.baseMp || u.mp) + 1);
-        if (u.location === "board" && typeof u.nodeId === "number") {
-          spawnPortalParticles(BOARD_NODES[u.nodeId].x, BOARD_NODES[u.nodeId].y, "#f472b6");
+        // v706: Mega de verdade (ou Poder Mega) via plates_extra.js
+        if (window.PDRPlates) PDRPlates.applyPlate("megaplate", u, true);
+        else {
+          if (!u.name.startsWith("Mega ")) u.name = "Mega " + u.name;
+          u.megaTurns = 5;
+          u.mp = Math.min(3, (u.baseMp || u.mp) + 1);
         }
       } else if (bestAction.plateToUse.id === "double") {
         state.doubleChanceArmed = true;

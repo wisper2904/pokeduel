@@ -158,7 +158,7 @@ const I18N_TRANSLATIONS = {
     "plate.goalblock.name": "Goal Block",
     "plate.goalblock.sub": "Teleporta uma figura aliada do campo para o seu Goal Point em emergência (recebe Wait 1).",
     "plate.megaplate.name": "Mega Plate [UX]",
-    "plate.megaplate.sub": "Mega Evolui a figura selecionada por 7 turnos (+20 DMG, +1★, +1 MP e Pass-Through).",
+    "plate.megaplate.sub": "Mega Evolui de verdade o Pokémon escolhido (forma Mega oficial: arte, roleta e MP) por 7 turnos. Sem forma Mega: Poder Mega, +30 de dano e ★+1 por 3 turnos.",
     "plate.use_btn": "USAR CARTA",
 
     // Shop (Loja da Tia & Troca de Material)
@@ -433,7 +433,7 @@ const I18N_TRANSLATIONS = {
     "plate.goalblock.name": "Goal Block",
     "plate.goalblock.sub": "Teleports an allied figure from the field to defend your Goal Point in emergency (Wait 1).",
     "plate.megaplate.name": "Mega Plate [UX]",
-    "plate.megaplate.sub": "Mega Evolves selected figure for 7 turns (+20 DMG, +1★, +1 MP and Pass-Through).",
+    "plate.megaplate.sub": "Truly Mega Evolves the chosen Pokémon (official Mega form: art, wheel and MP) for 7 turns. No Mega form: Mega Power, +30 damage and ★+1 for 3 turns.",
     "plate.use_btn": "USE PLATE",
 
     // Shop
@@ -708,7 +708,7 @@ const I18N_TRANSLATIONS = {
     "plate.goalblock.name": "Goal Block",
     "plate.goalblock.sub": "Teletransporta una figura aliada del campo para defender tu Goal Point en emergencia (recibe Wait 1).",
     "plate.megaplate.name": "Mega Plate [UX]",
-    "plate.megaplate.sub": "Mega Evoluciona la figura seleccionada por 7 turnos (+20 DMG, +1★, +1 MP y Salto).",
+    "plate.megaplate.sub": "Mega Evoluciona de verdad al Pokémon elegido (forma Mega oficial: arte, ruleta y MP) por 7 turnos. Sin forma Mega: Poder Mega, +30 de daño y ★+1 por 3 turnos.",
     "plate.use_btn": "USAR PLACA",
 
     // Shop

@@ -248,6 +248,7 @@
   function renderFusion() {
     const root = mountFusion();
     if (!root) return;
+    F.ro = false;
     if (F.view === "data" && FIGURES_DB[F.idx]) return renderData(root);
     if (F.view === "xp" && FIGURES_DB[F.idx]) return renderExpansion(root);
     F.view = "grid";
@@ -309,7 +310,7 @@
     const mp = (typeof getFigureEffectiveMp === "function") ? getFigureEffectiveMp(f) : f.mp;
     const lvPct = Math.round(((f.level || 1) / 10) * 100), clvPct = Math.round(((f.clv || 0) / 10) * 100);
     root.innerHTML = `
-      <div class="ds-title"><button class="ds-back" id="ds-back">‹ ${tt("ds.back", "Voltar")}</button><span>Data</span></div>
+      <div class="ds-title"><button class="ds-back" id="ds-back">‹ ${F.ro ? (F.backLabel || "Deck") : tt("ds.back", "Voltar")}</button><span>Data</span></div>
       <div class="ds-data">
         <div class="ds-wheelbox"><canvas id="ds-wheel"></canvas>
           <div class="ds-badges">${rarHtml(f.rarity)}${mpHtml(mp)}</div>
@@ -344,7 +345,7 @@
           </div>`).join("")}
       </div>
       ${zs.length ? `<div class="ds-sec">Z-Move</div>${zs.map((z) => `<div class="ds-z"><b>⚡ ${esc(z.n)}</b> <span style="font-size:10px;color:#c4b5fd">${z.c === "purple" ? "★".repeat(z.s || 4) : (z.d != null ? z.d + " " + tt("ds.dmg", "dano") : "")}</span>${z.t ? `<p>${esc(z.t)}</p>` : ""}</div>`).join("")}` : ""}
-      <div class="ds-btns">
+      ${F.ro ? (F.extraHtml || "") : `<div class="ds-btns">
         <button class="ds-btn" id="ds-go-xp">Disk Expansion</button>
         <button class="ds-btn" id="ds-go-dr">Damage Reallocation</button>
       </div>
@@ -356,14 +357,15 @@
         <button class="ds-btn" data-m="ingot" style="border-color:#eab308">🟨 ${tt("ds.sell_ingot", "Vender Ingot")} <small style="display:block;font-size:8.5px;opacity:.8" id="ds-c-ing"></small></button>
       </div>
       <div class="ds-mat" id="ds-mat"></div>
-      <div class="ds-msg" id="ds-msg"></div>`;
+      <div class="ds-msg" id="ds-msg"></div>`}`;
     const cv = $("ds-wheel");
     const draw = () => drawWheel(cv, segs, { hi: F.open, border: f.rarity === "UX" ? "#c084fc" : "#38bdf8" });
     requestAnimationFrame(draw);
     cv.onclick = (ev) => { const k = sliceAtPoint(cv, segs, ev, 0); if (k >= 0) { F.open = F.open === k ? -1 : k; sfx("tick"); renderData(root); } };
-    $("ds-back").onclick = () => { F.view = "grid"; sfx("tick"); renderFusion(); };
+    $("ds-back").onclick = () => { if (F.ro) { sfx("back"); if (F.onBack) F.onBack(); return; } F.view = "grid"; sfx("tick"); renderFusion(); };
     root.querySelectorAll(".ds-tr").forEach((r) => { r.onclick = () => { const k = +r.dataset.k; F.open = F.open === k ? -1 : k; sfx("tick"); renderData(root); }; });
-    root.querySelectorAll(".ds-ped").forEach((p) => { p.onclick = () => { const ni = +p.dataset.i; if (ni >= 0 && ni !== F.idx && unlocked(ni)) openData(ni); }; });
+    root.querySelectorAll(".ds-ped").forEach((p) => { p.onclick = () => { const ni = +p.dataset.i; if (ni >= 0 && ni !== F.idx && (F.ro || unlocked(ni))) { if (F.ro) { F.idx = ni; F.open = -1; sfx("tick"); renderData(root); } else openData(ni); } }; });
+    if (F.ro) { if (F.onRendered) F.onRendered(root, F.idx); return; }
     $("ds-go-xp").onclick = () => openExpansion("disk");
     $("ds-go-dr").onclick = () => openExpansion("dmg");
     root.querySelectorAll("[data-m]").forEach((b) => {
@@ -839,5 +841,12 @@
   if (!hookJuice()) document.addEventListener("DOMContentLoaded", hookJuice);
   setTimeout(hookJuice, 1500);
 
-  window.PDRDuelScreens = { openData, renderFusion, showEvolvePrompt, showZPicker, zMovesOf, drawWheel };
+  // Tela Data só informativa (sem Disk Expansion / Fundir), para a aba Deck
+  function showDataReadOnly(root, idx, opts) {
+    opts = opts || {};
+    injectCss();
+    F.ro = true; F.idx = idx; F.open = -1; F.onBack = opts.onBack; F.backLabel = opts.backLabel; F.extraHtml = opts.extraHtml || ""; F.onRendered = opts.onRendered;
+    renderData(root);
+  }
+  window.PDRDuelScreens = { showDataReadOnly, openData, renderFusion, showEvolvePrompt, showZPicker, zMovesOf, drawWheel, injectCss, displaySegs };
 })();
