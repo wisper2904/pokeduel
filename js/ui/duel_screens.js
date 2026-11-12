@@ -729,7 +729,11 @@
     };
     document.body.appendChild(m);
     paint();
-    m.addEventListener("click", (e) => { if (e.target === m) m.remove(); });
+    // v718: só fecha tocando fora se o toque COMEÇOU fora. Antes o painel abria no pointerdown do botão e o
+    // "click" do mesmo toque caía no fundo e fechava na hora (só abria segurando).
+    let downOnBg = false;
+    m.addEventListener("pointerdown", (e) => { downOnBg = e.target === m; });
+    m.addEventListener("click", (e) => { if (e.target === m && downOnBg) m.remove(); downOnBg = false; });
     sfx("portal");
   }
   function renderPlatesSafe() { try { if (typeof renderPlatesTray === "function") renderPlatesTray(); } catch (e) {} }
@@ -828,6 +832,11 @@
     if (!window.Juice || Juice.__v704) return !!(window.Juice);
     const orig = Juice.onImpact;
     Juice.onImpact = function (info) {
+      // v718: cena de batalha (js/ui/battle_scene.js), também no empate
+      if (info && info.atkUnit && info.defUnit && window.PDRBattleScene && animEnabled()) {
+        window.__pdrAtkAnimMs = PDRBattleScene.MS;
+        try { PDRBattleScene.play(info, () => orig.call(Juice, info)); return; } catch (e) { console.warn("[battle scene]", e); }
+      }
       if (info && info.winUnit && info.loser && info.winSpin && animEnabled()) {
         window.__pdrAtkAnimMs = ATK_MS;
         try { playAttack(info, () => orig.call(Juice, info)); return; } catch (e) { console.warn("[atk anim]", e); }

@@ -1552,6 +1552,7 @@ function drawHDVectorBoardAndChrome() {
   ctx.textBaseline = "middle";
   ctx.fillText(state.logText, 6, 9.5);
 
+  if (!window.PDR_ARENA3D) {
   // 2. Crisp 1080p Trainer Names & Seat Colors (swaps when viewing from P2's seat across the table!)
   const flipped = isBoardFlipped();
   const bluePatch = ctx.createLinearGradient(66, 19, 152, 48);
@@ -1596,6 +1597,7 @@ function drawHDVectorBoardAndChrome() {
   ctx.font = "900 12.5px sans-serif";
   ctx.fillText(String(state.turnCounter), 176, 39);
 
+  }
   // Prominent Multiplayer & Pass-and-Play Turn Indicator Pill (y = 49..63)
   if (state.mode === "p2p") {
     const isMyTurn = (state.turn === state.myRole);
@@ -1641,6 +1643,8 @@ function drawHDVectorBoardAndChrome() {
   const topRevQueueForChrome = botRoleForChrome === "p1" ? state.reviverQueueP2 : state.reviverQueueP1;
   const botRevQueueForChrome = botRoleForChrome === "p1" ? state.reviverQueueP1 : state.reviverQueueP2;
 
+  // v718: com a arena 3D (js/engine/arena3d.js) estas partes são desenhadas lá
+  if (!window.PDR_ARENA3D) {
   // 3. Crisp 1080p Enhancements on Authentic Green Incubator Capsules & Medical P.C. Pods
   // Back interior of Top-Left Green Incubator Capsules (Opponent P.C. Pods)
   drawGreenIncubatorChambers(false, topRevQueueForChrome);
@@ -1722,6 +1726,8 @@ function drawHDVectorBoardAndChrome() {
     }
   });
 
+  }
+
   // 7b. Live 5:00 Competitor Match Clocks (`04:56` / `04:58`) & Time-Up Loss Check
   const nowClk = performance.now();
   const drawerEl = document.getElementById("drawer-modal");
@@ -1756,6 +1762,7 @@ function drawHDVectorBoardAndChrome() {
   const oppClock = isP2Viewer ? state.clockMsP1 : state.clockMsP2;
   const isMyTurn = (state.turn === (isP2Viewer ? "p2" : "p1"));
 
+  if (!window.PDR_ARENA3D) {
   // Left Clock Box: ALWAYS the viewer's clock (VOCÊ)
   ctx.fillStyle = isP2Viewer ? "#3b0714" : "#061838";
   ctx.fillRect(66, 36, 52, 16);
@@ -1789,6 +1796,7 @@ function drawHDVectorBoardAndChrome() {
   ctx.font = "900 9.5px monospace"; ctx.textAlign = "right";
   ctx.fillText(fmtClk(oppClock), 285, 50);
 
+  }
   // 7c. First-Turn -1 MP Indicator Badge when turnCounter === 300
   if (state.turnCounter === 300) {
     const firstTurnBadge = (typeof t === "function") ? t("battle.first_turn_badge", "1st TURN: -1 MP") : "1st TURN: -1 MP";
@@ -1811,11 +1819,13 @@ function drawHDVectorBoardAndChrome() {
     ctx.fillText(String(list.length), ux, uy + 5.5);
     ctx.restore();
   };
-  drawUltraSpacePortal(25, 136, state.excludedP2, "ULTRA");
-  drawUltraSpacePortal(328, 434, state.excludedP1, "ULTRA");
+  const __up = window.PDR_ULTRA_POS || { top: [25, 136], bot: [328, 434] };
+  drawUltraSpacePortal(__up.top[0], __up.top[1], state.excludedP2, "ULTRA");
+  drawUltraSpacePortal(__up.bot[0], __up.bot[1], state.excludedP1, "ULTRA");
 
 // (Z-Move Gauge e Botão removidos)
 
+  if (!window.PDR_ARENA3D) {
   // 7B. Mascara o botão "AI" que vem desenhado na imagem da arena (não tinha função nenhuma)
   if (!state.postMoveAttackMode) {
     ctx.save();
@@ -1830,6 +1840,7 @@ function drawHDVectorBoardAndChrome() {
     ctx.restore();
   }
 
+  }
   // 8. Glowing Blue [End Turn ⏭️] Button during 2-Step Post-Move Target Selection ONLY (AI Button removed)
   if (state.postMoveAttackMode) {
     const endGrad = ctx.createLinearGradient(118, 446, 118, 475);
@@ -1869,6 +1880,7 @@ function drawHDVectorBoardAndChrome() {
       ctx.beginPath(); ctx.arc(x + w - 2, y + 2, 4.5, 0, Math.PI * 2); ctx.fill();
     }
   };
+  if (!window.PDR_ARENA3D) {
   // Seamlessly mask out the residual Rewind button baked into the arena floor across all arenas
   ctx.save();
   const cleanFloorGrad = ctx.createLinearGradient(240, 486, 240, 528);
@@ -1881,6 +1893,8 @@ function drawHDVectorBoardAndChrome() {
   ctx.roundRect(240, 486, 104, 42, 6);
   ctx.fill();
   ctx.restore();
+
+  }
 
   if (typeof syncActivePlayerPlates === "function") syncActivePlayerPlates();
   const unUsedPlates = (state.plates || []).filter(p => !p.disabledInDeck && !p.used).length;

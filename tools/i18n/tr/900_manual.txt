@@ -371,3 +371,6 @@
 @Atualizar agora|=|Update now|Actualizar ahora
 @Sair|=|Exit|Salir
 @Sair do jogo|=|Exit game|Salir del juego
+@Pular|=|Skip|Saltar
+@Defesa|=|Guard|Defensa
+@Partida|=|Match|Partida

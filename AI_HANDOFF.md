@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v717` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v718` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -156,6 +156,17 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Arena 3D, cena de batalha, Z-Move, MP do bônus semanal, segurar = Dados (v718)
+- **Novo `js/engine/arena3d.js`** (depois de `plates_all.js`). Substitui `drawFullTabletopFrame` (não usa mais a imagem de fundo).
+  - Homografia: retângulo lógico y 95–455 → trapézio. **As coordenadas de `BOARD_NODES`, `P2_BENCH_COORDS`, `BENCH_SLOTS_P1`, `REVIVER_PODS_P1/P2` são projetadas no lugar uma vez** (os mesmos arrays) → desenho, toque e partículas batem. `PDRArena.depthScale(y)` encolhe as peças ao fundo.
+  - Layout do original: P.C. do oponente em cima à direita, o seu embaixo à direita ao lado do banco (cúpulas verdes redondas com líquido, bolhas, varredura, anel de luz); monte de plates do oponente em cima à esquerda (×N) e o seu embaixo à direita (toque abre as cartas); ULTRA em `window.PDR_ULTRA_POS`.
+  - Mesa de mármore procedural por "Tema da arena" (crystal = mármore escuro, marble = branco, banana = ônix dourado, wood, stone, habitats), borda dourada, espessura, reflexo de luz passando, reflexo das peças, brilho dos Gols/Entradas no chão; fundo de cristal com feixes e poeira de luz; pulsos de energia nas linhas; Entradas com anel girando; Gols com feixe e partículas.
+  - HUD do topo redesenhado (painéis azul/vermelho, avatar, nome, escudo de nível, tempo, TURN). `board.js`: partes antigas (nomes, caixas de relógio, cápsulas, anéis, linhas, nós, máscaras da imagem) ficam em `if (!window.PDR_ARENA3D)`; a contagem do relógio continua lá.
+  - Segurar 480 ms numa peça abre a página de Dados (`PDRDuelScreens.showDataReadOnly`, overlay `#pd-unit-info`). `showCornerFigureCard` desligado (pedido do Gabriel).
+- **Novo `js/ui/battle_scene.js`** (depois de `settings_screen.js`): depois da roleta (450 ms), cena de batalha de ~2,6 s — chão de mármore, seu Pokémon na frente/anel azul, oponente ao fundo/anel vermelho, faixas diagonais com golpe e valor, avanço, choque (flash, faíscas, tremor), vencedor empurra; empate rebate os dois; botão Pular. `battle.js` passa `atkUnit, defUnit, atkChosen, defChosen` para `Juice.onImpact`; `duel_screens.js` chama `PDRBattleScene.play` (a tela da roleta espera `PDRBattleScene.MS` a mais).
+- **Bug Z-Move**: o painel abria no `pointerdown` e o `click` do mesmo toque fechava (só abria segurando). Agora o fundo só fecha se o toque começou nele (`duel_screens.js`).
+- **Bug MP no P2P**: o tipo bônus semanal (+1 MP, +10 dano) era sorteado com `Math.random` em cada aparelho → cada jogador via MP diferente. `figures.js getWeeklyBuffState`: calendário fixo (semana desde 05/01/2026 UTC, tipo por hash, sem repetir o anterior), igual para todos.
 
 ### 2026-11-12 · Claude · Tela de Configurações refeita (v717)
 - **Novo `js/ui/settings_screen.js`** (depois de `icons.js`; nos 2 HTMLs e no `sw.js`). Monta `#st-root` dentro de `#dtab-menu` quando a aba abre (wrapper de `switchDrawerTab`).

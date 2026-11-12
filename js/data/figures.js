@@ -577,54 +577,18 @@ let _cachedWeeklyBuffData = null;
 
 function getWeeklyBuffState() {
   const now = Date.now();
-  if (!_cachedWeeklyBuffData && typeof localStorage !== "undefined") {
-    try {
-      const raw = localStorage.getItem(WEEKLY_BUFF_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.typeId && typeof parsed.expiresAt === "number") {
-          _cachedWeeklyBuffData = parsed;
-        }
-      }
-    } catch (e) {}
-  }
-
-  // Semana inicial padrão: Pedra (Rock)
-  if (!_cachedWeeklyBuffData) {
-    _cachedWeeklyBuffData = {
-      typeId: "Rock",
-      startedAt: now,
-      expiresAt: now + WEEKLY_BUFF_DURATION_MS,
-      weekNumber: 1
-    };
-    if (typeof localStorage !== "undefined") {
-      try {
-        localStorage.setItem(WEEKLY_BUFF_STORAGE_KEY, JSON.stringify(_cachedWeeklyBuffData));
-      } catch (e) {}
-    }
-  }
-
-  // Se a semana de 7 dias acabou, sorteia um novo elemento aleatório (sem repetir o anterior!)
-  if (now >= _cachedWeeklyBuffData.expiresAt) {
-    const weeksElapsed = Math.max(1, Math.floor((now - _cachedWeeklyBuffData.expiresAt) / WEEKLY_BUFF_DURATION_MS) + 1);
-    let lastTypeId = _cachedWeeklyBuffData.typeId;
-    for (let w = 0; w < weeksElapsed; w++) {
-      const candidates = WEEKLY_BUFF_TYPES.filter(t => t.id !== lastTypeId);
-      const pick = candidates[Math.floor(Math.random() * candidates.length)] || WEEKLY_BUFF_TYPES[0];
-      lastTypeId = pick.id;
-    }
-    const newStart = _cachedWeeklyBuffData.expiresAt + (weeksElapsed - 1) * WEEKLY_BUFF_DURATION_MS;
-    _cachedWeeklyBuffData = {
-      typeId: lastTypeId,
-      startedAt: newStart,
-      expiresAt: newStart + WEEKLY_BUFF_DURATION_MS,
-      weekNumber: (_cachedWeeklyBuffData.weekNumber || 1) + weeksElapsed
-    };
-    if (typeof localStorage !== "undefined") {
-      try {
-        localStorage.setItem(WEEKLY_BUFF_STORAGE_KEY, JSON.stringify(_cachedWeeklyBuffData));
-      } catch (e) {}
-    }
+  // v718: calendário fixo, igual em todos os aparelhos (antes era sorteado com Math.random em cada um,
+  // então no P2P cada jogador tinha um tipo bônus diferente e o MP/dano não batia entre os dois).
+  // Semanas começam toda segunda 00:00 UTC; o tipo vem de um hash do número da semana, sem repetir o anterior.
+  const EPOCH = Date.UTC(2026, 0, 5);
+  const wk = Math.floor((now - EPOCH) / WEEKLY_BUFF_DURATION_MS);
+  const N = WEEKLY_BUFF_TYPES.length;
+  const h = (w) => { let x = (w * 2654435761) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) % N; };
+  let idx = h(wk); if (idx === h(wk - 1)) idx = (idx + 1) % N;
+  const startedAt = EPOCH + wk * WEEKLY_BUFF_DURATION_MS;
+  if (!_cachedWeeklyBuffData || _cachedWeeklyBuffData.weekNumber !== wk + 1) {
+    _cachedWeeklyBuffData = { typeId: WEEKLY_BUFF_TYPES[idx].id, startedAt, expiresAt: startedAt + WEEKLY_BUFF_DURATION_MS, weekNumber: wk + 1 };
+    try { if (typeof localStorage !== "undefined") localStorage.setItem(WEEKLY_BUFF_STORAGE_KEY, JSON.stringify(_cachedWeeklyBuffData)); } catch (e) {}
   }
 
   const meta = WEEKLY_BUFF_TYPES.find(t => t.id.toLowerCase() === String(_cachedWeeklyBuffData.typeId).toLowerCase()) || WEEKLY_BUFF_TYPES[0];

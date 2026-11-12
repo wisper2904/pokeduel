@@ -1123,7 +1123,7 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
       const winUnit = outcome.winner === "atk" ? atkUnit : (outcome.winner === "def" ? defUnit : null);
       const loser   = outcome.winner === "atk" ? defUnit : (outcome.winner === "def" ? atkUnit : null);
       const winSpin = outcome.winner === "atk" ? atkSpin.chosen : (outcome.winner === "def" ? defSpin.chosen : null);
-      if (window.Juice) Juice.onImpact({ outcome, winUnit, loser, winSpin, isZMove: Boolean(winSpin && winSpin.isZMove) });
+      if (window.Juice) Juice.onImpact({ outcome, winUnit, loser, winSpin, isZMove: Boolean(winSpin && winSpin.isZMove), atkUnit, defUnit, atkChosen: atkSpin && atkSpin.chosen, defChosen: defSpin && defSpin.chosen });
 
       // Ditto Transform Mirror ability: Se vencer o combate usando Transform Mirror, transforma-se no oponente por 3 turnos!
       const isTransformSpin = winSpin && (winSpin.name.toLowerCase().includes("transform") || winSpin.effect === "transform");
