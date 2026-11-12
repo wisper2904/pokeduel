@@ -1197,6 +1197,14 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
         } else if (outcome.effect === "banish") {
           banishToUltraSpace(loser);
           evolveUnitInMatch(winUnit);
+        } else if (outcome.effect === "wait") {
+          // Roletas oficiais: o roxo só aplica Espera (antes caía no nocaute)
+          loser.waitTurns = Math.max(loser.waitTurns || 0, 2);
+          if (loser.baseId === "lucario") loser.waitTurns = 0;
+          evolveUnitInMatch(winUnit);
+        } else if (outcome.effect === "none") {
+          // Efeito especial do jogo original ainda não implementado: vence o duelo sem nocautear
+          evolveUnitInMatch(winUnit);
         } else {
           if (loser.baseId === "magikarp") {
             applyUnitEvolutionNow(loser);
