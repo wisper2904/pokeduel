@@ -977,8 +977,75 @@ const BoosterCinematic = {
     ctx.restore();
   },
 
+  // Booster com a arte original: a imagem é cortada acima do emblema (38% da altura); a parte de cima vira a tampa
+  drawBoosterCaseArt(ctx, cx, cy, o, art) {
+    const dw = 156, dh = dw * (art.naturalHeight / art.naturalWidth);
+    const bottom = 49, topY = bottom - dh, cut = 0.38;   // corte acima do emblema central
+    const seamY = topY + dh * cut;               // = boca do booster
+    const sH = art.naturalHeight, sW = art.naturalWidth;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(o.tilt || 0);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.beginPath(); ctx.ellipse(0, bottom + 4, dw * 0.46, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+    // brilho pulsando na junta enquanto as travas soltam
+    if (o.latch > 0 && o.open < 0.05) {
+      ctx.save();
+      ctx.globalAlpha = 0.5 + 0.5 * Math.sin((o.now || 0) * 0.03);
+      ctx.shadowColor = o.glow; ctx.shadowBlur = 22 * o.latch;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-dw * 0.42, seamY - 1.5, dw * 0.84 * o.latch, 3);
+      ctx.restore();
+    }
+
+    if (o.open > 0.01) {
+      // feixe de luz saindo da boca
+      const beamH = 230 * o.open;
+      const bg = ctx.createLinearGradient(0, seamY, 0, seamY - beamH);
+      bg.addColorStop(0, "rgba(255,255,255,0.95)");
+      bg.addColorStop(0.25, o.glow);
+      bg.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalAlpha = 0.6 * o.open; ctx.fillStyle = bg;
+      ctx.beginPath();
+      ctx.moveTo(-dw * 0.36, seamY); ctx.lineTo(-dw * 0.66, seamY - beamH);
+      ctx.lineTo(dw * 0.66, seamY - beamH); ctx.lineTo(dw * 0.36, seamY);
+      ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+    }
+
+    // tampa (parte de cima da arte): sobe e inclina para trás
+    ctx.save();
+    const lift = o.open * 74;
+    ctx.translate(0, seamY - lift);
+    ctx.rotate(-o.open * 0.22);
+    ctx.scale(1, 1 - o.open * 0.35);
+    ctx.drawImage(art, 0, 0, sW, sH * cut, -dw / 2, -dh * cut, dw, dh * cut);
+    ctx.restore();
+
+    // corpo (parte de baixo da arte)
+    ctx.drawImage(art, 0, sH * cut, sW, sH * (1 - cut), -dw / 2, seamY, dw, dh * (1 - cut));
+
+    if (o.open > 0.01) {
+      // boca iluminada
+      ctx.save();
+      ctx.shadowColor = o.glow; ctx.shadowBlur = 30 * o.open;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath(); ctx.ellipse(0, seamY + 1, dw * 0.40, 3 + 7 * o.open, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+
   // Maleta metálica: corpo com travas, tampa que gira para trás e luz saindo de dentro
   drawBoosterCase(ctx, cx, cy, o) {
+    // v697: usa a arte original dos boosters (assets/ui/boosters/). Sem a imagem, cai no desenho por código.
+    const artName = { silver: "metallic", purple: "purple", gold: "gold", red: "locked" }[this.caseKind] || "metallic";
+    this.caseImgs = this.caseImgs || {};
+    let art = this.caseImgs[artName];
+    if (!art) { art = new Image(); art.src = "assets/ui/boosters/" + artName + ".png"; this.caseImgs[artName] = art; }
+    if (art.complete && art.naturalWidth) { this.drawBoosterCaseArt(ctx, cx, cy, o, art); return; }
     const kinds = {
       silver: { a: "#e2e8f0", b: "#94a3b8", c: "#475569", stripe: "#38bdf8" },
       purple: { a: "#e9d5ff", b: "#a855f7", c: "#581c87", stripe: "#f0abfc" },

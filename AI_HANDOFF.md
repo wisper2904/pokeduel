@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v696` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v697` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v696). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v697). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -151,6 +151,16 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-11 · Claude · Boosters com a arte original (v697)
+- **O que:**
+  - Novos arquivos em `assets/ui/boosters/` (12 PNGs 120×103 enviados pelo Gabriel, da Bulbagarden Archives): `red`, `rainbow`, `rainbow_1`, `purple`, `purple_1`, `metallic`, `green`, `gold`, `gold_1`, `blue`, `black`, `locked`.
+  - `js/ui/ui.js` `BoosterCinematic.drawBoosterCaseArt`: a abertura usa a arte (silver → `metallic`, purple → `purple`, gold/multi → `gold`, locked → `locked`). A imagem é cortada a 38% da altura: a parte de cima vira a tampa que sobe e inclina; luz, brilhos, névoa e silhueta continuam iguais. A maleta desenhada por código ficou só como reserva se a imagem não carregar.
+  - `js/data/sprites.js`: slots do hub (`booster_silver`, `booster_purple`) apontam para `boosters/metallic.png` e `boosters/purple.png`.
+  - `sw.js`: os 4 PNGs em uso entraram em `CORE_ASSETS`.
+- **Em aberto:** 8 artes ainda sem uso (red, rainbow, rainbow_1, purple_1, green, gold_1, blue, black) — Gabriel decide para que tipo de baú cada uma vai. `assets/ui/booster_silver.png` e `booster_purple.png` antigos ficaram sem uso.
+- **CACHE_NAME:** v696 → v697
+- **Verificação:** Playwright: abertura com metallic, purple e locked renderiza; sem erro de console.
 
 ### 2026-11-11 · Claude · Abertura de baús no estilo Pokémon Duel (v696)
 - **O que:** `js/ui/ui.js`, objeto `BoosterCinematic` (mesma API; `start()` ganhou 6º argumento opcional `newFlags`):
