@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v708` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v709` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v708). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v709). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,23 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Habilidades, lote 2: ações especiais, alcance 2 e passivas restantes (v709)
+- **Novo `js/engine/abilities_act.js`** (depois de `abilities_ext.js`).
+  - **Botão "⚡ Habilidade: <nome>"** (HTML fixo sobre o tabuleiro, `#ab-act-btn`): aparece quando a peça selecionada tem ação disponível neste turno (antes de mover, sem Espera, sem sono/congelamento).
+  - Tocar acende os alvos (`state.__abMode`, via `state.reachableNodes`); o wrapper em `onNodeClicked` executa.
+  - P2P: pacote `P2P_ABILITY` com as posições finais.
+  - **34 ações:**
+    - Trocar de lugar: swapAdj (Run Off, Strong Breeze, Electroswap, Electrobind), swapAny (Snowy Transformation).
+    - Saltar para longe: warp (Tunnel Construction, Magnetic Body, Spaceborne), dash por casas vazias (Rush In, Reckless Charge), raid (Raid: move 3 e entra em postMoveAttackMode).
+    - Passar por cima de vizinhos: hop (Distort, High-Speed Drill, Bonfire, Ultra Pump Up, Gulp), chainHop (Forest Leap, Cosmic Surfer).
+    - Outras: goal (Cut Off), summon (Swarm), spinAt (Long Lick, Entangle, Lock On ×3).
+  - **Alcance 2:** High Flying, Paper Sword (1ª batalha), Stance Change. Alvos a 2 passos com peça no meio, somados em `selectUnit`.
+  - **Passivas:** Arm Thrust Evolution, Sand Blizzard, Steel Breaker / Rough Skin (marcador `_cracked`), King Horn, Paper Sword (exclui com Cracked), Survive / Multitype, Pressure, Deliver, Flower Carpet, Pulsar Venom, Spark Noise, Power Construct, Surprise Back, Bite Instinct, Max Vital Spirit, Diving Entry.
+- **Correção:** os ataques depois de mover passam `forced` com `manualSpin`, e `abilities_ext.js` tratava isso como pacote remoto, pulando noAttack e fuga. Agora só conta como remoto se vier com `atkSpin`/`defSpin`.
+- **Cobertura:** 411 de 433 habilidades em uso têm mecânica. Ainda só texto (22): Gluttony, Spellbind, Big Eggsplosion, Surprise Strike, Ice Scramble, Full Metal Body, Bite Down, Open Sea Singer, Electromagnetic Barrier, Come Here, Rocket Ride, Illusion ×2, Permafrost, Ultra Stack, Psychic Amplifier ×2, King Spike, Volt Swap, Slime Touch, Slippery, Aftermath Switch. Dependem de mecânicas que o jogo não tem (tag, golpes que fazem outra peça girar, Twisted Spoon, Round/Sing, escolhas do jogador antes da batalha).
+- **Testes:** Tunnel Construction, Electroswap, High Flying, Long Lick, Raid e o botão; 16 checagens do lote 1; 7.548 batalhas 0 problemas; 251 evoluções; 6 partidas bot×bot 0 erros.
+- **CACHE_NAME:** v708 → v709
 
 ### 2026-11-12 · Claude · Habilidades restantes, lote 1: 179 habilidades à mão + motor estendido (v708)
 - **Novo `js/engine/abilities_ext.js`** (logo depois de `abilities.js`).

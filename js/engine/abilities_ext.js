@@ -519,13 +519,14 @@ if (typeof selectUnit === "function") {
 if (typeof triggerCombat === "function") {
   const _v708Trig = triggerCombat;
   triggerCombat = function (atk, def, broadcast, forced) {
-    if (atk && def && !forced && abCannotAttack(atk)) {
+    const remote = !!(forced && (forced.atkSpin || forced.defSpin));
+    if (atk && def && !remote && abCannotAttack(atk)) {
       setLogText(`🚫 ${atk.name} não pode atacar (Habilidade).`);
       if (typeof endTurn === "function") endTurn(true);
       return;
     }
     // Fugir do ataque (Run Away / Sand Veil / Emergency Exit) — automático fora do P2P quando a batalha parece ruim
-    if (atk && def && !forced && state.mode !== "p2p" && abShouldFlee(atk, def)) {
+    if (atk && def && !remote && state.mode !== "p2p" && abShouldFlee(atk, def)) {
       const ef = abilityEfOf(def) || [];
       const fl = ef.find((e) => e.k === "fleeToBench" || e.k === "dodgeUnder" || e.k === "fleeSwap");
       if (fl && abFlee(def, atk, fl.k)) { if (typeof endTurn === "function") endTurn(true); return; }
