@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v707` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v708` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v707). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v708). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,26 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Habilidades restantes, lote 1: 179 habilidades à mão + motor estendido (v708)
+- **Novo `js/engine/abilities_ext.js`** (logo depois de `abilities.js`).
+  - Dados: `OFFICIAL_DUEL_ABILITIES_MANUAL` (gerado de `/home/claude/gen/abil_manual.py`), que substitui o `ef` automático de 179 habilidades.
+  - Cobertura em uso: 358/433 com mecânica (antes ~187); 75 ainda só texto.
+- **Condições novas:** hasStatus, notSt, confused, onBench, atEntry, adjHas, fieldHas{side,names,types,st,min}, noOppWithin2, vsPureType, oppHasStatus, oppNotEvolved, oppDmgMin.
+- **Tipos novos:**
+  - MP: mpAura (set/n, range, maxMp/minMp, cap, nearOwnTypes, tag p/ não acumular), mpSet, mpMin, mp com per.
+  - Roleta e dano: auraDmg, protect, lessInFrom, stars, dmgMult, dmg.move (só no golpe com aquele nome), oppShift, oppGoldMiss, nullOppDmg, oppRespin, selfRespin.
+  - Pós-batalha: battleOppWait, selfStatusAfter, battleOppNullAbility (`unit._abNull`), magicTrick, synchronize, whiteStatusImmune, evolveSurvive, evolveOnInflict.
+  - Contra nocaute: noKoEffect (scope selfAdj), fairyGuard, reflectKoWhite, voltAbsorb, markerShield, koEvolve (ignora o alvo do deck), koToEntry, koExile, koRevivePC, regenerator.
+  - Imunidade com scope (allies/alliesAdj).
+  - Movimento: passSel ampliado (any, st, wait, names), allowPass, allyPassTypes, noPassOver (byTypes/protectTypes/chain), passKill, flyOverParalyze.
+  - Entrar em campo e turnos: onEnterCleanse, onEnterClearWait, startWait, badDreams, selfCleanseStart, evolveOnRevive.
+  - Regras: noAttack, noAttackAfterMove, blockOppPlates, surroundImmune/noSurround (wrapper em `checkSurroundKOs`).
+  - Fuga: fleeToBench/dodgeUnder/fleeSwap, automáticos fora do P2P quando a batalha parece ruim (`abShouldFlee`).
+- **Wrappers:** abilityEfOf, abilityCondOk, abilityPerCount, abilityDamageBonus, abilityImmuneTo, getEffectiveUnitMp, getActiveWheel, evaluateCombat, computeReachableWithPaths, executeMove, selectUnit, triggerCombat, confirmUseSelectedPlate, checkSurroundKOs, endTurn, demoFullMatchState.
+- **Testes:** 15 habilidades verificadas uma a uma (Guts, Swift Swim, Diffuse Poison, Shell Armor, Rapid Evolution, Gooey, Fire Alert, Spinning Pattern, Sticky Web, Thicket Slip, Bide, Dark Stone, Bad Dreams, Chemical Pollen, Mold Breaker); 7.548 batalhas 0 problemas; 251 evoluções; 4 partidas bot×bot 0 erros.
+- **Faltam 75**, quase todas ações especiais "no começo do turno, em vez de mover…", alcance 2 e marcadores. Próximo lote.
+- **CACHE_NAME:** v707 → v708
 
 ### 2026-11-12 · Claude · Loja repaginada + Mercado Diário + prêmio diário no hub (v707)
 - **Novo `js/ui/shop_screen.js`:** a aba `#dtab-shop` é refeita em runtime. O DOM antigo fica em `#sh-legacy`; o card da Troca por Material foi movido e aparece pelo botão no fim.
