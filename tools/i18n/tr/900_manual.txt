@@ -374,3 +374,4 @@
 @Pular|=|Skip|Saltar
 @Defesa|=|Guard|Defensa
 @Partida|=|Match|Partida
+@vitórias seguidas|=|wins in a row|victorias seguidas

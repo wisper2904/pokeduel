@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v718` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v719` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -156,6 +156,12 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Arena refeita pelo layout das capturas do original (v719)
+- Gabriel mandou 6 capturas do Pokémon Duel e disse que a v718 ficou pior (mesa inclinada, P.C. e plates fora do lugar). `js/engine/arena3d.js` reescrito:
+  - **Tabuleiro plano** (sem homografia; `PDRArena.P` é identidade e `depthScale` = 1). Chão de cristal em tela cheia (faces claras/escuras, arestas com luz, reflexos iridescentes); temas: crystal = cristal escuro, habitats = cristal de gelo, stone = magma, banana = ouro, marble, wood.
+  - Posições medidas nas capturas (415×739 → 353×530): nós num retângulo x 38–314; banco de cima (y 123/141) e de baixo (y 389/414) com anéis brancos; P.C. = 2 cúpulas verdes (oponente x 58/99 base 146, você x 266/312 base 397); monte de plates do oponente atrás das cúpulas, sua carta em (304, 449) com cantos amarelos; máquinas com pokébola (sua azul embaixo à esquerda, do oponente laranja em cima à direita) com o contador da Ultra Space; barras em y 158/367, amarela do lado de quem joga.
+  - Gols: círculo cheio azul ▷ (seu) / laranja ◁ (oponente) com onda; Entradas ◎. HUD: painéis azul/vermelho, avatar, nome, faixa (sequência de vitórias ou ★ rating), tempo, TURN.
 
 ### 2026-11-12 · Claude · Arena 3D, cena de batalha, Z-Move, MP do bônus semanal, segurar = Dados (v718)
 - **Novo `js/engine/arena3d.js`** (depois de `plates_all.js`). Substitui `drawFullTabletopFrame` (não usa mais a imagem de fundo).
