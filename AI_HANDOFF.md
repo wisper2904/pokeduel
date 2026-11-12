@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v698` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v699` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,19 +141,28 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v698). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v699). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
 - [ ] **Dois deploys por push**: rodam o workflow `Deploy PokeDuel to GitHub Pages` (`.github/workflows/deploy-pages.yml`) e o automático `pages build and deployment`. Eles competem e às vezes um falha (76f3f3a: falha no passo Deploy; e8fc86d: startup_failure), o que gera e-mail de erro. Resolver em Settings → Pages → Source: escolher **GitHub Actions** (aí o automático para) — ou, se ficar "Deploy from a branch", apagar o workflow.
-- [ ] 53 figuras do `FIGURES_DB` sem roleta oficial: 49 não existiam no Pokémon Duel (Kabutops, Starmie, Ditto, Jirachi…) ou são formas com outro nome (Palkia/Dialga/Giratina Origin, Deoxys Attack/Speed, Shaymin Land/Sky); 4 com dado incompleto na Bulbapedia (Lapras, Popplio, Poliwrath, Tentacruel). Pré-existente: 6 figuras com roleta que não soma 96 (Lapras, Kabutops, Mega Starmie, Mega Lopunny, Palkia/Dialga Origin).
+- [ ] 42 figuras do `FIGURES_DB` sem arte nem roleta oficial porque nunca existiram no Pokémon Duel (Kabutops, Starmie, Staryu, Lopunny, Ditto, Jirachi, Togekiss, Porygon…): mantêm sprite e roleta antigos. Lapras, Popplio, Poliwrath e Tentacruel têm arte oficial, mas a roleta da Bulbapedia está incompleta (não soma 96) → roleta antiga mantida. Pré-existente: 6 roletas que não somam 96 (Lapras, Kabutops, Mega Starmie, Mega Lopunny, Palkia/Dialga Origin).
 - [ ] Efeito roxo `none` (40 fatias): efeitos especiais do jogo original ainda não implementados (marcadores, MP −2, mover a si mesmo etc.) — vencem o duelo sem nocautear. Texto original em `effectText`.
-- [ ] 652 imagens oficiais em `assets/figures_duel/` ainda **sem uso** (187×256, retrato, já com base). Usar como sprite exige ajustar o desenho no tabuleiro/hub e perguntar ao Gabriel.
+- [ ] 422 das 652 imagens oficiais em `assets/figures_duel/` não têm figura correspondente no `FIGURES_DB` (seriam figuras novas: precisam de entrada nova no FINAL do `FIGURES_DB`).
 - [ ] Não há testes automatizados de regra (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Arte oficial em todas as figuras do Duel + roletas restantes (v699)
+- **O que:** `js/data/official_disks.js` regerado:
+  - Roletas oficiais agora em **226 de 272** figuras (antes 219): formas casadas pelo nome base (Palkia/Dialga/Giratina Origin, Deoxys Attack/Speed, Shaymin Land/Sky) e, quando a versão preferida tem roleta incompleta, usa outra versão da mesma figura que some 96.
+  - Novo `OFFICIAL_DUEL_SPRITES` (230 spriteKeys): troca `AUTHENTIC_FIG_SPRITES[key]` e `loadedFigImages[key]` pela arte oficial (`assets/figures_duel/*.webp`, 187×256 desenhado a 36×50, apoio calculado pelo fundo de cada imagem). A vista de costas `key_back` também recebe a arte oficial → o lado do jogador mostra as figuras de frente. Vale para tabuleiro, hub, Deck, Loja e abertura de baú (todos leem `AUTHENTIC_FIG_SPRITES`/`loadedFigImages`).
+  - `sw.js`: as 230 imagens usadas entraram em `CORE_ASSETS` (~4 MB) para funcionar offline.
+- **CACHE_NAME:** v698 → v699
+- **Verificação:** Playwright: hub, partida e aba Deck com a arte oficial, sem erro de console; `node --check` OK.
+- **Pendências:** §6 (42 figuras que não existiam no Duel; 422 imagens de figuras que ainda não estão no jogo).
 
 ### 2026-11-11 · Claude · Roletas oficiais do Pokémon Duel + imagens (v698)
 - **O que:**
