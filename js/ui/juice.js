@@ -71,15 +71,16 @@
       src.start(t); src.stop(t + dur + 0.03);
     } catch (e) {}
   }
+  const realSfx = () => !!(window.PDRSound && PDRSound.settings && PDRSound.settings.on);
   const SFX = {
-    thump() { tone(150, 38, 0.22, "sine", 0.16); noise(0.12, 0.05, 1800, 200); },
+    thump() { if (realSfx()) return; tone(150, 38, 0.22, "sine", 0.16); noise(0.12, 0.05, 1800, 200); },
     sparkle() { [880, 1175, 1568, 2093].forEach((f, i) => tone(f, f * 1.01, 0.16, "triangle", 0.045, i * 0.055)); },
     coin() { tone(988, 988, 0.07, "square", 0.04); tone(1319, 1319, 0.16, "square", 0.04, 0.07); },
     whoosh() { noise(0.35, 0.07, 400, 3800); },
     rumble(d) { noise(d, 0.09, 140, 900); tone(60, 110, d, "sawtooth", 0.05); },
     arpeggio(base) { [1, 1.25, 1.5, 2, 2.5].forEach((m, i) => tone(base * m, base * m, 0.2, "triangle", 0.06, i * 0.08)); },
-    fanfare() { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, f, 0.22, "square", 0.045, i * 0.09)); },
-    sad() { [392, 349, 311, 262].forEach((f, i) => tone(f, f * 0.98, 0.3, "triangle", 0.06, i * 0.16)); }
+    fanfare() { if (realSfx()) return; [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, f, 0.22, "square", 0.045, i * 0.09)); },
+    sad() { if (realSfx()) return; [392, 349, 311, 262].forEach((f, i) => tone(f, f * 0.98, 0.3, "triangle", 0.06, i * 0.16)); }
   };
 
   // --------------------------------------------------------------------------

@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v704` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v705` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v704). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v705). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,25 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Sons originais do Pokémon Duel + Deoxys corrigidos (v705)
+- **Sons:** 94 efeitos convertidos para `assets/sfx/*.mp3` (mono 80 kbps, 2,1 MB), dos pacotes Common / Duels / Cutscenes do The Sounds Resource (anexados pelo usuário). Não há música de fundo nesses pacotes.
+- **Novo `js/audio/duel_sfx.js`** (depois de `app.js`, antes de `duel_screens.js`): `PDRSound.play(nome, {vol, rate, delay, gap})` via Web Audio no `sfxCtx`.
+  - `playSfx` antigo mapeado: tick→confirm (na roleta → spin_tick), back→cancel, step/jump→move, portal→plate_ok, level_up→levelup, hit→plate_cancel (mudo durante a batalha).
+  - Eventos:
+    - Roleta: begin_attack + spin no `triggerCombat`; spin_tick no `Juice.tick`; spin_stop.
+    - Golpe: som pelo tipo do vencedor (t_*), gold_attack, golpes físicos (punches/scythe/slam) e zmove, tocado no lançamento da animação.
+    - Resultado: ko / condição (st_*) / push e bench, e miss / tie / shield / dodge quando não há vencedor.
+    - Partida: form_a/form_b na evolução, win/lose + cheer no fim, duel_start, new_turn, end_turn, select/deselect, cartas (plate_sel/plate_cancel/use_plate), booster.
+  - Liga/desliga e volume no topo da aba Config (`localStorage pdr_sfx`).
+  - `juice.js`: thump/fanfare/sad sintetizados ficam mudos quando os sons reais estão ligados.
+- **Deoxys:** as 3 Deoxys antigas (índices 26/55/201) apontavam todas para a figura oficial Nº218 (Speed).
+  - Agora: 26 = Attack Forme (Nº224), 55 = Deoxys Normal (Nº219), 201 = Speed Forme (Nº218); 399 renomeado para Defense Forme.
+  - Corrigidos `OFFICIAL_DUEL_DISKS`, `OFFICIAL_DUEL_SPRITES` e os nomes no fim de `official_disks.js`.
+- **Armadilha de teste:** o headless também guardava cache HTTP. `/tmp/unsw.py` agora chama `Network.clearBrowserCache`.
+- **Arquivos:** `js/audio/duel_sfx.js`, `assets/sfx/`, `js/ui/juice.js`, `js/ui/duel_screens.js`, `js/data/official_disks.js`, `index.html`, `PokeDuel-Web-v5.6.0.html`, `sw.js`.
+- **Testes:** 94 sons carregam e decodificam; sequência de sons de uma batalha conferida; 7.548 batalhas 0 problemas; 2 partidas bot×bot 0 erros.
+- **CACHE_NAME:** v704 → v705
 
 ### 2026-11-12 · Claude · Telas estilo original: Fusão/Data/Disk Expansion, Evolve?, Z-Move, animação de ataque (v704)
 - **Novo `js/ui/duel_screens.js`** (carrega depois de `app.js`):

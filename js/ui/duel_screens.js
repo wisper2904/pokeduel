@@ -504,14 +504,14 @@
     $("ds-xrec").onclick = () => { xpRecommended(f); sfx("portal"); pickSel(x.sel); rerender(tt("ds.rec_done", "Distribuição recomendada aplicada. Toque Confirm para salvar.")); };
     $("ds-xreset").onclick = () => {
       if (isDmg) x.clv = f.wheel.map(() => 0); else x.sizes = xpBase(f).slice();
-      sfx("tick"); pickSel(x.sel); rerender(tt("ds.reset_done", "Voltou ao disco base. Toque Confirm para salvar."));
+      if (!(window.PDRSound && PDRSound.play("reset"))) sfx("tick"); pickSel(x.sel); rerender(tt("ds.reset_done", "Voltou ao disco base. Toque Confirm para salvar."));
     };
     $("ds-xok").onclick = () => {
       if (isDmg) f.clvAlloc = x.clv.slice();
       else { x.sizes.forEach((sz, k) => { f.wheel[k].size = sz; }); f.diskPointsSpent = xpSpent(f); }
       try { if (typeof saveEconomyAndUpgrades === "function") saveEconomyAndUpgrades(); } catch (e) {}
       try { if (typeof demoFullMatchState === "function" && !(state && state.phase === "playing")) {} } catch (e) {}
-      sfx("level_up");
+ if (window.PDRSound && PDRSound.play("fusion_set")) {} else sfx("level_up");
       rerender("✅ " + tt("ds.saved", "Salvo!"));
     };
   }
@@ -718,6 +718,7 @@
       m.querySelectorAll(".ds-zopt").forEach((d) => { d.onclick = () => { pick = +d.dataset.k; sfx("tick"); paint(); }; });
       m.querySelector("#ds-z-yes").onclick = () => {
         state.zMoveChoice = { uid: cur.uid, idx: pick };
+        if (window.PDRSound) PDRSound.play("buff");
         if (!state.zMoveArmed) { m.remove(); _oldToggleZ(); } else { m.remove(); renderPlatesSafe(); }
         const z = zMovesOf(cur)[pick];
         if (typeof setLogText === "function" && z) setLogText(`⚡ Z-MOVE ${z.name} ${tt("ds.z_armed_for", "armado para")} ${cur.name}! ${tt("ds.z_attack_hint", "Ataque com ela para usar.")}`);
@@ -782,6 +783,7 @@
     const ease = "cubic-bezier(.2,.8,.2,1)";
     dim.animate([{ opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }], { duration: ATK_MS + 250, fill: "forwards" });
     [wi, li].forEach((el, k) => el.animate([{ opacity: 0, transform: `scale(.4) translateY(${k ? -20 : 20}px)` }, { opacity: 1, transform: "scale(1)" }], { duration: 180, easing: ease, fill: "forwards" }));
+    try { if (window.PDRSoundBattle) setTimeout(() => PDRSoundBattle.launch(info), 170); } catch (e) {}
     const physical = winSpin && (winSpin.color === "white" || winSpin.color === "gold") && (winSpin.dmg || 0) > 0 && /tackle|punch|claw|bite|slash|kick|crash|strike|fang|tail|smash|cut|scratch|charge|ram|blitz|fist|blade/i.test(winSpin.name || "");
     setTimeout(() => {
       // investida do vencedor
