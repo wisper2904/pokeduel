@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokeduel-pwa-v709";
+const CACHE_NAME = "pokeduel-pwa-v710";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -261,6 +261,7 @@ const CORE_ASSETS = [
   "./js/engine/abilities.js",
   "./js/engine/abilities_ext.js",
   "./js/engine/abilities_act.js",
+  "./js/engine/abilities_more.js",
   "./js/app.js",
   "./js/audio/duel_sfx.js",
   "./js/engine/plates_extra.js",

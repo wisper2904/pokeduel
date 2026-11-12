@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v709` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v710` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v709). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v710). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,22 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Habilidades, lote 3 (v710)
+- **Novo `js/engine/abilities_more.js`** (depois de `abilities_act.js`):
+  - Full Metal Body / Bite Down: o oponente não foge da batalha.
+  - Rocket Ride: na 1ª batalha, Flamethrower vira Flame Gun (roxo, KO).
+  - Big Eggsplosion: Barrage +60 e sacrifica um Exeggcute.
+  - Gluttony: Sweet Scent tira a peça do P.C.
+  - Aftermath Switch: explode um Voltorb seu se compensar.
+  - Illusion: troca antes da batalha, automática fora do P2P.
+  - Slippery: escapa do cerco uma vez.
+  - Come Here: cada lado põe uma peça do banco no Entry Point.
+  - Ações do botão ⚡ a partir do banco: Volt Swap, Ice Scramble, Surprise Strike (volta ao banco depois). Slime Touch (marcador `_slime` = Slime Barrier + habilidade anulada).
+- **`abilities_act.js`:** o botão agora usa `window.PDRAbilityActions.canAct/targetsFor/perform` em tempo de chamada, para outros arquivos poderem estender as ações.
+- **Cobertura:** 423 de 433 em uso. Só texto (não existe a mecânica de base): Electromagnetic Barrier, Permafrost, Psychic Amplifier ×2, King Spike, Spellbind, Ultra Stack, Open Sea Singer, Gluttony parcial, Rocket Ride parcial (a ação de lançar).
+- **Testes:** Volt Swap, Rocket Ride, Slippery; lotes 1 e 2 de novo; 7.548 batalhas 0 problemas; 251 evoluções; 3 partidas bot×bot 0 erros.
+- **CACHE_NAME:** v709 → v710
 
 ### 2026-11-12 · Claude · Habilidades, lote 2: ações especiais, alcance 2 e passivas restantes (v709)
 - **Novo `js/engine/abilities_act.js`** (depois de `abilities_ext.js`).

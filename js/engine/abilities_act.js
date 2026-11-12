@@ -53,6 +53,7 @@
     339: "sparkNoise", 585: "powerConstruct", 134: "fleeBack", 272: "fleeBack", 386: "slippery", 354: "aftermath",
     180: "biteInstinct", 209: "biteInstinct", 238: "maxVital", 166: "divingEntry", 191: "divingEntry"
   };
+  const PUB = () => window.PDRAbilityActions || { canAct, targetsFor, perform };
   const idOf = (u) => { const f = u && FIGURES_DB[u.baseIdx]; return f ? f.officialDuelId : null; };
   const actOf = (u) => (u && !u._abNull ? A[idOf(u)] : null);
   const pas = (u, k) => !!(u && !u._abNull && PASSIVE[idOf(u)] === k);
@@ -146,7 +147,7 @@
     const dr = document.getElementById("drawer-modal");
     const ov = document.getElementById("wheel-overlay");
     const u = state && state.units && state.units.find((x) => x.uid === state.selectedUnitId);
-    const show = !!(u && !(dr && dr.classList.contains("show")) && !(ov && ov.classList.contains("show")) && (state.__abMode && state.__abMode.uid === u.uid || canAct(u)));
+    const show = !!(u && !(dr && dr.classList.contains("show")) && !(ov && ov.classList.contains("show")) && (state.__abMode && state.__abMode.uid === u.uid || PUB().canAct(u)));
     if (!show) { b.style.display = "none"; if (state && state.__abMode && (!u || state.__abMode.uid !== u.uid)) cancelMode(); return; }
     const a = actOf(u);
     b.textContent = state.__abMode ? `✕ ${tt("ab.cancel", "Cancelar")} ${a.label}` : `⚡ ${tt("ab.use", "Habilidade")}: ${a.label}`;
@@ -157,8 +158,8 @@
   function toggleTargetMode() {
     const u = state.units.find((x) => x.uid === state.selectedUnitId);
     if (state.__abMode) { cancelMode(); try { selectUnit(u.uid); } catch (e) {} return; }
-    if (!canAct(u)) return;
-    const a = actOf(u), tg = targetsFor(u, a);
+    if (!PUB().canAct(u)) return;
+    const a = actOf(u), tg = PUB().targetsFor(u, a);
     state.__abMode = { uid: u.uid, targets: tg };
     state.reachableNodes = tg.slice(); state.reachablePaths = {}; state.attackTargets = [];
     snd("plate_sel");
@@ -264,7 +265,7 @@
         const u = state.units.find((x) => x.uid === m.uid);
         const a = actOf(u);
         state.__abMode = null; state.reachableNodes = [];
-        if (u && a && m.targets.includes(nodeId)) { perform(u, a, nodeId); return; }
+        if (u && a && m.targets.includes(nodeId)) { PUB().perform(u, a, nodeId); return; }
         log(tt("ab.cancelled", "Habilidade cancelada."));
         try { if (u) selectUnit(u.uid); } catch (e) {}
         return;
