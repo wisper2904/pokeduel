@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v715` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v716` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -157,6 +157,13 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 7. Log de alterações (mais recente no topo)
 
+### 2026-11-12 · Claude · Ícones oficiais do Bulbagarden (v716)
+- Gabriel baixou pelo Chrome um .zip com 47 arquivos de `archives.bulbagarden.net` (Category:Pokémon Duel + rarity icons). Recortados e reduzidos (PIL).
+- `assets/plates/icons/` — ícone por categoria, como no original: `movement` (roxo), `spin` (azul), `recovery` (rosa e curas), `pokemon` (dourado), `plates` (verde), `battle20/30/50` (vermelho: 30 = X Attack/Overdrive/Soul Dew, 50 = Desperate Times), `card`. `plates_all.js` → `iconOf(p)`, grava `p.icon` e `BANANA_PLATE_SPRITES[id]` (inclusive das 9 antigas).
+- `assets/plates/rarity/{c,uc,r,ex}.png` (raridade das cartas de plate); `assets/ui/rarity/{c,uc,r,ex,ux}.png` (raridade das figuras: .ds-rar e campos #…-rarity).
+- `assets/ui/icons/`: coin, gem, material, carmonite (+_pedestal), raremetal/cube/ingot (+ _c/_uc/_r/_ex/_ux), booster/ai/6-pack tickets, `mp0`–`mp3` ("MP n" com n ≤ 3 vira o ícone oficial com o número).
+- Removidos: fundos de cor e raridades do Serebii, SVGs próprios de Carmonite/Material/MP.
+
 ### 2026-11-12 · Claude · Todas as 152 Plates do original + cartas no formato do jogo + sprites de moedas/materiais/raridade/MP (v715)
 - **Novo `js/engine/plates_all.js`** (depois de `slice_effects.js`; nos 2 HTMLs e no `sw.js`). Lista oficial do Serebii (152 plates): marca as 41 que já existiam com `off` (ID oficial), `color`, `ocost` e raridade oficial, e adiciona as **112 que faltavam** (`window.PDRPlatesAll.D`).
   - Simples: Bright Powder, Clear Wait, Swap Spot (2 toques), No Guard, Quick Care, Priority Recovery, Ballast, 6 curas (Awakening, Paralyz/Confuse/Ice/Burn Heal, Antidote), Invisibility Cape, Power Battle, Switcheroo, Force Remove, Counter Attack.
@@ -168,7 +175,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
   - Bot: ganha 2 plates que combinam com o deck (Mega Stone da espécie, item do tipo mais comum, Clear Wait/curas) e usa por pontuação (`triggerPlayerAIMove`).
 - **Cartas no formato do original** (`window.PDRPlateCard`): carta preta recortada, ícone no canto, raridade ao lado, nome na cor da plate, barra de custo em 6 segmentos, ✓ no deck. Tela "Editar Plates" (`deck_screen.js`): 6 slots + "X/6 Custo", catálogo 5 colunas, filtro de custo 1–6/TODAS. Na partida (`#plates-tray.pk-tray`): fileira de cartas embaixo, carta escolhida aberta grande com a descrição, Usar / ✕.
 - **Novo `js/ui/icons.js`** (depois de `shop_screen.js`): troca 🪙 🔻/💎 🟦 🔷/🧱 🟣 🟩 e "MP n" por ícones; raridade (.ds-rar e #fcc/#fdet/#pcard/#pldet-rarity) com os ícones oficiais.
-- Assets: `assets/plates/plate{purple,gold,green,pink,red,blue}.png` + `c/uc/r/ex/ux.png` e `assets/ui/icons/` (coin, gem, raremetal, cube, ingot, tickets do Serebii; carmonite/material/mp em SVG próprio — **pendente trocar pelos oficiais do Bulbagarden**, que bloqueia download automático (Cloudflare 403)).
+- Assets: `assets/plates/plate{purple,gold,green,pink,red,blue}.png` + `c/uc/r/ex/ux.png` e `assets/ui/icons/` (coin, gem, raremetal, cube, ingot, tickets do Serebii; carmonite/material/mp em SVG próprio; trocados pelos oficiais na v716).
 - i18n: 248 linhas novas em `tools/i18n/tr/900_manual.txt` (nomes PT/ES, descrições EN/ES, mensagens).
 - Testes: efeitos (`/tmp/pa.py`, `/tmp/pb.py`), wheels 7.548 / 0 problemas, evo, 3 partidas bot × bot, sfx713/ext712/abt sem erro; telas PT/EN/ES conferidas.
 

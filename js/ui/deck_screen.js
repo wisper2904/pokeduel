@@ -132,7 +132,6 @@
     try { if (typeof getSavedEquippedPlateIds === "function") return getSavedEquippedPlateIds(); } catch (e) {}
     return (state.plates || []).filter((p) => !p.disabledInDeck).map((p) => p.id);
   }
-  const PF = [["all", "Todas"], ["purple"], ["gold"], ["green"], ["pink"], ["red"], ["blue"]];
   const plateRar = (r) => { const src = window.PDR_PLATE_RARITY_ICON && PDR_PLATE_RARITY_ICON(r); return src ? `<img class="ds-rimg" src="${src}" alt="${esc(r)}">` : rarHtml(r); };
   function plateById(id) { return (typeof BASE_PLATE_CATALOG !== "undefined" && BASE_PLATE_CATALOG.find((p) => p.id === id)) || { id, name: id, rarity: "C", sub: "" }; }
 

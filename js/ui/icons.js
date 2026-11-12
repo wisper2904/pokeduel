@@ -3,18 +3,18 @@
 //  - Troca os emojis da interface por ícones: 🪙 Moedas · 🔻/💎 Gemas · 🟦 Rare Metal · 🔷 Material · 🟣 Carmonite.
 //  - "MP 3" / "MP3" / "PM 3" → ícone de MP + número.
 //  - Raridade (C/UC/R/EX/UX): badges .ds-rar e os campos #fcc-rarity, #fdet-rarity, #pcard-rarity, #pldet-rarity
-//    viram os ícones oficiais (assets/plates/<r>.png).
-//  - Moeda, gema, Rare Metal, cubo, lingote e tickets: Serebii (assets/ui/icons/*.png).
-//    Carmonite, Material e MP: desenho próprio em SVG (o Serebii não tem e o Bulbagarden bloqueia acesso automático).
+//    viram os ícones oficiais (assets/ui/rarity/<r>.png).
+//    v716: todos os ícones são os oficiais do Bulbagarden (moeda, gema, Rare Metal, cubo, lingote, Carmonite, Material, MP0–3, raridades).
 //  - Não mexe em <input>, <textarea>, <select>/<option>, <script>, <style> nem no canvas. API: window.PDRIcons.
 // ============================================================================
 (function () {
   "use strict";
   const ICON = {
     coin: "assets/ui/icons/coin.png", gem: "assets/ui/icons/gem.png", raremetal: "assets/ui/icons/raremetal.png",
-    material: "assets/ui/icons/material.svg", carmonite: "assets/ui/icons/carmonite.svg", mp: "assets/ui/icons/mp.svg",
+    material: "assets/ui/icons/material.png", carmonite: "assets/ui/icons/carmonite.png",
     cube: "assets/ui/icons/cube.png", ingot: "assets/ui/icons/ingot.png", ticket: "assets/ui/icons/booster_ticket.png", aiticket: "assets/ui/icons/ai_ticket.png",
-    C: "assets/plates/c.png", UC: "assets/plates/uc.png", R: "assets/plates/r.png", EX: "assets/plates/ex.png", UX: "assets/plates/ux.png"
+    mp0: "assets/ui/icons/mp0.png", mp1: "assets/ui/icons/mp1.png", mp2: "assets/ui/icons/mp2.png", mp3: "assets/ui/icons/mp3.png",
+    C: "assets/ui/rarity/c.png", UC: "assets/ui/rarity/uc.png", R: "assets/ui/rarity/r.png", EX: "assets/ui/rarity/ex.png", UX: "assets/ui/rarity/ux.png"
   };
   const EMO = { "🪙": "coin", "🔻": "gem", "💎": "gem", "🟦": "raremetal", "🔷": "material", "🟣": "carmonite", "🧱": "material", "🟩": "cube" };
   const RX = /(🪙|🔻|💎|🟦|🔷|🟣|🧱|🟩)|\b(MP|PM) ?([0-9])\b/g;
@@ -22,7 +22,7 @@
   const css = document.createElement("style");
   css.textContent = `
   img.pdi{display:inline-block!important;width:1.25em!important;height:1.25em!important;max-width:none!important;min-width:0!important;vertical-align:-.28em!important;object-fit:contain!important;margin:0 .08em!important;padding:0!important;border:0!important;background:none!important;position:static!important;transform:none!important;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
-  img.pdi.mp{width:1.15em!important;height:1.15em!important;margin-right:.12em!important}
+  img.pdi.mp{width:1.3em!important;height:1.3em!important;vertical-align:-.32em!important}
   .ds-rar.C,.ds-rar.UC,.ds-rar.R,.ds-rar.EX,.ds-rar.UX,[data-pdrar]{color:transparent!important;text-shadow:none!important;background-color:transparent!important;border-color:transparent!important;box-shadow:none!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;min-width:22px!important;min-height:22px!important}
   ${["C", "UC", "R", "EX", "UX"].map((r) => `.ds-rar.${r},[data-pdrar="${r}"]{background-image:url(${ICON[r]})!important}`).join("\n  ")}
   `;
@@ -30,7 +30,7 @@
 
   function img(key) {
     const i = document.createElement("img");
-    i.className = "pdi" + (key === "mp" ? " mp" : ""); i.src = ICON[key]; i.alt = ""; i.draggable = false; i.setAttribute("aria-hidden", "true");
+    i.className = "pdi" + (/^mp\d$/.test(key) ? " mp" : ""); i.src = ICON[key]; i.alt = ""; i.draggable = false; i.setAttribute("aria-hidden", "true");
     return i;
   }
   function skipEl(el) {
@@ -53,9 +53,10 @@
         frag.appendChild(document.createTextNode(s.slice(last, m.index)));
         frag.appendChild(img(EMO[m[1]]));
       } else {
+        const n = Number(m[3]);
+        if (n > 3) continue;
         frag.appendChild(document.createTextNode(s.slice(last, m.index)));
-        frag.appendChild(img("mp"));
-        frag.appendChild(document.createTextNode(m[3]));
+        frag.appendChild(img("mp" + n));
       }
       last = m.index + m[0].length; changed = true;
     }

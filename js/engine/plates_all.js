@@ -1,7 +1,7 @@
 // ============================================================================
 // v715 · Todas as Plates do Pokémon Duel original (lista do Serebii, 152 plates)
 //  - Marca as 41 que já existiam com ID oficial, cor e custo, e adiciona as 111 que faltavam.
-//  - Ícones: fundo oficial da cor da plate (assets/plates/plate<cor>.png) + símbolo desenhado por cima.
+//  - Ícones: os oficiais do Bulbagarden por categoria (assets/plates/icons/) e raridade de plate (assets/plates/rarity/).
 //  - Efeitos por turno em state.__pa.turn[chave][uid] = turnCounter; efeitos do duelo em state.__pa.duel[dono].
 //  - Marcas na peça: _paItem (+dano no campo), _paSph {esfera:true}, _paBlade, _paSticky, _paMetalCoat,
 //    _paOverdrive, _paLongBarrel, _paMeteor, _paTherian, _paRet (plate que volta se a peça for nocauteada).
@@ -331,35 +331,18 @@
     enforceStrict6CostPlates();
   } catch (e) {}
 
-  // ------------------------------------------------------------------ ícones: fundo oficial + símbolo
-  const BG = (c) => `assets/plates/plate${c}.png`;
-  if (typeof BANANA_PLATE_SPRITES !== "undefined") {
-    const imgs = {};
-    const draw = (p, glyph) => {
-      const im = imgs[p.color]; if (!im || !im.complete || !im.naturalWidth) return;
-      try {
-        const cv = document.createElement("canvas"); cv.width = 112; cv.height = 112; const g = cv.getContext("2d");
-        const sc = Math.min(104 / im.naturalWidth, 104 / im.naturalHeight), w = im.naturalWidth * sc, h = im.naturalHeight * sc;
-        g.drawImage(im, (112 - w) / 2, (112 - h) / 2, w, h);
-        const txt = String(glyph || "★"); const big = [...txt].length <= 2;
-        g.font = `900 ${big ? 42 : 28}px Arial, "Segoe UI Emoji", "Noto Color Emoji", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
-        g.lineWidth = 6; g.strokeStyle = "rgba(15,23,42,.85)"; g.strokeText(txt, 56, 58); g.fillStyle = "#fff"; g.fillText(txt, 56, 58);
-        BANANA_PLATE_SPRITES[p.id] = cv.toDataURL("image/png");
-      } catch (e) {}
-    };
-    const todo = BASE_PLATE_CATALOG.filter((p) => p.color && (!BANANA_PLATE_SPRITES[p.id] || /^data:image\/svg/.test(BANANA_PLATE_SPRITES[p.id])));
-    todo.forEach((p) => { BANANA_PLATE_SPRITES[p.id] = BG(p.color); });
-    const GLY = { ironpower: "+20", dreadpower: "+20", flamepower: "+20", meadowpower: "+20", splashpower: "+20", mindpower: "+20", toxicpower: "+20", dracopower: "+20", claypower: "+20", spookypower: "+20", zappower: "+20",
-      burndrive: "⚙", dousedrive: "⚙", chilldrive: "⚙", shockdrive: "⚙", twistedspoon: "🥄", fullheal: "✚", focusband: "✊", xdefend: "🛡", xspatk: "★", xaccuracy: "◎", scoopup: "↩", desperate: "‼", recycle: "♻" };
-    const GLY0 = { hurdle: "⤴", double: "↻", xatk: "30", xspeed: "»", revive: "✚", goalblock: "⛉", megaplate: "🧬", longthrow: "➚", pkmswitch: "↷" };
-    BASE_PLATE_CATALOG.forEach((p) => { p.glyph = (D[p.id] && D[p.id].glyph) || GLY[p.id] || GLY0[p.id] || (/energy$/.test(p.id) ? "⚡" : p.badge); });
-    ["purple", "gold", "green", "pink", "red", "blue"].forEach((c) => {
-      const im = new Image(); imgs[c] = im;
-      im.onload = () => { todo.filter((p) => p.color === c).forEach((p) => draw(p, (D[p.id] && D[p.id].glyph) || GLY[p.id] || (/energy$/.test(p.id) ? "⚡" : p.badge))); };
-      im.src = BG(c);
-    });
+  // ------------------------------------------------------------------ ícones oficiais (Bulbagarden) por categoria, como no original
+  // roxo = Movimento · azul = Giro · rosa/curas = Recuperação · dourado = Pokémon · verde = Plates · vermelho = Batalha 20/30/50
+  const ICO = (n) => `assets/plates/icons/${n}.png`;
+  const BATTLE30 = ["xatk", "overdrive", "souldew"], BATTLE50 = ["desperate"];
+  function iconOf(p) {
+    if ((D[p.id] && D[p.id].heal) || p.color === "pink") return ICO("recovery");
+    if (p.color === "red") return ICO(BATTLE50.includes(p.id) ? "battle50" : BATTLE30.includes(p.id) ? "battle30" : "battle20");
+    return ICO({ purple: "movement", blue: "spin", gold: "pokemon", green: "plates" }[p.color] || "card");
   }
-  window.PDR_PLATE_RARITY_ICON = (r) => ({ C: "assets/plates/c.png", UC: "assets/plates/uc.png", R: "assets/plates/r.png", EX: "assets/plates/ex.png", UX: "assets/plates/ux.png" })[r] || null;
+  BASE_PLATE_CATALOG.forEach((p) => { p.icon = iconOf(p); if (typeof BANANA_PLATE_SPRITES !== "undefined") BANANA_PLATE_SPRITES[p.id] = p.icon; });
+  const RAR_PLATE = { C: "assets/plates/rarity/c.png", UC: "assets/plates/rarity/uc.png", R: "assets/plates/rarity/r.png", EX: "assets/plates/rarity/ex.png", UX: "assets/ui/rarity/ux.png" };
+  window.PDR_PLATE_RARITY_ICON = (r) => RAR_PLATE[r] || null;
 
   // ------------------------------------------------------------------ uso
   const send = (pkt) => { try { if (state.mode === "p2p" && typeof sendP2PPacket === "function") sendP2PPacket(pkt); } catch (e) {} };
@@ -775,13 +758,13 @@
   function plateCard(p, o) {
     o = o || {};
     const cat = BASE_PLATE_CATALOG.find((x) => x.id === p.id) || p;
-    const col = PCOL[cat.color] || "#e2e8f0", g = cat.glyph, cost = cat.ocost != null ? cat.ocost : 1;
-    const num = g && /^\+?\d+$/.test(g);
-    const icon = g ? `<span class="pk-ic ${num ? "num" : ""}">${escH(g.replace(/^\+/, ""))}</span>` : `<img class="pk-img" src="${escH(BANANA_PLATE_SPRITES[p.id] || "")}" alt="">`;
+    const col = PCOL[cat.color] || "#e2e8f0", cost = cat.ocost != null ? cat.ocost : 1;
+    const icon = `<img class="pk-img" src="${escH(cat.icon || BANANA_PLATE_SPRITES[p.id] || "")}" alt="">`;
+    const rsrc = RAR_PLATE[cat.rarity || "C"];
     const segs = Array.from({ length: 6 }, (_, i) => `<i class="${i < cost ? "f" : ""}"></i>`).join("");
     const name = tt("plate." + p.id + ".name", cat.name || p.name);
     return `<div class="pk-card ${o.big ? "big" : ""} ${o.on ? "on" : ""} ${o.sel ? "sel" : ""} ${o.used ? "used" : ""} ${o.dim ? "dim" : ""}" data-p="${escH(p.id)}"${o.idx != null ? ` data-ix="${o.idx}"` : ""} style="--pc:${col}"><div class="pk-in">${icon}
-      <span class="pk-r">${escH(cat.rarity || "C")}</span><div class="pk-nm">${escH(name)}${o.copy ? " #" + o.copy : ""}</div>${o.big ? `<div class="pk-ds">${o.desc || ""}</div>` : ""}
+      ${rsrc ? `<img class="pk-r img" src="${rsrc}" alt="${escH(cat.rarity || "C")}">` : `<span class="pk-r">${escH(cat.rarity || "C")}</span>`}<div class="pk-nm">${escH(name)}${o.copy ? " #" + o.copy : ""}</div>${o.big ? `<div class="pk-ds">${o.desc || ""}</div>` : ""}
       <div class="pk-seg">${segs}</div>${o.on ? `<span class="pk-ck">✓</span>` : ""}${o.cnt > 1 ? `<span class="pk-n">x${o.cnt}</span>` : ""}${o.used ? `<span class="pk-used">${escH(tt("pa.used", "USADA"))}</span>` : ""}</div></div>`;
   }
   window.PDRPlateCard = plateCard;
@@ -794,7 +777,8 @@
   .pk-card.dim,.pk-card.used{opacity:.42}
   .pk-ic{position:absolute;left:6%;top:6%;width:44%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:var(--pc);font-weight:900;font-size:26cqw;line-height:1;text-shadow:0 0 6px color-mix(in srgb,var(--pc) 55%,transparent)}
   .pk-ic.num{color:#fff;font-size:15cqw;background:radial-gradient(circle,#fb923c,#dc2626 70%);clip-path:polygon(50% 0,61% 22%,85% 12%,78% 38%,100% 50%,78% 62%,85% 88%,61% 78%,50% 100%,39% 78%,15% 88%,22% 62%,0 50%,22% 38%,15% 12%,39% 22%);text-shadow:0 1px 2px #000}
-  .pk-img{position:absolute;left:5%;top:5%;width:46%;aspect-ratio:1;object-fit:contain}
+  .pk-img{position:absolute;left:5%;top:5%;width:46%;height:40%;object-fit:contain;object-position:left center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
+  .pk-r.img{right:14%;top:5%;height:15%;width:auto;max-width:34%;object-fit:contain}
   .pk-r{position:absolute;right:15%;top:5%;color:#fff;font:900 14cqw/1 Arial,sans-serif;text-shadow:0 1px 0 #000}
   .pk-nm{position:absolute;left:7%;right:3%;top:52%;color:var(--pc);font-weight:900;font-size:12.5cqw;line-height:1.1;letter-spacing:-.02em;overflow:hidden;max-height:3.4em;word-break:break-word}
   .pk-seg{position:absolute;left:16%;right:5%;bottom:4.5%;display:flex;gap:2.5%}
@@ -805,7 +789,7 @@
   .pk-used{position:absolute;left:0;right:0;top:38%;text-align:center;font-weight:900;font-size:11cqw;color:#fff;background:rgba(0,0,0,.6)}
   .pk-card.big{width:min(74vw,290px);cursor:default}
   .pk-card.big .pk-nm{top:33%;font-size:9cqw;max-height:none}
-  .pk-card.big .pk-ic{width:36%;font-size:20cqw}.pk-card.big .pk-ic.num{font-size:12cqw}.pk-card.big .pk-img{width:36%}
+  .pk-card.big .pk-img{width:36%;height:26%}.pk-card.big .pk-r.img{height:11%}
   .pk-card.big .pk-r{font-size:13cqw}
   .pk-ds{position:absolute;left:8%;right:7%;top:47%;bottom:12%;color:#fff;font-size:5.4cqw;line-height:1.3;overflow:auto}
   .pk-ds div{font-size:4.3cqw!important}
