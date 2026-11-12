@@ -1,0 +1,186 @@
+1680|=|☁️ Save to the Cloud with Login and Password|☁️ Guarda en la nube con usuario y contraseña
+1681|=|Password-protected cloud sync, keeping your decks, gems and progress available on any phone or PC.|Sincronización en la nube protegida con contraseña, con tus mazos, gemas y progreso disponibles en cualquier móvil o PC.
+1682|=|Reload and Update Now|Recargar y actualizar ahora
+1683|=|Keep Playing|Seguir en el juego
+1684|=|GAME MINI TUTORIAL|MINI TUTORIAL DEL JUEGO
+1685|=|Official Quick Guide · Battle Rules|Guía rápida oficial · Reglas de combate
+1686|=|📋 All|📋 Todos
+1687|=|🎯 Objective|🎯 Objetivo
+1688|=|🔄 Wheel|🔄 Ruleta
+1689|=|♟️ MP & Surround|♟️ PM y cerco
+1690|=|🎴 Plates & Mega|🎴 Placas y Mega
+1691|1. O objetivo da vitória: o GOL!|1. The Win Condition: GOAL POINT!|1. El objetivo de la victoria: ¡la META!
+1692|=|How to Win|Cómo ganar
+1693|=|: Just take|: Solo tienes que llevar
+1694|qualquer um dos seus Pokémon até o Gol do adversário|any of your Pokémon to the opponent's Goal Point|cualquiera de tus Pokémon a la Meta del rival
+1695|=|(the red node at the top of the arena). Step on it and the win is instant!|(el nodo rojo de arriba de la arena). ¡Si la pisas, la victoria es instantánea!
+1696|=|You don't need to defeat them all|No hace falta derrotarlos a todos
+1697|=|: The goal is strategic and territorial!|: ¡El objetivo es estratégico y territorial!
+1698|Defenda seu Gol|Defend your Goal|Defiende tu Meta
+1699|: Proteja o seu próprio Gol na base inferior. Se uma peça inimiga pisar nele, você perde na hora.|: Protect your own Goal Point at the bottom base. If an enemy piece steps on it, you lose immediately.|: Protege tu propia Meta en la base inferior. Si una pieza enemiga la pisa, pierdes al instante.
+1700|Portais de Entrada (Pontos de Entrada)|Entry Gates (Entry Points)|Portales de entrada (Puntos de entrada)
+1701|=|: The 2 nodes at your base where your figures leave the Bench for the arena. Careful not to let the opponent block both!|: Los 2 nodos de tu base por donde tus figuras salen del banquillo a la arena. ¡Cuidado de que el rival no bloquee los dos!
+1702|=|2. The Battle Wheel & Attack Colors|2. La ruleta de combate y los colores de los ataques
+1703|=|🔵 Blue|🔵 Azul
+1704|=|: Dodge / Invulnerable|: Esquiva / Invulnerable
+1705|=|🟡 Gold|🟡 Dorado
+1706|=|: Breaks Purple (★)|: Rompe Morado (★)
+1707|=|🟣 Purple|🟣 Morado
+1708|=|: Beats White + Effect|: Vence a Blanco + efecto
+1709|=|⚪ White|⚪ Blanco
+1710|=|: Wins on Damage|: Gana por daño
+1711|=|🔴 Red|🔴 Rojo
+1712|: Falha|: Miss|: Fallo
+1713|Ao combater, as duas figuras giram seu Disco de Dados de 96 fatias:|When battling, both figures spin their 96-slice Data Disk:|Al combatir, ambas figuras giran su Disco de Datos de 96 porciones:
+1715|AZUL (Esquiva)|BLUE (Dodge)|AZUL (Esquiva)
+1716|=|: Immune! Blocks any attack and ends in a safe tie.|: ¡Inmune! Bloquea cualquier ataque y termina en empate seguro.
+1718|DOURADO (Prioridade)|GOLD (Priority)|DORADO (Prioridad)
+1719|=|BEATS PURPLE (★)|VENCE A MORADO (★)
+1720|=|no matter what, even against a 4-star purple! Against White or Gold, it wins by numeric damage.|¡siempre, incluso contra un morado de 4 estrellas! Contra Blanco o Dorado, gana por daño numérico.
+1722|ROXO (Status)|PURPLE (Status)|MORADO (Estado)
+1723|=|BEATS WHITE AND RED|VENCE A BLANCO Y ROJO
+1724|=|! If both land on purple, the one with more stars wins (★★★ > ★★ > ★). Applies devastating conditions like Sleep, Paralysis or Freeze!|! Si los dos caen en morado, gana el de más estrellas (★★★ > ★★ > ★). ¡Aplica estados devastadores como Sueño, Parálisis o Congelación!
+1726|BRANCO (Normal)|WHITE (Normal)|BLANCO (Normal)
+1727|=|: Straight damage duel! The higher number knocks out the rival.|: ¡Duelo directo de daño! Quien saque el número más alto derrota al rival.
+1729|VERMELHO (Falha)|RED (Miss)|ROJO (Fallo)
+1730|=|: Loses to any attack and the piece is knocked out.|: Pierde contra cualquier ataque y la pieza es derrotada.
+1732|=|Quick Hierarchy|Jerarquía rápida
+1733|=|Gold beats Purple ➔ Purple beats White ➔ White wins on Highest Damage!|Dorado vence a Morado ➔ Morado vence a Blanco ➔ ¡Blanco gana con el mayor daño!
+1734|3. Movimentação (MP) e Pontos de Entrada|3. Movement (MP) & Entry Gates|3. Movimiento (PM) y Puntos de entrada
+1735|=|3 MP|3 PM
+1736|=|Sprinter|Velocista
+1737|=|Tactical|Táctico
+1738|=|1 MP|1 PM
+1739|=|Heavy Tank|Tanque pesado
+1740|MP (Pontos de Movimento)|MP (Movement Points)|PM (Puntos de Movimiento)
+1741|=|: Sets how many spaces the figure can move per turn:|: Define cuántas casillas puede avanzar la figura por turno:
+1742|=|MP 3 (Runners)|PM 3 (Corredores)
+1743|: Avançam até 3 casas (Pikachu, Mew, Froakie). Perfeitos para avançar no Gol inimigo no início!|: Move up to 3 spaces (Pikachu, Mew, Froakie). Perfect for rushing the enemy Goal early!|: Avanzan hasta 3 casillas (Pikachu, Mew, Froakie). ¡Perfectos para avanzar a la Meta enemiga al principio!
+1744|=|MP 2 (Fighters)|PM 2 (Combatientes)
+1745|=|: The ideal balance of damage and speed (Lucario, Blaziken, Greninja).|: El equilibrio ideal entre daño y velocidad (Lucario, Blaziken, Greninja).
+1746|=|MP 1 (Defensive Colossi)|PM 1 (Colosos defensivos)
+1747|: Movem 1 casa (Charizard, Snorlax, Rayquaza), mas têm roletas destrutivas para segurar o Gol!|: Move 1 space (Charizard, Snorlax, Rayquaza), but have destructive wheels to hold the Goal!|: Mueven 1 casilla (Charizard, Snorlax, Rayquaza), ¡pero tienen ruletas destructivas para aguantar la Meta!
+1748|Bloqueio de Portais (Armadilha de Entrada)|Gate Block (Entry Trap)|Bloqueo de portales (trampa de entrada)
+1749|=|: If the opponent steps on both your entry gates, your Bench is locked and no new figure can enter the arena until you drive them out!|: ¡Si el rival pisa tus dos portales de entrada, tu banquillo queda bloqueado y ninguna figura nueva puede entrar a la arena hasta echarlo!
+1750|4. Cerco Tático (Nocaute por Cerco)|4. Tactical Surround (Surround K.O.)|4. Cerco táctico (derrota por cerco)
+1751|=|Instant Knockout With No Wheel!|¡Derrota instantánea sin ruleta!
+1752|=|If every adjacent route of a figure is surrounded by opposing pieces, it's eliminated on the spot!|¡Si todas las rutas adyacentes de una figura quedan rodeadas por piezas rivales, es eliminada al instante!
+1753|=|Immediate Elimination|Eliminación inmediata
+1754|=|: When a miniature is surrounded on all its connected paths, it goes straight to the P.C. without even spinning the wheel!|: ¡Cuando una miniatura queda rodeada en todos sus caminos conectados, va directo al P.C. sin girar la ruleta!
+1755|=|Careful at the Edges|Cuidado en los bordes
+1756|=|: Miniatures at the board's edges have fewer escape paths (only 2 or 3), so just 2 enemy pieces can surround them!|: ¡Las miniaturas en los bordes del tablero tienen menos rutas de escape (solo 2 o 3) y pueden ser rodeadas por solo 2 piezas enemigas!
+1757|Cerco no Gol|Goal Surround|Cerco en la Meta
+1758|: Cercar o defensor do Gol nocauteia o Pokémon e garante a vitória da partida!|: Surrounding the Goal Point defender knocks out the Pokémon and wins the match!|: ¡Rodear al defensor de la Meta derrota al Pokémon y asegura la victoria!
+1759|=|5. P.C. (Pokémon Center) & Rotation Cycle|5. P.C. (Centro Pokémon) y ciclo de rotación
+1760|• Pokémon nocauteados são enviados aos espaços do|• Knocked-out Pokémon are sent to the pods of the|• Los Pokémon derrotados van a las cápsulas del
+1761|=|(maximum capacity of 2 figures per player).|(capacidad máxima de 2 figuras por jugador).
+1762|• Quando um 3º Pokémon for nocauteado, o mais antigo que estava no P.C.|• When a 3rd Pokémon is knocked out, the oldest one in the P.C.|• Cuando un 3.er Pokémon es derrotado, el más antiguo del P.C.
+1763|=|automatically leaves and returns to your Bench|sale automáticamente y vuelve a tu banquillo
+1764|• Ao voltar ao Banco, ele fica com|• Back on the Bench, it has|• Al volver al banquillo, tiene
+1765|Espera|Wait|Espera
+1766|=|for 1 to 2 turns before it can move again.|durante 1 o 2 turnos antes de poder moverse otra vez.
+1767|6. Placas Táticas (botão [Placas])|6. Tactical Plates ([Plates] Button)|6. Placas tácticas (botón [Placas])
+1768|=|Tap the button|Toca el botón
+1769|[🎴 Placas]|[🎴 Plates]|[🎴 Placas]
+1770|=|at the bottom of the arena before moving to use strategic cards with a point cost (◆):|al pie de la arena antes de moverte para usar cartas estratégicas con coste en puntos (◆):
+1772|=|: Lets you respin the wheel if you don't like the first spin!|: ¡Permite volver a girar la ruleta si no te gusta el primer giro!
+1774|=|: Jumps over any adjacent figure (ally or rival) to advance freely!|: ¡Salta sobre cualquier figura adyacente (aliada o rival) para avanzar libremente!
+1776|: Teleporta na hora um Pokémon seu (do campo ou banco) direto para o seu Gol para uma defesa de emergência!|: Instantly teleports one of your Pokémon (from field or bench) straight to your Goal Point for an emergency defense!|: ¡Teletransporta al instante uno de tus Pokémon (del campo o banquillo) directo a tu Meta para una defensa de emergencia!
+1778|=|: Immediately takes a Pokémon out of your P.C. straight to the Bench without waiting for the rotation!|: ¡Saca al instante un Pokémon de tu P.C. directo al banquillo sin esperar a la rotación!
+1780|=|: Grants +30 damage for the next battle!|: ¡Da +30 de daño para el próximo combate!
+1781|=|: Turns white attacks into Gold to break the opponent's purple attacks!|: ¡Convierte los ataques blancos en Dorados para romper los ataques morados del rival!
+1782|7. Evolução em Batalha e Megaevolução|7. In-Battle Evolution & Mega Evolution|7. Evolución en combate y Megaevolución
+1783|=|Base|Base
+1784|+10 de dano|+10 Damage|+10 de daño
+1786|=|In-Match Evolution|Evolución en partida
+1787|=|: When you win a battle with a basic figure (e.g. Charmander, Squirtle, Magikarp), you get the option to evolve on the field!|: ¡Al ganar un combate con una figura básica (ej.: Charmander, Squirtle, Magikarp), aparece la opción de evolucionar en el campo!
+1788|=|Permanent Bonus|Bonificación permanente
+1789|=|: Evolution grants|: La evolución da
+1790|=|+10 permanent Damage|+10 de daño permanente
+1791|em Branco/Dourado e|on White/Gold and|en Blanco/Dorado y
+1792|em Roxo!|on Purple!|¡en Morado!
+1793|Megaevolução (5 turnos)|Mega Evolution (5 Turns)|Megaevolución (5 turnos)
+1794|: Ative a placa Mega correspondente para despertar o poder da Megaevolução por 5 turnos com habilidades extras e dano colossal!|: Activate the matching Mega plate to awaken the power of Mega Evolution for 5 turns with extra abilities and colossal damage!|: ¡Activa la placa Mega correspondiente para despertar el poder de la Megaevolución durante 5 turnos con habilidades extra y daño colosal!
+1795|=|Got it! Let's Play|¡Entendido! A jugar
+1796|=|BUFF OF THE WEEK|BONO DE LA SEMANA
+1797|=|TYPE: ROCK|TIPO: ROCA
+1798|+10 DANO · +1★ · +1 MP|+10 DMG · +1★ · +1 MP|+10 DAÑO · +1★ · +1 PM
+1799|=|⏳ 7d left|⏳ Quedan 7 d
+1800|=|Carmonte Lounge: 1 Trainer Online|Salón Carmonte: 1 Entrenador en línea
+1801|=|Pokémon Trainer|Entrenador Pokémon
+1802|=|🏆 Carmonte League · Rating|🏆 Liga Carmonte · Puntuación
+1803|Figuras|Figures|Figuras
+1804|=|✏️ Edit Figures|✏️ Editar figuras
+1805|(Sem custo · máx 6 placas)|(No cost · max 6 plates)|(Sin coste · máx. 6 placas)
+1806|🎴 Editar Placas|🎴 Edit Plates|🎴 Editar Placas
+1807|=|◀ Back to Deck|◀ Volver al mazo
+1808|Editar Figuras (6/6)|Edit Figures (6/6)|Editar figuras (6/6)
+1809|=|🗑️ Clear Team|🗑️ Vaciar equipo
+1810|=|💡 Tap any Pokémon below to see its|💡 Toca cualquier Pokémon de abajo para ver sus
+1811|Dados (Detalhes)|Data (Details)|Datos (detalles)
+1812|=|and choose where to equip it in the team!|¡y elegir dónde equiparlo en el equipo!
+1813|📦 ESTOJO DE FIGURAS|📦 FIGURE CASE|📦 ESTUCHE DE FIGURAS
+1814|=|ALL|TODOS
+1815|Editar Placas (|Edit Plates (|Editar Placas (
+1816|=|🗑️ Clear All|🗑️ Quitar todas
+1817|=|💡 Tap any Plate to see the|💡 Toca cualquier Placa para ver los
+1818|=|Details|Detalles
+1819|=|and choose whether to use it or remove it from the Deck!|¡y elegir si la usas o la quitas del mazo!
+1820|⚡ CATÁLOGO DE PLACAS|⚡ PLATE CATALOG|⚡ CATÁLOGO DE PLACAS
+1821|MÁX 6 PLACAS|MAX 6 PLATES|MÁX. 6 PLACAS
+1822|🧬 FUSÃO E EXPANSÃO DE DISCO|🧬 FUSION & DISK EXPANSION|🧬 FUSIÓN Y EXPANSIÓN DE DISCO
+1824|=|TAP THE DISK SLICE!|¡TOCA LA PORCIÓN DEL DISCO!
+1825|🪙 Moedas:|🪙 Coins:|🪙 Monedas:
+1826|🟦 Metal Raro:|🟦 Rare Metal:|🟦 Metal Raro:
+1827|🟣 Carmonita:|🟣 Carmonite:|🟣 Carmonita:
+1828|🟩 Cubos:|🟩 Cubes:|🟩 Cubos:
+1829|🟨 Lingotes:|🟨 Ingots:|🟨 Lingotes:
+1830|🟦 Subir nível (Nv.1–5)|🟦 Level Up (Lv.1–5)|🟦 Subir nivel (Nv.1–5)
+1831|=|Requires|Requiere
+1832|1🟦 + Moedas|1🟦 + Coins|1🟦 + Monedas
+1833|🟣 Carmonita (Nv.6–10)|🟣 Carmonite (Lv.6–10)|🟣 Carmonita (Nv.6–10)
+1834|🟣 + Moedas|🟣 + Coins|🟣 + Monedas
+1835|🟩 Subir CLv (+1 DANO)|🟩 Raise CLv (+1 DMG)|🟩 Subir CLv (+1 DAÑO)
+1836|🟩 + Moedas|🟩 + Coins|🟩 + Monedas
+1837|🟨 Vender Lingote de Ouro|🟨 Sell Gold Ingot|🟨 Vender Lingote de Oro
+1838|1🟨 Lingote ➔ +15.000🪙|1🟨 Ingot ➔ +15,000🪙|1🟨 Lingote ➔ +15.000🪙
+1839|↺ Restaurar Disco e CLv (voltar à base 96)|↺ Reset Disk & CLv (Back to Base 96)|↺ Restablecer disco y CLv (volver a la base 96)
+1840|⚡ Recomendado automático (Nv e CLv)|⚡ Auto-Recommended (Lv & CLv)|⚡ Recomendado automático (Nv y CLv)
+1841|🔻 300 Gemas|🔻 300 Gems|🔻 300 Gemas
+1842|🔻 200 Gemas|🔻 200 Gems|🔻 200 Gemas
+1843|🔻 100 Gemas|🔻 100 Gems|🔻 100 Gemas
+1844|🔻 50 Gemas|🔻 50 Gems|🔻 50 Gemas
+1845|🪙 MOEDAS)|🪙 COINS)|🪙 MONEDAS)
+1846|🪙 10.000 Moedas|🪙 10,000 Coins|🪙 10.000 Monedas
+1847|🪙 4.000 Moedas|🪙 4,000 Coins|🪙 4.000 Monedas
+1848|🪙 15.000 Moedas|🪙 15,000 Coins|🪙 15.000 Monedas
+1849|🪙 22.000 Moedas|🪙 22,000 Coins|🪙 22.000 Monedas
+1850|🔷 TROCA DE MATERIAIS (|🔷 MATERIAL EXCHANGE (|🔷 CAMBIO DE MATERIALES (
+1851|Materiais — UX: 5000 · EX: 4000 · R: 1800 · UC: 450 · C: 250)|Material — UX: 5000 · EX: 4000 · R: 1800 · UC: 450 · C: 250)|Materiales — UX: 5000 · EX: 4000 · R: 1800 · UC: 450 · C: 250)
+1852|← Voltar ao Início|← Back to the Hub|← Volver al Inicio
+1853|🌐 MULTIJOGADOR P2P E LOCAL|🌐 P2P & LOCAL MULTIPLAYER|🌐 MULTIJUGADOR P2P Y LOCAL
+1854|=|✕ View Board|✕ Ver tablero
+1855|🌐 Multijogador P2P|🌐 P2P Multiplayer|🌐 Multijugador P2P
+1856|🏨 Missões / Arenas / Mônaco|🏨 Quests / Arenas / Monaco|🏨 Misiones / Arenas / Mónaco
+1858|⚪ MULTIJOGADOR P2P — PRONTO PARA CONECTAR|⚪ P2P MULTIPLAYER — READY TO CONNECT|⚪ MULTIJUGADOR P2P — LISTO PARA CONECTAR
+1859|=|Choose below: Create Room (Phone 1), Enter Code (Phone 2) or Play Local 2P|Elige abajo: Crear sala (móvil 1), Escribir código (móvil 2) o Jugar 2P local
+1860|=|👑 PHONE 1 (CREATE ROOM)|👑 MÓVIL 1 (CREAR SALA)
+1861|=|You'll be Player 1 (Blue Team · Base)|Serás el Jugador 1 (equipo azul · base)
+1862|=|YOUR ROOM CODE:|CÓDIGO DE TU SALA:
+1863|=|⚡ 1. OPEN P2P ROOM|⚡ 1. ABRIR SALA P2P
+1864|=|🔄 New Code|🔄 Código nuevo
+1865|=|📋 Copy|📋 Copiar
+1866|=|🚀 PHONE 2 (JOIN)|🚀 MÓVIL 2 (ENTRAR)
+1867|=|You'll be Player 2 (Red Team · Top)|Serás el Jugador 2 (equipo rojo · arriba)
+1868|=|ENTER PHONE 1'S CODE:|ESCRIBE EL CÓDIGO DEL MÓVIL 1:
+1869|=|🚀 2. CONNECT AND PLAY|🚀 2. CONECTAR Y JUGAR
+1870|=|Starts the match automatically on both phones!|¡Empieza la partida automáticamente en los 2 móviles!
+1871|=|🔴 Close P2P Room / Disconnect|🔴 Cerrar sala P2P / Desconectar
+1872|=|📱 Play 2 People on the Same Phone (Pass & Play)|📱 Jugar 2 personas en el mismo móvil (pasar y jugar)
+1873|=|No internet: you take turns on the same screen with 180° rotation!|Sin internet: ¡os turnáis en la misma pantalla con rotación de 180°!
+1874|=|👥 Start Local 2P|👥 Iniciar 2P local
+1875|=|🛠️ Serverless Manual Connection (WhatsApp / Copy-Paste SDP) & Tech Log|🛠️ Conexión manual sin servidor (WhatsApp / copiar y pegar SDP) y registro técnico
+1876|=|1. Host: Generate Invite|1. Anfitrión: generar invitación
+1877|=|2. Guest: Accept Invite|2. Invitado: aceptar invitación
+1878|=|3. Host: Confirm Answer|3. Anfitrión: confirmar respuesta
+1879|=|📋 Copy SDP Code|📋 Copiar código SDP

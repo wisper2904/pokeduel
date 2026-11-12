@@ -1,0 +1,13 @@
+209|As Esquivas dos Pokémon adversários vizinhos a este Pokémon viram Falhas.|=|Las Esquivas de los Pokémon rivales adyacentes a este Pokémon se vuelven Fallos.
+213|Todos os ataques Azuis dos oponentes de batalha deste Pokémon viram Falhas.|=|Todos los ataques Azules de los rivales de combate de este Pokémon se vuelven Fallos.
+172|ATQ +20|ATK +20|ATQ +20
+475|🟦 Nv +1|🟦 Lv +1|🟦 Nv +1
+476|🟣 Nv +1|🟣 Lv +1|🟣 Nv +1
+761|728 figuras (MP, raridade, fatias do Disco de Dados)|728 figures (MP, Rarity, DataDisk slices)|728 figuras (PM, rareza, porciones del Disco de Datos)
+762|166 placas (Chance Dupla, Salto de Obstáculo, Velocidade X, Bloqueio de Gol, Revive Máximo)|166 plates (Double Chance, Hurdle Jump, X-Speed, Goal Block, Max Revive)|166 placas (Doble Oportunidad, Salto de Valla, Velocidad X, Bloqueo de Meta, Revivir Máximo)
+763|72 capítulos (Ulex, Château de Rosa, Atlantis, Palácio Olivia, Vulcão, Elysium)|72 chapters (Ulex, Château de Rosa, Atlantis, Olivia Palace, Volcano, Elysium)|72 capítulos (Ulex, Château de Rosa, Atlantis, Palacio Olivia, Volcán, Elysium)
+899|🔷 {5} Mat.|🔷 {5} Mat|🔷 {5} Mat.
+1312|PokeDuel 3D (v5.6.0) — Edição Multiplataforma Web/PWA e P2P|PokeDuel 3D (v5.6.0) - Multiplatform Web/PWA & P2P Edition|PokeDuel 3D (v5.6.0) — Edición multiplataforma Web/PWA y P2P
+1392|=|({1} pts)|({1} pts)
+1395|· Pos. #{0}|· Rank #{0}|· Pos. #{0}
+1396|{0} · Pos. #{1}|{0} · Rank #{1}|{0} · Pos. #{1}

@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v713` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v714` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -47,7 +47,7 @@
 
 | Agente | Desde | Tarefa | Arquivos tocados |
 |---|---|---|---|
-| Claude | 2026-11-12 | i18n completo PT/EN/ES (varredura de textos fixos) | `js/data/i18n.js` + módulos de UI/engine |
+| — | — | nenhuma tarefa aberta | — |
 
 ---
 
@@ -156,6 +156,16 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Jogo inteiro em PT / EN / ES — tradutor central + dicionário de 3.731 entradas (v714)
+- **Novo `js/data/i18n_runtime.js`** (depois de `i18n.js` e do novo `js/data/i18n_dict.js`, nos 2 HTMLs e no `sw.js`).
+  - `L(texto)` traduz qualquer texto conhecido para a língua atual. Ponto único de aplicação: DOM (MutationObserver em texto + `title/placeholder/alt/aria-label`), canvas (`fillText/strokeText/measureText`), `alert/confirm/prompt`, `t()` (inclusive chave inexistente → texto de reserva), `localizeAbility`, `localizeMove`.
+  - Textos com partes variáveis: modelos `{0}`; compostos ("A: B", " · ", " — ", " + ", parênteses/colchetes, "Golpe 90", "Golpe*", prefixo de emoji) são traduzidos por partes. Glossário final por língua (DMG/DANO/DAÑO, MP→PM no ES, Lv→Nv., Miss, Entry Point, Plate, Z-Move).
+  - Troca de língua re-traduz a tela (`setAppLanguage` embrulhado). Cada aparelho no P2P vê a sua língua.
+- **`js/data/i18n_dict.js`** (gerado; ~700 KB, ~150 KB gzip): `[pt, en, es, original?]` × 3.731. Cobre logs e telas de todos os módulos, as 349 Habilidades oficiais (nome + texto), 515 textos de Habilidade das figuras originais, 175 efeitos de fatia, ~450 efeitos de Movimento Z / golpes brancos (`OFFICIAL_DUEL_EXTRA`), 277 golpes sem tradução antes, nomes com forma (Alola, Origem, Kyurem Negro, Rotom…), changelog, tutorial, bots.
+- **`tools/i18n/`**: `extract.js` (acorn: literais, templates, concatenações, atributos em HTML montado no JS), `ordered.json` (IDs estáveis), lotes `tr/0NN.txt` (`id|pt|en|es`), `tr/900_manual.txt` (`@original|pt|en|es`), `build.py`, `crawl.py` + `detect.py` (varredura de telas e partida nas 3 línguas). Ver `tools/i18n/README.md`. **Texto novo no jogo → linha em `tr/900_manual.txt` + `python3 tools/i18n/build.py`.**
+- Glossário: PT Falha/Esquiva/Gol/Ponto de Entrada/Banco/Espera/Placa/Movimento Z/Apoio(Tag) · ES Fallo/Esquiva/Meta/Punto de entrada/Banquillo/Espera/Placa/Movimiento Z/Apoyo/PM.
+- Verificação: varredura de ~1.480 textos visíveis por língua (abas, modais, Dados, Fusão, Loja, partida bot × bot) sem texto na língua errada (sobram só nomes próprios, nomes de arquivo e nomes de usuário); wheels 7.548 / 0 problemas; evo; `/tmp/sfx713.py`; lotes antigos; 2 partidas bot × bot sem erro.
 
 ### 2026-11-12 · Claude · Fatias Roxas "sem efeito" + marcadores MP + Trick Room + Ultra Stack completo (v713)
 - **Novo `js/engine/slice_effects.js`** (depois de `duel_extras.js`; no `sw.js` e nos 2 HTMLs).

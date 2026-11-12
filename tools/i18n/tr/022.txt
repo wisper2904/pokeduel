@@ -1,0 +1,24 @@
+3770|Aumentar o tamanho deste ataque (+1 na roleta)|Increase this attack's Size (+1 Wheel Size)|Aumentar el tamaño de este ataque (+1 en la ruleta)
+3771|Alocar +1 DANO de Nível de Corrente|Allocate +1 Chain Level DMG|Asignar +1 DAÑO de Nivel de Cadena
+3772|=|Select as the slice to shrink|Elegir como porción a reducir
+3773|Subir de nível para ganhar +1 Ponto de Disco|Level up to earn +1 Disk Point|Subir de nivel para ganar +1 Punto de Disco
+3774|=|Auto-allocate points to the best slice|Asignar puntos automáticamente a la mejor porción
+3775|Restaurar a roleta para a base Nv 1|Reset the wheel to Base Lv 1|Restablecer la ruleta a la base Nv 1
+3776|=|Choose a slice > 4 to shrink (-1)|Elegir una porción > 4 para reducir (-1)
+3777|=|Create a new team (max 3)|Crear un equipo nuevo (máximo 3)
+3778|=|Automatically builds the best team with your unlocked Pokémon|Monta automáticamente el mejor equipo con tus Pokémon desbloqueados
+3779|=|Change the current team's name|Cambiar el nombre del equipo actual
+3780|Bônus da Semana ativo (+10 DANO, +1★, +1 MP)|Buff of the Week Active (+10 DMG, +1★, +1 MP)|Bono de la semana activo (+10 DAÑO, +1★, +1 PM)
+3781|⚡ Movimento Z: {1} ({2})|⚡ Z-Move: {1} ({2})|⚡ Movimiento Z: {1} ({2})
+3782|=|Automatically builds the best team|Monta automáticamente el mejor equipo
+3783|=|Rename team|Renombrar equipo
+3784|Bônus Semanal|Weekly Buff|Bono semanal
+3785|⚡ Movimento Z: {0}|⚡ Z-Move: {0}|⚡ Movimiento Z: {0}
+3786|Bônus da Semana (+10 DANO, +1★, +1 MP)|Buff of the Week (+10 DMG, +1★, +1 MP)|Bono de la semana (+10 DAÑO, +1★, +1 PM)
+3787|⚡ Movimento Z: {0} ({1})|⚡ Z-Move: {0} ({1})|⚡ Movimiento Z: {0} ({1})
+3788|=|Fusion / +CLv|Fusión / +CLv
+3789|=|Show/Hide Password|Mostrar/ocultar contraseña
+3790|=|Your password...|Tu contraseña...
+3791|Usuário do GitHub|GitHub User|Usuario de GitHub
+3792|=|Repository|Repositorio
+3793|Cole seu token do GitHub (ghp_...)|Paste your GitHub Token (ghp_...)|Pega tu token de GitHub (ghp_...)

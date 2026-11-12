@@ -1,0 +1,178 @@
+720|CRÍTICO DOURADO|GOLD CRITICAL|CRÍTICO DORADO
+721|PODER BRANCO|WHITE POWER|PODER BLANCO
+722|MOVIMENTO Z: {1}|Z-MOVE: {1}|MOVIMIENTO Z: {1}
+723|Roleta 100% · Quebra Azul em Falha · {2}|Wheel 100% · Breaks Blue into Miss · {2}|Ruleta 100% · Rompe Azul en Fallo · {2}
+724|=|🔒 Locked — Unlock in the Shop|🔒 Bloqueado — Desbloquear en la Tienda
+725|=|⭐ In Team: Slot #{0} ({1}/{2} copies in use)|⭐ En el equipo: casilla #{0} ({1}/{2} copias en uso)
+726|=|📦 On the Bench: Available ({0} cop{1})|📦 En el banquillo: disponible ({0} copia{1})
+727|=|🔄 Change Slot / Place Copy|🔄 Cambiar casilla / Poner copia
+728|=|➔ Add to Team|➔ Poner en el equipo
+729|=|Remove from Team|Quitar del equipo
+730|=|✅ Unlocked|✅ Desbloqueado
+731|=|Put {0} in the Team|Poner a {0} en el equipo
+732|=|Current|Actual
+733|=|Keep|Mantener
+734|=|Place Here|Poner aquí
+735|=|Slot #{2}|Casilla #{2}
+737|=|⚠️ You only have {0} cop(ies) of {1}! Get more copies in the Shop.|⚠️ ¡Solo tienes {0} copia(s) de {1}! Consigue más en la Tienda.
+738|=|⚠️ Limit exceeded: At most 1 Mega Pokémon per Deck!|⚠️ Límite superado: ¡como máximo 1 Pokémon Mega por mazo!
+739|=|⚠️ Limit exceeded: At most 1 UX Pokémon per Deck!|⚠️ Límite superado: ¡como máximo 1 Pokémon UX por mazo!
+740|=|⚠️ Limit exceeded: At most 2 EX Pokémon per Deck!|⚠️ Límite superado: ¡como máximo 2 Pokémon EX por mazo!
+741|PACOTE ABERTO|BOOSTER PACK OPENED|SOBRE ABIERTO
+742|=|👆 Tap to open|👆 Toca para abrir
+743|=|NEW!|¡NUEVO!
+744|=|Figure {0} of {1}|Figura {0} de {1}
+745|=|View All (OK) ➔|Ver todas (OK) ➔
+746|=|Next Pokémon ❯|Siguiente Pokémon ❯
+747|=|Continue (OK) ➔|Continuar (OK) ➔
+748|=|⏩ Skip|⏩ Saltar
+749|ULTRA RARA|ULTRA RARE|ULTRA RARA
+750|RARA EX|EX RARE|RARA EX
+751|RARA|RARE|RARA
+752|Tipo {0} · MP {1} · Roleta 96|=|Tipo {0} · PM {1} · Ruleta 96
+754|🎉 Pacote {0} aberto! Saíram [{1}] {2} e [{3}] {4}!|=|🎉 ¡Sobre {0} abierto! ¡Salieron [{1}] {2} y [{3}] {4}!
+755|🎁 PACOTE {0} ABERTO!|=|🎁 ¡SOBRE {0} ABIERTO!
+756|+50 Gemas · +1 Cubo EX/UX · +15.000 Moedas|=|+50 Gemas · +1 Cubo EX/UX · +15.000 Monedas
+765|=|⏳ Applying Zero-Copy patch on {0}...|⏳ Aplicando parche Zero-Copy en {0}...
+766|=|✅ Zero-Copy patch done ({0} blocks updated)!|✅ ¡Parche Zero-Copy terminado ({0} bloques actualizados)!
+767|1. Hotel Ulex (Ilha Carmonte)|1. Ulex Hotel (Carmonte Island)|1. Hotel Ulex (Isla Carmonte)
+768|Figuras Iniciais|=|Figuras Iniciales
+769|=|Win the Duel · In ≤28 turns · Knock out 2+ figures.|Gana el duelo · En ≤28 turnos · Derrota 2+ figuras.
+770|1.500 🪙 + Metal Raro + 15 🔻|=|1.500 🪙 + Metal Raro + 15 🔻
+771|=|=|=
+773|Dançarinos Fada/Psíquico|=|Bailarines Hada/Psíquico
+774|2.000 🪙 + Metal Raro + 15 🔻|=|2.000 🪙 + Metal Raro + 15 🔻
+775|3. Hotel Atlantis (Arena Submarina)|=|3. Hotel Atlantis (Arena Submarina)
+777|Shuriken de Água e Torrente|=|Shuriken de Agua y Torrente
+778|=|Win the Duel · In ≤26 turns · Knock out 2+ figures.|Gana el duelo · En ≤26 turnos · Derrota 2+ figuras.
+779|2.500 🪙 + Carmonita + 20 🔻|=|2.500 🪙 + Carmonita + 20 🔻
+780|4. Palácio Olivia (Suíte de Luxo)|=|4. Palacio Olivia (Suite de Lujo)
+782|Pedra / Terra Robustos|=|Roca / Tierra Robustos
+783|3.000 🪙 + Carmonita + 20 🔻|=|3.000 🪙 + Carmonita + 20 🔻
+784|5. O Vulcão e Elysium|=|5. El Volcán y Elysium
+786|Chama Giratória e Fúria do Dragão|=|Giro Fuego y Furia Dragón
+787|=|Win the Duel · In ≤24 turns · Knock out 2+ figures.|Gana el duelo · En ≤24 turnos · Derrota 2+ figuras.
+788|3.500 🪙 + Lingote EX + 25 🔻|=|3.500 🪙 + Lingote EX + 25 🔻
+789|6. Torre do Caos (Suíte do Caos)|=|6. Torre del Caos (Suite del Caos)
+791|Garchomp e Trio Lendário|=|Garchomp y Trío Legendario
+792|=|Win the Duel · In ≤22 turns · Knock out 3+ figures.|Gana el duelo · En ≤22 turnos · Derrota 3+ figuras.
+793|5.000 🪙 + Cubo UX + 50 🔻|=|5.000 🪙 + Cubo UX + 50 🔻
+794|=|★ Final|★ Final
+795|=|MP {6} · CLv+{7}|PM {6} · CLv+{7}
+796|CUSTO {0}/6|COST {0}/6|COSTE {0}/6
+797|CUSTO {0}/6 {1}{2}|COST {0}/6 {1}{2}|COSTE {0}/6 {1}{2}
+798|=|Opponent:|Rival:
+799|=|Start Duel|Iniciar duelo
+800|=|🔒 Locked|🔒 Bloqueado
+801|=|ⓘ View Wheel & Ability|ⓘ Ver ruleta y habilidad
+802|=|★ In Deck|★ En el mazo
+803|=|➔ Slot #{0}|➔ Casilla #{0}
+804|=|🔒 Unlock in the Shop|🔒 Desbloquear en la Tienda
+805|Nv.{0}/10 · CLv+{1}|Lv.{0}/10 · CLv+{1}|Nv.{0}/10 · CLv+{1}
+807|=|Slot #{0} Active (Featured on the Home Screen)|Casilla #{0} activa (destacada en la pantalla de inicio)
+808|=|★ Featured Team (Slot #{0}/6): [{1}] {2} (MP {3})|★ Equipo destacado (casilla #{0}/6): [{1}] {2} (PM {3})
+809|★ {0} ({1} · MP {2} · Nv.{3} CLv+{4}) — Arraste para girar|★ {0} ({1} · MP {2} · Lv.{3} CLv+{4}) — Drag to rotate|★ {0} ({1} · PM {2} · Nv.{3} CLv+{4}) — Arrastra para girar
+810|É aqui que acontecem os duelos. Estas figuras são para praticar, então vamos duelar!|=|Aquí es donde se juegan los duelos. Estas figuras son para practicar, ¡así que a duelear!
+811|O primeiro giro decide quem começa. Toque no botão amarelo Jogar abaixo para começar!|=|El primer giro decide quién empieza. ¡Toca el botón amarillo Jugar de abajo para empezar!
+813|Pacote de Tempo Prateado (1h)|Silver Time Booster (1h)|Sobre de Tiempo Plateado (1h)
+814|Pacote de Tempo Roxo (6h)|Purple Time Booster (6h)|Sobre de Tiempo Morado (6h)
+815|Espaço Extra (+1)|Extra Slot (+1)|Casilla Extra (+1)
+816|PRONTO!|READY!|¡LISTO!
+817|=|EMPTY|VACÍO
+818|DUELO|DUEL|DUELO
+819|=|OPEN!|¡ABRIR!
+820|=|FREE|GRATIS
+821|=|🎁 Open for Free Now!|🎁 ¡Abrir gratis ahora!
+822|=|🔻 Open Now ({0} Gems)|🔻 Abrir ahora ({0} Gemas)
+823|=|🔒 You have {0}🔻 (need {1}🔻 to skip the time). Wait for the real timer!|🔒 Tienes {0}🔻 (necesitas {1}🔻 para saltar el tiempo). ¡Espera al temporizador real!
+824|📦 Novo Pacote de Tempo colocado no espaço #{0} (contando em tempo real)!|📦 New Time Booster placed in Slot #{0} (counting in real time)!|📦 ¡Nuevo Sobre de Tiempo colocado en la casilla #{0} (contando en tiempo real)!
+825|⏳ Todos os 3 espaços já estão ocupados contando em tempo real!|⏳ All 3 slots are already busy counting in real time!|⏳ ¡Las 3 casillas ya están ocupadas contando en tiempo real!
+826|O espaço #{0} está vazio! Vença uma partida em [Jogar] ou toque no botão vermelho [+1] para receber um novo baú!|Slot #{0} is empty! Win a match in [Play] or tap the red [+1] button to get a new chest!|¡La casilla #{0} está vacía! ¡Gana una partida en [Jugar] o toca el botón rojo [+1] para recibir un cofre nuevo!
+827|=|Purple Chest (06:00:00): Guarantees 2 Figures (high R/EX chance) + Material!|Cofre Morado (06:00:00): ¡garantiza 2 figuras (alta probabilidad R/EX) + Material!
+828|=|Silver Chest (01:00:00): Guarantees a Figure + Material + Coins!|Cofre Plateado (01:00:00): ¡garantiza una figura + Material + Monedas!
+829|=|⚠️ Not enough gems ({0}/{1}🔻)! Wait for the real timer or earn gems!|⚠️ ¡Gemas insuficientes ({0}/{1}🔻)! ¡Espera al temporizador o gana gemas!
+830|=|(Sped up by 🔻{0})|(Acelerado con 🔻{0})
+831|=|(Real Time Done!)|(¡Tiempo real completado!)
+832|🎉 {0}: Ganhou [{1}] {2}! (o espaço #{3} agora está vazio)|🎉 {0}: Got [{1}] {2}! (Slot #{3} is now empty)|🎉 {0}: ¡Conseguiste [{1}] {2}! (la casilla #{3} ahora está vacía)
+833|+{0} Materiais · +1 Cubo · +{1} Moedas|+{0} Material · +1 Cube · +{1} Coins|+{0} Materiales · +1 Cubo · +{1} Monedas
+834|🔒 O Pacote Trancado requer 10 Fragmentos de Chave (você tem {0}/10 🔑). Jogue partidas em [Jogar] para ganhar +3🔑 por vitória!|🔒 The Locked Booster needs 10 Key Fragments (you have {0}/10 🔑). Play matches in [Play] to earn +3🔑 per win!|🔒 ¡El Sobre Cerrado requiere 10 Fragmentos de Llave (tienes {0}/10 🔑)! ¡Juega partidas en [Jugar] para ganar +3🔑 por victoria!
+835|Pacote Trancado (10/10 Chaves — desbloqueado!)|Locked Booster (10/10 Keys Unlocked!)|Sobre Cerrado (¡10/10 llaves, desbloqueado!)
+836|Grande Apostador de Carmonte|Carmonte High Roller|Gran Apostador de Carmonte
+837|Troféu Invencível da Copa de Ginásio 11-0|Gym Cup 11-0 Invincible Trophy|Trofeo Invencible de la Copa de Gimnasio 11-0
+838|Rank S do Carnaval de Carmonte|Carmonte Carnival S-Rank|Rango S del Carnaval de Carmonte
+839|Torneio Top 32|Tournament Top 32|Torneo Top 32
+840|Especialista Elétrico|Electric Specialist|Especialista Eléctrico
+841|Mestre do Cerco|Surround Master|Maestro del Cerco
+842|Corredor do Gol|Goal Rusher|Corredor de la Meta
+843|Masculino|Male|Masculino
+847|Liga|League|Liga
+848|Liga {0}|{0} League|Liga {0}
+849|=|Slot #{2} of My Team: [{3}] {4}|Casilla #{2} de mi equipo: [{3}] {4}
+850|=|Stage: With Pedestal|Escenario: con pedestal
+851|=|Stage: Piece Only|Escenario: solo la pieza
+852|🏆 Ranking Mensal: #142 Uptodown (2890 pts — Liga Mestre)|🏆 Monthly Ranking: #142 Uptodown (2890 pts — Master League)|🏆 Clasificación mensual: #142 Uptodown (2890 pts — Liga Maestra)
+853|📺 Duelo em destaque: Master Rosé vs Campeã Cynthia (toque em JOGAR para jogar!)|📺 Featured Duel: Master Rosé vs Champion Cynthia (Tap PLAY to play!)|📺 Duelo destacado: Master Rosé vs Campeona Cynthia (¡toca JUGAR para jugar!)
+854|✅ Missões Diárias (3/3): +25 Gemas e 3 Fragmentos de Chave resgatados!|✅ Daily Missions (3/3): +25 Gems & 3 Key Fragments claimed!|✅ Misiones diarias (3/3): ¡+25 Gemas y 3 Fragmentos de Llave reclamados!
+855|⚠️ Regra oficial: nenhuma fatia (nem Falha) pode ser reduzida abaixo de tamanho 4!|⚠️ Official Rule: No slice (not even Miss) can be reduced below Size 4!|⚠️ Regla oficial: ¡ninguna porción (ni el Fallo) puede reducirse por debajo de tamaño 4!
+856|⚠️ Regra oficial CLv: pontos de Nível de Corrente (+1 DANO) só podem ir para ataques Brancos ou Dourados!|⚠️ Official CLv Rule: Chain Level points (+1 DMG) can only go to White or Gold attacks!|⚠️ Regla oficial CLv: ¡los puntos de Nivel de Cadena (+1 DAÑO) solo pueden ir a ataques Blancos o Dorados!
+857|🛑 LIMITE MÁXIMO CLv 10/10 ATINGIDO! Use [↺ Restaurar Disco e CLv] se quiser mudar de golpe.|🛑 MAX CLv CAP 10/10 REACHED! Use [↺ Reset Disk & CLv] if you want to change move.|🛑 ¡LÍMITE MÁXIMO CLv 10/10 ALCANZADO! Usa [↺ Restablecer Disco y CLv] si quieres cambiar de ataque.
+858|⚠️ Sem pontos CLv livres ({0}/10)! Use 🟩 Cubo Verde ({1} Cubo para +1 CLv).|⚠️ No free CLv points ({0}/10)! Use 🟩 Green Cube ({1} Cube for +1 CLv).|⚠️ ¡Sin puntos CLv libres ({0}/10)! Usa 🟩 Cubo Verde ({1} Cubo para +1 CLv).
+859|🟩 +1 DANO (CLv) aplicado em [{0}]! Dano base agora: {1} (limite CLv {2}/10).|🟩 +1 DMG (CLv) applied to [{0}]! Base damage now: {1} (CLv Cap {2}/10).|🟩 ¡+1 DAÑO (CLv) aplicado a [{0}]! Daño base ahora: {1} (límite CLv {2}/10).
+860|🛑 Limite do Nv.{0} atingido ({1}/{2} pts)! Use 🟦 Metal Raro Azul para subir até o limite suave Nv.5!|🛑 Lv.{0} cap reached ({1}/{2} pts)! Use 🟦 Blue Rare Metal to climb to the Lv.5 Soft Cap!|🛑 ¡Límite del Nv.{0} alcanzado ({1}/{2} pts)! ¡Usa 🟦 Metal Raro Azul para subir hasta el límite suave Nv.5!
+861|🛑 Limite suave Nv.{0} atingido! Use 🟣 Carmonita ({1} Carmonita) para desbloquear Nv.{2} (limite máximo Nv.10)!|🛑 Soft Cap Lv.{0} reached! Use 🟣 Carmonite ({1} Carmonite) to unlock Lv.{2} (Hard Cap Lv.10)!|🛑 ¡Límite suave Nv.{0} alcanzado! ¡Usa 🟣 Carmonita ({1} Carmonita) para desbloquear Nv.{2} (límite máximo Nv.10)!
+862|🏆 LIMITE MÁXIMO NV.10 ATINGIDO (9/9 pontos distribuídos · soma 96/96)! Use [↺ Restaurar] para redistribuir.|🏆 MAX HARD CAP LV.10 REACHED (9/9 Points distributed · Total 96/96)! Use [↺ Reset] to redistribute.|🏆 ¡LÍMITE MÁXIMO NV.10 ALCANZADO (9/9 puntos repartidos · suma 96/96)! Usa [↺ Restablecer] para redistribuir.
+863|⚠️ Nenhuma fatia doadora tem tamanho > 4 (o mínimo oficial de qualquer fatia é 4/96)!|⚠️ No donor slice has Size > 4 (the official minimum of any slice is 4/96)!|⚠️ ¡Ninguna porción donante tiene tamaño > 4 (el mínimo oficial de cualquier porción es 4/96)!
+864|⚙️ +1 Ponto de Disco: [{0}] subiu para {1}/96 e [{2}] caiu para {3}/96 (restam {4} pts)!|⚙️ +1 Disk Point: [{0}] rose to {1}/96 and [{2}] dropped to {3}/96 ({4} pts left)!|⚙️ ¡+1 Punto de Disco: [{0}] subió a {1}/96 y [{2}] bajó a {3}/96 (quedan {4} pts)!
+865|↺ Roleta de {0} restaurada para a base Nv.1 (96/96)! Você tem {1} Pontos de Disco e {2} Pontos CLv para distribuir!|↺ {0}'s wheel reset to Base Lv.1 (96/96)! You have {1} Disk Pts and {2} CLv Pts to distribute!|↺ ¡Ruleta de {0} restablecida a la base Nv.1 (96/96)! ¡Tienes {1} Puntos de Disco y {2} Puntos CLv para repartir!
+866|[{1}] {2} (Nv.{3}/10 · CLv+{4})|[{1}] {2} (Lv.{3}/10 · CLv+{4})|[{1}] {2} (Nv.{3}/10 · CLv+{4})
+867|[LIMITE MÁX. NV.10]|[MAX CAP LV.10]|[LÍMITE MÁX. NV.10]
+868|[Limite suave Nv.5 ➔ requer {0} Carmonita]|[Lv.5 Soft Cap ➔ Requires {0} Carmonite]|[Límite suave Nv.5 ➔ requiere {0} Carmonita]
+869|[Metal Raro até Nv.5]|[Rare Metal up to Lv.5]|[Metal Raro hasta Nv.5]
+870|➖Doador ✓|➖Donor ✓|➖Donante ✓
+871|🔒Mín4|🔒Min4|🔒Mín4
+872|Nível:|Level:|Nivel:
+873|Pontos de Disco livres:|Free Disk Pts:|Puntos de Disco libres:
+874|(Usados: {7}/{8} · Máx 9)|(Used: {7}/{8} · Max 9)|(Usados: {7}/{8} · Máx 9)
+875|({10} Cubo/CLv · Livres:|({10} Cube/CLv · Free:|({10} Cubo/CLv · Libres:
+876|LIGADO (24K)|ON (24K)|ACTIVADO (24K)
+877|DESLIGADO|OFF|DESACTIVADO
+878|=|🏆 Playing Round {0} of the Official Bo3 Tournament!|🏆 ¡Disputando la ronda {0} del Torneo Oficial Bo3!
+880|🔇 Música (BGM): DESLIGADA|🔇 Music (BGM): OFF|🔇 Música (BGM): DESACTIVADA
+881|=|💿 Source: YouTube OST|💿 Fuente: OST de YouTube
+882|=|🎛️ Source: Web Audio|🎛️ Fuente: Web Audio
+883|🔇DESL.|🔇OFF|🔇DESACT.
+884|🛑 LIMITE SUAVE NV.5 ATINGIDO! Metal Raro só funciona do Nv.1 ao Nv.5. Para subir do Nv.6 ao Nv.10 (limite máximo), use 🟣 Carmonita!|🛑 LV.5 SOFT CAP REACHED! Rare Metal only works from Lv.1 to Lv.5. To go from Lv.6 to Lv.10 (Hard Cap), use 🟣 Carmonite!|🛑 ¡LÍMITE SUAVE NV.5 ALCANZADO! El Metal Raro solo funciona del Nv.1 al Nv.5. ¡Para subir del Nv.6 al Nv.10 (límite máximo), usa 🟣 Carmonita!
+885|🟦 Metal Raro fundido (−2.500 Moedas)! {0} subiu para Nv.{1}/5 (+1 Ponto de Expansão de Disco liberado)!|🟦 Rare Metal fused (-2,500 Coins)! {0} rose to Lv.{1}/5 (+1 Disk Expansion Point unlocked)!|🟦 ¡Metal Raro fundido (−2.500 Monedas)! ¡{0} subió a Nv.{1}/5 (+1 Punto de Expansión de Disco liberado)!
+886|⚠️ Regra oficial: {0} está no Nv.{1}. Carmonita só pode ser usada a partir do Nv.5 (use 🟦 Metal Raro primeiro)!|⚠️ Official Rule: {0} is Lv.{1}. Carmonite can only be used from Lv.5 (use 🟦 Rare Metal first)!|⚠️ Regla oficial: {0} está en Nv.{1}. ¡La Carmonita solo puede usarse desde Nv.5 (usa 🟦 Metal Raro primero)!
+887|🏆 LIMITE MÁXIMO NV.10/10 JÁ ATINGIDO em {0} (9/9 Pontos de Expansão de Disco)!|🏆 MAX HARD CAP LV.10/10 ALREADY REACHED on {0} (9/9 total Disk Expansion Points)!|🏆 ¡LÍMITE MÁXIMO NV.10/10 YA ALCANZADO en {0} (9/9 Puntos de Expansión de Disco)!
+888|⚠️ Carmonita insuficiente ({0}/{1} necessários para a raridade [{2}])!|⚠️ Not enough Carmonite ({0}/{1} needed for rarity [{2}])!|⚠️ ¡Carmonita insuficiente ({0}/{1} necesarias para la rareza [{2}])!
+889|🟣 −{0} Carmonita aplicada! {1} subiu para Nv.{2}/10 (+1 Ponto de Disco liberado — escolha qual fatia expandir e qual > 4 reduzir)!|🟣 -{0} Carmonite applied! {1} rose to Lv.{2}/10 (+1 Disk Point unlocked — choose which slice to expand and which > 4 to shrink)!|🟣 ¡−{0} Carmonita aplicada! ¡{1} subió a Nv.{2}/10 (+1 Punto de Disco liberado — elige qué porción ampliar y cuál > 4 reducir)!
+890|🛑 LIMITE MÁXIMO CLv 10/10 ATINGIDO em {0} (+10 DANO máximo oficial)!|🛑 MAX CLv CAP 10/10 REACHED on {0} (+10 DMG official maximum)!|🛑 ¡LÍMITE MÁXIMO CLv 10/10 ALCANZADO en {0} (+10 DAÑO máximo oficial)!
+891|🟩 Subida de Nível de Corrente (−{0} Cubo [{1}])! {2} subiu para CLv {3}/10 (+1 DANO no ataque Branco/Dourado)!|🟩 Chain Level Up (-{0} Cube [{1}])! {2} rose to CLv {3}/10 (+1 DMG on the White/Gold attack)!|🟩 ¡Subida de Nivel de Cadena (−{0} Cubo [{1}])! ¡{2} subió a CLv {3}/10 (+1 DAÑO en el ataque Blanco/Dorado)!
+892|🟨 Lingote de Ouro [UX] vendido na loja da Tia! +360.000 Moedas adicionadas!|🟨 Gold Ingot [UX] sold at Auntie's shop! +360,000 Coins added!|🟨 ¡Lingote de Oro [UX] vendido en la tienda de la Tía! ¡+360.000 Monedas añadidas!
+893|[{2}] {3} (Nv.{4}/10 · CLv {5}/10)|[{2}] {3} (Lv.{4}/10 · CLv {5}/10)|[{2}] {3} (Nv.{4}/10 · CLv {5}/10)
+894|=|🎁 +50 Gems and +250 Material added to your account!|🎁 ¡+50 Gemas y +250 Materiales añadidos a tu cuenta!
+895|🎉 Você abriu o Pacote de {0}: ganhou [{1}] {2} + {3} Materiais + 2 Cubos UX/EX!|🎉 You opened the {0}-Pack Booster: got [{1}] {2} + {3} Material + 2 UX/EX Cubes!|🎉 Abriste el Sobre de {0}: ¡conseguiste [{1}] {2} + {3} Materiales + 2 Cubos UX/EX!
+896|📦 PACOTE UX/EX DE {0} ABERTO!|📦 {0}-PACK UX/EX BOOSTER OPENED!|📦 ¡SOBRE UX/EX DE {0} ABIERTO!
+897|+{0} Materiais (total: {1}) · +2 Cubos UX/EX · [UX]/[EX] garantido!|+{0} Material (Total: {1}) · +2 UX/EX Cubes · [UX]/[EX] Guaranteed!|+{0} Materiales (total: {1}) · +2 Cubos UX/EX · ¡[UX]/[EX] garantizado!
+898|[{2}] · MP {3}|=|[{2}] · PM {3}
+900|=|✅ [{0}] {1} acquired for {2} Material and equipped in your Deck!|✅ ¡[{0}] {1} conseguido por {2} Materiales y equipado en tu mazo!
+901|=|Team #1 (Starter)|Equipo #1 (Inicial)
+902|PADRÃO|STANDARD|ESTÁNDAR
+903|=|Team #1|Equipo #1
+904|=|{0} · Collection: {1}/{2} Unlocked!|{0} · Colección: ¡{1}/{2} desbloqueados!
+905|=|✨ NEW! (📦 x1 COPY)|✨ ¡NUEVO! (📦 x1 COPIA)
+906|=|📦 DUPLICATE! YOU NOW HAVE x{0} COPIES! (+1 CLv)|📦 ¡REPETIDO! ¡AHORA TIENES x{0} COPIAS! (+1 CLv)
+907|=|MP {3} · 📦x{4}|PM {3} · 📦x{4}
+908|⚠️ Você tem 0 Caixas de Vitória! Vença uma partida em [Jogar] para ganhar Caixas de Pokémon!|⚠️ You have 0 Victory Boxes! Win a match in [Play] to earn Pokémon Boxes!|⚠️ ¡Tienes 0 Cajas de Victoria! ¡Gana una partida en [Jugar] para conseguir Cajas de Pokémon!
+909|=|⚠️ Win a match to earn a Victory Box and unlock new Pokémon!|⚠️ ¡Gana una partida para conseguir una Caja de Victoria y desbloquear nuevos Pokémon!
+910|=|🏆 VICTORY BOX OPENED!|🏆 ¡CAJA DE VICTORIA ABIERTA!
+911|+100 Materiais · +3.500 Moedas · +1 Cubo|+100 Material · +3,500 Coins · +1 Cube|+100 Materiales · +3.500 Monedas · +1 Cubo
+912|=|🎁 +1 VICTORY BOX EARNED! (Total: {0})|🎁 ¡+1 CAJA DE VICTORIA GANADA! (Total: {0})
+913|Você venceu o duelo e ganhou 1 Caixa de Vitória para desbloquear novos Pokémon (+1 Pacote de Tempo colocado no Início)!|You won the duel and earned 1 Victory Box to unlock new Pokémon (+1 Time Booster placed in the Hub)!|¡Ganaste el duelo y conseguiste 1 Caja de Victoria para desbloquear nuevos Pokémon (+1 Sobre de Tiempo colocado en el Inicio)!
+914|⏱️ VER CRONÔMETRO NO INÍCIO ({0})|⏱️ SEE TIMER IN THE HUB ({0})|⏱️ VER TEMPORIZADOR EN EL INICIO ({0})
+915|=|❌ NO VICTORY BOX THIS MATCH|❌ SIN CAJA DE VICTORIA EN ESTA PARTIDA
+916|=|Pokémon Boxes are only earned in won matches! Try again or visit the Shop.|¡Las Cajas de Pokémon solo se ganan en partidas ganadas! Inténtalo de nuevo o visita la Tienda.
+917|=|🎉 {0}: Unlocked/Got [{1}] {2} & [{3}] {4}!|🎉 {0}: ¡Desbloqueaste/conseguiste [{1}] {2} y [{3}] {4}!
+918|=|(Time Done!)|(¡Tiempo completado!)
+919|🎉 {0}: Desbloqueou/Obteve [{1}] {2}! (espaço #{3} vazio — vença outra partida!)|🎉 {0}: Unlocked/Got [{1}] {2}! (Slot #{3} empty — win another match!)|🎉 {0}: ¡Desbloqueaste/conseguiste [{1}] {2}! (casilla #{3} vacía — ¡gana otra partida!)

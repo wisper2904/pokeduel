@@ -1,0 +1,184 @@
+920|🏆 As Caixas são ganhas vencendo partidas! Toque em [Jogar] e vença um duelo para ganhar sua Caixa!|🏆 Boxes are earned by winning matches! Tap [Play] and win a duel to earn your Box!|🏆 ¡Las Cajas se ganan venciendo partidas! ¡Toca [Jugar] y gana un duelo para conseguir tu Caja!
+921|=|⚠️ Not enough gems ({0}/{1}🔻)! {2} Gems missing.|⚠️ ¡Gemas insuficientes ({0}/{1}🔻)! Faltan {2} Gemas.
+922|⚠️ Gemas insuficientes para abrir este Pacote ({0}x)!|⚠️ Not enough gems to open this Booster Pack ({0}x)!|⚠️ ¡Gemas insuficientes para abrir este Sobre ({0}x)!
+923|Você possui: 🔻 {0} Gemas|You have: 🔻 {0} Gems|Tienes: 🔻 {0} Gemas
+924|Custo: 🔻 {0} Gemas (faltam 🔻 {1} Gemas)|Cost: 🔻 {0} Gems ({1} 🔻 Gems missing)|Coste: 🔻 {0} Gemas (faltan 🔻 {1} Gemas)
+925|Deseja adicionar +300 Gemas bônus para abrir a caixa agora?|Add +300 bonus Gems to open the box now?|¿Quieres añadir +300 Gemas de bonificación para abrir la caja ahora?
+926|Você possui: 🔻 {1} Gemas|You have: 🔻 {1} Gems|Tienes: 🔻 {1} Gemas
+927|Custo: 🔻 {2} Gemas (faltam 🔻 {3} Gemas)|Cost: 🔻 {2} Gems ({3} 🔻 Gems missing)|Coste: 🔻 {2} Gemas (faltan 🔻 {3} Gemas)
+928|🎉 Você abriu o Pacote {0}x na Loja: desbloqueou/obteve [{1}] {2} + {3} Materiais!|🎉 You opened the {0}x Booster in the Shop: unlocked/got [{1}] {2} + {3} Material!|🎉 Abriste el Sobre {0}x en la Tienda: ¡desbloqueaste/conseguiste [{1}] {2} + {3} Materiales!
+929|🛒 LOJA: PACOTE {0}x ABERTO!|🛒 SHOP: {0}x BOOSTER PACK OPENED!|🛒 TIENDA: ¡SOBRE {0}x ABIERTO!
+930|+{0} Materiais (total: {1}) · +{2} Cubo|+{0} Material (Total: {1}) · +{2} Cube|+{0} Materiales (total: {1}) · +{2} Cubo
+931|=|🎁 Open Box ({0})|🎁 Abrir caja ({0})
+932|=|⬆️ +1 CLv (🔷 {0})|⬆️ +1 CLv (🔷 {0})
+933|=|🔓 Unlock (🔷 {0})|🔓 Desbloquear (🔷 {0})
+934|=|MP {7} · {8}|PM {7} · {8}
+935|⚠️ Materiais insuficientes ({0}/{1}🔷)! Abra Caixas ou resgate +500 Materiais no botão do topo!|⚠️ Not enough Material ({0}/{1}🔷)! Open Boxes or claim +500 Material with the top button!|⚠️ ¡Materiales insuficientes ({0}/{1}🔷)! ¡Abre Cajas o reclama +500 Materiales con el botón de arriba!
+936|=|📦 +1 COPY FROM THE SHOP: {0}!|📦 ¡+1 COPIA DE LA TIENDA: {0}!
+937|=|🔓 UNLOCKED IN THE SHOP: {0}!|🔓 ¡DESBLOQUEADO EN LA TIENDA: {0}!
+938|Adquirido por {0} Materiais|Acquired for {0} Material|Conseguido por {0} Materiales
+939|=|📦 +1 copy of [{0}] {1} acquired! You now have x{2} copies to use in the same team (+1 CLv)!|📦 ¡+1 copia de [{0}] {1} conseguida! ¡Ahora tienes x{2} copias para usar en el mismo equipo (+1 CLv)!
+940|=|✅ [{0}] {1} was UNLOCKED (📦 x1 copy)! Go to [Decks] to equip it in your Team!|✅ ¡[{0}] {1} fue DESBLOQUEADO (📦 x1 copia)! ¡Ve a [Mazos] para equiparlo en tu equipo!
+941|=|⚠️ Maximum of 3 teams reached!|⚠️ ¡Límite máximo de 3 equipos alcanzado!
+942|=|Team #{0}|Equipo #{0}
+943|=|Team #{0} created!|¡Equipo #{0} creado!
+944|=|Type the new team name:|Escribe el nuevo nombre del equipo:
+945|=|Team renamed to "{0}"!|¡Equipo renombrado a "{0}"!
+946|=|⚠️ You need to keep at least 1 active team!|⚠️ ¡Tienes que mantener al menos 1 equipo activo!
+947|=|Are you sure you want to delete the team "{0}"? This cannot be undone.|¿Seguro que quieres borrar el equipo "{0}"? Esta acción no se puede deshacer.
+948|=|Are you sure you want to delete the team "{0}"?|¿Seguro que quieres borrar el equipo "{0}"?
+949|=|Team "{0}" deleted!|¡Equipo "{0}" borrado!
+951|=|🔒 {0} locked! Get it in Victory Boxes or the Shop!|🔒 ¡{0} bloqueado! ¡Consíguelo en Cajas de Victoria o en la Tienda!
+952|=|Slot #{0} Active ({1} kept in Slot #{2})|Casilla #{0} activa ({1} se queda en la casilla #{2})
+953|=|⚠️ Deck Limit: Max 1 MEGA Pokémon allowed ({0}/1)! Select the current Mega's slot to replace it.|⚠️ Límite del mazo: ¡máximo 1 Pokémon MEGA ({0}/1)! Elige la casilla del Mega actual para sustituirlo.
+954|=|⚠️ Deck Limit: Max 1 UX Pokémon allowed ({0}/1)! Select the current UX's slot to replace it.|⚠️ Límite del mazo: ¡máximo 1 Pokémon UX ({0}/1)! Elige la casilla del UX actual para sustituirlo.
+955|=|⚠️ Deck Limit: Max 2 EX Pokémon allowed ({0}/2)! Select a current EX's slot to replace it.|⚠️ Límite del mazo: ¡máximo 2 Pokémon EX ({0}/2)! Elige la casilla de un EX actual para sustituirlo.
+956|=|✅ {0} equipped in Slot #{1} (📦 {2}/{3} copies in the team) ➔ Editing Slot #{4}|✅ {0} equipado en la casilla #{1} (📦 {2}/{3} copias en el equipo) ➔ Editando casilla #{4}
+957|=|✅ {0} equipped in Slot #{1} ➔ Editing Slot #{2}|✅ {0} equipado en la casilla #{1} ➔ Editando casilla #{2}
+958|=|🔄 {0} moved to Slot #{1} (You have 📦x1 copy — get duplicates in Boxes/Shop to use more than 1 in the team!)|🔄 {0} movido a la casilla #{1} (tienes 📦x1 copia — ¡consigue repetidos en Cajas/Tienda para usar más de 1 en el equipo!)
+959|=|⚠️ All your 📦x{0} copies of {1} are already in the team! Get more duplicates in Boxes or the Shop to add another.|⚠️ ¡Todas tus 📦x{0} copias de {1} ya están en el equipo! Consigue más repetidos en Cajas o en la Tienda para añadir otra.
+960|=|Team|Equipo
+961|=|Teams|Equipos
+962|=|🔓 Collection: {0}/{1} Pokémon · {2} {3} · 🏆 Wins: {4}|🔓 Colección: {0}/{1} Pokémon · {2} {3} · 🏆 Victorias: {4}
+963|=|🎁 Open Victory Box ({0})|🎁 Abrir Caja de Victoria ({0})
+964|=|➕ New Team|➕ Nuevo equipo
+965|Oponente: {1} · 🏆 Vitória = +1 Caixa de Pokémon!|Opponent: {1} · 🏆 Win = +1 Pokémon Box!|Rival: {1} · 🏆 ¡Victoria = +1 Caja de Pokémon!
+966|=|Start Duel (Earn a Box)|Iniciar duelo (gana una caja)
+967|· Nv.{0}/10 · CLv+{1}|· Lv.{0}/10 · CLv+{1}|· Nv.{0}/10 · CLv+{1}
+968|=|· Get it in Boxes/Shop|· Consíguelo en Cajas/Tienda
+969|=|★ In Team|★ En el equipo
+970|=|🔒 Get in Boxes / Shop|🔒 Conseguir en Cajas / Tienda
+971|ⓘ Ver Roleta e Habilidade|ⓘ View Wheel & Ability|ⓘ Ver ruleta y habilidad
+972|=|Showing {0} of {1} Pokémon (Page {2}/{3})|Mostrando {0} de {1} Pokémon (pág. {2}/{3})
+973|· Nv.{1}/10 · CLv+{2}|· Lv.{1}/10 · CLv+{2}|· Nv.{1}/10 · CLv+{2}
+974|=|Shop: {0} of {1} Pokémon (Page {2}/{3})|Tienda: {0} de {1} Pokémon (pág. {2}/{3})
+975|=|📦 x{0} COPIES|📦 x{0} COPIAS
+976|=|➕ +1 Copy [x{0}➔x{1}] (🔷 {2})|➕ +1 copia [x{0}➔x{1}] (🔷 {2})
+977|🎁 Bônus Diário (+50🔻 +1.500🪙)|🎁 Daily Bonus (+50🔻 +1,500🪙)|🎁 Bonificación diaria (+50🔻 +1.500🪙)
+978|=|⏳ Bonus ({0})|⏳ Bonificación ({0})
+979|🔒 Bônus Diário já resgatado hoje! Próximo bônus disponível em {0}. Vença partidas em [Jogar] para ganhar Gemas e Moedas!|🔒 Daily Bonus already claimed today! Next bonus available in {0}. Win matches in [Play] to earn Gems and Coins!|🔒 ¡La bonificación diaria ya se reclamó hoy! La próxima estará disponible en {0}. ¡Gana partidas en [Jugar] para conseguir Gemas y Monedas!
+980|🎁 Bônus Diário de 24h resgatado: +50🔻 Gemas, +1.500🪙 Moedas e +1🟦 Metal Raro!|🎁 24h Daily Bonus claimed: +50🔻 Gems, +1,500🪙 Coins and +1🟦 Rare Metal!|🎁 Bonificación diaria de 24 h reclamada: ¡+50🔻 Gemas, +1.500🪙 Monedas y +1🟦 Metal Raro!
+981|📺 Duelo em destaque: vença partidas em [Jogar] para ganhar Caixas de Vitória, Moedas (🪙) e Gemas (🔻)!|📺 Featured Duel: Win matches in [Play] to earn Victory Boxes, Coins (🪙) and Gems (🔻)!|📺 Duelo destacado: ¡gana partidas en [Jugar] para conseguir Cajas de Victoria, Monedas (🪙) y Gemas (🔻)!
+982|🔒 Missão diária: vença mais 1 partida em [Jogar] para liberar a recompensa (vitórias atuais: {0})!|🔒 Daily Mission: Win 1 more match in [Play] to unlock the mission reward (current wins: {0})!|🔒 Misión diaria: ¡gana 1 partida más en [Jugar] para liberar la recompensa (victorias actuales: {0})!
+983|✅ Missão de vitória concluída: +20🔻 Gemas, +2.000🪙 Moedas e +1🟦 Metal Raro!|✅ Victory Mission Complete: +20🔻 Gems, +2,000🪙 Coins and +1🟦 Rare Metal!|✅ Misión de victoria completada: ¡+20🔻 Gemas, +2.000🪙 Monedas y +1🟦 Metal Raro!
+984|❌ Moedas insuficientes ({0}/{1}🪙)! Vença partidas (+3.500🪙) ou venda Lingotes!|❌ Not enough Coins ({0}/{1}🪙)! Win matches (+3,500🪙) or sell Ingots!|❌ ¡Monedas insuficientes ({0}/{1}🪙)! ¡Gana partidas (+3.500🪙) o vende Lingotes!
+985|🎉 Caixa de Moedas aberta (−10.000🪙): ganhou [{0}] {1} + 1🟦 Metal Raro + 25🔷 Materiais!|🎉 Coin Box opened (-10,000🪙): got [{0}] {1} + 1🟦 Rare Metal + 25🔷 Material!|🎉 Caja de Monedas abierta (−10.000🪙): ¡conseguiste [{0}] {1} + 1🟦 Metal Raro + 25🔷 Materiales!
+986|=|🪙 COIN BOX OPENED!|🪙 ¡CAJA DE MONEDAS ABIERTA!
+987|+1🟦 Metal Raro · +25🔷 Materiais|+1🟦 Rare Metal · +25🔷 Material|+1🟦 Metal Raro · +25🔷 Materiales
+988|❌ Moedas insuficientes ({0}/{1}🪙) para comprar 🟦 Metal Raro!|❌ Not enough Coins ({0}/{1}🪙) to buy 🟦 Rare Metal!|❌ ¡Monedas insuficientes ({0}/{1}🪙) para comprar 🟦 Metal Raro!
+989|✅ +1🟦 Metal Raro comprado por 4.000🪙 Moedas! (estoque: {0}🟦)|✅ +1🟦 Rare Metal bought for 4,000🪙 Coins! (Stock: {0}🟦)|✅ ¡+1🟦 Metal Raro comprado por 4.000🪙 Monedas! (reserva: {0}🟦)
+990|❌ Moedas insuficientes ({0}/{1}🪙) para comprar 🟣 50 Carmonita!|❌ Not enough Coins ({0}/{1}🪙) to buy 🟣 50 Carmonite!|❌ ¡Monedas insuficientes ({0}/{1}🪙) para comprar 🟣 50 Carmonita!
+991|✅ +50🟣 Carmonita comprada por 15.000🪙 Moedas! (estoque: {0}🟣)|✅ +50🟣 Carmonite bought for 15,000🪙 Coins! (Stock: {0}🟣)|✅ ¡+50🟣 Carmonita comprada por 15.000🪙 Monedas! (reserva: {0}🟣)
+992|❌ Moedas insuficientes ({0}/{1}🪙) para comprar 🟩 Cubo Verde!|❌ Not enough Coins ({0}/{1}🪙) to buy 🟩 Green Cube!|❌ ¡Monedas insuficientes ({0}/{1}🪙) para comprar 🟩 Cubo Verde!
+993|✅ +1🟩 Cubo Verde comprado por 22.000🪙 Moedas! (estoque: {0}🟩)|✅ +1🟩 Green Cube bought for 22,000🪙 Coins! (Stock: {0}🟩)|✅ ¡+1🟩 Cubo Verde comprado por 22.000🪙 Monedas! (reserva: {0}🟩)
+994|Nv.5 atingido (use 🟣 Carmonita)|Lv.5 Reached (Use 🟣 Carmonite)|Nv.5 alcanzado (usa 🟣 Carmonita)
+995|=|Cost:|Coste:
+996|1🟦 + {0}🪙 Moedas|1🟦 + {0}🪙 Coins|1🟦 + {0}🪙 Monedas
+997|NV.10 MÁXIMO ATINGIDO!|MAX LV.10 REACHED!|¡NV.10 MÁXIMO ALCANZADO!
+998|{0}🟣 + {1}🪙 Moedas|{0}🟣 + {1}🪙 Coins|{0}🟣 + {1}🪙 Monedas
+999|CLv 10 MÁXIMO ATINGIDO!|MAX CLv 10 REACHED!|¡CLv 10 MÁXIMO ALCANZADO!
+1000|{0}🟩 + {1}🪙 Moedas|{0}🟩 + {1}🪙 Coins|{0}🟩 + {1}🪙 Monedas
+1001|=|Stock:|Reserva:
+1002|=|➔ Gain|➔ Gana
+1003|0🟨 Lingotes no estoque|0🟨 Ingots in stock|0🟨 Lingotes en reserva
+1004|=|🔒 {0} is locked! Unlock it before fusing.|🔒 ¡{0} está bloqueado! Desbloquéalo antes de fusionar.
+1005|🛑 LIMITE SUAVE NV.5 ATINGIDO! Para subir do Nv.6 ao Nv.10, use 🟣 Carmonita + 🪙 Moedas!|🛑 LV.5 SOFT CAP REACHED! To go from Lv.6 to Lv.10, use 🟣 Carmonite + 🪙 Coins!|🛑 ¡LÍMITE SUAVE NV.5 ALCANZADO! ¡Para subir del Nv.6 al Nv.10, usa 🟣 Carmonita + 🪙 Monedas!
+1006|❌ Você tem 0🟦 Metais Raros! Ganhe vencendo partidas ou compre por 4.000🪙 Moedas na Loja!|❌ You have 0🟦 Rare Metals! Earn them by winning matches or buy for 4,000🪙 Coins in the Shop!|❌ ¡Tienes 0🟦 Metales Raros! ¡Consíguelos ganando partidas o cómpralos por 4.000🪙 Monedas en la Tienda!
+1007|❌ Moedas insuficientes! Precisa de {0}🪙 Moedas (você tem {1}🪙). Vença partidas ou venda Lingotes!|❌ Not enough Coins! You need {0}🪙 Coins (you have {1}🪙). Win matches or sell Ingots!|❌ ¡Monedas insuficientes! Necesitas {0}🪙 Monedas (tienes {1}🪙). ¡Gana partidas o vende Lingotes!
+1008|🟦 Fusão concluída (−1🟦 Metal Raro e −{0}🪙 Moedas)! {1} subiu para Nv.{2}/5 (+1 Ponto de Disco liberado — toque na fatia do disco)!|🟦 Fusion Complete (-1🟦 Rare Metal and -{0}🪙 Coins)! {1} rose to Lv.{2}/5 (+1 Disk Point unlocked — tap the disk slice)!|🟦 ¡Fusión completada (−1🟦 Metal Raro y −{0}🪙 Monedas)! ¡{1} subió a Nv.{2}/5 (+1 Punto de Disco liberado — toca la porción del disco)!
+1009|⚠️ {0} está no Nv.{1}. Suba até o Nv.5 usando 🟦 Metal Raro + 🪙 Moedas primeiro!|⚠️ {0} is Lv.{1}. Raise it to Lv.5 with 🟦 Rare Metal + 🪙 Coins first!|⚠️ {0} está en Nv.{1}. ¡Súbelo a Nv.5 con 🟦 Metal Raro + 🪙 Monedas primero!
+1010|🏆 NÍVEL MÁXIMO NV.10/10 JÁ ATINGIDO em {0}!|🏆 MAX LEVEL LV.10/10 ALREADY REACHED on {0}!|🏆 ¡NIVEL MÁXIMO NV.10/10 YA ALCANZADO en {0}!
+1011|❌ Carmonita insuficiente ({0}/{1}🟣)! Compre +50🟣 na Loja de Moedas (15.000🪙) ou abra Caixas!|❌ Not enough Carmonite ({0}/{1}🟣)! Buy +50🟣 in the Coin Shop (15,000🪙) or open Boxes!|❌ ¡Carmonita insuficiente ({0}/{1}🟣)! ¡Compra +50🟣 en la Tienda de Monedas (15.000🪙) o abre Cajas!
+1012|❌ Moedas insuficientes! Precisa de {0}🪙 Moedas (você tem {1}🪙) para fundir Carmonita!|❌ Not enough Coins! You need {0}🪙 Coins (you have {1}🪙) to fuse Carmonite!|❌ ¡Monedas insuficientes! ¡Necesitas {0}🪙 Monedas (tienes {1}🪙) para fusionar Carmonita!
+1013|🟣 Fusão com Carmonita concluída (−{0}🟣 e −{1}🪙 Moedas)! {2} subiu para Nv.{3}/10 (+1 Ponto de Disco liberado)!|🟣 Carmonite Fusion Complete (-{0}🟣 and -{1}🪙 Coins)! {2} rose to Lv.{3}/10 (+1 Disk Point unlocked)!|🟣 ¡Fusión con Carmonita completada (−{0}🟣 y −{1}🪙 Monedas)! ¡{2} subió a Nv.{3}/10 (+1 Punto de Disco liberado)!
+1014|🛑 LIMITE MÁXIMO CLv 10/10 ATINGIDO em {0} (+10 DANO máximo)!|🛑 MAX CLv CAP 10/10 REACHED on {0} (+10 DMG maximum)!|🛑 ¡LÍMITE MÁXIMO CLv 10/10 ALCANZADO en {0} (+10 DAÑO máximo)!
+1015|❌ Cubos Verdes insuficientes ({0}/{1}🟩)! Compre na Loja de Moedas (22.000🪙) ou abra Caixas!|❌ Not enough Green Cubes ({0}/{1}🟩)! Buy them in the Coin Shop (22,000🪙) or open Boxes!|❌ ¡Cubos Verdes insuficientes ({0}/{1}🟩)! ¡Cómpralos en la Tienda de Monedas (22.000🪙) o abre Cajas!
+1016|❌ Moedas insuficientes! Precisa de {0}🪙 Moedas (você tem {1}🪙) para fundir CLv!|❌ Not enough Coins! You need {0}🪙 Coins (you have {1}🪙) to fuse CLv!|❌ ¡Monedas insuficientes! ¡Necesitas {0}🪙 Monedas (tienes {1}🪙) para fusionar CLv!
+1017|🟩 Subida de Nível de Corrente (−{0}🟩 Cubo e −{1}🪙 Moedas)! {2} subiu para CLv {3}/10 (+1 DANO)!|🟩 Chain Level Up (-{0}🟩 Cube and -{1}🪙 Coins)! {2} rose to CLv {3}/10 (+1 DMG)!|🟩 ¡Subida de Nivel de Cadena (−{0}🟩 Cubo y −{1}🪙 Monedas)! ¡{2} subió a CLv {3}/10 (+1 DAÑO)!
+1018|❌ Você tem 0🟨 Lingotes de Ouro no estoque! Ganhe Lingotes vencendo partidas ou abrindo Caixas!|❌ You have 0🟨 Gold Ingots in stock! Earn Ingots by winning matches or opening Boxes!|❌ ¡Tienes 0🟨 Lingotes de Oro en reserva! ¡Consigue Lingotes ganando partidas o abriendo Cajas!
+1019|🟨 1x Lingote de Ouro vendido por +15.000🪙 Moedas! (lingotes restantes: {0}🟨)|🟨 1x Gold Ingot sold for +15,000🪙 Coins! (Ingots left: {0}🟨)|🟨 ¡1x Lingote de Oro vendido por +15.000🪙 Monedas! (lingotes restantes: {0}🟨)
+1020|=|🛑 {0} is already at CLv 10/10!|🛑 ¡{0} ya está en CLv 10/10!
+1021|=|❌ Requires {0}🟩 ({1}) + {2}🪙 ({3})!|❌ ¡Requiere {0}🟩 ({1}) + {2}🪙 ({3})!
+1023|· +1🟨 Lingote!|· +1🟨 Ingot!|· ¡+1🟨 Lingote!
+1024|+600 🪙 Moedas|+600 🪙 Coins|+600 🪙 Monedas
+1025|· +1🟦 Metal Raro|· +1🟦 Rare Metal|· +1🟦 Metal Raro
+1026|{0} · +1🟦 Metal Raro|{0} · +1🟦 Rare Metal|{0} · +1🟦 Metal Raro
+1027|=|Beginner Trainer|Entrenador Principiante
+1029|=|👑 Official Game Creator (Dev)|👑 Creador oficial del juego (Dev)
+1030|=|🏆 PokeDuel Founder (ID 484-861-517)|🏆 Fundador de PokeDuel (ID 484-861-517)
+1031|=|🏅 1st Victory Earned|🏅 1.ª victoria conseguida
+1032|=|⚔️ 5 Duel Wins|⚔️ 5 victorias en duelos
+1033|=|🏆 Carmonte Champion (15W)|🏆 Campeón de Carmonte (15V)
+1034|=|🔥 Unbeaten Streak ({0}x)|🔥 Racha invicta ({0}x)
+1035|👑 Liga Líder (1500+ pts)|👑 Leader League (1500+ Pts)|👑 Liga Líder (1500+ pts)
+1036|🌟 Liga Campeão (1900+ pts)|🌟 Champion League (1900+ Pts)|🌟 Liga Campeón (1900+ pts)
+1037|=|🔓 Collector ({0}/217)|🔓 Coleccionista ({0}/217)
+1038|=|👑 Official Game Creator|👑 Creador oficial del juego
+1039|=|{0} · {1} Pts ({2}) · {3}W / {4}L ({5})|{0} · {1} pts ({2}) · {3}V / {4}D ({5})
+1041|=|🔒 No badges yet — win matches to unlock your achievements!|🔒 Aún no hay insignias — ¡gana partidas para desbloquear tus logros!
+1042|=|⚠️ The user "{0}" already has an account registered with a password!|⚠️ ¡El usuario "{0}" ya tiene una cuenta registrada con contraseña!
+1043|Para acessar este perfil, use o botão "Gerenciar Conta" e faça login com sua senha.|To access this profile, use the "Manage Account" button and log in with your password.|Para acceder a este perfil, usa el botón "Gestionar cuenta" e inicia sesión con tu contraseña.
+1044|=|Trainer_|Entrenador_
+1045|=|Trainer_{0}|Entrenador_{0}
+1046|=|💎 Original Crystal|💎 Cristal original
+1047|=|🍌 3D Golden Arena|🍌 Arena dorada 3D
+1048|=|🏛️ Imperial Marble|🏛️ Mármol imperial
+1049|=|🪵 Fine Wood|🪵 Madera noble
+1050|=|🪨 Volcanic Rock|🪨 Roca volcánica
+1051|=|🌿 4 Pokémon Habitats|🌿 4 hábitats Pokémon
+1052|=|✅ Arena theme changed to: {0}!|✅ ¡Tema de la arena cambiado a: {0}!
+1053|🔊 Música (BGM): DESLIGADA|🔊 Music (BGM): OFF|🔊 Música (BGM): DESACTIVADA
+1054|=|Game Saved and Closed|Juego guardado y cerrado
+1055|=|Your whole individual profile, points and Pokémon were saved safely.|Todo tu perfil individual, puntos y Pokémon se guardaron de forma segura.
+1056|=|🔄 Log In Again|🔄 Entrar de nuevo
+1059|306 Figuras 3D Kaiyodo · Pacotes de Tempo em tempo real · Multijogador P2P|306 Kaiyodo 3D Figures · Real-Time Time Boosters · P2P Multiplayer|306 figuras 3D Kaiyodo · Sobres de Tiempo en tiempo real · Multijugador P2P
+1060|=|READY|LISTO
+1061|🎁 Abrir no Início ({0})|🎁 Open in the Hub ({0})|🎁 Abrir en el Inicio ({0})
+1062|=|⏱️ View Timers ({0}/3)|⏱️ Ver temporizadores ({0}/3)
+1063|=|🎁 Open Box Now (Free!)|🎁 ¡Abrir caja ahora (gratis)!
+1064|🔻 Abrir ({0} Gemas)|🔻 Open ({0} Gems)|🔻 Abrir ({0} Gemas)
+1065|=|⚡ Speed it up now for 🔻{0} Gems or wait for the timer to finish.|⚡ Acelera ahora por 🔻{0} Gemas o espera a que termine el temporizador.
+1066|=|✅ Time's up! Tap Open Box to get your Pokémon!|✅ ¡Tiempo completado! ¡Toca Abrir caja para recibir tus Pokémon!
+1067|=|🔒 {0} left! Use gems to open it immediately.|🔒 ¡Faltan {0}! Usa gemas para abrirla ya.
+1068|(Acelerado com Gemas!)|(Sped up with Gems!)|(¡Acelerado con Gemas!)
+1069|🎉 {0} concluído e aberto! (espaço #{1} livre)|🎉 {0} finished and opened! (Slot #{1} free)|🎉 ¡{0} completado y abierto! (casilla #{1} libre)
+1070|+{0} Materiais · +{1} 🪙 Moedas · +1🟩 Cubo|+{0} Material · +{1} 🪙 Coins · +1🟩 Cube|+{0} Materiales · +{1} 🪙 Monedas · +1🟩 Cubo
+1071|=|⚠️ Not enough gems ({0}/{1}🔻)!|⚠️ ¡Gemas insuficientes ({0}/{1}🔻)!
+1072|⚠️ Gemas insuficientes para abrir este Pacote de Tempo agora!|⚠️ Not enough gems to open this Time Booster now!|⚠️ ¡Gemas insuficientes para abrir este Sobre de Tiempo ahora!
+1073|Custo: 🔻 {1} Gemas (faltam 🔻 {2} Gemas)|Cost: 🔻 {1} Gems ({2} 🔻 Gems missing)|Coste: 🔻 {1} Gemas (faltan 🔻 {2} Gemas)
+1074|🏆 Os Pacotes de Tempo são ganhos vencendo partidas em [Jogar]!|🏆 Time Booster boxes are earned by winning matches in [Play]!|🏆 ¡Los Sobres de Tiempo se ganan venciendo partidas en [Jugar]!
+1075|📦 O espaço #{0} está vazio! Vença uma partida em [Jogar] para ganhar um Pacote de Tempo.|📦 Slot #{0} is empty! Win a match in [Play] to earn a Time Booster.|📦 ¡La casilla #{0} está vacía! Gana una partida en [Jugar] para conseguir un Sobre de Tiempo.
+1076|=|Purple Chest (06:00:00): Unlocks 2 Pokémon (high R/EX/UX chance) + Material + Coins!|Cofre Morado (06:00:00): ¡desbloquea 2 Pokémon (alta probabilidad R/EX/UX) + Material + Monedas!
+1077|=|Silver Chest (01:00:00): Unlocks 1 Pokémon + Material + Coins!|Cofre Plateado (01:00:00): ¡desbloquea 1 Pokémon + Material + Monedas!
+1078|📦 Seus 3 espaços estão vazios! Vença uma partida em [Jogar] para ganhar um Pacote de Tempo.|📦 Your 3 slots are empty! Win a match in [Play] to earn a Time Booster.|📦 ¡Tus 3 casillas están vacías! Gana una partida en [Jugar] para conseguir un Sobre de Tiempo.
+1079|📦 +1 PACOTE DE TEMPO NO ESPAÇO #{0} ({1})|📦 +1 TIME BOOSTER IN SLOT #{0} ({1})|📦 +1 SOBRE DE TIEMPO EN LA CASILLA #{0} ({1})
+1080|Caixa enviada ao espaço #{0} do Início! O cronômetro de {1} já começou — aguarde o tempo zerar para abrir.|Box sent to Hub Slot #{0}! The {1} timer has started — wait for it to finish to open it.|¡Caja enviada a la casilla #{0} del Inicio! El temporizador de {1} ya empezó — espera a que termine para abrirla.
+1081|⏳ ESPAÇOS DE PACOTE DE TEMPO OCUPADOS (3/3)|⏳ TIME BOOSTER SLOTS FULL (3/3)|⏳ CASILLAS DE SOBRES DE TIEMPO LLENAS (3/3)
+1082|Seus 3 espaços de caixa no Início já estão em contagem regressiva! Aguarde uma caixa terminar para liberar espaço.|Your 3 box slots in the Hub are already counting down! Wait for one box to finish to free up space.|¡Tus 3 casillas de caja en el Inicio ya están en cuenta atrás! Espera a que termine una caja para liberar espacio.
+1083|🏠 VOLTAR AO INÍCIO (VER CRONÔMETROS)|🏠 BACK TO THE HUB (VIEW TIMERS)|🏠 VOLVER AL INICIO (VER TEMPORIZADORES)
+1084|=|✅ Full Energy (110/110)!|✅ ¡Energía llena (110/110)!
+1085|=|⏱️ +1⚡ in {0}:{1} (1⚡ every 2m30s)|⏱️ +1⚡ en {0}:{1} (1⚡ cada 2m30s)
+1086|=|⚡ ENERGY BAR (110/110)|⚡ BARRA DE ENERGÍA (110/110)
+1087|Sistema oficial de Energia do Pokémon Duel|Official Pokémon Duel Stamina System|Sistema oficial de Energía de Pokémon Duel
+1088|=|What is the green bar for?|¿Para qué sirve la barra verde?
+1089|=|It is your|Es tu
+1090|Energia de Campanha|Campaign Energy (Stamina)|Energía de Campaña
+1091|=|Where it's spent:|Dónde se gasta:
+1092|=|Each duel in the|Cada duelo en las
+1093|🗺️ Missões (Hotéis da Ilha Carmonte)|🗺️ Quests (Carmonte Island Hotels)|🗺️ Misiones (Hoteles de la Isla Carmonte)
+1094|=|Free Energy Matches:|Partidas gratis de energía:
+1095|Partida de Liga|League Match|Partida de Liga
+1096|Partida em Sala P2P|Room Match P2P|Partida en Sala P2P
+1097|Centro de Treinamento|Training Center|Centro de Entrenamiento
+1098|=|Auto Recharge:|Recarga automática:
+1099|=|Regenerates|Regenera
+1100|=|+1⚡ every 2m30s|+1⚡ cada 2m30s
+1101|=|up to a maximum of|hasta un máximo de
+1102|🪙 Recarregar tudo (1.500 Moedas)|🪙 Refill All (1,500 Coins)|🪙 Recargar todo (1.500 Monedas)
+1103|🗺️ MISSÕES — ILHA CARMONTE|🗺️ QUESTS — CARMONTE ISLAND|🗺️ MISIONES — ISLA CARMONTE
+1104|=|Each mission uses|Cada misión consume
+1105|=|⚡15 Energy|⚡15 de Energía
+1106|=|from the green bar · Reward: +1,500 🪙|de la barra verde · Recompensa: +1.500 🪙
+1107|=|🎓 TUTORIAL · STEP 1/6|🎓 TUTORIAL · PASO 1/6
+1108|=|⏭️ Skip Tutorial|⏭️ Saltar tutorial
+1109|=|✕ Exit|✕ Salir

@@ -1,0 +1,209 @@
+1885|Treinador · 1000 pts (Iniciante) · 0V / 0D|Trainer · 1000 Pts (Beginner) · 0W / 0L|Entrenador · 1000 pts (Principiante) · 0V / 0D
+1887|=|Version v6.1.0 · Stable · Build|Versión v6.1.0 · Estable · Build
+1888|=|ONLINE|EN LÍNEA
+1889|=|🎶 Official Pokémon Duel Soundtrack (Shota Kageyama OST) with the official Playlist!|🎶 ¡Banda sonora oficial de Pokémon Duel (OST de Shota Kageyama) con la lista oficial!
+1890|=|🖼️ Change Board Image (.jpg/.png)|🖼️ Cambiar imagen del tablero (.jpg/.png)
+1891|=|Your name|Tu nombre
+1892|Ex.: problema com a placa ou ideia de nova figura|E.g.: Issue with a plate or a new figure idea|Ej.: problema con una placa o idea de nueva figura
+1893|=|Explain what happened, how to reproduce the bug or the details of your suggestion...|Explica qué pasó, cómo reproducir el error o los detalles de tu sugerencia...
+1894|=|Your Name|Tu nombre
+1895|Ex.: treinador123|E.g.: trainer123|Ej.: entrenador123
+1896|=|Type your password...|Escribe tu contraseña...
+1897|=|Show Password|Ver contraseña
+1898|Ex.: Time Dragão|E.g.: Dragon Team|Ej.: Equipo Dragón
+1899|Tabuleiro e Gol do Pokémon Duel|Pokémon Duel Board and Goal Point|Tablero y Meta de Pokémon Duel
+1900|Roleta do Disco de Dados|Data Disk Wheel|Ruleta del Disco de Datos
+1901|Barra de Energia (para Missões)|Energy Bar (Stamina for Quests)|Barra de Energía (para Misiones)
+1902|=|Open Shop|Abrir Tienda
+1903|=|Mini Tutorial and Game Guide|Mini tutorial y guía del juego
+1904|=|View Weekly Type Buff Details|Ver detalles del bono semanal de tipo
+1905|=|Send an Idea or Report a Bug|Enviar idea o reportar error
+1906|=|Toggle between With Pedestal and Piece Only|Alternar entre con pedestal y solo la pieza
+1907|=|Change the Stage's Central Pokémon|Cambiar el Pokémon central del escenario
+1908|=|Global Ranking (Top 10 Best Trainers)|Clasificación global (Top 10 mejores Entrenadores)
+1909|Iniciar Partida Ranqueada (Partida de Liga)|Start Ranked Match (League Match)|Iniciar partida clasificatoria (Partida de Liga)
+1910|Outros modos de jogo (Multijogador por convite, Copa de Ginásio, Missões, Treino)|Other Game Modes (Invite Multiplayer, Gym Cup, Quests, Training)|Otros modos de juego (Multijugador por invitación, Copa de Gimnasio, Misiones, Entrenamiento)
+1911|=|Remove every Pokémon from the Team|Quitar todos los Pokémon del equipo
+1912|Ex.: 4829|E.g.: 4829|Ej.: 4829
+1913|=|Paste the SDP code here if you're playing without a server...|Pega aquí el código SDP si juegas sin servidor...
+1914|=|📋 Code|📋 Código
+1915|=|📋 Code {0} copied!|📋 ¡Código {0} copiado!
+1916|=|Send this 4-digit number to Phone 2.|Envía este número de 4 dígitos al móvil 2.
+1917|=|COPIED|COPIADO
+1918|Jogador 1 · Azul|Player 1 · Blue|Jugador 1 · Azul
+1919|Jogador 2 · Vermelho|Player 2 · Red|Jugador 2 · Rojo
+1920|=|🎲 1st Turn Wheel: YOU start the duel (-1 MP)! ({0})|🎲 Ruleta del 1.er turno: ¡TÚ empiezas el duelo (-1 PM)! ({0})
+1921|=|🎲 1st Turn Wheel: {0} starts the duel (-1 MP)! ({1})|🎲 Ruleta del 1.er turno: ¡{0} empieza el duelo (-1 PM)! ({1})
+1922|🏆 O adversário desistiu! Vitória por W.O.!|🏆 The opponent forfeited! Win by walkover!|🏆 ¡El rival se rindió! ¡Victoria por abandono!
+1923|=|Trainer P2|Entrenador P2
+1924|=|Trainer P1|Entrenador P1
+1925|=|🟢 CONNECTED TO PLAYER 2!|🟢 ¡CONECTADO AL JUGADOR 2!
+1926|=|Match started! You are Player 1 (Blue · Below).|¡Partida iniciada! Eres el Jugador 1 (Azul · Abajo).
+1927|=|ONLINE P1|EN LÍNEA P1
+1928|=|🟢 CONNECTED TO THE HOST (P1)!|🟢 ¡CONECTADO AL ANFITRIÓN (P1)!
+1929|=|Match started! Opposite Table View (180°): your P2 team is BELOW facing P1!|¡Partida iniciada! Vista de mesa opuesta (180°): ¡tu equipo P2 está ABAJO mirando a P1 de frente!
+1930|=|ONLINE P2|EN LÍNEA P2
+1933|=|ONLINE · {0}ms|EN LÍNEA · {0}ms
+1934|🛡️ Oponente usou Bloqueio de Gol: {0} teleportado para defender o Gol (Espera 1)!|🛡️ Opponent used Goal Block: {0} teleported to defend the Goal Point (Wait 1)!|🛡️ El rival usó Bloqueo de Meta: ¡{0} se teletransportó para defender la Meta (Espera 1)!
+1935|⇄ Oponente usou Troca de Pokémon: {0} trocado por {1}!|⇄ Opponent used Pokémon Switch: {0} swapped for {1}!|⇄ El rival usó Cambio de Pokémon: ¡{0} cambiado por {1}!
+1936|💖 Oponente usou Revive Máximo: {0} resgatado do P.C.!|💖 Opponent used Max Revive: {0} rescued from the P.C.!|💖 El rival usó Revivir Máximo: ¡{0} rescatado del P.C.!
+1937|🧬 Oponente ativou a Placa Mega: {0} [UX] (+20 DANO, +1★, MP {1})!|🧬 Opponent activated Mega Plate: {0} [UX] (+20 DMG, +1★, MP {1})!|🧬 El rival activó la Placa Mega: ¡{0} [UX] (+20 DAÑO, +1★, PM {1})!
+1938|⚔️ Oponente ativou Ataque X (+30 DANO no combate deste turno)!|⚔️ Opponent activated X Attack (+30 DMG in this turn's battle)!|⚔️ ¡El rival activó Ataque X (+30 DAÑO en el combate de este turno)!
+1939|⚡ Oponente ativou Velocidade X (Branco ➔ Dourado neste combate)!|⚡ Opponent activated X Speed (White ➔ Gold in this battle)!|⚡ ¡El rival activó Velocidad X (Blanco ➔ Dorado en este combate)!
+1940|🎲 Oponente ativou Chance Dupla!|🎲 Opponent activated Double Chance!|🎲 ¡El rival activó Doble Oportunidad!
+1941|🦘 Oponente ativou Salto de Obstáculo!|🦘 Opponent activated Hurdle Jump!|🦘 ¡El rival activó Salto de Valla!
+1942|=|⚪ ROOM CLOSED|⚪ SALA CERRADA
+1943|=|No active room. Create or join a room to play online.|No hay ninguna sala activa. Crea o entra en una sala para jugar en línea.
+1944|=|OFFLINE|SIN CONEXIÓN
+1946|🏳️ Desistência! Vitória por W.O. para {0}!|🏳️ Forfeit! Win by walkover for {0}!|🏳️ ¡Rendición! ¡Victoria por abandono para {0}!
+1948|🏆 VITÓRIA POR W.O.! Sinal WebRTC do adversário perdido por >30s!|🏆 WIN BY WALKOVER! The opponent's WebRTC signal was lost for >30s!|🏆 ¡VICTORIA POR ABANDONO! ¡Se perdió la señal WebRTC del rival durante >30 s!
+1949|=|🟡 OPENING ROOM [ {0} ]...|🟡 ABRIENDO SALA [ {0} ]...
+1950|=|Ask Phone 2 to type {0} in "Phone 2 (Join)" and tap Connect!|¡Pide al móvil 2 que escriba {0} en "Móvil 2 (Entrar)" y toque Conectar!
+1951|=|ROOM {0}|SALA {0}
+1952|=|[Host] Room {0} online ({1}). Waiting for Guest...|[Anfitrión] Sala {0} en línea ({1}). Esperando al invitado...
+1953|=|🟢 ROOM [ {0} ] OPEN! WAITING FOR PLAYER 2...|🟢 ¡SALA [ {0} ] ABIERTA! ESPERANDO AL JUGADOR 2...
+1954|=|On Phone 2, type the code {0} and tap "2. CONNECT AND PLAY"!|¡En el móvil 2, escribe el código {0} y toca "2. CONECTAR Y JUGAR"!
+1955|=|WAITING|ESPERANDO
+1956|=|[Host] Guest connecting...|[Anfitrión] Invitado conectándose...
+1958|=|⚠️ ENTER THE ROOM CODE!|⚠️ ¡ESCRIBE EL CÓDIGO DE LA SALA!
+1959|=|Type in the red field the 4 numbers shown on Phone 1.|Escribe en el campo rojo los 4 números que aparecen en el móvil 1.
+1960|=|CODE MISSING|FALTA EL CÓDIGO
+1961|=|🟡 CONNECTING TO ROOM [ {0} ]...|🟡 CONECTANDO A LA SALA [ {0} ]...
+1962|=|Finding Phone 1 and syncing the board...|Buscando el móvil 1 y sincronizando el tablero...
+1963|=|CONNECTING|CONECTANDO
+1965|=|[Guest] Connecting to {0}...|[Invitado] Conectando a {0}...
+1966|=|[P2P] WebRTC channel open ({0})!|[P2P] ¡Canal WebRTC abierto ({0})!
+1967|=|⚠️ P2P connection closed|⚠️ Conexión P2P cerrada
+1968|=|The other player disconnected.|El otro jugador se desconectó.
+1969|=|[P2P] Connection closed.|[P2P] Conexión cerrada.
+1970|=|[P2P Channel Error] {0}|[P2P Error de canal] {0}
+1971|=|Silver|Plata
+1973|=|[PeerJS] Active Peer ID: {0}|[PeerJS] ID de par activo: {0}
+1974|=|[PeerJS] P2P connection received from the opponent!|[PeerJS] ¡Conexión P2P recibida del rival!
+1975|=|[PeerJS] Error: {0}|[PeerJS] Error: {0}
+1976|=|Carmonte Lounge: {0} Trainer{1} Online|Salón Carmonte: {0} Entrenador{1} en línea
+1977|=|Carmonte League|Liga Carmonte
+1978|=|Page closed|Página cerrada
+1980|=|📡 Connected to the Global Lounge · Looking for a rival in the queue...|📡 Conectado al Salón Global · Buscando rival en la cola...
+1981|=|Looking for real opponents connected to the League Lounge...|Buscando rivales reales conectados al Salón de la Liga...
+1982|=|📡 Syncing with the Global Lounge network...|📡 Sincronizando con la red del Salón Global...
+1983|=|⚡ Scanning opponents in the matchmaking queue...|⚡ Buscando rivales en la cola de emparejamiento...
+1984|=|🌐 Optimizing low-latency P2P WebRTC channel...|🌐 Optimizando el canal P2P WebRTC de baja latencia...
+1985|=|⏱️ 30s reached! No opponent joined the queue.|⏱️ ¡30 s alcanzados! Ningún rival entró en la cola.
+1986|=|Matchmaking cancelled.|Emparejamiento cancelado.
+1987|=|🎉 OPPONENT FOUND!|🎉 ¡RIVAL ENCONTRADO!
+1989|=|⚡ Connecting via Git P2P WebRTC (<15ms Delay)...|⚡ Conectando vía Git P2P WebRTC (<15 ms de retraso)...
+1990|=|🤖 LEAGUE BOT SELECTED|🤖 BOT DE LA LIGA SELECCIONADO
+1991|=|⚔️ {0} — Starting a League practice match!|⚔️ {0} — ¡Empieza una partida de práctica de la Liga!
+1992|=|GLOBAL LOUNGE QUEUE|COLA DEL SALÓN GLOBAL
+1993|=|No other player joined the queue in the last 30s.|Ningún otro jugador entró en la cola en los últimos 30 s.
+1994|=|Tap 'Play with Bot' to train against the AI or wait for opponents in the Lounge.|Toca 'Jugar con bot' para entrenar contra la IA o espera rivales en el Salón.
+1995|=|🏆 LEAGUE MATCH STARTED! You vs {0} ({1} ELO)!|🏆 ¡PARTIDA DE LIGA INICIADA! ¡Tú vs {0} ({1} ELO)!
+1996|🏆 COPA DE GINÁSIO (COPA PLANTA E FOGO) — Planta (+1 MP) · Fogo (+20 DANO) · Vale Troféus!|🏆 GYM CUP (GRASS & FIRE CUP) — Grass (+1 MP) · Fire (+20 DMG) · Worth Trophies!|🏆 COPA DE GIMNASIO (COPA PLANTA Y FUEGO) — Planta (+1 PM) · Fuego (+20 DAÑO) · ¡Da Trofeos!
+1997|=|🏋️ TACTICAL TRAINING MODE — No ELO loss/gain and no rewards.|🏋️ MODO ENTRENAMIENTO TÁCTICO — Sin perder/ganar ELO y sin recompensas.
+1998|=|⚠️ Not enough Energy ({0}/{1}⚡)! Wait for it to regenerate or tap the green bar (110/110) to refill.|⚠️ ¡Energía insuficiente ({0}/{1}⚡)! Espera a que se regenere o toca la barra verde (110/110) para recargar.
+2000|🗺️ MISSÃO: {0} vs {1} (−15⚡ Energia)! Desafio 3 estrelas de Carmonte iniciado!|🗺️ QUEST: {0} vs {1} (-15⚡ Energy)! Carmonte 3-Star Challenge started!|🗺️ MISIÓN: ¡{0} vs {1} (−15⚡ Energía)! ¡Desafío de 3 estrellas de Carmonte iniciado!
+2001|=|🎓 MATCH COMPLETE!|🎓 ¡PARTIDA COMPLETADA!
+2003|=|+0 🔑 (Tutorial Mode)|+0 🔑 (Modo tutorial)
+2004|=|+0 🔻 · +0 🪙 (Intro Match)|+0 🔻 · +0 🪙 (Partida de presentación)
+2005|=|🎉 TUTORIAL COMPLETE!|🎉 ¡TUTORIAL COMPLETADO!
+2006|Você aprendeu a entrar em campo, saltar, usar Placas, girar a roleta, cercar e conquistar o Gol. Agora crie sua conta para salvar seu progresso!|You learned to enter the field, jump, use Plates, spin the wheel, surround and conquer the Goal. Now create your account to save your progress!|Aprendiste a entrar al campo, saltar, usar Placas, girar la ruleta, rodear y conquistar la Meta. ¡Ahora crea tu cuenta para guardar tu progreso!
+2007|=|👤 CREATE MY ACCOUNT ➔|👤 CREAR MI CUENTA ➔
+2008|=|TRAINING: VICTORY|ENTRENAMIENTO: VICTORIA
+2009|=|TRAINING: END|ENTRENAMIENTO: FIN
+2010|=|+0 Pts (Training Mode)|+0 pts (modo entrenamiento)
+2011|=|+0 🔑 (No Keys in Training)|+0 🔑 (sin llaves en entrenamiento)
+2012|=|+0 🔻 · +0 🪙 (No Rewards in Training)|+0 🔻 · +0 🪙 (sin recompensas en entrenamiento)
+2013|=|🏋️ TACTICAL TRAINING MODE — NO POINTS OR BOXES|🏋️ MODO ENTRENAMIENTO TÁCTICO — SIN PUNTOS NI CAJAS
+2014|Partidas no Centro de Treinamento servem para testar seus Decks e mecânicas sem ganhar/perder pontos ELO e sem dar recompensas.|Training Center matches are for testing your Decks and mechanics without gaining/losing ELO points and without rewards.|Las partidas en el Centro de Entrenamiento sirven para probar tus mazos y mecánicas sin ganar/perder ELO y sin recompensas.
+2015|🏠 VOLTAR AO INÍCIO|🏠 BACK TO THE HUB|🏠 VOLVER AL INICIO
+2016|MISSÃO CONCLUÍDA! ★★★|QUEST CLEAR! ★★★|¡MISIÓN COMPLETADA! ★★★
+2017|MISSÃO FALHOU|QUEST FAILED|MISIÓN FALLIDA
+2019|+0 pts (Campanha)|+0 Pts (Quest Campaign)|+0 pts (Campaña)
+2020|+0 🔑 (Energia restante: ⚡{0}/110)|+0 🔑 (Energy Left: ⚡{0}/110)|+0 🔑 (Energía restante: ⚡{0}/110)
+2021|+{0} 🔻 Gemas · +{1} 🪙 Moedas|+{0} 🔻 Gems · +{1} 🪙 Coins|+{0} 🔻 Gemas · +{1} 🪙 Monedas
+2022|+0 🔻 Gemas · +0 🪙 Moedas|+0 🔻 Gems · +0 🪙 Coins|+0 🔻 Gemas · +0 🪙 Monedas
+2023|Recompensas: +{0} 🔻 Gemas · +{1} 🪙 Moedas · +1 🟦 Metal Raro|Rewards: +{0} 🔻 Gems · +{1} 🪙 Coins · +1 🟦 Rare Metal|Recompensas: +{0} 🔻 Gemas · +{1} 🪙 Monedas · +1 🟦 Metal Raro
+2024|=|Try again to earn all 3 stars!|¡Inténtalo de nuevo para conseguir las 3 estrellas!
+2025|=|Condition 1:|Condición 1:
+2026|=|Win the Duel|Ganar el duelo
+2027|=|Condition 2:|Condición 2:
+2028|=|Win within {2} turns (You used:|Ganar en {2} turnos o menos (usaste:
+2029|=|Condition 3:|Condición 3:
+2030|=|Knock out {5}+ opposing figures (You knocked out:|Derrotar {5}+ figuras rivales (derrotaste:
+2031|🗺️ VOLTAR ÀS MISSÕES|🗺️ BACK TO QUESTS|🗺️ VOLVER A LAS MISIONES
+2032|=|🎓 LESSON 1/6 · ENTERING THE FIELD|🎓 LECCIÓN 1/6 · ENTRADA AL CAMPO
+2033|1. Portais de Entrada (Pontos de Entrada) e MP|1. Entry Gates (Entry Points) and MP|1. Portales de entrada (Puntos de entrada) y PM
+2034|Seus 6 Pokémon começam no Banco embaixo. Os portais nos cantos (Nós 7 e 13) são seus Pontos de Entrada e o ponto brilhante no topo (Nó 3) é o Gol inimigo! Toque no Nó 7 brilhando no tabuleiro (ou no botão abaixo) para colocar seu Pikachu (MP 3) em campo.|Your 6 Pokémon start on the Bench below. The gates in the corners (Nodes 7 and 13) are your Entry Points and the glowing spot at the top (Node 3) is the enemy Goal Point! Tap the glowing Node 7 on the board (or the button below) to put your Pikachu (MP 3) on the field.|Tus 6 Pokémon empiezan en el banquillo de abajo. Los portales de las esquinas (nodos 7 y 13) son tus Puntos de entrada y el punto brillante de arriba (nodo 3) es la Meta enemiga. Toca el nodo 7 que brilla en el tablero (o el botón de abajo) para poner a tu Pikachu (PM 3) en el campo.
+2035|=|▶️ Lesson 1: Place Pikachu on the Gate (Node 7)|▶️ Lección 1: poner a Pikachu en el portal (nodo 7)
+2036|=|🎓 LESSON 2/6 · 2 MP JUMP|🎓 LECCIÓN 2/6 · SALTO DE 2 PM
+2037|=|2. Official Jump Rule (Jumped Space Counts = 2 MP)|2. Regla oficial de salto (la casilla saltada cuenta = 2 PM)
+2038|Nosso Bulbasaur está no Nó 25 logo à frente do Pikachu! Com a habilidade de salto (ou a Placa Salto de Obstáculo), pular uma peça consome 1 MP da casa ocupada (Nó 25) + 1 MP da casa de pouso (Nó 23) = 2 MPs! Com o 3º MP, o Pikachu chega ao Nó 20. Toque no Nó 20 (ou no botão abaixo)!|Our Bulbasaur is on Node 25 right in front of Pikachu! With the jump ability (or the Hurdle Jump Plate), jumping a piece costs 1 MP for the occupied space (Node 25) + 1 MP for the landing space (Node 23) = 2 MPs! With the 3rd MP, Pikachu reaches Node 20. Tap Node 20 (or the button below)!|¡Nuestro Bulbasaur está en el nodo 25 justo delante de Pikachu! Con la habilidad de salto (o la Placa Salto de Valla), saltar una pieza cuesta 1 PM por la casilla ocupada (nodo 25) + 1 PM por la casilla de aterrizaje (nodo 23) = 2 PM. Con el 3.er PM, Pikachu llega al nodo 20. ¡Toca el nodo 20 (o el botón de abajo)!
+2039|=|▶️ Lesson 2: Jump Bulbasaur (2 MP) ➔ Node 20|▶️ Lección 2: saltar a Bulbasaur (2 PM) ➔ nodo 20
+2040|🎓 AULA 3/6 · USO DE PLACAS (6/6 ◆)|🎓 LESSON 3/6 · USING PLATES (6/6 ◆)|🎓 LECCIÓN 3/6 · USO DE PLACAS (6/6 ◆)
+2041|3. Cartas Táticas (Placas — limite de custo 6/6 ◆)|3. Tactical Cards (Plates — 6/6 ◆ Cost Limit)|3. Cartas tácticas (Placas — límite de coste 6/6 ◆)
+2042|Veja o Charmander inimigo bloqueando o Nó 21 à direita! No seu Deck você equipa até 6 diamantes (6/6 ◆) de Placas. No início do turno, antes de mover, você pode usar uma Placa. Toque no botão abaixo para ativar [Ataque X (1◆)] e dar +30 de dano ao Pikachu!|See the enemy Charmander blocking Node 21 on the right! In your Deck you equip up to 6 diamonds (6/6 ◆) of Plates. At the start of the turn, before moving, you can use a Plate. Tap the button below to activate [X Attack (1◆)] and give Pikachu +30 Damage!|¡Mira al Charmander enemigo bloqueando el nodo 21 a la derecha! En tu mazo equipas hasta 6 diamantes (6/6 ◆) de Placas. Al inicio del turno, antes de moverte, puedes usar una Placa. ¡Toca el botón de abajo para activar [Ataque X (1◆)] y dar +30 de daño a Pikachu!
+2043|▶️ Aula 3: Ativar a Placa [Ataque X +30 DANO]|▶️ Lesson 3: Activate the [X Attack +30 DMG] Plate|▶️ Lección 3: activar la Placa [Ataque X +30 DAÑO]
+2044|=|🎓 LESSON 4/6 · 96-SLICE WHEEL|🎓 LECCIÓN 4/6 · RULETA DE 96 PORCIONES
+2045|4. Combate de Disco de Dados (hierarquia de cores)|4. Data Disk Battle (Color Hierarchy)|4. Combate de Disco de Datos (jerarquía de colores)
+2046|No combate os dois giram a roleta de 96 fatias: 🔵 Azul (Esquiva) neutraliza tudo > 🟡 Dourado quebra Roxo > 🟣 Roxo (★) vence Branco > ⚪ Branco/Dourado vence pelo maior dano > 🔴 Vermelho (Falha) perde! Toque no Charmander no Nó 21 (ou no botão abaixo) para girar a roleta!|In battle both spin the 96-slice wheel: 🔵 Blue (Dodge) cancels everything > 🟡 Gold breaks Purple > 🟣 Purple (★) beats White > ⚪ White/Gold wins on the higher Damage > 🔴 Red (Miss) loses! Tap Charmander on Node 21 (or the button below) to spin the wheel!|En combate ambos giran la ruleta de 96 porciones: 🔵 Azul (Esquiva) lo anula todo > 🟡 Dorado rompe Morado > 🟣 Morado (★) vence a Blanco > ⚪ Blanco/Dorado gana con el mayor daño > 🔴 Rojo (Fallo) pierde. ¡Toca a Charmander en el nodo 21 (o el botón de abajo) para girar la ruleta!
+2047|=|▶️ Lesson 4: Attack Charmander on Node 21 (Spin the Wheel)|▶️ Lección 4: atacar a Charmander en el nodo 21 (girar la ruleta)
+2048|🎓 AULA 5/6 · CERCO (NOCAUTE POR CERCO)|🎓 LESSON 5/6 · SURROUND (SURROUND KO)|🎓 LECCIÓN 5/6 · CERCO (DERROTA POR CERCO)
+2049|5. Cerco Tático (Nocaute por Cerco automático e P.C.)|5. Tactical Surround (Automatic Surround KO & P.C.)|5. Cerco táctico (derrota por cerco automática y P.C.)
+2050|O Charmander derrotado foi para o P.C. (que guarda no máximo 2 peças)! Agora olhe o Squirtle inimigo no Nó 1: ele só tem 2 saídas (Nó 0, onde já está nosso Charizard, e Nó 2). Mova o Pikachu ao Nó 2 para fechar o cerco e causar NOCAUTE POR CERCO automático sem girar a roleta!|The defeated Charmander went to the P.C. (which holds at most 2 pieces)! Now look at the enemy Squirtle on Node 1: it only has 2 exits (Node 0, where our Charizard already is, and Node 2). Move Pikachu to Node 2 to close the surround and cause an automatic SURROUND KO without spinning the wheel!|¡El Charmander derrotado fue al P.C. (que guarda como máximo 2 piezas)! Ahora mira al Squirtle enemigo en el nodo 1: solo tiene 2 salidas (nodo 0, donde ya está nuestro Charizard, y nodo 2). ¡Mueve a Pikachu al nodo 2 para cerrar el cerco y provocar una DERROTA POR CERCO automática sin girar la ruleta!
+2051|=|▶️ Lesson 5: Move to Node 2 and Surround Squirtle!|▶️ Lección 5: ¡moverse al nodo 2 y rodear a Squirtle!
+2052|🎓 AULA 6/6 · CONQUISTA DO GOL|🎓 LESSON 6/6 · CONQUERING THE GOAL POINT|🎓 LECCIÓN 6/6 · CONQUISTA DE LA META
+2053|6. Pisar no Gol inimigo (Nó 3) e vencer!|6. Step on the Enemy Goal Point (Node 3) and Win!|6. ¡Pisar la Meta enemiga (nodo 3) y ganar!
+2054|Squirtle cercado e enviado ao P.C.! Agora o Gol inimigo (Nó 3) está totalmente livre ao lado do seu Pikachu. Avance do Nó 2 para o Nó 3 para conquistar a vitória na Partida de Apresentação e abrir o Tour Guiado do Início!|Squirtle surrounded and sent to the P.C.! Now the enemy Goal Point (Node 3) is completely free next to your Pikachu. Advance from Node 2 to Node 3 to win the Intro Match and open the guided Hub Tour!|¡Squirtle rodeado y enviado al P.C.! Ahora la Meta enemiga (nodo 3) está totalmente libre junto a tu Pikachu. ¡Avanza del nodo 2 al nodo 3 para ganar la partida de presentación y abrir el recorrido guiado del Inicio!
+2055|▶️ Aula 6: Avançar ao Gol (Nó 3) e vencer!|▶️ Lesson 6: Advance to the Goal Point (Node 3) and Win!|▶️ Lección 6: ¡avanzar a la Meta (nodo 3) y ganar!
+2056|Cynthia (Campeã)|Cynthia (Champion)|Cynthia (Campeona)
+2057|=|Master of Sinnoh & Legendary Dragons|Maestra de Sinnoh y dragones legendarios
+2058|Grão-Mestre|Grandmaster|Gran Maestro
+2059|Dragões de Sinnoh: Rugido do Tempo de 160 de dano, Velocidade Extrema e Ascensão do Dragão 150 Dourado.|Sinnoh Dragons: 160-damage Roar of Time, Extreme Speed and 150 Gold Dragon Ascent.|Dragones de Sinnoh: Distorsión de 160 de daño, Velocidad Extrema y Ascenso Draco 150 Dorado.
+2060|Red (Campeão)|Red (Champion)|Red (Campeón)
+2061|=|The Legend of Mt. Silver|La Leyenda del Monte Plateado
+2062|Liga Mestre|Master League|Liga Maestra
+2063|=|Classic Kanto team: big impact with Charizard, Zapdos's push and Snorlax and Blastoise's defense.|Equipo clásico de Kanto: gran impacto con Charizard, avance de Zapdos y defensa de Snorlax y Blastoise.
+2064|Steven Stone (Campeão)|Steven Stone (Champion)|Steven Stone (Campeón)
+2065|=|Fossil and Mineral Specialist|Especialista en fósiles y minerales
+2066|Trio de Aves Lendárias com Voo Alto (infiltração sobre Pokémon terrestres), Congelamento, Queimadura e Esfera de Aura.|Legendary Bird Trio with Soar (infiltration over ground Pokémon), Freeze, Burn and Aura Sphere.|Trío de aves legendarias con Vuelo Alto (infiltración sobre Pokémon terrestres), Congelación, Quemadura y Esfera Aural.
+2067|Lance (Mestre dos Dragões)|Lance (Dragon Master)|Lance (Maestro Dragón)
+2068|=|The Supreme Dragon Tamer|El domador supremo de dragones
+2069|Ataque aéreo implacável com Dragões pesados e Hiper-Raio de dano devastador.|Relentless air attack with heavy Dragons and devastating Hyper Beam damage.|Ataque aéreo implacable con dragones pesados e Hiperrayo de daño devastador.
+2070|Leon (Campeão)|Leon (Champion)|Lionel (Campeón)
+2071|=|Galar's Unbeatable Champion|El campeón imbatible de Galar
+2072|=|Total Galar pressure with aggressive mobility and maximum-damage finishers.|Presión total de Galar con movilidad agresiva y remates de daño máximo.
+2073|Blue (Campeão e Rival)|Blue (Champion & Rival)|Blue (Campeón y Rival)
+2074|=|Pallet's Eternal Rival|El rival eterno de Pueblo Paleta
+2075|=|Tactical, versatile composition balanced on every flank of the board.|Composición táctica y versátil equilibrada en todos los flancos del tablero.
+2076|Diantha (Campeã)|Diantha (Champion)|Dianta (Campeona)
+2077|=|The Radiant Star of Kalos|La estrella radiante de Kalos
+2078|Controle mágico de fadas e status roxos com teleporte e proteção do Gol.|Magic fairy control and purple status with teleport and Goal protection.|Control mágico de hadas y estados morados con teletransporte y protección de la Meta.
+2079|Alder (Campeão)|Alder (Champion)|Mirto (Campeón)
+2080|=|Unova's Wandering Guardian|El guardián errante de Teselia
+2081|=|Heavy fighters with high physical power and staying power in direct trades.|Luchadores pesados con gran poder físico y resistencia en los intercambios directos.
+2082|Morty (Mestre Fantasma)|Morty (Ghost Master)|Morti (Maestro Fantasma)
+2083|=|Johto's Ghost Mystic|El místico de los fantasmas de Johto
+2084|Fantasmas que atravessam o campo, Sombra Presa para travar o inimigo e o escudo Hyper Sonic do Mew.|Ghosts with Pass-Through over the field, Shadow Tag to lock the enemy and Mew's Hyper Sonic shield.|Fantasmas que atraviesan el campo, Sombra Trampa para bloquear al enemigo y el escudo Hyper Sonic de Mew.
+2085|Misty (Líder de Ginásio)|Misty (Gym Leader)|Misty (Líder de Gimnasio)
+2086|=|The Tomboyish Mermaid|La sirena marimacho
+2087|Liga Campeão|Champion League|Liga Campeón
+2088|Evolução tática de Magikarp para Gyarados (+10 DANO), Shuriken de Água dourado e sono com Lapras.|Tactical evolution from Magikarp to Gyarados (+10 DMG), gold Water Shuriken and sleep with Lapras.|Evolución táctica de Magikarp a Gyarados (+10 DAÑO), Shuriken de Agua dorado y sueño con Lapras.
+2089|Volkner (Líder de Ginásio)|Volkner (Gym Leader)|Lectro (Líder de Gimnasio)
+2090|=|Sunyshore's Shining Lightning|El rayo brillante de Ciudad Marina
+2091|Velocidade elétrica com corredores dourados, paralisia e pressão relâmpago nos Pontos de Entrada.|Electric speed with gold Runners, paralysis and lightning pressure on the Entry Points.|Velocidad eléctrica con corredores dorados, parálisis y presión relámpago en los Puntos de entrada.
+2092|Sabrina (Líder de Ginásio)|Sabrina (Gym Leader)|Sabrina (Líder de Gimnasio)
+2093|=|Saffron's Mistress of Telepathy|La maestra de la telepatía de Ciudad Azafrán
+2094|=|Psychic manipulation with confusion, teleport and high-star purple attacks.|Manipulación psíquica con confusión, teletransporte y ataques morados de muchas estrellas.
+2095|Giovanni (Chefe da Equipe Rocket)|Giovanni (Rocket Boss)|Giovanni (Jefe del Team Rocket)
+2096|=|Team Rocket's Ruthless Leader|El despiadado líder del Team Rocket
+2097|=|Underground brute force: massive damage, heavy invasion and territorial control.|Fuerza bruta subterránea: daño masivo, invasión pesada y dominio territorial.
+2098|Karolin (IA Grão-Mestre)|Karolin (Grandmaster AI)|Karolin (IA Gran Maestro)
+2099|=|Carmonte's Strategist Automaton|El autómata estratega de Carmonte
+2100|IA Minimax Grão-Mestre: análise profunda de 2 lances, cerco letal e contra-ataques milimétricos.|Minimax Grandmaster AI: deep 2-Ply analysis, lethal surrounds and pinpoint counterattacks.|IA Minimax Gran Maestro: análisis profundo de 2 jugadas, cerco letal y contraataques milimétricos.
+2101|N (Herói da Equipe Plasma)|N (Team Plasma Hero)|N (Héroe del Equipo Plasma)
+2102|=|The Hero of Ideals and Truth|El héroe de los ideales y la verdad
+2103|=|Legendary harmony with ancient dragons and stealthy illusions over the routes.|Armonía legendaria con dragones ancestrales e ilusiones sigilosas sobre las rutas.
+2104|Raihan (Líder de Ginásio)|Raihan (Gym Leader)|Roy (Líder de Gimnasio)
+2105|=|The Sandstorm Tamer|El domador de las tormentas de arena
+2106|=|Sandstorm and assault dragons: guard break and fast advance.|Tormenta de arena y dragones de asalto: rotura de guardia y avance rápido.

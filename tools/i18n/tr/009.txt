@@ -1,0 +1,188 @@
+1490|=|⏳ Wait for the Time|⏳ Esperar el tiempo
+1491|=|🔻 Open (10)|🔻 Abrir (10)
+1492|=|⚡ To play|⚡ Para jugar
+1493|Ranqueada (Partida de Liga)|Ranked (League Match)|Clasificatoria (Partida de Liga)
+1494|=|, tap the main button|, toca el botón principal
+1495|1.850 ELO · Liga Mestre|1,850 ELO · Master League|1.850 ELO · Liga Maestra
+1496|=|WORLD RANKING (REAL PLAYERS)|CLASIFICACIÓN MUNDIAL (JUGADORES REALES)
+1497|=|🟢 100% Real Players · Official Season · No Bots|🟢 100% jugadores reales · Temporada oficial · Sin bots
+1498|=|Tap any profile to inspect it|Toca cualquier perfil para verlo
+1499|=|🟢 Registered Accounts Only|🟢 Solo cuentas registradas
+1501|=|Title|Título
+1502|=|CURRENT SCORE|PUNTUACIÓN ACTUAL
+1503|=|PERSONAL BEST|RÉCORD PERSONAL
+1504|=|Best Season|Mejor temporada
+1505|=|⚔️ ACTIVE TEAM (6-FIGURE DECK)|⚔️ EQUIPO ACTIVO (MAZO DE 6 FIGURAS)
+1506|=|6/6 Figures|6/6 figuras
+1507|=|📊 DUEL STATS|📊 ESTADÍSTICAS DE DUELO
+1508|=|Matches:|Partidas:
+1509|=|Wins:|Victorias:
+1510|=|Losses:|Derrotas:
+1511|=|Win Rate:|Tasa de victoria:
+1512|=|Streak:|Racha:
+1513|=|Best Streak:|Mejor racha:
+1514|=|🏆 TROPHIES & ACHIEVEMENTS|🏆 TROFEOS Y LOGROS
+1515|=|🧠 TACTICAL STRATEGY|🧠 ESTRATEGIA TÁCTICA
+1516|=|❮ Back to Ranking|❮ Volver a la clasificación
+1517|=|SEND FEEDBACK|ENVIAR COMENTARIOS
+1518|=|Suggestions, New Ideas & Bug Reports|Sugerencias, nuevas ideas y reporte de errores
+1519|=|Message Type:|Tipo de mensaje:
+1520|=|🐛 Report a Bug|🐛 Reportar un error
+1521|=|💡 New Idea|💡 Nueva idea
+1522|=|⚖️ Balance|⚖️ Equilibrio
+1523|=|⭐ Praise / Other|⭐ Elogio / Otro
+1524|=|Your Trainer Name:|Tu nombre de Entrenador:
+1525|=|Subject:|Asunto:
+1526|=|Describe in Detail:|Describe en detalle:
+1527|=|Max. 1000 characters|Máx. 1000 caracteres
+1528|=|WEEKLY BUFF: ROCK|BONO SEMANAL: ROCA
+1529|=|Automatic rotation every 7 days|Rotación automática cada 7 días
+1530|=|Got it!|¡Entendido!
+1531|=|League Points|Puntos de Liga
+1532|=|Personal Best|Récord personal
+1534|=|Chest Keys|Llaves del cofre
+1535|Pacote Trancado|Locked Booster|Sobre Cerrado
+1536|=|📊 MY DUEL STATS|📊 MIS ESTADÍSTICAS DE DUELO
+1537|=|Best Streak:|Mejor racha:
+1538|=|🏆 MY ACHIEVEMENTS & BADGES|🏆 MIS LOGROS E INSIGNIAS
+1539|=|Your Name / Nickname:|Tu nombre / apodo:
+1540|=|Profile Title:|Título del perfil:
+1541|=|Carmonte Challenger|Retador de Carmonte
+1542|=|PFG Strategist|Estratega PFG
+1543|=|Wheel Master|Maestro de las ruletas
+1544|=|Arena Legend|Leyenda de la arena
+1545|=|Avatar Look:|Aspecto del avatar:
+1546|=|Red & Gold Visor|Visor rojo y dorado
+1547|=|Classic Tactical Glasses|Gafas tácticas clásicas
+1548|=|Silver Mask|Máscara plateada
+1549|=|Figure Pedestal:|Pedestal de las figuras:
+1550|=|⚙️ Classic Bronze|⚙️ Bronce clásico
+1551|=|💎 Royal Blue Crystal|💎 Cristal azul real
+1552|=|👑 24K Polished Gold|👑 Oro pulido 24K
+1553|=|🔮 Purple Obsidian|🔮 Obsidiana morada
+1554|=|🔥 Volcanic Flames|🔥 Llamas volcánicas
+1555|=|Featured Pokémon in the Lobby:|Pokémon destacado en el vestíbulo:
+1556|=|CLOUD ACCOUNT (SAVE & SYNC)|CUENTA EN LA NUBE (GUARDADO Y SINCRONIZACIÓN)
+1557|=|Manage Account / Log In|Gestionar cuenta / Iniciar sesión
+1558|=|🔄 Reset Profile|🔄 Restablecer perfil
+1559|=|💾 Save My Profile|💾 Guardar mi perfil
+1560|=|🎉 WELCOME, TRAINER!|🎉 ¡BIENVENIDO, ENTRENADOR!
+1561|=|Create your username and password to save your progress and play on other devices. Already have an account? Enter the same username and your password.|Crea tu usuario y contraseña para guardar tu progreso y jugar en otros dispositivos. ¿Ya tienes cuenta? Escribe el mismo usuario y tu contraseña.
+1562|=|Username / Nickname:|Nombre de usuario / apodo:
+1563|=|Account Password:|Contraseña de la cuenta:
+1564|=|🚪 EXIT THE GAME|🚪 SALIR DEL JUEGO
+1565|=|Your profile, points, coins and unlocked Pokémon are already saved automatically. Close the game?|Tu perfil, puntos, monedas y Pokémon desbloqueados ya se guardaron automáticamente. ¿Quieres cerrar el juego?
+1566|=|Keep Playing|Seguir jugando
+1567|=|🚪 Exit Now|🚪 Salir ahora
+1568|=|RENAME TEAM|RENOMBRAR EQUIPO
+1569|=|Type a new name for this team (max 20 characters):|Escribe un nuevo nombre para este equipo (máximo 20 caracteres):
+1570|=|Save Name|Guardar nombre
+1571|=|DELETE TEAM|BORRAR EQUIPO
+1572|=|Are you sure you want to delete this team?|¿Seguro que quieres borrar este equipo?
+1573|=|Yes, Delete|Sí, borrar
+1574|=|UPDATE NOTES|NOTAS DE ACTUALIZACIÓN
+1575|=|🏆 Official Pokémon Duel BR Meta (Brindera): Plates, Evolution and Gym Cups|🏆 Meta oficial de Pokémon Duel BR (Brindera): Placas, evolución y Copas de Gimnasio
+1576|Bandeja de Placas ativa no tabuleiro|Plates Tray Active on the Board|Bandeja de Placas activa en el tablero
+1577|: Botão direto [🎴 Placas] no rodapé da arena com contagem de placas restantes. Execução real de|: Direct [🎴 Plates] button at the bottom of the arena with a count of remaining plates. Real execution of|: Botón directo [🎴 Placas] al pie de la arena con el contador de placas restantes. Ejecución real de
+1578|=|(re-spin on the wheel),|(nuevo giro en la ruleta),
+1579|=|(adjacent piece jump),|(salto de pieza adyacente),
+1580|(defesa imediata do Gol),|(instant Goal Point defense),|(defensa inmediata de la Meta),
+1581|(resgate imediato do P.C. sem Espera),|(instant P.C. rescue without Wait),|(rescate inmediato del P.C. sin Espera),
+1582|Ataque X (+30 DANO)|X Attack (+30 DMG)|Ataque X (+30 DAÑO)
+1583|Velocidade X (Branco ➔ Dourado ⚡)|X Speed (White ➔ Gold ⚡)|Velocidad X (Blanco ➔ Dorado ⚡)
+1584|Megaevolução|Mega Evolution|Megaevolución
+1585|Evolução em Partida|In-Battle Evolution|Evolución en partida
+1586|=|: Pre-evolved Pokémon (Charmander, Squirtle, Bulbasaur, Pikachu, Eevee, Magikarp, etc.) that win a battle can evolve right away, permanently gaining|: Los Pokémon preevolucionados (Charmander, Squirtle, Bulbasaur, Pikachu, Eevee, Magikarp, etc.) que ganan un combate pueden evolucionar al momento ganando permanentemente
+1587|+10 DANO em Branco/Dourado e +1★ em Roxo|+10 DMG on White/Gold and +1★ on Purple|+10 DAÑO en Blanco/Dorado y +1★ en Morado
+1588|=|with a full cure of status conditions! Magikarp keeps its classic passive ability of evolving into Gyarados even when knocked out!|¡con cura total de estados! ¡Magikarp conserva su clásica habilidad pasiva de evolucionar a Gyarados incluso al ser derrotado!
+1589|Copa de Ginásio Temática|Themed Gym Cup|Copa de Gimnasio temática
+1590|: Novo modo de torneio no Seletor de Duelos com regras de tipo oficiais (Copa de Grama e Fogo: Grama ganha +1 MP e Fogo ganha +20 DANO), valendo Troféus de Ginásio exibidos no Perfil do Treinador e super recompensas!|: New tournament mode in the Duel Selector with official type rules (Grass & Fire Cup: Grass gets +1 MP and Fire gets +20 DMG), worth Gym Trophies shown on the Trainer Profile and big rewards!|: ¡Nuevo modo torneo en el selector de duelos con reglas de tipo oficiales (Copa Planta y Fuego: Planta gana +1 PM y Fuego +20 DAÑO), con Trofeos de Gimnasio que se muestran en el perfil del Entrenador y grandes recompensas!
+1591|🎵 Música (BGM) ativa na hora e abertura de caixas com Gemas|🎵 Music (BGM) Active Instantly & Opening Boxes with Gems|🎵 Música (BGM) activa al instante y apertura de cajas con Gemas
+1592|=|Instant and Reliable Music Playback|Reproducción de música instantánea y fiable
+1593|=|: The audio engine uses high-fidelity native Web Audio synthesis by default, auto-unlocking on any tap/click, with strong dynamic volume in the Carmonte Island Hub and in League Battles!|: ¡El motor de audio usa por defecto la síntesis nativa Web Audio de alta fidelidad, con desbloqueo automático en cualquier toque/clic y volumen dinámico potente en el Inicio de la Isla Carmonte y en los combates de Liga!
+1594|Abertura de caixas (Pacotes de Tempo) com Gemas 100% funcional|Opening Boxes (Time Boosters) with Gems 100% Working|Apertura de cajas (Sobres de Tiempo) con Gemas 100% funcional
+1595|: Corrigido o bloqueio do cronômetro. Agora você pode acelerar ou abrir qualquer Pacote de Tempo na hora usando Gemas (🔻) no Início e na janela de detalhes!|: Fixed the timer lock. You can now speed up or instantly open any Time Booster using Gems (🔻) in the Hub and the details window!|: Arreglado el bloqueo del temporizador. ¡Ahora puedes acelerar o abrir al instante cualquier Sobre de Tiempo usando Gemas (🔻) en el Inicio y en la ventana de detalles!
+1596|Pacotes da Loja (1x, 2x, 4x, 6x) com Gemas|Shop Boosters (1x, 2x, 4x, 6x) with Gems|Sobres de la Tienda (1x, 2x, 4x, 6x) con Gemas
+1597|=|: Immediate deduction and saving of the Gem balance with an interactive alert if something is missing, letting you claim bonuses and open right away!|: ¡Descuento y guardado inmediato del saldo de Gemas con aviso interactivo si falta algo, para reclamar bonificaciones y abrir al momento!
+1598|=|Fast Auto-Open Cinematic|Cinemática con apertura automática rápida
+1599|=|: The box opens automatically after a short pause or with a tap, and you can skip at any time.|: La caja se abre automáticamente tras una breve pausa o con un toque, y se puede saltar en cualquier momento.
+1600|🎶 Trilha sonora oficial do Pokémon Duel (OST do YouTube) integrada|🎶 Official Pokémon Duel Soundtrack (YouTube OST Gamerip) Integrated|🎶 Banda sonora oficial de Pokémon Duel (OST de YouTube) integrada
+1601|=|Shota Kageyama's Official Playlist|Lista oficial de Shota Kageyama
+1602|=|integrated straight into the game with high-fidelity playback!|¡integrada directamente en el juego con reproducción de alta fidelidad!
+1603|=|Faithful Mapping to the Original Places|Asignación fiel a los lugares originales
+1604|Menu Principal / Salão da Ilha Carmonte|Main Menu / Carmonte Island Lounge|Menú principal / Salón de la Isla Carmonte
+1605|: Toca no Início, Editor de Decks, Loja e Fusão.|: Plays in the Hub, Deck Editor, Shop and Fusion.|: Suena en el Inicio, el editor de mazos, la Tienda y la Fusión.
+1606|Tema de Duelo Online|Online Duel Theme|Tema de duelo en línea
+1607|=|: Plays during League matches in the arena.|: Suena durante las partidas de Liga en la arena.
+1608|Duelo Online (Aperto)|Online Duel (Pinch)|Duelo en línea (Apuro)
+1609|: Muda dinamicamente para o alarme de perigo quando o Gol está ameaçado (≤ 2 passos)!|: Dynamically switches to the danger alarm when the Goal is under threat (≤ 2 steps)!|: ¡Cambia dinámicamente a la alarma de peligro cuando la Meta está amenazada (≤ 2 pasos)!
+1610|Vinhetas de Vitória e Derrota|Victory & Lose Jingles|Melodías de victoria y derrota
+1611|=|: Official victory and defeat fanfare when the match ends.|: Fanfarria oficial de victoria y derrota al terminar la partida.
+1612|Vinheta de Sucesso|Success Jingle|Melodía de éxito
+1613|: Fanfarra clássica tocando na abertura das caixas de vitória e pacotes!|: Classic fanfare playing when opening victory boxes and boosters!|: ¡Fanfarria clásica al abrir las cajas de victoria y los sobres!
+1614|=|Audio Source Control in the Menu|Control de fuente de audio en el menú
+1615|=|: 1-tap switch between the Official YouTube Soundtrack and the Offline Web Audio Synthesizer.|: Cambio con 1 toque entre la banda sonora oficial de YouTube y el sintetizador Web Audio sin conexión.
+1616|=|🎬 Cinematic Box Animations (Single & Multiple) and Battle Attacks|🎬 Animaciones cinemáticas de caja (única y múltiple) y ataques en combate
+1617|=|Single Box Opening|Apertura de caja única
+1618|(1x Pacote e Caixa de Vitória): caixa 3D flutuando sobre pedestal holográfico, feixes de luz, partículas estelares, explosão ao toque e a figura subindo com revelação de raridade!|(1x Booster & Victory Box): 3D box floating over a holographic pedestal, God Rays, star particles, a burst on tap and the figure rising with a rarity reveal!|(1x sobre y Caja de Victoria): ¡caja 3D flotando sobre un pedestal holográfico, haces de luz, partículas estelares, explosión al tocar y la figura subiendo con revelación de rareza!
+1619|=|Multiple Box Opening|Apertura de caja múltiple
+1620|(4x, 6x, 10x): grande cápsula de pacote abrindo e revelando figura por figura com suspense especial de arco-íris para [EX] e [UX], botão de avançar e opção de pular!|(4x, 6x, 10x): Big pack capsule opening and revealing figure by figure with special rainbow suspense for [EX] and [UX], a next button and a skip option!|(4x, 6x, 10x): ¡gran cápsula de sobre que se abre revelando figura por figura con suspense arcoíris especial para [EX] y [UX], botón de avanzar y opción de saltar!
+1621|=|Attack Effects in Battle|Efectos de ataque en combate
+1622|: Raio sônico dourado (Hyper Sonic/Dourado), cortes incandescentes na diagonal (Branco), orbe de plasma mágico (Roxo) e escudo holográfico (Azul/Escudo Hyper Sonic)!|: Golden sonic beam (Hyper Sonic/Gold), glowing diagonal slashes (White), magic plasma orb (Purple) and holographic shield (Blue/Hyper Sonic Shield)!|: ¡Rayo sónico dorado (Hyper Sonic/Dorado), cortes incandescentes en diagonal (Blanco), orbe de plasma mágico (Morado) y escudo holográfico (Azul/Escudo Hyper Sonic)!
+1623|=|🛡️ Official Hyper Sonic Rule (Mew EX/UX) Fixed|🛡️ Regla oficial de Hyper Sonic (Mew EX/UX) corregida
+1624|=|The gold attack's passive ability is now faithfully implemented|Implementada con fidelidad la habilidad pasiva del ataque dorado
+1625|(50 DANO): quando o Mew cai em Hyper Sonic e o adversário gira um ataque Branco ou Dourado de|(50 DMG): when Mew lands on Hyper Sonic and the opponent spins a White or Gold attack of|(50 DAÑO): cuando Mew cae en Hyper Sonic y el rival saca un ataque Blanco o Dorado de
+1626|=|100 damage or more|100 de daño o más
+1627|=|, Mew|, Mew
+1628|=|is NOT knocked out|NO es derrotado
+1629|=|! It absorbs the impact and both keep their positions on the board.|! Absorbe el impacto y ambos mantienen sus posiciones en el tablero.
+1630|🎯 Roleta 100% limpa: mensagem de total no topo removida|🎯 100% Clean Wheel: Top Total Message Removed|🎯 Ruleta 100% limpia: mensaje de total arriba eliminado
+1631|=|Removed the top box/ticker that showed the multiplier summary and total. The top of the screen is completely clear, keeping the focus only on the wheels and the floating numbers and sparks in Vampire Survivors style!|Se eliminó la cajita superior que mostraba el resumen y total del multiplicador. ¡La parte de arriba queda totalmente despejada, con el foco solo en las ruletas y en los números y chispas flotantes al estilo Vampire Survivors!
+1632|🎵 Trilha sonora oficial (BGM) ativada (OST Pokémon Duel)|🎵 Official BGM Soundtrack Enabled (Pokémon Duel OST)|🎵 Banda sonora oficial (BGM) activada (OST de Pokémon Duel)
+1633|=|Authentic music enabled by default|Música auténtica activada por defecto
+1634|=|with pure Web Audio API synthesis, no lag or heavy files!|¡con síntesis pura Web Audio API, sin retrasos ni archivos pesados!
+1635|Salão da Ilha Carmonte|Carmonte Island Lounge|Salón de la Isla Carmonte
+1636|: tema relaxante e elegante tocando no Início, Loja de Pacotes, Editor de Decks e Menus.|: relaxing, elegant theme playing in the Hub, Booster Shop, Deck Editor and Menus.|: tema relajante y elegante en el Inicio, la tienda de sobres, el editor de mazos y los menús.
+1637|Batalha de Partida de Liga|League Match Battle|Combate de Partida de Liga
+1638|=|: rhythmic, energetic theme during board duels.|: tema rítmico y enérgico durante los duelos de tablero.
+1639|Tema de Alerta de Aperto|Pinch Alert Theme|Tema de alerta de apuro
+1640|: alarme dinâmico e acelerado quando o Gol entra em perigo imediato (≤ 2 passos)!|: dynamic, fast alarm when the Goal is in immediate danger (≤ 2 steps)!|: ¡alarma dinámica y acelerada cuando la Meta está en peligro inmediato (≤ 2 pasos)!
+1641|=|Victory, Defeat and Box Opening Fanfares|Fanfarrias de victoria, derrota y apertura de cajas
+1642|: vinhetas festivas de vitória e comemoração nos pacotes! Controle liga/desliga no Menu.|: festive victory jingles and celebration on boosters! On/off control in the Menu.|: ¡melodías festivas de victoria y celebración en los sobres! Control de activar/desactivar en el menú.
+1643|🛡️ Regras oficiais do P.C. e interface sem Voltar Jogada|🛡️ Official P.C. Rules & No-Rewind Interface|🛡️ Reglas oficiales del P.C. e interfaz sin rebobinar
+1644|Removido o botão Voltar Jogada|Removed the Rewind button|Se eliminó el botón Rebobinar
+1645|=|from the bottom game bar to keep the board authentic and focused.|de la barra inferior del juego para mantener el tablero auténtico y centrado.
+1646|=|Strict fix of the Bot's P.C. in Ranked|Corrección estricta del P.C. del bot en clasificatoria
+1647|: removida qualquer ressurreição automática pré-turno. Quando os Pokémon da IA são derrotados, eles vão direto para os espaços do P.C. e ficam lá até a rotação oficial (máx. 2 vagas), saindo ao banco com Espera 2 sem poder agir de imediato!|: removed any automatic pre-turn revival. When the AI's Pokémon are defeated, they go straight to the P.C. pods and stay there until the official rotation (max 2 spots), leaving to the bench with Wait 2 and unable to act immediately!|: ¡se eliminó cualquier resurrección automática antes del turno! Cuando los Pokémon de la IA son derrotados, van directo a las cápsulas del P.C. y se quedan hasta la rotación oficial (máx. 2 plazas), saliendo al banquillo con Espera 2 sin poder actuar de inmediato.
+1648|🪙 Saldo inicial equilibrado: 100 Gemas e 15.000 de Ouro|🪙 Balanced Starting Balance: 100 Gems & 15,000 Gold|🪙 Saldo inicial equilibrado: 100 Gemas y 15.000 de Oro
+1649|=|All new accounts created from the welcome menu or reset start with exactly|Todas las cuentas nuevas creadas desde el menú de bienvenida o restablecidas empiezan exactamente con
+1650|100 Gemas (🔻)|100 Gems (🔻)|100 Gemas (🔻)
+1651|15.000 Moedas de Ouro (🪙)|15,000 Gold Coins (🪙 Coins)|15.000 Monedas de Oro (🪙)
+1652|=|, for a fair, authentic progression!|, ¡para una progresión justa y auténtica!
+1653|⚡ Dano multiplicador estilo Vampire Survivors|⚡ Vampire Survivors–Style Multiplier Damage|⚡ Daño multiplicador al estilo Vampire Survivors
+1654|=|When the wheel lands on a multiplier attack (like|Cuando la ruleta cae en un ataque multiplicador (como
+1655|Chama Giratória 50x|Fire Spin 50x|Giro Fuego 50x
+1656|Chicote de Vinha 40x|Vine Whip 40x|Látigo Cepa 40x
+1657|), números de combate flutuantes com mola elástica, partículas de faíscas, contorno grosso e efeito sonoro arcade somam o dano na tela (+50! ➔ 2x COMBO ➔ 100 DANO!) até o fim do combo, mantendo a roleta 100% limpa!|), floating combat numbers with elastic springs, spark particles, thick outlines and an arcade sound effect add up the damage on screen (+50! ➔ 2x COMBO ➔ 100 DMG!) until the combo ends, keeping the wheel 100% clean!|), ¡números de combate flotantes con muelle elástico, partículas de chispas, contorno grueso y sonido arcade suman el daño en pantalla (¡+50! ➔ 2x COMBO ➔ ¡100 DAÑO!) hasta el final del combo, manteniendo la ruleta 100% limpia!
+1658|💎 Recompensa diária fixada em 50 Gemas|💎 Daily Reward Set at 50 Gems|💎 Recompensa diaria fijada en 50 Gemas
+1659|=|The Shop's Daily Bonus was adjusted to give exactly|La bonificación diaria de la Tienda se ajustó para dar exactamente
+1660|50 Gemas (🔻)|50 Gems (🔻)|50 Gemas (🔻)
+1661|, além de 1.500 Moedas e 1 Metal Raro a cada 24 horas!|, plus 1,500 Coins and 1 Rare Metal every 24 hours!|, ¡además de 1.500 Monedas y 1 Metal Raro cada 24 horas!
+1662|=|⚔️ Team Management (Max 3)|⚔️ Gestión de equipos (máx. 3)
+1663|=|Added the option to|Se añadió la opción de
+1664|=|rename your teams|renombrar tus equipos
+1665|=|freely (e.g. Fire Team, Electric, etc.) and|libremente (ej.: Equipo Fuego, Eléctrico, etc.) y
+1666|=|delete teams|borrar equipos
+1667|=|you no longer use. The number of teams was|que ya no usas. El número de equipos se
+1668|=|limited to a maximum of 3 teams|limitó a un máximo de 3 equipos
+1669|=|, keeping everything clean and organized!|, ¡manteniendo todo limpio y ordenado!
+1670|=|🎯 100% Clean Battle Wheel|🎯 Ruleta de combate 100% limpia
+1671|Removidos todos os pop-ups, faixas de multiplicador e mensagens sobrepostas na tela de confronto da roleta. Agora a tela mostra apenas os dois Discos de Dados autênticos com o pino central e brilho neon na fatia sorteada!|Removed every pop-up, multiplier banner and overlapping message on the wheel battle screen. The screen now shows only the two authentic Data Disks with the center pin and a neon glow on the chosen slice!|Se eliminaron todas las ventanas emergentes, banners de multiplicador y mensajes superpuestos en la pantalla de la ruleta. ¡Ahora solo se ven los dos Discos de Datos auténticos con el pin central y brillo neón en la porción elegida!
+1672|=|🧹 Clean Look on the Board|🧹 Aspecto limpio en el tablero
+1673|=|Removed the buttons|Se eliminaron los botones
+1674|[🔄 Visão P1]|[🔄 P1 View]|[🔄 Vista P1]
+1675|=|from the top bar to widen the combat log and give full focus to the match without visual clutter.|de la barra superior para ampliar el registro de combate y centrarse por completo en la partida sin ruido visual.
+1676|🌐 Multijogador P2P e 2P local estável|🌐 Stable P2P Multiplayer and Local 2P|🌐 Multijugador P2P y 2P local estable
+1677|=|Fixed a freeze that blocked taps and selections in multiplayer matches. Miniature selection area enlarged (28px hitbox) and a dynamic turn indicator added on the table.|Se arregló un bloqueo que impedía toques y selecciones en las partidas multijugador. Se amplió el área de selección de las miniaturas (zona táctil de 28px) y se añadió un indicador dinámico de turno en la mesa.
+1678|=|🔄 1-Tap Auto Updater|🔄 Actualizador automático en 1 toque
+1679|=|New button to check and apply updates instantly, clearing the browser caches and Service Worker to load the latest version without resetting your data!|¡Nuevo botón para buscar y aplicar actualizaciones al instante, limpiando la caché del navegador y el Service Worker para cargar la versión más reciente sin borrar tus datos!

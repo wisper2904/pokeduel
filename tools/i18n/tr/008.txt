@@ -1,0 +1,169 @@
+1300|=|Local Vault|Caja fuerte local
+1301|=|🎉 New account @{0} created and linked to the Cloud!|🎉 ¡Nueva cuenta @{0} creada y vinculada a la nube!
+1302|=|✅ Logged in as @{0} ({1})! Restoring {2} Pokémon and {3} ELO...|✅ ¡Sesión iniciada como @{0} ({1})! Restaurando {2} Pokémon y {3} ELO...
+1303|=|🚪 You logged out of the cloud account. Your local progress is kept intact.|🚪 Cerraste la sesión en la nube. Tu progreso local sigue intacto.
+1304|=|☁️ Disconnected|☁️ Desconectado
+1305|=|Session active as @{0}. Your progress, gems and trophies are saved in the cloud.|Sesión activa como @{0}. Tu progreso, gemas y trofeos se guardan en la nube.
+1306|=|Manage Account (@{0})|Gestionar cuenta (@{0})
+1307|=|Sync your progress, Kaiyodo figures and gems with a Login and Password to play on phone or PC.|Sincroniza tu progreso, figuras Kaiyodo y gemas con usuario y contraseña para jugar en el móvil o el PC.
+1308|=|Log In or Create a Cloud Account|Entrar o crear cuenta en la nube
+1309|=|⚠️ Paste your GitHub Token (ghp_... or github_pat_...) to publish automatically to GitHub Pages!|⚠️ ¡Pega tu token de GitHub (ghp_... o github_pat_...) para publicar automáticamente en GitHub Pages!
+1310|=|⏳ 1/4 Checking/creating repository|⏳ 1/4 Comprobando/creando repositorio
+1311|=|on GitHub...|en GitHub...
+1313|=|Error creating repository ({0})|Error al crear el repositorio ({0})
+1314|=|Authentication error ({0})|Error de autenticación ({0})
+1315|=|⏳ 2/4 Packing the full monolithic engine (4.53 MB · 27 Kaiyodo Sprites + 200 Nano Banana)...|⏳ 2/4 Empaquetando el motor monolítico completo (4,53 MB · 27 sprites Kaiyodo + 200 Nano Banana)...
+1316|PokeDuel — Jogo de Figuras 3D|PokeDuel — 3D Figure Game|PokeDuel — Juego de figuras 3D
+1317|=|Failed to upload blob ({0})|Error al subir el blob ({0})
+1318|=|⏳ 3/4 Creating Git tree and commit on branch|⏳ 3/4 Creando árbol Git y commit en la rama
+1319|=|Failed to create Git Tree ({0})|Error al crear el árbol Git ({0})
+1321|=|Failed to create Commit ({0})|Error al crear el commit ({0})
+1323|=|⏳ 4/4 Enabling GitHub Pages...|⏳ 4/4 Activando GitHub Pages...
+1324|=|✅ Published! Site live at:|✅ ¡Publicado! Sitio en línea en:
+1325|=|(it may take ~40s for GitHub to refresh the cache).|(GitHub puede tardar ~40 s en actualizar la caché).
+1326|=|❌ Error publishing: {0}|❌ Error al publicar: {0}
+1327|=|☁️ ACCOUNT & CLOUD SAVE|☁️ CUENTA Y GUARDADO EN LA NUBE
+1328|=|Sync with Login and Password between APK, iPhone and PC|Sincroniza con usuario y contraseña entre APK, iPhone y PC
+1329|=|Account Status:|Estado de la cuenta:
+1330|=|👤 Your Login / User:|👤 Tu usuario:
+1331|=|🔑 Your Password:|🔑 Tu contraseña:
+1332|📥 Entrar e baixar progresso|📥 Log In & Download Save|📥 Entrar y descargar partida
+1333|=|☁️ Save to Cloud Now|☁️ Guardar en la nube ahora
+1334|=|🔒 SHA-256 Encryption + Auto-Save active|🔒 Cifrado SHA-256 + guardado automático activo
+1335|=|🚪 Log Out|🚪 Cerrar sesión
+1336|=|🚀 Continue|🚀 Continuar
+1337|=|🔍 Checking if the user already exists...|🔍 Comprobando si el usuario ya existe...
+1338|=|⚠️ Name "@{0}" already registered! Enter the password to log in or choose another name.|⚠️ ¡El nombre "@{0}" ya está registrado! Escribe la contraseña para entrar o elige otro nombre.
+1339|=|🔑 Log in as @{0}|🔑 Entrar como @{0}
+1340|=|✨ Name "@{0}" available! Create a password to protect it.|✨ ¡Nombre "@{0}" disponible! Crea una contraseña para protegerlo.
+1341|=|🚀 Create @{0} and Start|🚀 Crear @{0} y empezar
+1342|=|⚠️ The username must have at least 3 characters.|⚠️ El nombre de usuario debe tener al menos 3 caracteres.
+1343|=|⚠️ Enter a password with at least 4 characters.|⚠️ Escribe una contraseña de al menos 4 caracteres.
+1344|=|⏳ Checking credentials...|⏳ Comprobando credenciales...
+1345|=|❌ Wrong password! The user "@{0}" already exists. Enter the right password or create another user.|❌ ¡Contraseña incorrecta! El usuario "@{0}" ya existe. Escribe la contraseña correcta o crea otro usuario.
+1346|=|✅ Correct password! Loading @{0}'s save...|✅ ¡Contraseña correcta! Cargando la partida de @{0}...
+1347|=|🎉 Account created for @{0}!|🎉 ¡Cuenta creada para @{0}!
+1349|=|❌ An error occurred while checking the account. Try again.|❌ Hubo un error al comprobar la cuenta. Inténtalo de nuevo.
+1350|☁️ SAVE NA NUVEM (LOGIN E SENHA)|☁️ CLOUD SAVE (LOGIN & PASSWORD)|☁️ GUARDADO EN LA NUBE (USUARIO Y CONTRASEÑA)
+1351|=|📲 Install App|📲 Instalar app
+1352|=|Create or access your account with just a|Crea o accede a tu cuenta solo con
+1353|=|Login and Password|usuario y contraseña
+1354|para sincronizar seus 306 Pokémon, Decks, Gemas, ELO e Pacotes de Tempo entre o|to sync your 306 Pokémon, Decks, Gems, ELO and Time Boosters between|para sincronizar tus 306 Pokémon, mazos, gemas, ELO y Sobres de Tiempo entre
+1357|=|👤 Login (User):|👤 Usuario:
+1358|=|🔑 Password:|🔑 Contraseña:
+1359|📥 Entrar / Baixar progresso|📥 Log In / Download Save|📥 Entrar / Descargar partida
+1360|=|☁️ Save to Cloud|☁️ Guardar en la nube
+1361|=|🚪 Log Out|🚪 Salir
+1362|=|🚀 Publish / Update Site on GitHub Pages (1 Tap · Safe Monolithic)|🚀 Publicar / actualizar el sitio en GitHub Pages (1 toque · monolítico seguro)
+1363|=|Sends the|Envía el
+1364|=|full monolithic index.html (4.53 MB)|index.html monolítico completo (4,53 MB)
+1365|=|with all 27 Kaiyodo sprites and 200 Nano Banana via the Git Data Blobs API straight to your GitHub Pages:|con los 27 sprites Kaiyodo y 200 Nano Banana vía la API Git Data Blobs directo a tu GitHub Pages:
+1366|=|🔑 Generate Token|🔑 Generar token
+1367|=|🚀 Publish Now at https://{3}.github.io/{4}/|🚀 Publicar ahora en https://{3}.github.io/{4}/
+1368|📦 Backup Offline por Arquivo (.pokeduel) ou Código de Transferência|📦 Offline Backup by File (.pokeduel) or Transfer Code|📦 Copia sin conexión por archivo (.pokeduel) o código de transferencia
+1369|=|📋 Export Code|📋 Exportar código
+1370|=|💾 Download .pokeduel|💾 Descargar .pokeduel
+1371|=|📥 Import Code|📥 Importar código
+1372|=|📂 Load .pokeduel File|📂 Cargar archivo .pokeduel
+1373|=|👑 Official Game Creator 🏆|👑 Creador oficial del juego 🏆
+1374|=|🛠️ PokeDuel Founder & Developer|🛠️ Fundador y desarrollador de PokeDuel
+1375|=|👑 Game Creator|👑 Creador del juego
+1376|=|Official Dev|Dev oficial
+1377|=|👑 Official Account of the PokeDuel Creator and Developer (ID: 484-861-517).|👑 Cuenta oficial del creador y desarrollador de PokeDuel (ID: 484-861-517).
+1378|=|Registered Trainer|Entrenador registrado
+1379|=|Registered Account 🏆|Cuenta registrada 🏆
+1380|=|Official Player|Jugador oficial
+1381|=|Official account registered (@{0}) in the Carmonte League.|Cuenta oficial registrada (@{0}) en la Liga Carmonte.
+1382|=|Official Trainer profile on Carmonte Island.|Perfil oficial de Entrenador en la Isla Carmonte.
+1383|=|Registered Account|Cuenta registrada
+1384|Liga Iniciante|Beginner League|Liga Principiante
+1390|=|👑 CREATOR|👑 CREADOR
+1391|=|Your Rank:|Tu clasificación:
+1393|=|View Profile ❯|Ver perfil ❯
+1394|=|(You)|(Tú)
+1397|=|Board strategist on Carmonte Island.|Estratega del tablero en la Isla Carmonte.
+1398|=|{4} MP|{4} PM
+1399|=|Send Feedback|Enviar comentarios
+1400|=|⚠️ Write your feedback, idea or bug before sending.|⚠️ Escribe tu comentario, idea o error antes de enviar.
+1401|=|Sending feedback...|Enviando comentarios...
+1402|=|🔄 Connecting and sending to the developers...|🔄 Conectando y enviando a los desarrolladores...
+1403|=|Visitor|Visitante
+1404|=|(No subject)|(Sin asunto)
+1406|=|✅ Feedback #{0} sent! Thanks a lot for the support!|✅ ¡Comentario #{0} enviado! ¡Muchas gracias por el apoyo!
+1407|=|💾 Feedback #{0} saved in the queue! It will be resent automatically once there's a connection.|💾 ¡Comentario #{0} guardado en la cola! Se reenviará automáticamente cuando haya conexión.
+1408|=|UPDATING POKÉMON DUEL...|ACTUALIZANDO POKÉMON DUEL...
+1409|=|Clearing the browser cache, Service Worker and downloading the latest version...|Limpiando la caché del navegador, el Service Worker y descargando la versión más reciente...
+1413|=|📱 Display: Auto (Mobile Detected 1:1)|📱 Pantalla: automática (móvil detectado 1:1)
+1414|=|💻 Display: Auto (PC Simulator Detected)|💻 Pantalla: automática (simulador de PC detectado)
+1415|=|📱 Display: Forced Mobile (Full Screen 1:1)|📱 Pantalla: forzado móvil (pantalla completa 1:1)
+1416|=|💻 Display: Forced PC (Smartphone Simulator)|💻 Pantalla: forzado PC (simulador de smartphone)
+1417|=|✅ Automatic: Mobile Detected (Full Screen 1:1)|✅ Automático: móvil detectado (pantalla completa 1:1)
+1418|=|✅ Automatic: PC Detected (Simulator)|✅ Automático: PC detectado (simulador)
+1419|=|✅ Mode set to: {0}|✅ Modo fijado en: {0}
+1421|=|🎯 LESSON {0}|🎯 LECCIÓN {0}
+1422|=|🎓 LESSON 1/6 — Tap Node 7 (or the green button) to enter the field!|🎓 LECCIÓN 1/6 — ¡Toca el nodo 7 (o el botón verde) para entrar al campo!
+1423|=|🎓 LESSON 2/6 — Jump over Bulbasaur (Node 25) to Node 20 (2 MP + 1 MP)!|🎓 LECCIÓN 2/6 — ¡Salta sobre Bulbasaur (nodo 25) hasta el nodo 20 (2 PM + 1 PM)!
+1424|🎓 AULA 3/6 — Ative a Placa [Ataque X +30 DANO] antes de atacar o Charmander!|🎓 LESSON 3/6 — Activate the [X Attack +30 DMG] Plate before attacking Charmander!|🎓 LECCIÓN 3/6 — ¡Activa la Placa [Ataque X +30 DAÑO] antes de atacar a Charmander!
+1425|⚡ [Ataque X +30 DANO] ativo! Agora toque no Charmander (Nó 21) para girar a Roleta!|⚡ [X Attack +30 DMG] active! Now tap Charmander (Node 21) to spin the Wheel!|⚡ ¡[Ataque X +30 DAÑO] activo! ¡Ahora toca a Charmander (nodo 21) para girar la ruleta!
+1426|Relâmpago (+30 Ataque X)|Thunderbolt (+30 X Attack)|Rayo (+30 Ataque X)
+1427|💥 NOCAUTE POR CERCO! O Squirtle no Nó 1 foi cercado! Agora avance ao Gol (Nó 3)!|💥 SURROUND KO! Squirtle on Node 1 was surrounded! Now advance to the Goal Point (Node 3)!|💥 ¡DERROTA POR CERCO! ¡Squirtle en el nodo 1 fue rodeado! ¡Ahora avanza a la Meta (nodo 3)!
+1428|🏆 GOL CONQUISTADO! Partida de apresentação concluída!|🏆 GOAL POINT CONQUERED! Intro Match complete!|🏆 ¡META CONQUISTADA! ¡Partida de presentación completada!
+1429|🎓 AULA 5/6 — Mova o Pikachu ao Nó 2 para cercar o Squirtle no Nó 1 (Nocaute por Cerco)!|🎓 LESSON 5/6 — Move Pikachu to Node 2 to surround Squirtle on Node 1 (Surround KO)!|🎓 LECCIÓN 5/6 — ¡Mueve a Pikachu al nodo 2 para rodear a Squirtle en el nodo 1 (derrota por cerco)!
+1430|=|👆 Tap the Node {0} highlighted in gold or the green {1} button!|👆 ¡Toca el nodo {0} resaltado en dorado o el botón verde de {1}!
+1431|=|1. Green Energy Bar (⚡110/110), Coins and 3D Stage|1. Barra verde de energía (⚡110/110), monedas y escenario 3D
+1432|• No topo esquerdo está a Barra Verde (⚡ 110/110): é a sua Energia de Campanha, usada para jogar as Missões dos hotéis da Ilha Carmonte (regenera +1⚡ a cada 2m30s; toque nela para ver detalhes!).|• At the top left is the Green Bar (⚡ 110/110): it's your Campaign Energy, used to play the Carmonte Island hotel Quests (regenerates +1⚡ every 2m30s; tap it for details!).|• Arriba a la izquierda está la barra verde (⚡ 110/110): es tu Energía de Campaña, usada para jugar las Misiones de los hoteles de la Isla Carmonte (regenera +1⚡ cada 2m30s; ¡tócala para ver detalles!).
+1433|=|• Next to it are your Coins (🪙, used in Fusion and the Shop) and Gems (🔻).|• Al lado están tus Monedas (🪙, usadas en la Fusión y la Tienda) y Gemas (🔻).
+1434|=|• In the middle are the 6 Kaiyodo 3D miniatures of your team and your Individual Profile with ELO!|• En el centro están las 6 miniaturas 3D Kaiyodo de tu equipo y tu perfil individual con ELO!
+1435|🏛️ TOUR DO INÍCIO · ETAPA 2/5|🏛️ HUB TOUR · STEP 2/5|🏛️ RECORRIDO DEL INICIO · PASO 2/5
+1436|2. Pacotes de Tempo (cronômetro real) e Pacote Trancado|2. Time Boosters (Real Timer) & Locked Booster|2. Sobres de Tiempo (temporizador real) y Sobre Cerrado
+1437|• Na parte de baixo do Início ficam os 3 espaços de Pacote de Tempo: sempre que você vence uma partida ranqueada (Partida de Liga), ganha uma caixa (1h Prata ou 6h Roxa) que abre quando o cronômetro chega a 00:00:00.|• At the bottom of the Hub are the 3 Time Booster Slots: whenever you win a ranked match (League Match), you get a box (1h Silver or 6h Purple) that opens when the timer reaches 00:00:00.|• En la parte inferior del Inicio están las 3 casillas de Sobre de Tiempo: cada vez que ganas una partida clasificatoria (Partida de Liga), recibes una caja (1 h Plata o 6 h Morada) que se abre cuando el temporizador llega a 00:00:00.
+1438|• No canto superior direito fica o Pacote Trancado: junte 10/10 Fragmentos de Chave (🔑) em partidas de Liga para abri-lo!|• In the top right corner is the Locked Booster: collect 10/10 Key Fragments (🔑) in League matches to open it!|• En la esquina superior derecha está el Sobre Cerrado: ¡junta 10/10 Fragmentos de Llave (🔑) en partidas de Liga para abrirlo!
+1439|🏛️ TOUR DO INÍCIO · ETAPA 3/5|🏛️ HUB TOUR · STEP 3/5|🏛️ RECORRIDO DEL INICIO · PASO 3/5
+1440|3. Aba [Decks] — 306 Pokémon e limite de custo 6/6 ◆ nas Placas|3. [Decks] Tab — 306 Pokémon and the 6/6 ◆ Cost Limit on Plates|3. Pestaña [Mazos] — 306 Pokémon y límite de coste 6/6 ◆ en las Placas
+1441|=|• Here in [Decks] you build your team with up to 6 unlocked Pokémon and set up their Evolutions/Mega UX.|• Aquí en [Mazos] montas tu equipo con hasta 6 Pokémon desbloqueados y configuras sus Evoluciones/Mega UX.
+1442|• Na seção ⚡ ESTOJO DE PLACAS logo abaixo do time, cada carta tática tem um custo em diamantes (1◆ ou 2◆). O limite máximo oficial é 6/6 ◆ — escolha a combinação tática ideal até somar 6◆!|• In the ⚡ PLATE CASE section right below the team, each tactical card has a diamond cost (1◆ or 2◆). The official maximum is 6/6 ◆ — pick the ideal tactical combo up to 6◆!|• En la sección ⚡ ESTUCHE DE PLACAS justo debajo del equipo, cada carta táctica tiene un coste en diamantes (1◆ o 2◆). El máximo oficial es 6/6 ◆ — ¡elige la combinación táctica ideal hasta sumar 6◆!
+1443|🏛️ TOUR DO INÍCIO · ETAPA 4/5|🏛️ HUB TOUR · STEP 4/5|🏛️ RECORRIDO DEL INICIO · PASO 4/5
+1444|4. Aba [Fusão] — evolução real com Moedas e Materiais|4. [Fusion] Tab — Real Evolution with Coins and Materials|4. Pestaña [Fusión] — evolución real con Monedas y Materiales
+1445|• Em [Fusão], você fortalece a roleta de 96 fatias dos seus Pokémon:|• In [Fusion], you strengthen your Pokémon's 96-slice wheel:|• En [Fusión], refuerzas la ruleta de 96 porciones de tus Pokémon:
+1446|1) Nv.1 a Nv.5: exige 🟦 Metal Raro + 🪙 Moedas (expande 1 fatia de ataque e reduz 1 fatia de Falha vermelha).|1) Lv.1 to Lv.5: needs 🟦 Rare Metal + 🪙 Coins (expands 1 attack slice and shrinks 1 red Miss slice).|1) Nv.1 a Nv.5: requiere 🟦 Metal Raro + 🪙 Monedas (amplía 1 porción de ataque y reduce 1 porción de Fallo roja).
+1447|2) Nv.6 a Nv.10: exige 🟣 Carmonita + 🪙 Moedas.|2) Lv.6 to Lv.10: needs 🟣 Carmonite + 🪙 Coins.|2) Nv.6 a Nv.10: requiere 🟣 Carmonita + 🪙 Monedas.
+1448|3) Nível de Corrente (CLv 1–10): exige 🟩 Cubo Verde + 🪙 Moedas para somar +1 de dano!|3) Chain Level (CLv 1–10): needs 🟩 Green Cube + 🪙 Coins to add +1 Damage!|3) Nivel de Cadena (CLv 1–10): ¡requiere 🟩 Cubo Verde + 🪙 Monedas para sumar +1 de daño!
+1449|🏛️ TOUR DO INÍCIO · ETAPA 5/5|🏛️ HUB TOUR · STEP 5/5|🏛️ RECORRIDO DEL INICIO · PASO 5/5
+1450|5. Aba [Loja] e modos de jogo no botão [Jogar]|5. [Shop] Tab and Game Modes on the [Play] Button|5. Pestaña [Tienda] y modos de juego en el botón [Jugar]
+1451|• Na [Loja], você pode abrir Pacotes com Gemas, usar a Loja de Moedas ou trocar Materiais por qualquer um dos 306 Pokémon.|• In the [Shop], you can open Boosters with Gems, use the Coin Shop or trade Material for any of the 306 Pokémon.|• En la [Tienda], puedes abrir Sobres con Gemas, usar la Tienda de Monedas o cambiar Materiales por cualquiera de los 306 Pokémon.
+1452|• Ao tocar em [Jogar] no Início, escolha entre: 🏆 Partida de Liga (ranqueada), 🌐 Partida em Sala P2P (2 celulares em lados opostos), 🗺️ Missões (usa ⚡15 da barra verde) ou 🏋️ Centro de Treinamento (treino livre sem pontos nem recompensas)!|• When you tap [Play] in the Hub, choose between: 🏆 League Match (Ranked), 🌐 Room Match P2P (2 phones on opposite sides), 🗺️ Quests (uses ⚡15 from the green bar) or 🏋️ Training Center (free practice, no points or rewards)!|• Al tocar [Jugar] en el Inicio, elige entre: 🏆 Partida de Liga (clasificatoria), 🌐 Partida en Sala P2P (2 móviles en lados opuestos), 🗺️ Misiones (usa ⚡15 de la barra verde) o 🏋️ Centro de Entrenamiento (práctica libre sin puntos ni recompensas)!
+1453|=|Next Step ({0}/{1}) ➔|Siguiente paso ({0}/{1}) ➔
+1454|=|✅ Finish Tutorial and Play!|✅ ¡Terminar tutorial y jugar!
+1455|🎓 TUTORIAL INTERATIVO E TOUR DO INÍCIO|🎓 INTERACTIVE TUTORIAL & HUB TOUR|🎓 TUTORIAL INTERACTIVO Y RECORRIDO DEL INICIO
+1456|Reveja a partida de apresentação ou o tour guiado pelas abas do Início.|Replay the intro match or the guided tour of the Hub tabs.|Repite la partida de presentación o el recorrido guiado por las pestañas del Inicio.
+1457|=|⚔️ Intro Match|⚔️ Partida de presentación
+1458|🏛️ Tour do Início (5 etapas)|🏛️ Hub Tour (5 Steps)|🏛️ Recorrido del Inicio (5 pasos)
+1459|PokeDuel — Edição Multiplataforma 3D (GitHub Pages / PWA / Android / iOS)|PokeDuel — 3D Multiplatform Edition (GitHub Pages / PWA / Android / iOS)|PokeDuel — Edición multiplataforma 3D (GitHub Pages / PWA / Android / iOS)
+1461|CUSTO ◆|COST ◆|COSTE ◆
+1462|Pokémon do tipo Planta causam +20 de dano. O efeito dura até um Pokémon do oponente ser nocauteado.|=|Los Pokémon de tipo Planta hacen +20 de daño. El efecto dura hasta que un Pokémon del rival sea derrotado.
+1463|Usar|Use|Usar
+1464|=|The box was placed in the Hub slot! Wait for the real-time timer to finish to open it.|¡La caja se colocó en la casilla del Inicio! Espera a que termine el temporizador en tiempo real para abrirla.
+1466|Planta / Veneno|=|Planta / Veneno
+1467|Nv.10 · CLv+3|Lv.10 · CLv+3|Nv.10 · CLv+3
+1468|Síntese Solar: aliados do tipo Planta causam +10 de dano. Evolui para [UX] Mega Venusaur (+1 MP, 7 turnos).|=|Síntesis Solar: los aliados de tipo Planta hacen +10 de daño. Evoluciona a [UX] Mega Venusaur (+1 PM, 7 turnos).
+1469|🧬 Expandir Roleta (Fusão)|🧬 Expand Wheel (Fusion)|🧬 Ampliar ruleta (Fusión)
+1470|=|Choose the Team Slot|Elige la casilla del equipo
+1471|=|Tap the slot where you want the figure:|Toca la casilla donde quieres poner la figura:
+1472|=|Deck: 0/6 Equipped|Mazo: 0/6 equipadas
+1473|EFEITO DA PLACA / REGRA TÁTICA|PLATE EFFECT / TACTICAL RULE|EFECTO DE LA PLACA / REGLA TÁCTICA
+1474|=|Use in Deck|Usar en el mazo
+1475|=|Remove|Quitar
+1476|✨ EVOLUÇÃO / EXPLOSÃO UX PRONTA!|✨ EVOLUTION / UX BURST READY!|✨ ¡EVOLUCIÓN / ESTALLIDO UX LISTO!
+1477|Evoluir Bulbasaur ➔ Ivysaur?|Evolve Bulbasaur ➔ Ivysaur?|¿Evolucionar Bulbasaur ➔ Ivysaur?
+1478|=|Permanently gains|Gana permanentemente
+1479|+10 de dano de ataque|+10 Attack DMG|+10 de daño de ataque
+1480|=|(Mega UX gets +1 MP and Pass-Through for 7 turns)!|(¡Mega UX gana +1 PM y Atravesar durante 7 turnos)!
+1481|Não (manter)|No (Keep)|No (mantener)
+1482|✨ Sim (evoluir!)|✨ Yes (Evolve!)|✨ Sí (¡evolucionar!)
+1483|🌈 PACOTE ARCO-ÍRIS / UX ABERTO!|🌈 RAINBOW / UX BOOSTER OPENED!|🌈 ¡SOBRE ARCOÍRIS / UX ABIERTO!
+1484|CONTEÚDO DO PACOTE OBTIDO|BOOSTER CONTENTS ACQUIRED|CONTENIDO DEL SOBRE OBTENIDO
+1485|OK (guardar no Estojo)|OK (Store in the Deck Case)|OK (guardar en el estuche)
+1486|PACOTE DE TEMPO EM DESBLOQUEIO|TIME BOOSTER UNLOCKING|SOBRE DE TIEMPO DESBLOQUEÁNDOSE
+1487|=|The timer runs in real time (even with the app closed).|El temporizador corre en tiempo real (incluso con la app cerrada).
+1488|=|REAL TIME LEFT:|TIEMPO REAL RESTANTE:
+1489|Contém Figuras + Materiais + Lingote/Metal Raro|Contains Figures + Material + Ingot/Rare Metal|Contiene figuras + materiales + lingote/metal raro

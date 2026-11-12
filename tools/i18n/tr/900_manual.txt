@@ -1,0 +1,64 @@
+@Cole aqui seu Código POKEDUEL_SAVE_V560:... para importar manualmente|=|Paste your POKEDUEL_SAVE_V560:... code here to import manually|Pega aquí tu código POKEDUEL_SAVE_V560:... para importar manualmente
+@Play|Jogar|Play|Jugar
+@X Attack|Ataque X|X Attack|Ataque X
+@X Speed|Velocidade X|X Speed|Velocidad X
+@Double Chance|Chance Dupla|Double Chance|Doble Oportunidad
+@Hurdle Jump|Salto de Obstáculo|Hurdle Jump|Salto de Valla
+@Goal Block|Bloqueio de Gol|Goal Block|Bloqueo de Meta
+@Max Revive|Revive Máximo|Max Revive|Revivir Máximo
+@Mega Evolution|Megaevolução|Mega Evolution|Megaevolución
+@🎵 Música (BGM): ON|🎵 Música (BGM): LIGADA|🎵 Music (BGM): ON|🎵 Música (BGM): ACTIVADA
+@🔇 Música (BGM): OFF|🔇 Música (BGM): DESLIGADA|🔇 Music (BGM): OFF|🔇 Música (BGM): DESACTIVADA
+@🔊 Música (BGM): OFF|🔊 Música (BGM): DESLIGADA|🔊 Music (BGM): OFF|🔊 Música (BGM): DESACTIVADA
+@📥 Entrar / Baixar Save|📥 Entrar / Baixar progresso|📥 Log In / Download Save|📥 Entrar / Descargar partida
+@📥 Entrar & Baixar Save|📥 Entrar e baixar progresso|📥 Log In & Download Save|📥 Entrar y descargar partida
+@🔄 Actualizar Ahora (1-Toque)|🔄 Atualizar agora (1 toque)|🔄 Update Now (1-Tap)|🔄 Actualizar ahora (1 toque)
+@Alolan {0}|{0} de Alola|Alolan {0}|{0} de Alola
+@{0} (Origin)|{0} (Origem)|{0} (Origin)|{0} (Origen)
+@{0} (Land)|{0} (Terrestre)|{0} (Land)|{0} (Tierra)
+@{0} (Sky)|{0} (Céu)|{0} (Sky)|{0} (Cielo)
+@Deoxys Attack Forme|Deoxys Forma Ataque|Deoxys Attack Forme|Deoxys Forma Ataque
+@Deoxys Speed Forme|Deoxys Forma Velocidade|Deoxys Speed Forme|Deoxys Forma Velocidad
+@Deoxys Defense Forme|Deoxys Forma Defesa|Deoxys Defense Forme|Deoxys Forma Defensa
+@Black Kyurem|Kyurem Negro|Black Kyurem|Kyurem Negro
+@White Kyurem|Kyurem Branco|White Kyurem|Kyurem Blanco
+@Primal Groudon|Groudon Primitivo|Primal Groudon|Groudon Primigenio
+@Primal Kyogre|Kyogre Primitivo|Primal Kyogre|Kyogre Primigenio
+@Mow Rotom|Rotom Corte|Mow Rotom|Rotom Corte
+@Wash Rotom|Rotom Lavagem|Wash Rotom|Rotom Lavado
+@Fan Rotom|Rotom Ventilador|Fan Rotom|Rotom Ventilador
+@Frost Rotom|Rotom Gelo|Frost Rotom|Rotom Frío
+@Heat Rotom|Rotom Calor|Heat Rotom|Rotom Calor
+@Dusk Mane Necrozma|Necrozma Juba Crepuscular|Dusk Mane Necrozma|Necrozma Melena Crepuscular
+@Dawn Wings Necrozma|Necrozma Asas do Alvorecer|Dawn Wings Necrozma|Necrozma Alas del Alba
+@Ultra Necrozma|Ultra Necrozma|Ultra Necrozma|Ultra-Necrozma
+@Type: Null|Tipo: Nulo|Type: Null|Código Cero
+@Mr. Mime|Mr. Mime|Mr. Mime|Mr. Mime
+@{0} (Nº{1})|{0} (Nº{1})|{0} (No.{1})|{0} (N.º{1})
+@[Skip]|[Pular]|[Skip]|[Saltar]
+@Roar of Time|Rugido do Tempo|Roar of Time|Distorsión
+@Tentacle Sting|Ferroada de Tentáculo|Tentacle Sting|Picadura de Tentáculo
+@Manaphy's Song|Canção de Manaphy|Manaphy's Song|Canción de Manaphy
+@Inferno|Inferno|Inferno|Infierno
+@Let's Snuggle Forever|Abraço Eterno|Let's Snuggle Forever|Somanta Adorable
+@U-turn|Ida e Volta|U-turn|Ida y Vuelta
+@Extreme Evoboost|Evoimpulso Extremo|Extreme Evoboost|Novena Potencia
+@{0} dano|{0} de dano|{0} DMG|{0} de daño
+@dano|dano|damage|daño
+@+Size|+Tam.|+Size|+Tam.
+@Disk Pts:|Pts de Disco:|Disk Pts:|Pts de Disco:
+@FEEDBACK|SUGESTÕES|FEEDBACK|COMENTARIOS
+@Ideias/Bugs|Ideias/Erros|Ideas/Bugs|Ideas/Errores
+@Ideas/Bugs|Ideias/Erros|Ideas/Bugs|Ideas/Errores
+@ONLINE|CONECTADO|ONLINE|EN LÍNEA
+@Oponente ({0})|Oponente ({0})|Opponent ({0})|Rival ({0})
+@consome|consome|uses|consume
+@custam|custam|cost|cuestan
+@↺ Reset|↺ Restaurar|↺ Reset|↺ Restablecer
+@SILVER TIME BOOSTER (1H)|PACOTE DE TEMPO PRATEADO (1H)|SILVER TIME BOOSTER (1H)|SOBRE DE TIEMPO PLATEADO (1H)
+@PURPLE TIME BOOSTER (6H)|PACOTE DE TEMPO ROXO (6H)|PURPLE TIME BOOSTER (6H)|SOBRE DE TIEMPO MORADO (6H)
+@⚙️ CARMONTE WORKSHOP|⚙️ OFICINA CARMONTE|⚙️ CARMONTE WORKSHOP|⚙️ TALLER CARMONTE
+@IA Evolutiva|IA Evolutiva|Evolutionary AI|IA Evolutiva
+@IA Grandmaster|IA Grão-Mestre|Grandmaster AI|IA Gran Maestro
+@IA Master|IA Mestre|Master AI|IA Maestro
+@IA|IA|AI|IA

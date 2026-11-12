@@ -1,0 +1,177 @@
+330|Poder Ferro|=|Poder Hierro
+331|Poder Pavor|=|Poder Pavor
+332|Disco Chama|=|Disco Fuego
+333|Disco Água|=|Disco Agua
+334|Disco Gelo|=|Disco Hielo
+335|Disco Choque|=|Disco Voltio
+336|Energia Chama|=|Energía Llama
+337|=|During the duel, your Fire Pokémon cannot be frozen or burned. Your turn ends.|Durante el duelo, tus Pokémon de Fuego no pueden congelarse ni quemarse. Tu turno termina.
+338|Energia Tropical|=|Energía Tropical
+339|=|Removes special conditions from your Grass, Flying and Bug Pokémon.|Quita los estados especiales de tus Pokémon Planta, Volador y Bicho.
+340|Energia Sombria|=|Energía Siniestra
+341|Durante o duelo, se o oponente da batalha for Psíquico, seus Pokémon Sombrios não são nocauteados na batalha.|During the duel, if the battle opponent is Psychic, your Dark Pokémon are not knocked out in battle.|Durante el duelo, si el rival de combate es Psíquico, tus Pokémon Siniestros no son derrotados en combate.
+342|Energia Fantasma|=|Energía Fantasma
+343|=|During the duel, your Ghost Pokémon can move over Pokémon with a special condition.|Durante el duelo, tus Pokémon Fantasma pueden pasar por encima de Pokémon con un estado especial.
+344|Energia Aço|=|Energía Acero
+345|=|During the duel, your Steel Pokémon cannot be poisoned.|Durante el duelo, tus Pokémon de Acero no pueden envenenarse.
+346|Energia Músculo|=|Energía Músculo
+347|=|Removes sleep, freeze and Wait from all your Fighting Pokémon.|Quita sueño, congelación y Espera de todos tus Pokémon Lucha.
+348|Energia Elétrica|=|Energía Eléctrica
+349|=|Removes paralysis from all your Electric Pokémon.|Quita la parálisis de todos tus Pokémon Eléctricos.
+350|Energia Muda|=|Energía Muda
+351|=|During the duel, when your Bug or Flying Pokémon return from the P.C. to the bench, they can evolve.|Durante el duelo, cuando tus Pokémon Bicho o Volador vuelven del P.C. al banquillo, pueden evolucionar.
+352|Colher Torta|=|Cuchara Torcida
+353|Escolha um Pokémon Psíquico seu no campo. Enquanto ele estiver no campo, ganha ★+1 (e Amplificador Psíquico passa a ter Alcance 2). Seu turno acaba.|Choose one of your Psychic Pokémon on the field. While it is on the field it gains ★+1 (and Psychic Amplifier gets Range 2). Your turn ends.|Elige uno de tus Pokémon Psíquicos en el campo. Mientras esté en el campo gana ★+1 (y Amplificador Psíquico tiene Alcance 2). Tu turno termina.
+354|DISCO|DRIVE|DISCO
+355|Escolha seu Genesect no campo ou no banco. Neste turno, se ele tirar Falha, passa para o ataque ao lado; se nocautear um Pokémon {0}, esse Pokémon é excluído do duelo.|Choose your Genesect on the field or bench. This turn, if it spins Miss it shifts to the next attack; if it knocks out a {0} Pokémon, that Pokémon is excluded from the duel.|Elige tu Genesect en el campo o el banquillo. Este turno, si saca Fallo pasa al ataque de al lado; si derrota a un Pokémon {0}, ese Pokémon queda excluido del duelo.
+356|=|Your {0}-type Pokémon deal +20 damage until an opposing Pokémon is knocked out by a {1} attack. Your turn ends.|Tus Pokémon de tipo {0} hacen +20 de daño hasta que un Pokémon rival sea derrotado por un ataque {1}. Tu turno termina.
+357|ENERGIA|ENERGY|ENERGÍA
+358|=|Opponent|Rival
+359|🥄 {0}: Colher Torta em {1} — ★+1 enquanto estiver no campo!|🥄 {0}: Twisted Spoon on {1} — ★+1 while on the field!|🥄 {0}: Cuchara Torcida en {1} — ¡★+1 mientras esté en el campo!
+360|=|⚙️ {0}: {1} on {2}!|⚙️ {0}: ¡{1} en {2}!
+361|=|💪 {0}: {1} — {2} Pokémon get +20 damage!|💪 {0}: {1} — ¡los Pokémon {2} hacen +20 de daño!
+362|🔇 Placas bloqueadas pela Habilidade do oponente.|🔇 Plates blocked by the opponent's Ability.|🔇 Placas bloqueadas por la Habilidad del rival.
+363|⚠️ Nenhum Pokémon seu pode receber esta Placa agora.|⚠️ None of your Pokémon can receive this Plate now.|⚠️ Ninguno de tus Pokémon puede recibir esta Placa ahora.
+364|=|tap the Pokémon that will receive the card.|toca el Pokémon que recibirá la carta.
+365|🔋 {0} ganhou um marcador Carga!|🔋 {0} got a Charge marker!|🔋 ¡{0} recibió un marcador Carga!
+366|🌑 Energia Sombria!|🌑 Dark Energy!|🌑 ¡Energía Siniestra!
+367|{0} 🌑 Energia Sombria!|{0} 🌑 Dark Energy!|{0} 🌑 ¡Energía Siniestra!
+368|💪 Poder {0} acabou.|💪 {0} Power ended.|💪 El Poder {0} terminó.
+369|⚙️ Hoverjet: {0} pode ser usada de novo!|⚙️ Hoverjet: {0} can be used again!|⚙️ Hoverjet: ¡{0} puede usarse de nuevo!
+370|📴 {0}: os efeitos das Placas de Energia acabaram!|📴 {0}: the Energy plate effects ended!|📴 {0}: ¡terminaron los efectos de las Placas de Energía!
+371|Carga|Charge|Carga
+372|🔋 {0} soltou a Carga: {1} → {2}!|🔋 {0} released the Charge: {1} → {2}!|🔋 ¡{0} liberó la Carga: {1} → {2}!
+373|Voo Foguete: nenhuma casa livre a 3 passos.|Rocket Ride: no free space 3 steps away.|Vuelo Cohete: no hay casilla libre a 3 pasos.
+374|🚀 Voo Foguete: agora toque na casa a 3 passos para onde o Pokémon vai.|🚀 Rocket Ride: now tap the space 3 steps away where the Pokémon will go.|🚀 Vuelo Cohete: ahora toca la casilla a 3 pasos adonde irá el Pokémon.
+375|🚀 {0}: Voo Foguete lançou {1} e foi para o Ultra Espaço!|🚀 {0}: Rocket Ride launched {1} and went to the Ultra Space!|🚀 {0}: ¡Vuelo Cohete lanzó a {1} y se fue al Ultraespacio!
+376|Apoio|Tag|Apoyo
+377|→ Gol|→ Goal|→ Meta
+378|{0} → Gol|{0} → Goal|{0} → Meta
+380|=|🤖 {0}: used {1}.|🤖 {0}: usó {1}.
+381|=|🔻 {0} got an MP −1 marker!|🔻 ¡{0} recibió un marcador PM −1!
+382|=|🪽 {0}: {1}! Jumped over {2}.|🪽 {0}: ¡{1}! Saltó por encima de {2}.
+383|=|✨ {0}: {1}! Moved 2 steps.|✨ {0}: ¡{1}! Se movió 2 pasos.
+384|⛏️ {0}: Cavar! Cavou até outra casa.|⛏️ {0}: Dig! Dug to another space.|⛏️ {0}: ¡Excavar! Excavó hasta otra casilla.
+385|💪 {0}: Empurrão! Empurrou {1} e tomou o lugar dele.|💪 {0}: Push Away! Pushed {1} back and took its spot.|💪 {0}: ¡Empujón! Empujó a {1} y ocupó su lugar.
+386|🤼 {0}: Arremesso por Cima! {1} foi jogado para trás.|🤼 {0}: Overhead Toss! {1} was thrown behind.|🤼 {0}: ¡Lanzamiento Aéreo! {1} fue lanzado hacia atrás.
+387|🔥 {0}: Pirocinese! {1} foi afastado 3 passos.|🔥 {0}: Flame Kinesis! {1} was pushed 3 steps away.|🔥 {0}: ¡Piroquinesis! {1} fue alejado 3 pasos.
+388|🌪️ {0}: Vento Drenante puxou {1}!|🌪️ {0}: Draining Wind pulled {1}!|🌪️ {0}: ¡Viento Drenante atrajo a {1}!
+389|=|❄️ {0}: {1}! {2} Pokémon spun.|❄️ {0}: ¡{1}! {2} Pokémon giraron.
+390|😤 {0}: Provocação em {1}!|😤 {0}: Taunt on {1}!|😤 {0}: ¡Mofa a {1}!
+391|🟢 {0}: {1}! Os Azuis de {2} viram Falha enquanto {3} estiver em campo.|🟢 {0}: {1}! {2}'s Blues become Miss while {3} is on the field.|🟢 {0}: ¡{1}! Los Azules de {2} se vuelven Fallo mientras {3} esté en el campo.
+392|🥺 {0}: os Azuis de {1} viram Falha no próximo turno.|🥺 {0}: {1}'s Blues become Miss next turn.|🥺 {0}: los Azules de {1} se vuelven Fallo el próximo turno.
+393|👁️ {0}: Olhar Penetrante!|👁️ {0}: Leer!|👁️ {0}: ¡Malicioso!
+394|🔒 {0}: marcador Aprisionado ({1} vira Falha).|🔒 {0}: Imprisoned marker ({1} becomes Miss).|🔒 {0}: marcador Encarcelado ({1} se vuelve Fallo).
+395|💥 {0}: Explosão!|💥 {0}: Explosion!|💥 {0}: ¡Explosión!
+396|🪨 {0}: Arrasa-Rocha nocauteou {1}!|🪨 {0}: Rock Wrecker knocked out {1}!|🪨 {0}: ¡Romperrocas derrotó a {1}!
+397|🌀 {0}: Arremesso Giratório nocauteou {1}!|🌀 {0}: Swinging Throw knocked out {1}!|🌀 {0}: ¡Lanzamiento Giratorio derrotó a {1}!
+398|🎵 {0}: marcador Canção Final (nocaute em 5 turnos).|🎵 {0}: Final Song marker (knocked out in 5 turns).|🎵 {0}: marcador Canto Final (derrota en 5 turnos).
+399|=|🌟 {0}: {1}! Your {2} Pokémon get +{3} damage.|🌟 {0}: ¡{1}! Tus Pokémon {2} hacen +{3} de daño.
+400|🍃 {0}: Vento a Favor! Seus Voadores +1 MP.|🍃 {0}: Tailwind! Your Flying Pokémon +1 MP.|🍃 {0}: ¡Viento Afín! Tus Voladores +1 PM.
+401|🎃 {0}: marcador Abóbora.|🎃 {0}: Pumpkin marker.|🎃 {0}: marcador Calabaza.
+402|🔮 {0}: Sala dos Truques por {1} turnos!|🔮 {0}: Trick Room for {1} turns!|🔮 {0}: ¡Espacio Raro durante {1} turnos!
+403|=|⬇️ {0} can no longer pass through Pokémon.|⬇️ {0} ya no puede atravesar Pokémon.
+404|🦷 {0}: {1}! A placa {2} do adversário foi anulada.|🦷 {0}: {1}! The opponent's plate {2} was cancelled.|🦷 {0}: ¡{1}! La placa {2} del rival fue anulada.
+405|🔁 {0}: copiou os efeitos de placa de {1}.|🔁 {0}: copied {1}'s plate effects.|🔁 {0}: copió los efectos de placa de {1}.
+406|🌸 {0}: Aroma Misterioso fez {1} evoluir!|🌸 {0}: Mystery Scent made {1} evolve!|🌸 {0}: ¡Aroma Misterioso hizo evolucionar a {1}!
+407|🌑 {0}: Lua Sombria drenou o Movimento Z do adversário.|🌑 {0}: Dark Moon drained the opponent's Z-Move.|🌑 {0}: Luna Oscura drenó el Movimiento Z del rival.
+408|Espinho Rei: Dourado → Branco|King Spike: Gold → White|Púa Real: Dorado → Blanco
+409|Chifres Farpados: Dourado → Falha|Barbed Horns: Gold → Miss|Cuernos de Púas: Dorado → Fallo
+410|Provocação: {0} → {1}|Taunt: {0} → {1}|Mofa: {0} → {1}
+411|=|{0}: {1} → spun again ({2})|{0}: {1} → giró de nuevo ({2})
+412|Tormento: {0} repetiu o ataque e errou!|Torment: {0} repeated the attack and missed!|Tormento: ¡{0} repitió el ataque y falló!
+413|Tormento: os dois giraram de novo|Torment: both spun again|Tormento: los dos giraron de nuevo
+414|Capa Mágica devolveu o efeito para {0}!|Magic Coat bounced the effect back to {0}!|¡Capa Mágica devolvió el efecto a {0}!
+415|🎵 Canção Final: {0} foi nocauteado.|🎵 Final Song: {0} was knocked out.|🎵 Canto Final: {0} fue derrotado.
+416|🔮 Sala dos Truques acabou.|🔮 Trick Room ended.|🔮 Espacio Raro terminó.
+417|Cura Total|=|Cura Total
+418|=|HEAL|CURA
+419|=|Removes every special condition (sleep, paralysis, poison, burn, freeze, confusion) from one of your Pokémon on the field.|Quita todos los estados especiales (sueño, parálisis, veneno, quemadura, congelación, confusión) de uno de tus Pokémon en el campo.
+420|Faixa de Foco|=|Banda Focus
+421|=|FOCUS|FOCO
+422|=|This turn, the chosen Pokémon cannot be knocked out in battle.|Este turno, el Pokémon elegido no puede ser derrotado en combate.
+423|Defesa X|=|Defensa X
+424|=|=|DEF
+425|=|This turn, the chosen Pokémon is not knocked out by White or Gold attacks of 10 to 100 damage.|Este turno, el Pokémon elegido no es derrotado por ataques Blancos o Dorados de 10 a 100 de daño.
+426|Ataque Esp. X|=|At. Esp. X
+427|=|This turn, the chosen Pokémon's Purple attacks get ★+2.|Este turno, los ataques Morados del Pokémon elegido ganan ★+2.
+428|Precisão X|=|Precisión X
+429|=|AIM|MIRA
+430|=|This turn, if the chosen Pokémon spins Miss, the result shifts to the next attack.|Este turno, si el Pokémon elegido saca Fallo, el resultado pasa al ataque de al lado.
+431|Recolher|=|Recoger
+432|=|BACK|VUELTA
+433|=|Returns one of your Pokémon from the field to the bench, without Wait.|Devuelve uno de tus Pokémon del campo al banquillo, sin Espera.
+434|Tempos Desesperados|=|Tiempos Desesperados
+435|=|This turn, the chosen Pokémon's 10 to 50 damage attacks deal +50.|Este turno, los ataques de 10 a 50 de daño del Pokémon elegido hacen +50.
+436|Reciclar|=|Reciclaje
+437|Todas as Placas dos dois jogadores (menos Reciclar) podem ser usadas de novo. Seu turno acaba.|Every Plate of both players (except Recycle) can be used again. Your turn ends.|Todas las Placas de ambos jugadores (menos Reciclaje) pueden usarse de nuevo. Tu turno termina.
+438|Megaevolui de verdade o Pokémon escolhido (forma Mega oficial: arte, roleta e MP) por 7 turnos. Se ele não tiver forma Mega: Poder Mega, +30 de dano e ★+1 por 3 turnos.|Truly Mega Evolves the chosen Pokémon (official Mega form: art, wheel and MP) for 7 turns. If it has no Mega form: Mega Power, +30 damage and ★+1 for 3 turns.|Megaevoluciona de verdad al Pokémon elegido (forma Mega oficial: arte, ruleta y PM) durante 7 turnos. Si no tiene forma Mega: Poder Mega, +30 de daño y ★+1 durante 3 turnos.
+439|🧬 {0}: {1} megaevoluiu para {2} por 7 turnos!|🧬 {0}: {1} Mega Evolved into {2} for 7 turns!|🧬 {0}: ¡{1} megaevolucionó a {2} durante 7 turnos!
+440|=|🧬 {0}: Mega Power on {1} — +30 damage and ★+1 for 3 turns!|🧬 {0}: Poder Mega en {1} — ¡+30 de daño y ★+1 durante 3 turnos!
+441|✚ {0}: Cura Total curou {1}!|✚ {0}: Full Heal cured {1}!|✚ {0}: ¡Cura Total curó a {1}!
+442|✊ {0}: {1} não pode ser nocauteado neste turno (Faixa de Foco)!|✊ {0}: {1} cannot be knocked out this turn (Focus Band)!|✊ {0}: ¡{1} no puede ser derrotado este turno (Banda Focus)!
+443|🛡 {0}: Defesa X em {1} (aguenta ataques de 10–100)!|🛡 {0}: X Defend on {1} (withstands 10–100 attacks)!|🛡 {0}: ¡Defensa X en {1} (aguanta ataques de 10–100)!
+444|★ {0}: Ataque Esp. X — ataques Roxos de {1} com ★+2 neste turno!|★ {0}: X Sp. Atk — {1}'s Purple attacks get ★+2 this turn!|★ {0}: At. Esp. X — ¡los ataques Morados de {1} con ★+2 este turno!
+445|◎ {0}: Precisão X em {1} — Falha passa para o ataque ao lado!|◎ {0}: X Accuracy on {1} — Miss shifts to the next attack!|◎ {0}: Precisión X en {1} — ¡el Fallo pasa al ataque de al lado!
+446|‼ {0}: Tempos Desesperados — ataques de 10–50 de {1} com +50!|‼ {0}: Desperate Times — {1}'s 10–50 attacks get +50!|‼ {0}: Tiempos Desesperados — ¡ataques de 10–50 de {1} con +50!
+447|↩ {0}: Recolher — {1} voltou para o banco!|↩ {0}: Scoop Up — {1} returned to the bench!|↩ {0}: Recoger — ¡{1} volvió al banquillo!
+448|♻ {0}: Reciclar — todas as Placas podem ser usadas de novo!|♻ {0}: Recycle — every Plate can be used again!|♻ {0}: Reciclaje — ¡todas las Placas pueden usarse de nuevo!
+449|(Precisão X)|(X Accuracy)|(Precisión X)
+450|{0} (Precisão X)|{0} (X Accuracy)|{0} (Precisión X)
+451|✊ Faixa de Foco!|✊ Focus Band!|✊ ¡Banda Focus!
+452|{0} ✊ Faixa de Foco!|{0} ✊ Focus Band!|{0} ✊ ¡Banda Focus!
+453|🛡 Defesa X!|🛡 X Defend!|🛡 ¡Defensa X!
+454|{0} 🛡 Defesa X!|{0} 🛡 X Defend!|{0} 🛡 ¡Defensa X!
+455|=|⚠️ Choose one of your Pokémon.|⚠️ Elige uno de tus Pokémon.
+456|=|No effect.|Sin efecto.
+457|=|Defense: blocks White and Gold Attacks.|Defensa: bloquea ataques Blancos y Dorados.
+458|=|Gold Attack: beats White and ties with Gold by damage.|Ataque Dorado: vence a los Blancos y empata con Dorados por daño.
+459|=|White Attack: the higher damage wins.|Ataque Blanco: gana el mayor daño.
+460|=|Purple Attack: more ★ wins; beats White and Gold.|Ataque Morado: gana más ★; vence a Blancos y Dorados.
+462|=|Back|Volver
+463|=|Duels|Duelos
+464|=|Type|Tipo
+465|=|This figure has no Ability.|Esta figura no tiene Habilidad.
+466|=|Evolution|Evolución
+467|=|Size|Tam.
+468|=|Attack|Ataque
+469|=|Damage|Daño
+470|Movimento Z|Z-Move|Movimiento Z
+471|=|Fuse (level up)|Fusionar (subir nivel)
+472|=|Sell Ingot|Vender Lingote
+473|Expansão de Disco|Disk Expansion|Expansión de Disco
+474|Realocação de Dano|Damage Reallocation|Reasignación de Daño
+478|Dados|Data|Datos
+482|Peça de Roleta|Wheel Piece|Pieza de Ruleta
+483|Nv5: use Carmonita|Lv5: use Carmonite|Nv5: usa Carmonita
+484|MÁX|MAX|MÁX
+485|=|from Lv5|desde Nv5
+486|=|Damage can only go to White or Gold Attacks.|El daño solo puede ir a ataques Blancos o Dorados.
+487|=|CLv at maximum (10).|CLv al máximo (10).
+488|=|No CLv points. Raise CLv with 🟩 Cubes.|Sin puntos de CLv. Sube el CLv con 🟩 Cubos.
+489|Falha não pode ser expandida.|Miss cannot be expanded.|El Fallo no puede expandirse.
+490|=|All disk points have been used (Lv10).|Ya se usaron todos los puntos de disco (Nv10).
+491|Sem pontos. Suba o Nv da figura para ganhar Pontos de Disco.|No points. Level up the figure to earn Disk Points.|Sin puntos. Sube el Nv de la figura para ganar Puntos de Disco.
+492|=|No slice can shrink (minimum 4).|Ninguna porción puede reducirse (mínimo 4).
+495|Nv|Lv|Nv
+496|Nv{0}|Lv{0}|Nv{0}
+497|=|Free damage points|Puntos de daño libres
+498|Pontos de Disco livres|Free Disk Points|Puntos de Disco libres
+499|‹ Dados|‹ Data|‹ Datos
+501|Restaurar|Reset|Restablecer
+502|Recomendado|Recommended|Recomendado
+503|Confirmar|Confirm|Confirmar
+504|pts DANO|DMG pts|pts DAÑO
+505|pts Disco|Disk pts|pts Disco
+506|Distribuição recomendada aplicada. Toque em Confirmar para salvar.|Recommended layout applied. Tap Confirm to save.|Distribución recomendada aplicada. Toca Confirmar para guardar.
+507|Voltou ao disco base. Toque em Confirmar para salvar.|Back to the base disk. Tap Confirm to save.|Volvió al disco base. Toca Confirmar para guardar.
+508|=|Saved!|¡Guardado!
+509|*A Megaevolução dura 5 turnos e depois volta à forma anterior.|*Mega Evolution lasts 5 turns and then returns to the previous form.|*La Megaevolución dura 5 turnos y luego vuelve a la forma anterior.
+510|=|*Mega: +1 MP while it lasts.|*Mega: +1 PM mientras dure.
+511|=|*An evolution cannot be undone once done.|*Una evolución no puede deshacerse una vez hecha.
+512|=|*Each evolution gives +10 damage and ★+1.|*Cada evolución da +10 de daño y ★+1.
+513|=|*If you don't evolve now, you'll need to meet the conditions again.|*Si no evolucionas ahora, tendrás que cumplir las condiciones de nuevo.
+514|=|*Special conditions and markers are removed on evolving.|*Los estados especiales y marcadores se quitan al evolucionar.
+517|Estágio|Stage|Fase
+518|Estágio {0}|Stage {0}|Fase {0}
+519|Megaevoluir?|Mega Evolve?|¿Megaevolucionar?

@@ -1,0 +1,150 @@
+0|Falha (Sono)|=|Fallo (Sueño)
+1|Falha (Congelado)|=|Fallo (Congelado)
+2|{0} tirou Falha! {1} venceu!|=|¡{0} sacó Fallo! ¡{1} gana!
+3|Dourado ({0}) vence Roxo ({1})!|=|¡Dorado ({0}) vence a Morado ({1})!
+4|=|⚡ Z-POWER: {0} overpowered the purple move ({1} ★{2}) by brute force!|⚡ PODER Z: ¡{0} superó el movimiento morado ({1} ★{2}) por fuerza bruta!
+5|Roxo ({0} ★{1}) vence Branco!|=|¡Morado ({0} ★{1}) vence a Blanco!
+6|★{0} vence ★{1}!|=|¡★{0} vence a ★{1}!
+7|Empate de estrelas Roxas (★{0})!|=|¡Empate de estrellas moradas (★{0})!
+8|=|🛡️ Hyper Sonic ({0}): Immune to knockout against 100+ DMG!|🛡️ Hyper Sonic ({0}): ¡Inmune a derrota contra 100+ de DAÑO!
+9|{0} ({1}) derrota {2} ({3})!|=|¡{0} ({1}) derrota a {2} ({3})!
+10|Empate de dano ({0} x {1})!|=|¡Empate de daño ({0} vs {1})!
+11|Florescer Fatal|=|Megatón Floral
+12|Inferno Avassalador|=|Hecatombe Pírica
+13|Hidrovórtice Abissal|=|Hidrovórtice Abisal
+14|Gigavolt Devastador|=|Gigavoltio Destructor
+15|Psique Estilhaçada|=|Disruptor Psíquico
+16|Pesadelo Sem Fim|=|Presa Espectral
+17|Dragão Devastador|=|Dracoaliento Devastador
+18|Pancadaria Total|=|Ofensiva Física
+19|Colisão em Espiral|=|Tornado Metálico
+20|Esmagamento Continental|=|Sepultura Telúrica
+21|Fúria Tectônica|=|Barrena Telúrica
+22|Golpe Supersônico Celeste|=|Picado Supersónico
+23|Esmagador Abaixo de Zero|=|Crioaliento Despiadado
+24|Chuva Ácida Torrencial|=|Diluvio Corrosivo
+25|Giro Selvagem|=|Guadaña Sedosa
+26|Eclipse Buraco Negro|=|Agujero Negro Aniquilador
+27|Investida Cintilante|=|Arrumaco Sideral
+28|Ataque Desenfreado|=|Carrera Arrolladora
+29|Catastropika|=|Catastropikachu
+30|Panqueca Pulverizadora|=|Arrollamiento Total
+31|Supernova Gênese|=|Supernova Original
+32|Psygolpe Supremo|=|Psicoataque Supremo
+33|Chuva de Flechas Sinistras|=|Lluvia de Flechas Sombrías
+34|Mortal Malicioso|=|Hiperplancha Oscura
+35|Opereta Oceânica|=|Sinfonía de la Diva Marina
+36|Inferno Avassalador Plus|=|Hecatombe Pírica Plus
+37|Hidrovórtice Abissal Plus|=|Hidrovórtice Abisal Plus
+38|Florescer Fatal Plus|=|Megatón Floral Plus
+39|Pesadelo Sem Fim Plus|=|Presa Espectral Plus
+40|Pancadaria de Aura Total|=|Ofensiva Física de Aura
+41|Esmagamento Solar Ardente|=|Embestida Solar
+42|Turbilhão Lunar Ameaçador|=|Deflagración Lunar
+43|Luz que Queima o Céu|=|Fotodestrucción Apocalíptica
+44|Guardião de Alola|=|Furia de los Guardianes
+45|Guardião de Alola (Psíquico)|=|Furia de los Guardianes (Psíquico)
+46|Guardião de Alola (Planta)|=|Furia de los Guardianes (Planta)
+47|Guardião de Alola (Água)|=|Furia de los Guardianes (Agua)
+48|Rugido do Tempo Z|=|Distorsión Z
+49|Corte Espacial Z|=|Corte Vacío Z
+50|Força Sombria Z|=|Golpe Umbrío Z
+51|Psicoimpulso Z|=|Psicoataque Z
+52|Fusão Chama Z|=|Llama Fusión Z
+53|Fusão Raio Z|=|Rayo Fusión Z
+54|Golpe das Sete Estrelas Ladra-Almas|=|Constelación Robaalmas
+55|Punhos de Plasma Z|=|Puños Plasma Z
+56|Falha (Quebra Z)|=|Fallo (Ruptura Z)
+57|⚡ MOVIMENTO Z: [{0}] ativado por {1}! Quebrou o Azul do defensor em Falha!|⚡ Z-MOVE: [{0}] activated by {1}! Broke the defender's Blue into Miss!|⚡ MOVIMIENTO Z: ¡[{0}] activado por {1}! ¡Rompió el Azul del defensor en Fallo!
+58|=|DMG|DAÑO
+59|=|{0} DMG|{0} DAÑO
+60|ROXO|=|MORADO
+61|★{0} ROXO|=|★{0} MORADO
+62|⚡ MOVIMENTO Z:|=|⚡ MOVIMIENTO Z:
+63|({1} · QUEBRA Z AZUL)!|=|({1} · RUPTURA Z AZUL)!
+64|=|🛡️ Re-Spin blocked by the Hyper Sonic / Temporal Lock passive on the field!|🛡️ ¡Nuevo giro bloqueado por la pasiva Hyper Sonic / Temporal Lock en el campo!
+66|=|=|=
+67|{0}x COMBO|=|{0}x COMBO
+68|=|➔ {0} DMG|➔ {0} DAÑO
+69|=|✨ Lucario strengthened its Aura with the win (+{0} DMG stacked)!|✨ ¡Lucario fortaleció su Aura con la victoria (+{0} DAÑO acumulado)!
+70|=|🛡️ Snorlax resisted {0} with its Immunity/Sturdy Ability!|🛡️ ¡Snorlax resistió {0} con su Habilidad Inmunidad/Robustez!
+71|=|🛡️ Lucario resisted the Wait condition with Inner Focus!|🛡️ ¡Lucario resistió la Espera con Foco Interno!
+72|=|🌊 Magikarp survived the knockout with its Special Ability and evolved into Gyarados!|🌊 ¡Magikarp sobrevivió a la derrota con su Habilidad Especial y evolucionó a Gyarados!
+73|🏆 VITÓRIA POR ESPERA! {0} está com os Pontos de Entrada bloqueados e sem movimentos legais!|🏆 WAIT WIN! {0} has its Entry Points blocked and no legal moves!|🏆 ¡VICTORIA POR ESPERA! ¡{0} tiene los Puntos de entrada bloqueados y no tiene movimientos legales!
+74|=|P1 Blue · Your Side Below|P1 Azul · Tu lado abajo
+75|=|P2 Red · Your Side Below (Opposite View 180°)|P2 Rojo · Tu lado abajo (Vista opuesta 180°)
+76|=|🟢 YOUR TURN! ({0}) Tap a figure on the bench.|🟢 ¡TU TURNO! ({0}) Toca una figura en el banquillo.
+77|=|⏳ Opponent's turn... ({0}) Wait for their move.|⏳ Turno del rival... ({0}) Espera su jugada.
+78|=|Player 1 (Blue · Below)|Jugador 1 (Azul · Abajo)
+79|=|Player 2 (Red · Below)|Jugador 2 (Rojo · Abajo)
+80|=|👥 TURN: {0} Tap a figure.|👥 TURNO DE: {0} Toca una figura.
+81|=|=|=
+82|=|=|=
+83|=|✨ Mode: Smooth|✨ Modo: Suave
+84|PÂNICO|=|PÁNICO
+85|VEN-20|=|VEN-20
+86|TÓX-40|=|TÓX-40
+87|SONO|=|SUEÑO
+88|CONGEL.|=|CONGEL.
+89|PARAL.|=|PARAL.
+90|QUEIM.|=|QUEM.
+91|=|🔄 Table View: P2 Side (Red Below · Facing P1 on Top)|🔄 Vista de mesa: lado P2 (Rojo abajo · Mirando a P1 arriba)
+92|=|🔄 Table View: P1 Side (Blue Below · Facing P2 on Top)|🔄 Vista de mesa: lado P1 (Azul abajo · Mirando a P2 arriba)
+93|Início da partida! Escolha um Pokémon.|=|¡Empieza la partida! Elige un Pokémon.
+94|Usou Salto de Obstáculo (Salto ativo).|Used Hurdle Jump (Jump active).|Usó Salto de Valla (salto activo).
+95|Usou Chance Dupla (novo giro pronto).|Used Double Chance (Re-Spin ready).|Usó Doble Oportunidad (nuevo giro listo).
+96|Usou Ataque X (+30 DANO neste turno)!|Used X Attack (+30 DMG this turn)!|¡Usó Ataque X (+30 DAÑO este turno)!
+97|Usou Velocidade X (Branco ➔ Dourado)!|=|¡Usó Velocidad X (Blanco ➔ Dorado)!
+98|Usou Revive Máximo (P.C. ➔ Banco sem Espera)!|Used Max Revive (P.C. ➔ Bench without Wait)!|¡Usó Revivir Máximo (P.C. ➔ Banquillo sin Espera)!
+99|Usou Bloqueio de Gol (teleportado ao Gol + Espera 1)!|Used Goal Block (Teleported to the Goal + Wait 1)!|¡Usó Bloqueo de Meta (teletransportado a la Meta + Espera 1)!
+100|=|Mega Evolves the selected figure for 5 turns (+20 DMG, +1★, +1 MP and Pass-Through).|Megaevoluciona la figura elegida durante 5 turnos (+20 DAÑO, +1★, +1 PM y Atravesar).
+101|Usou a Placa de Megaevolução (7 turnos [UX])!|Used Mega Evolution Plate (7 Turns [UX])!|¡Usó la Placa de Megaevolución (7 turnos [UX])!
+102|Arremesso Longo|=|Lanzamiento Largo
+103|=|Brings a figure down from the Bench next to the Entry Point even with Spawn Block.|Baja una figura del banquillo junto al Punto de entrada incluso con Bloqueo de entrada.
+104|Usou Arremesso Longo!|=|¡Usó Lanzamiento Largo!
+105|Troca de Pokémon|=|Cambio de Pokémon
+106|=|Swaps an allied figure on the field with a figure from your Bench.|Cambia una figura aliada del campo por una de tu banquillo.
+107|Usou Troca de Pokémon!|=|¡Usó Cambio de Pokémon!
+108|=|🟢 YOUR TURN! (P1 Blue · Below) Select a figure on the Bench.|🟢 ¡TU TURNO! (P1 Azul · Abajo) Elige una figura del banquillo.
+109|=|⏳ Opponent P1's turn... (Your side P2 · Below)|⏳ Turno del rival P1... (Tu lado P2 · Abajo)
+110|=|🔵 PLAYER 1'S TURN (Blue · Below) Select a figure on the Bench.|🔵 TURNO DEL JUGADOR 1 (Azul · Abajo) Elige una figura del banquillo.
+111|TURNO 300 (primeiro turno: −1 MP). Escolha um Pokémon!|=|TURNO 300 (primer turno: −1 PM). ¡Elige un Pokémon!
+112|=|⚠️ The Z-Move has already been used this match! (Limit: 1x per duel).|⚠️ ¡El Movimiento Z ya se usó en esta partida! (Límite: 1x por duelo).
+113|=|⚡ Z-Power at {0}%! Charges every turn (+10%) and battle (+15%). Activates at 100% (1x per duel)!|⚡ ¡Poder Z al {0}%! Se carga cada turno (+10%) y combate (+15%). ¡Se activa al 100% (1x por duelo)!
+114|=|⚡ Z-POWER ACTIVATED! The whole wheel (100%) will become the Z-Move (1x per duel)!|⚡ ¡PODER Z ACTIVADO! ¡Toda la ruleta (100%) se convertirá en el Movimiento Z (1x por duelo)!
+115|=|Z-Move disarmed.|Movimiento Z desactivado.
+116|CUSTO {0}|=|COSTE {0}
+117|=|⚡ Z-Power: Used this match (0/1)|⚡ Poder Z: usado en esta partida (0/1)
+118|=|ARMED (FULL WHEEL)!|¡ARMADO (RULETA COMPLETA)!
+119|=|TAP TO ACTIVATE (1x)!|¡TOCA PARA ACTIVAR (1x)!
+120|⚡ MOVIMENTO Z 100%: {2}|=|⚡ MOVIMIENTO Z 100%: {2}
+121|=|⚡ Z-Power Gauge: {0}% / 100% (1x per duel)|⚡ Indicador de Poder Z: {0}% / 100% (1x por duelo)
+122|=|⚠️ Goal Block: Your Goal Point is already occupied!|⚠️ Bloqueo de Meta: ¡tu Meta ya está ocupada!
+123|=|🛡️ Goal Block: {0} teleported to defend the Goal Point (Wait 1)!|🛡️ Bloqueo de Meta: ¡{0} se teletransportó para defender la Meta (Espera 1)!
+124|=|🛡️ Goal Block Activated: Tap a Pokémon (on the field or bench) to defend the Goal Point!|🛡️ Bloqueo de Meta activado: ¡toca un Pokémon (en el campo o el banquillo) para defender la Meta!
+125|=|⚔️ X Attack Activated: +30 DMG on every attack in this turn's battle!|⚔️ Ataque X activado: ¡+30 DAÑO en todos los ataques del combate de este turno!
+126|=|⚡ X Speed Activated: All White attacks become Gold ⚡ this turn!|⚡ Velocidad X activada: ¡todos los ataques Blancos se vuelven Dorados ⚡ este turno!
+127|=|🎲 Double Chance Activated: You may respin the wheel if the result is bad!|🎲 Doble Oportunidad activada: ¡podrás volver a girar la ruleta si el resultado no te conviene!
+128|=|🦘 Hurdle Jump Activated: Select a figure to jump over an adjacent Pokémon!|🦘 Salto de Valla activado: ¡elige una figura para saltar sobre un Pokémon adyacente!
+129|=|🧬 {0} [UX] activated for 7 turns (+20 DMG, +1★, MP {1})!|🧬 ¡{0} [UX] activado durante 7 turnos (+20 DAÑO, +1★, PM {1})!
+130|=|⇄ Pokémon Switch: {0} swapped for {1}!|⇄ Cambio de Pokémon: ¡{0} cambiado por {1}!
+131|=|⚠️ Pokémon Switch needs 1 figure on the field and 1 free figure on the bench!|⚠️ ¡Cambio de Pokémon necesita 1 figura en el campo y 1 libre en el banquillo!
+132|=|💖 Max Revive: {0} rescued from the P.C. straight to the Bench without Wait!|💖 Revivir Máximo: ¡{0} rescatado del P.C. directo al banquillo sin Espera!
+133|=|⚠️ Max Revive requires at least 1 Pokémon in the P.C.!|⚠️ ¡Revivir Máximo requiere al menos 1 Pokémon en el P.C.!
+134|=|{0} returned to the Bench with Wait 2 ({1}/2 in the P.C.)|{0} volvió al banquillo con Espera 2 ({1}/2 en el P.C.)
+135|{0} foi nocauteado para o P.C. ({1}/2)|=|{0} fue derrotado al P.C. ({1}/2)
+136|=|☠️ SURROUND KO! {0} ({1}) was cornered by rival Pokémon!|☠️ ¡DERROTA POR CERCO! ¡{0} ({1}) fue acorralado por Pokémon rivales!
+137|🏆 VITÓRIA POR CERCO NO GOL! O defensor do Gol foi cercado!|🏆 GOAL SURROUND WIN! The Goal defender was surrounded!|🏆 ¡VICTORIA POR CERCO EN LA META! ¡El defensor de la Meta fue rodeado!
+138|🌀 {0} foi banido para o Ultra Espaço!|=|🌀 ¡{0} fue desterrado al Ultraespacio!
+139|=|⏳ MEGA EVOLUTION ENDED! {0} reverted to {1} after 5 turns.|⏳ ¡TERMINÓ LA MEGAEVOLUCIÓN! {0} volvió a ser {1} tras 5 turnos.
+140|=|🧬 TRANSFORMATION! Ditto won with Transform Mirror and copied {0}'s form for 3 turns!|🧬 ¡TRANSFORMACIÓN! ¡Ditto ganó con Transform Mirror y copió la forma de {0} durante 3 turnos!
+141|=|🧬 TRANSFORMATION ENDED! {0} became Ditto again after 3 turns.|🧬 ¡TERMINÓ LA TRANSFORMACIÓN! {0} volvió a ser Ditto tras 3 turnos.
+142|=|Mega Evolve {0} ➔ {1}?|¿Megaevolucionar a {0} ➔ {1}?
+143|=|Evolve {0} ➔ {1}?|¿Evolucionar a {0} ➔ {1}?
+144|=|Temporarily Mega Evolves into|Megaevoluciona temporalmente a
+145|=|5 turns|5 turnos
+146|=|Bonus: +20 DMG, +1★ Purple, +1 MP and Pass-Through. Reverts on the 6th turn.|Bonificación: +20 DAÑO, +1★ Morado, +1 PM y Atravesar. Se revierte en el 6.º turno.
+147|=|Evolves into|Evoluciona a
+148|=|permanently gaining|ganando permanentemente
+149|+10 DANO|+10 DMG|+10 DAÑO
+150|+1★ Roxo|+1★ Purple|+1★ Morado

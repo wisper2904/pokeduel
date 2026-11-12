@@ -1,0 +1,173 @@
+520|=|Evolve?|¿Evolucionar?
+521|=|Yes|Sí
+522|=|No|No
+523|⚡ Nenhuma peça sua em campo ou no banco pode usar Movimento Z.|⚡ None of your pieces on the field or bench can use a Z-Move.|⚡ Ninguna de tus piezas en el campo o banquillo puede usar Movimiento Z.
+524|=|Purple Attack.|Ataque Morado.
+525|=|The whole wheel becomes this attack.|Toda la ruleta se convierte en este ataque.
+526|*Na próxima batalha desta peça, a roleta inteira vira o Movimento Z.|*In this piece's next battle, the whole wheel becomes the Z-Move.|*En el próximo combate de esta pieza, toda la ruleta se convierte en el Movimiento Z.
+527|*O Movimento Z quebra as Defesas (azul) do oponente.|*The Z-Move breaks the opponent's Defenses (blue).|*El Movimiento Z rompe las Defensas (azul) del rival.
+528|=|*Can only be used once per duel.|*Solo se puede usar 1 vez por duelo.
+529|Trocar o Movimento Z?|Change the Z-Move?|¿Cambiar el Movimiento Z?
+530|Ativar o Movimento Z?|Activate the Z-Move?|¿Activar el Movimiento Z?
+531|=|Disarm|Desactivar
+532|⚡ Movimento Z|⚡ Z-Move|⚡ Movimiento Z
+533|=|armed for|activado para
+534|=|Attack with it to use it.|Ataca con ella para usarlo.
+535|⚡ MOVIMENTO Z {0} {1} {2}! {3}|⚡ Z-MOVE {0} {1} {2}! {3}|⚡ ¡MOVIMIENTO Z {0} {1} {2}! {3}
+542|TODOS|ALL|TODOS
+543|=|Deck|Mazo
+544|=|Change slot|Cambiar de casilla
+545|=|Use in deck|Usar en el mazo
+546|=|Team #|Equipo #
+547|=|Team #{0}{1}|Equipo #{0}{1}
+548|=|New team|Nuevo equipo
+549|=|Rename|Renombrar
+551|=|Tap the slot to place it|Toca la casilla para colocarla
+553|Editar Placas|Edit Plates|Editar Placas
+554|=|Collection|Colección
+555|=|Hold and drag to a slot|Mantén pulsado y arrastra a una casilla
+556|=|Search figure...|Buscar figura...
+557|=|Mine|Mías
+558|=|All|Todas
+560|=|No figures.|Ninguna figura.
+561|=|Show more|Mostrar más
+562|⚡ Auto|=|⚡ Auto
+563|Placas|Plates|Placas
+564|=|Info|Info
+565|=|Use|Usar
+566|=|In deck|En el mazo
+567|=|Catalog|Catálogo
+568|=|Tap a card to see details, add it to or remove it from the deck.|Toca una carta para ver detalles, ponerla o quitarla del mazo.
+569|=|Clear all|Quitar todas
+570|=|‹ Deck|‹ Mazo
+571|=|OK|OK
+576|=|Insufficient balance|Saldo insuficiente
+577|=|DAILY MARKET|MERCADO DIARIO
+578|Pacote Simples|Single Booster|Sobre Simple
+579|1 figura + 50 Materiais|1 figure + 50 Material|1 figura + 50 Materiales
+580|Pacote Duplo|Double Booster|Sobre Doble
+581|2 figuras + 100 Materiais|2 figures + 100 Material|2 figuras + 100 Materiales
+582|Pacote Quádruplo|Quadruple Booster|Sobre Cuádruple
+583|4 figuras + 1 Cubo extra|4 figures + 1 extra Cube|4 figuras + 1 Cubo extra
+584|=|POPULAR|POPULAR
+585|Pacote Sêxtuplo|Sextuple Booster|Sobre Séxtuple
+586|=|6 figures · guarantees EX/UX|6 figuras · garantiza EX/UX
+587|=|BEST|MEJOR
+588|=|Daily Reward|Recompensa Diaria
+589|=|CLAIM!|¡RECLAMAR!
+590|=|Victory Boxes|Cajas de Victoria
+591|=|Earn them by winning matches|Se ganan venciendo partidas
+592|=|Open|Abrir
+593|=|Daily Market|Mercado Diario
+594|=|NEW|NUEVO
+595|=|You don't have it|No la tienes
+596|=|You have it|La tienes
+597|=|Bought|Comprado
+598|=|Boxes|Cajas
+599|=|Coin Box|Caja de Monedas
+600|1 figura + 1 Metal Raro + 25 Materiais|1 figure + 1 Rare Metal + 25 Material|1 figura + 1 Metal Raro + 25 Materiales
+601|=|Fusion Materials|Materiales de Fusión
+602|Sobe Nv 1→5|Raises Lv 1→5|Sube Nv 1→5
+603|Sobe Nv 6→10|Raises Lv 6→10|Sube Nv 6→10
+604|+1 CLv (dano)|+1 CLv (damage)|+1 CLv (daño)
+605|=|Trade for Material (all figures)|Cambia por Material (todas las figuras)
+606|🟦 +1 Metal Raro|🟦 +1 Rare Metal|🟦 +1 Metal Raro
+607|Metal Raro|Rare Metal|Metal Raro
+608|Carmonita ×50|Carmonite ×50|Carmonita ×50
+609|Cubo Verde|Green Cube|Cubo Verde
+610|=|Not enough gems|Gemas insuficientes
+614|=|DAILY PRIZE!|¡PREMIO DIARIO!
+615|=|DAILY PRIZE|PREMIO DIARIO
+616|=|Tap to claim|Toca para reclamar
+617|=|SLEEP!|¡SUEÑO!
+618|=|PANIC!|¡PÁNICO!
+619|=|FROZEN!|¡CONGELADO!
+620|=|POISON!|¡VENENO!
+621|=|PARALYSIS!|¡PARÁLISIS!
+622|=|BURNED!|¡QUEMADO!
+623|=|WAIT!|¡ESPERA!
+624|=|KNOCKOUT!|¡DERROTA!
+625|=|PUSH!|¡EMPUJÓN!
+626|=|SWAP!|¡CAMBIO!
+627|=|CONFUSED!|¡CONFUSO!
+628|=|TIE!|¡EMPATE!
+629|ACERTO!|HIT!|¡GOLPE!
+630|MOVIMENTO Z!|Z-MOVE!|¡MOVIMIENTO Z!
+631|=|CRITICAL!|¡CRÍTICO!
+632|NOCAUTE!|KO!|¡K.O.!
+633|=|VICTORY!|¡VICTORIA!
+634|MEGAEVOLUÇÃO!|MEGA EVOLUTION!|¡MEGAEVOLUCIÓN!
+635|=|EVOLUTION!|¡EVOLUCIÓN!
+636|=|ULTRA RARE!|¡ULTRA RARA!
+639|=|✨ Visual effects (particles, texts, flashes)|✨ Efectos visuales (partículas, textos, destellos)
+640|=|📳 Screen shake|📳 Temblor de pantalla
+641|=|📲 Phone vibration|📲 Vibración del móvil
+642|🎮 EFEITOS DE JOGO|🎮 GAME JUICE|🎮 EFECTOS DE JUEGO
+643|=|ON|ACTIVADO
+644|=|OFF|DESACT.
+645|=|📖 Opening Book: Proven Reply ({0} → node {1})|📖 Libro de aperturas: respuesta probada ({0} → nodo {1})
+646|=|📖 Opening Read ({0}%): Locking node {1} with {2}!|📖 Lectura de apertura ({0}%): ¡bloqueando el nodo {1} con {2}!
+647|=|📖 Counter-Opening: Blocking the lane at node {0} with {1}|📖 Contraapertura: bloqueando el pasillo en el nodo {0} con {1}
+648|📖 Contra-Posicionamento: {0} ({1}% de vitória) para caçar {2}!|📖 Counter-Deploy: {0} ({1}% Win) to hunt {2}!|📖 Contradespliegue: ¡{0} ({1}% de victoria) para cazar a {2}!
+649|=|Left Anti-Flank|Antiflanco Izq.
+650|=|Right Anti-Flank|Antiflanco Der.
+651|=|Central Lock|Bloqueo Central
+652|=|Karolin [Grandmaster AI · {0}%]|Karolin [IA Gran Maestro · {0}%]
+653|=|No.9 [Adaptive AI · {0}%]|No.9 [IA Adaptativa · {0}%]
+654|=|Don Roger [Master AI · {0}%]|Don Roger [IA Maestro · {0}%]
+655|=|N.O.V.A. [Evolutionary AI · {0}%]|N.O.V.A. [IA Evolutiva · {0}%]
+656|=|Strategic AI|IA Estratégica
+657|=|🎲 Wheel: YOU start the duel (1st Turn: -1 MP) against {0}!|🎲 Ruleta: ¡TÚ empiezas el duelo (1.er turno: -1 PM) contra {0}!
+658|=|🎲 Wheel: {0} won the 1st Turn (-1 MP) and will start!|🎲 Ruleta: ¡{0} ganó el 1.er turno (-1 PM) y empezará!
+659|=|Adaptive AI|IA Adaptativa
+660|🏆 {0}: Xeque-mate! {1} avança direto para o Gol!|🏆 {0}: Checkmate! {1} heads straight for the Goal Point!|🏆 {0}: ¡Jaque mate! ¡{1} avanza directo a la Meta!
+661|🦘 {0} ativou a Placa [Salto de Obstáculo] com {1} — Xeque-mate no Gol!|🦘 {0} activated the [Hurdle Jump] Plate with {1} — Checkmate on the Goal Point!|🦘 {0} activó la Placa [Salto de Valla] con {1} — ¡Jaque mate en la Meta!
+662|Salto Ofensivo [Salto de Obstáculo] com {0}|Offensive Jump [Hurdle Jump] with {0}|Salto Ofensivo [Salto de Valla] con {0}
+663|=|Tactical Advance with {0}|Avance Táctico con {0}
+664|Cerco Relâmpago (Nocaute por Cerco em {0})|Lightning Surround (Surround KO on {0})|Cerco Relámpago (derrota por cerco a {0})
+665|=|Anti-Surround Evasion with {0}|Evasión Anticerco con {0}
+666|=|Habit Read: Blocking {0}'s route at node {1}|Lectura de hábitos: bloqueando la ruta de {0} en el nodo {1}
+667|🏆 Vitória imediata no Gol com {0}!|🏆 Instant Win on the Goal Point with {0}!|🏆 ¡Victoria inmediata en la Meta con {0}!
+668|⚡ Xeque letal no Gol! (vitória em 1 turno com {0})|⚡ Lethal Check on the Goal! (Win in 1 Turn with {0})|⚡ ¡Jaque letal en la Meta! (victoria en 1 turno con {0})
+669|🚀 Rota direta de xeque (2 turnos com {0})|🚀 Direct Check Route (2 Turns with {0})|🚀 Ruta directa de jaque (2 turnos con {0})
+670|Ameaça imediata ao Gol inimigo com {0}!|Immediate Threat to the enemy Goal with {0}!|¡Amenaza inmediata a la Meta enemiga con {0}!
+671|🔒 Asfixia dupla dos Pontos de Entrada ({0}) — pressão de Vitória por Espera!|🔒 Double Entry Point Choke ({0}) — Wait-Win Pressure!|🔒 Asfixia doble de los Puntos de entrada ({0}) — ¡presión de Victoria por Espera!
+672|⚡ Invasão do Ponto de Entrada inimigo com {0}!|⚡ Invasion of the enemy Entry Point with {0}!|⚡ ¡Invasión del Punto de entrada enemigo con {0}!
+673|🛡️ Trancamento do Gol ({0})|🛡️ Goal Point Lockdown ({0})|🛡️ Cierre de la Meta ({0})
+674|Guarda da entrada do Gol com {0}|Goal Entrance Guard with {0}|Guardia de la entrada de la Meta con {0}
+675|Suporte anticerco ao defensor do Gol com {0}|Anti-Surround Support for the Goal Defender with {0}|Apoyo anticerco al defensor de la Meta con {0}
+676|=|Opening Blitz with {0} (3 MP)|Ataque relámpago de apertura con {0} (3 PM)
+677|⚔️ Assalto ao defensor do Gol ({0} vs {1} · {2}% de vitória)|⚔️ Assault on the Goal Defender ({0} vs {1} · {2}% Win)|⚔️ Asalto al defensor de la Meta ({0} vs {1} · {2}% de victoria)
+678|Ataque decisivo ({0} vs {1} · {2}% de vitória)|Decisive Attack ({0} vs {1} · {2}% Win)|Ataque decisivo ({0} vs {1} · {2}% de victoria)
+679|🛡️ Manutenção firme no Gol com {0}|🛡️ Holding firm on the Goal Point with {0}|🛡️ Firmes en la Meta con {0}
+680|=|{0} (Tactical Containment)|{0} (Contención Táctica)
+681|🛡️ {0} ativou a Placa [Bloqueio de Gol] e teleportou {1} para trancar o Gol!|🛡️ {0} activated the [Goal Block] Plate and teleported {1} to lock the Goal Point!|🛡️ ¡{0} activó la Placa [Bloqueo de Meta] y teletransportó a {1} para cerrar la Meta!
+684|+ Placa [{0}]|+ Plate [{0}]|+ Placa [{0}]
+685|Lenda|Legend|Leyenda
+686|Mestre|Master|Maestro
+687|Campeão|Champion|Campeón
+688|Líder|Leader|Líder
+689|Iniciante|Beginner|Principiante
+690|🏆 Vitória na Copa de Ginásio! +1 Troféu (Total: {0} 🏆) + 100 Gemas + 250 Materiais!|🏆 Gym Cup Victory! +1 Trophy (Total: {0} 🏆) + 100 Gems + 250 Material!|🏆 ¡Victoria en la Copa de Gimnasio! +1 Trofeo (Total: {0} 🏆) + 100 Gemas + 250 Materiales!
+692|=|Original sounds|Sonidos originales
+693|=|On|Activado
+694|=|Reloading ends the current match|Recargar termina la partida actual
+695|=|🔄 New version available{0}|🔄 Nueva versión disponible{0}
+696|=|Reload|Recargar
+697|=|Later|Después
+700|=|no cache|sin caché
+703|=|✅ Sprite [{0}.png] updated live on the board and menu!|✅ ¡Sprite [{0}.png] actualizado en vivo en el tablero y el menú!
+704|=|✅ Board texture updated live ({0})!|✅ ¡Textura del tablero actualizada en vivo ({0})!
+705|🏆 Limite máximo Nv.10 já atingido!|🏆 Max Hard Cap Lv.10 already reached!|🏆 ¡Límite máximo Nv.10 ya alcanzado!
+707|Nv.{0}/10 · CLv+{1} ({2})|Lv.{0}/10 · CLv+{1} ({2})|Nv.{0}/10 · CLv+{1} ({2})
+708|=|{2} BUFF OF THE WEEK ({3}): +10 Damage on the Wheel · +1★ on Purple Attacks · +1 Extra MP!|{2} BONO DE LA SEMANA ({3}): +10 de daño en la ruleta · +1★ en ataques Morados · ¡+1 PM extra!
+709|=|🦘 JUMPS FIGURES: This Pokémon can jump over allied and opposing Pokémon on the board spending 2 MP per jump.|🦘 SALTA FIGURAS: este Pokémon puede saltar por encima de Pokémon aliados y rivales en el tablero gastando 2 PM por salto.
+710|=|🚫 GROUND MOVEMENT: Doesn't jump over other Pokémon (the path is blocked by adjacent pieces).|🚫 MOVIMIENTO TERRESTRE: no salta otros Pokémon (el camino queda bloqueado por piezas adyacentes).
+711|Habilidade padrão de figura.|=|Habilidad estándar de figura.
+712|=|Evolution Line / [UX]:|Línea evolutiva / [UX]:
+713|=|Line:|Línea:
+714|=|Single Form / No further evolution|Forma única / Sin más evolución
+715|=|· CLv Pts:|· Pts CLv:
+716|=|↺ View Base Wheel (96)|↺ Ver ruleta base (96)
+717|=|⚡ View 100% Wheel|⚡ Ver ruleta 100%
+719|ROXO ★★★★|=|MORADO ★★★★

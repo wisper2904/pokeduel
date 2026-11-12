@@ -1,0 +1,142 @@
+1110|1. Entrada em Campo (Pontos de Entrada e MP)|1. Entering the Field (Entry Points & MP)|1. Entrada al campo (Puntos de entrada y PM)
+1111|=|▶️ Run Step 1/6 Now|▶️ Ejecutar paso 1/6 ahora
+1112|🏛️ TOUR DO INÍCIO · ETAPA 1/5|🏛️ HUB TOUR · STEP 1/5|🏛️ RECORRIDO DEL INICIO · PASO 1/5
+1113|=|✕ Close Tour|✕ Cerrar recorrido
+1114|Bem-vindo ao Início do PokeDuel!|Welcome to the PokeDuel Hub!|¡Bienvenido al Inicio de PokeDuel!
+1115|=|Next Step (2/5) ➔|Siguiente paso (2/5) ➔
+1116|=|✅ Your Energy bar is already at 110/110!|✅ ¡Tu barra de Energía ya está en 110/110!
+1117|⚠️ Moedas insuficientes ({0}/1.500 🪙)!|⚠️ Not enough Coins ({0}/1,500 🪙)!|⚠️ ¡Monedas insuficientes ({0}/1.500 🪙)!
+1118|=|⚡ Energy refilled to 110/110!|⚡ ¡Energía recargada a 110/110!
+1119|Equipe do Hotel|Hotel Staff|Personal del Hotel
+1120|Desafios de 3 estrelas disponíveis.|3-Star challenges available.|Desafíos de 3 estrellas disponibles.
+1121|=|Boss:|Jefe:
+1122|· Deck: {2}|· Deck: {2}|· Mazo: {2}
+1123|=|Stars:|Estrellas:
+1124|=|⚡15 Play|⚡15 Jugar
+1125|SALTO|JUMP|SALTO
+1126|=|Jumps over an adjacent Pokémon and lands on the other side if the space is free.|Salta sobre un Pokémon adyacente y aterriza al otro lado si la casilla está libre.
+1127|GIRAR DE NOVO|REROLL|GIRAR OTRA VEZ
+1128|=|Lets you spin the wheel again if the first result is bad.|Permite volver a girar la ruleta si el primer resultado no te conviene.
+1129|+30 DANO|+30 DMG|+30 DAÑO
+1130|=|Raises the damage of all white and gold attacks by +30 during this battle.|Aumenta el daño de todos los ataques blancos y dorados en +30 durante este combate.
+1131|DOURADO|GOLD|DORADO
+1132|=|Turns all of your figure's white attacks into Gold this turn, beating purples.|Convierte todos los ataques blancos de tu figura en Dorados este turno, venciendo a los morados.
+1133|REVIVER|REVIVE|REVIVIR
+1134|Cura e resgata na hora um Pokémon do Centro Pokémon para o banco, sem Espera.|Instantly heals and rescues a Pokémon from the Pokémon Center to the bench, without Wait.|Cura y rescata al instante un Pokémon del Centro Pokémon al banquillo, sin Espera.
+1135|DEFESA|DEFEND|DEFENSA
+1136|Move um Pokémon do seu banco ou campo diretamente para o seu Gol para defendê-lo.|Moves a Pokémon from your bench or field straight to your Goal to defend it.|Mueve un Pokémon de tu banquillo o campo directamente a tu Meta para defenderla.
+1137|Placa Mega|Mega Plate|Placa Mega
+1138|Ativa a Megaevolução do Pokémon por 7 turnos, aumentando o MP e adicionando novos ataques devastadores.|Activates the Pokémon's Mega Evolution for 7 turns, raising MP and adding devastating new attacks.|Activa la Megaevolución del Pokémon durante 7 turnos, aumentando sus PM y añadiendo nuevos ataques devastadores.
+1139|ENTRADA|ENTRY|ENTRADA
+1140|Permite que um Pokémon entre no campo a até 2 passos de distância de um Ponto de Entrada.|Lets a Pokémon enter the field up to 2 steps away from an Entry Point.|Permite que un Pokémon entre al campo hasta a 2 pasos de un Punto de entrada.
+1141|TROCA|SWITCH|CAMBIO
+1142|=|Swaps the positions of a Pokémon on the field and another Pokémon on your bench.|Intercambia las posiciones de un Pokémon del campo con otro de tu banquillo.
+1143|=|Special tactical effect in the Pokémon Duel match.|Efecto táctico especial en la partida de Pokémon Duel.
+1144|=|✓ In Deck: {0}x equipped (Total: {1}/{2})|✓ En el mazo: {0}x equipada (Total: {1}/{2})
+1145|=|📦 On the Bench: Not equipped (Total in Deck: {0}/{1})|📦 En el banquillo: no equipada (total en el mazo: {0}/{1})
+1146|⚠️ Deck cheio ({0}/{1} Placas)|⚠️ Deck Full ({0}/{1} Plates)|⚠️ Mazo lleno ({0}/{1} Placas)
+1147|=|➕ Add Another Copy|➕ Añadir otra copia
+1148|=|➕ Use in Deck|➕ Usar en el mazo
+1183|TIME|TEAM|EQUIPO
+1184|=|⚡ Balanced Ideal Team Built (Respecting Max 1 Mega · 1 UX · 2 EX)!|⚡ ¡Equipo ideal equilibrado montado (respetando máx. 1 Mega · 1 UX · 2 EX)!
+1185|=|Empty|Vacío
+1186|=|#{0} Empty|#{0} Vacío
+1187|=|+ Available|+ Disponible
+1188|=|🔍 View / Adjust|🔍 Ver / Ajustar
+1189|➕ Usar Placa|➕ Use Plate|➕ Usar Placa
+1190|=|🗑️ Clear|🗑️ Quitar
+1191|=|TYPE: {0}|TIPO: {0}
+1192|+{0} DANO · +{1}★ · +{2} MP|+{0} DMG · +{1}★ · +{2} MP|+{0} DAÑO · +{1}★ · +{2} PM
+1193|=|⏳ {0} left|⏳ Quedan {0}
+1194|=|BUFF OF THE WEEK: {0} ({1})|BONO DE LA SEMANA: {0} ({1})
+1195|=|⏳ Time left this week: {0}|⏳ Tiempo restante esta semana: {0}
+1196|{4}{5} (MP {6}➔{7})|=|{4}{5} (PM {6}➔{7})
+1197|=|{2} All {3} Pokémon get this week:|{2} Todos los Pokémon de {3} ganan esta semana:
+1198|=|+10 Extra Damage|+10 de daño extra
+1199|=|on every wheel attack|en todos los ataques de la ruleta
+1200|=|+1 Extra Star (★)|+1 estrella (★) extra
+1201|=|on every Purple attack|en todos los ataques Morados
+1202|=|+1 Extra MP|+1 PM extra
+1203|=|of movement on the board|de movimiento en el tablero
+1204|=|How it works:|Cómo funciona:
+1205|=|At the end of the 7 days (|Al final de los 7 días (faltan
+1206|=| left), the|), los Pokémon de
+1207|=|Pokémon return to their original stats and a new element is drawn at random for next week!|vuelven a sus atributos originales y se sortea un nuevo elemento al azar para la próxima semana!
+1208|=|{6} Type Pokémon ({7}):|Pokémon de tipo {6} ({7}):
+1209|=|➕ Team ({0}/3)|➕ Equipo ({0}/3)
+1210|=|🔒 3/3 Teams|🔒 3/3 equipos
+1211|=|⚡ Auto-Team|⚡ Equipo automático
+1212|=|{2} Weekly Buff:|{2} Bono semanal:
+1213|+{4} DANO · +{5}★ Roxo · +{6} MP (⏳{7})|+{4} DMG · +{5}★ Purple · +{6} MP (⏳{7})|+{4} DAÑO · +{5}★ Morado · +{6} PM (⏳{7})
+1214|=|Delete this team|Borrar este equipo
+1215|=|At least 1 team required|Mínimo 1 equipo obligatorio
+1216|=|✏️ Rename|✏️ Renombrar
+1217|=|🗑️ Delete|🗑️ Borrar
+1218|=|Limit: {8}/3|Límite: {8}/3
+1219|=|⚖️ Deck Rules:|⚖️ Reglas del mazo:
+1223|📦 R/UC/C e repetidos: livre|📦 R/UC/C & Duplicates: Free|📦 R/UC/C y repetidos: libre
+1224|Editando o espaço #{0} ({1})|Editing Slot #{0} ({1})|Editando la casilla #{0} ({1})
+1225|=|★ Final Form|★ Forma final
+1226|{10} MP {11}{12} · 💥{13} · Nv.{14}|{10} MP {11}{12} · 💥{13} · Lv.{14}|{10} PM {11}{12} · 💥{13} · Nv.{14}
+1227|{8} MP {9}{10} · 💥{11} · Nv.{12}|{8} MP {9}{10} · 💥{11} · Lv.{12}|{8} PM {9}{10} · 💥{11} · Nv.{12}
+1228|Bônus {0}: {1}|{0} Buff: {1}|Bono {0}: {1}
+1232|=|All ({0})|Todos ({0})
+1233|DESBLOQUEADOS|UNLOCKED|DESBLOQUEADOS
+1234|=|✅ Mine ({0})|✅ Míos ({0})
+1235|BLOQUEADOS|LOCKED|BLOQUEADOS
+1236|=|🔒 Missing ({0})|🔒 Faltan ({0})
+1237|=|🌐 All Roles|🌐 Todos los roles
+1238|=|⭐ In Team|⭐ En el equipo
+1240|🏃 Corredores 3 MP|🏃 3 MP Runners|🏃 Corredores 3 PM
+1242|⚔️ Lutadores 2 MP|⚔️ 2 MP Fighters|⚔️ Luchadores 2 PM
+1244|🛡️ Tanques 1 MP|🛡️ 1 MP Tanks|🛡️ Tanques 1 PM
+1245|=|⭐ Team First|⭐ Equipo primero
+1246|RARIDADE|RARITY|RAREZA
+1247|=|💎 Rarity|💎 Rareza
+1248|DANO|DMG|DAÑO
+1249|=|💥 Highest Damage|💥 Mayor daño
+1250|=|👟 MP|👟 PM
+1251|NÍVEL|LEVEL|NIVEL
+1252|=|⬆️ Level/CLv|⬆️ Nivel/CLv
+1253|NOME|NAME|NOMBRE
+1254|=|🔤 Name A-Z|🔤 Nombre A-Z
+1255|📦 ESTOJO DE FIGURAS ({0}/{1} desbloqueados)|📦 FIGURE CASE ({0}/{1} Unlocked)|📦 ESTUCHE DE FIGURAS ({0}/{1} desbloqueados)
+1256|=|⊞ 3x Grid|⊞ Cuadrícula 3x
+1257|=|⊟ 2x Detailed|⊟ Detallado 2x
+1258|=|Sort:|Ordenar:
+1259|=|🔍 Search the {0} Pokémon (name, type, rarity)...|🔍 Buscar entre los {0} Pokémon (nombre, tipo, rareza)...
+1260|★ {0}/{1} (+espaço #{2})|★ {0}/{1} (+Slot #{2})|★ {0}/{1} (+casilla #{2})
+1261|=|★ {0}/{1} In Team|★ {0}/{1} en el equipo
+1262|★ Espaço #{0}|★ Slot #{0}|★ Casilla #{0}
+1263|=|MP {3}{4} · 💥{5}|PM {3}{4} · 💥{5}
+1264|Nv.{12} · CLv+{13}{14}|Lv.{12} · CLv+{13}{14}|Nv.{12} · CLv+{13}{14}
+1265|★ {0}/{1} (+equipar espaço #{2})|★ {0}/{1} (+Equip Slot #{2})|★ {0}/{1} (+equipar casilla #{2})
+1266|=|★ {0}/{1} Copies in Team|★ {0}/{1} copias en el equipo
+1267|★ No espaço #{0}|★ In Slot #{0}|★ En la casilla #{0}
+1268|➔ Equipar espaço #{0}|➔ Equip Slot #{0}|➔ Equipar casilla #{0}
+1269|BÔNUS {0}|{0} BUFF|BONO {0}
+1270|✅ Nv.{0}/10 · CLv+{1} · 📦x{2} un.|✅ Lv.{0}/10 · CLv+{1} · 📦x{2} copies|✅ Nv.{0}/10 · CLv+{1} · 📦x{2} copias
+1271|Movimento Z:|Z-Move:|Movimiento Z:
+1272|=|MP {7}{8}|PM {7}{8}
+1273|=|{13} · 💥Max {14}|{13} · 💥Máx {14}
+1274|=|📱 To install as an App: on iPhone (Safari) tap [Share ➔ Add to Home Screen]; on Android/PC (Chrome) use the [Install app] menu.|📱 Para instalar como app: en iPhone (Safari) toca [Compartir ➔ Añadir a pantalla de inicio]; en Android/PC (Chrome) usa el menú [Instalar aplicación].
+1275|=|✅ Transfer Code generated and copied! Paste it on the GitHub Pages site, iPhone or Android to sync your account.|✅ ¡Código de transferencia generado y copiado! Pégalo en el sitio de GitHub Pages, iPhone o Android para sincronizar tu cuenta.
+1277|=|💾 .pokeduel file downloaded!|💾 ¡Archivo .pokeduel descargado!
+1278|=|Invalid save format|Formato de guardado no válido
+1279|=|⚠️ Paste a valid Transfer Code in the field above or load a .pokeduel file!|⚠️ ¡Pega un código de transferencia válido en el campo de arriba o carga un archivo .pokeduel!
+1280|=|✅ Account imported! Reloading collection, gems, ELO and teams...|✅ ¡Cuenta importada! Recargando colección, gemas, ELO y equipos...
+1281|=|❌ Invalid or corrupted code. Use the [📋 Export Code] button on the source device.|❌ Código no válido o dañado. Usa el botón [📋 Exportar código] en el dispositivo de origen.
+1282|=|Invalid encrypted package|Paquete cifrado no válido
+1286|Sincronização do salvamento na nuvem @{0}|Cloud Save sync @{0}|Sincronización del guardado en la nube @{0}
+1288|=|⚠️ Enter your Login (User) and Password to save to the cloud!|⚠️ ¡Escribe tu usuario y contraseña para guardar en la nube!
+1289|=|⚠️ The Login must have at least 3 characters and the Password at least 4.|⚠️ El usuario debe tener al menos 3 caracteres y la contraseña al menos 4.
+1290|=|❌ Wrong password for the account @{0}!|❌ ¡Contraseña incorrecta para la cuenta @{0}!
+1291|=|⏳ Encrypting and saving @{0}'s progress to the cloud...|⏳ Cifrando y guardando el progreso de @{0} en la nube...
+1292|=|✅ @{0}'s progress saved to the Cloud ({1})! Use the same Login and Password on any phone, iPhone or PC.|✅ ¡Progreso de @{0} guardado en la nube ({1})! Usa el mismo usuario y contraseña en cualquier móvil, iPhone o PC.
+1293|=|💾 @{0}'s progress saved in the Encrypted Vault ({1}). It will sync to the cloud as soon as there's a connection.|💾 Progreso de @{0} guardado en la Caja Fuerte Cifrada ({1}). Se sincronizará en la nube en cuanto haya conexión.
+1294|=|⚠️ Fill in your Login (User) and Password to log in or download your save!|⚠️ ¡Rellena tu usuario y contraseña para entrar o descargar tu partida!
+1295|=|🔍 Looking for account @{0} in the cloud...|🔍 Buscando la cuenta @{0} en la nube...
+1296|=|❌ Wrong password for user @{0}!|❌ ¡Contraseña incorrecta para el usuario @{0}!
+1297|=|❌ Wrong password for user @{0}! Check your password.|❌ ¡Contraseña incorrecta para el usuario @{0}! Revisa tu contraseña.
+1298|Nuvem do GitHub|GitHub Cloud|Nube de GitHub
+1299|=|PokeDuel Cloud|Nube PokeDuel

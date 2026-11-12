@@ -1,0 +1,171 @@
+149|+10 DANO|=|+10 DAÑO
+150|+1★ Roxo|=|+1★ Morado
+151|=|Deck's Final Target:|Objetivo final del mazo:
+152|🧬 MEGAEVOLUÇÃO EM PARTIDA! {0} megaevoluiu para {1} por 5 turnos (+20 DANO, +1★, +1 MP e Atravessar)!|🧬 IN-MATCH MEGA EVOLUTION! {0} Mega Evolved into {1} for 5 turns (+20 DMG, +1★, +1 MP and Pass-Through)!|🧬 ¡MEGAEVOLUCIÓN EN PARTIDA! ¡{0} megaevolucionó a {1} durante 5 turnos (+20 DAÑO, +1★, +1 PM y Atravesar)!
+153|✨ EVOLUÇÃO EM PARTIDA! {0} evoluiu para {1} (+{2} DANO, +{3}★)!|✨ IN-MATCH EVOLUTION! {0} evolved into {1} (+{2} DMG, +{3}★)!|✨ ¡EVOLUCIÓN EN PARTIDA! ¡{0} evolucionó a {1} (+{2} DAÑO, +{3}★)!
+154|🚫 BLOQUEIO DE ENTRADA! Os dois Pontos de Entrada estão bloqueados!|🚫 SPAWN BLOCK! Both Entry Points are blocked!|🚫 ¡BLOQUEO DE ENTRADA! ¡Ambos Puntos de entrada están bloqueados!
+155|=|You|Tú
+156|=|Rival|Rival
+157|TURNO|=|TURNO
+158|=|{0} — Select a piece|{0} — Elige una pieza
+159|=|Player 1 (Blue)|Jugador 1 (Azul)
+160|=|Player 2 (Red)|Jugador 2 (Rojo)
+161|=|👥 Turn: {0}|👥 Turno de: {0}
+162|=|🔴 AI (P2)|🔴 IA (P2)
+164|⚡ PODER Z (0/1 USADO)|=|⚡ PODER Z (0/1 USADO)
+165|⚡ Z ARMADO! 🔥|=|⚡ ¡Z ARMADO! 🔥
+166|⚡ MOVIMENTO Z (100%)|=|⚡ MOVIMIENTO Z (100%)
+167|⚡ Poder Z ({0}%)|=|⚡ Poder Z ({0}%)
+169|=|Status|Estado
+171|BÔNUS +10/+1★|BUFF +10/+1★|BONO +10/+1★
+173|Detalhes|=|Detalles
+174|📊 Banco de Duelos vs {0}: V {1}% · E {2}% · D {3}%|=|📊 Datos de duelo vs {0}: V {1}% · E {2}% · D {3}%
+175|✨ Estágio +{0} (+{1} DANO / +{2}★)|=|✨ Fase +{0} (+{1} DAÑO / +{2}★)
+176|=|⚡ Z-POWER ACTIVATED! (1x PER DUEL)|⚡ ¡PODER Z ACTIVADO! (1x POR DUELO)
+177|ROLETA 100% CONVERTIDA NO MOVIMENTO Z!|WHEEL 100% CONVERTED INTO THE Z-MOVE!|¡RULETA 100% CONVERTIDA EN EL MOVIMIENTO Z!
+178|=|(AI · P2)|(IA · P2)
+179|PRIMEIRO!|=|¡PRIMERO!
+182|🏆 Vitória na Copa de Ginásio! +1 Troféu da Copa (Total: {0} 🏆) + 100 Gemas + 250 Materiais!|🏆 Gym Cup Victory! +1 Cup Trophy (Total: {0} 🏆) + 100 Gems + 250 Material!|🏆 ¡Victoria en la Copa de Gimnasio! +1 Trofeo de Copa (Total: {0} 🏆) + 100 Gemas + 250 Materiales!
+184|🥇 Torneio Oficial (Preliminar 50 Duelos -> Final Top 32): Prêmio [UX] Necrozma Asas do Alvorecer Dourado (#647)!|🥇 Official Tournament (Prelim 50 Duels -> Top 32 Finals): Prize [UX] Golden Dawn Wings Necrozma (#647)!|🥇 Torneo Oficial (Preliminar 50 duelos -> Final Top 32): ¡Premio [UX] Necrozma Alas del Alba Dorada (#647)!
+185|⚡ Copa de Ginásio ativa: figuras de 1-2 MP recebem +1 MP e ataques Brancos/Dourados recebem +20 DANO (rumo ao Troféu Invencível 11-0)!|⚡ Gym Cup Active: 1-2 MP figures get +1 MP and White/Gold attacks get +20 DMG (on the way to the Invincible Trophy 11-0)!|⚡ Copa de Gimnasio activa: las figuras de 1-2 PM reciben +1 PM y los ataques Blancos/Dorados reciben +20 DAÑO (¡rumbo al Trofeo Invencible 11-0)!
+186|🚢 Copa da Rainha (Carnaval S.S. Carmonte): Desafiando Karolin (Rank S · Happy Hour 02:00/14:00 UTC · +400 pts)!|🚢 Queen's Cup (S.S. Carmonte Carnival): Challenging Karolin (Rank S · Happy Hour 02:00/14:00 UTC · +400 pts)!|🚢 Copa de la Reina (Carnaval S.S. Carmonte): ¡Desafiando a Karolin (Rango S · Hora feliz 02:00/14:00 UTC · +400 pts)!
+187|💎 Salão de Partidas (Salão Rubi 1-2-3 / Lua Prateada UC e abaixo): Regras de Torneio de Criadores Bo3 ativas!|💎 Room Match Hall (Ruby Hall 1-2-3 / Silver Moon UC & Under): Creators' Tournament Bo3 rules active!|💎 Sala de Partidas (Sala Rubí 1-2-3 / Luna Plateada UC y menor): ¡Reglas de Torneo de Creadores Bo3 activas!
+189|=|ℹ️ Multiplayer match active! Use the Surrender button (🏳️) to leave.|ℹ️ ¡Partida multijugador activa! Usa el botón Rendirse (🏳️) para salir.
+190|=|Your Pokémon|Tu Pokémon
+191|=|· 🦘 Jumps Figures|· 🦘 Salta figuras
+192|=|· 🚫 Doesn't Jump|· 🚫 No salta
+193|=|P.C. [{0}] ({1}{2}) — Recovering.|P.C. [{0}] ({1}{2}) — Recuperándose.
+194|=|Inspecting {0} ({1}{2}).|Inspeccionando {0} ({1}{2}).
+195|⚠️ Selecione um Pokémon seu em campo ou no banco para o Bloqueio de Gol!|⚠️ Select one of your Pokémon on the field or bench for the Goal Block!|⚠️ ¡Elige uno de tus Pokémon del campo o del banquillo para el Bloqueo de Meta!
+196|⚠️ {0} tem Espera {1} e não pode defender o Gol!|⚠️ {0} has Wait {1} and cannot defend the Goal!|⚠️ ¡{0} tiene Espera {1} y no puede defender la Meta!
+197|=|Inspecting {0} (Rival{1}).|Inspeccionando {0} (Rival{1}).
+198|{0} tem Espera {1}.|=|{0} tiene Espera {1}.
+199|=|{0} (MP {1}{2}) selected.|{0} (PM {1}{2}) seleccionado.
+200|=|Inspecting {0} ({1}).|Inspeccionando {0} ({1}).
+201|=|Inspecting {0} (Rival).|Inspeccionando {0} (Rival).
+202|=|🎯 Adjacent Target: {0}! Tap it again to ATTACK or tap somewhere else.|🎯 Objetivo adyacente: ¡{0}! Tócalo otra vez para ATACAR o toca en otro lugar.
+203|Apoio! {0} acordou {1}!|=|¡Apoyo! ¡{0} despertó a {1}!
+204|=|⏳ Opponent placed a piece and is deciding the attack...|⏳ El rival colocó una pieza y está decidiendo el ataque...
+205|IA Carlo moveu {0} (avaliação do Banco de Duelos).|=|La IA Carlo movió {0} (evaluación de datos de duelo).
+206|=|=|PM
+207|=|Standard Pokémon Duel figure.|Figura estándar de Pokémon Duel.
+208|=|Passive:|Pasiva:
+210|Muralha de Gelo|=|Muro de Hielo
+211|Este Pokémon não pode ficar queimado nem congelado.|=|Este Pokémon no puede quemarse ni congelarse.
+212|Este Pokémon não pode ser adormecido.|This Pokémon cannot be put to sleep.|Este Pokémon no puede dormirse.
+214|Corpo de Balão|=|Cuerpo Globo
+215|Se um Pokémon terminar um movimento MP ao lado deste Pokémon, este Pokémon se move 1 casa para longe.|=|Si un Pokémon termina un movimiento PM junto a este Pokémon, este Pokémon se aleja 1 casilla.
+216|Olhar Hipnótico|=|Mirada Hipnótica
+217|Qualquer Pokémon que batalhe com este Pokémon fica confuso.|=|Cualquier Pokémon que combata con este Pokémon queda confuso.
+218|Asas Vendaval|=|Alas Vendaval
+219|Na primeira batalha depois de entrar em campo, todos os ataques Brancos deste Pokémon viram ataques Dourados.|=|En su primer combate tras entrar al campo, todos los ataques Blancos de este Pokémon se vuelven Dorados.
+220|No início do seu turno, se outro Metang ou Metagross seu estiver a até 2 passos, você pode mover este Pokémon para um ponto a 2 passos em vez de um movimento MP. Se fizer isso, seu turno termina.|=|Al inicio de tu turno, si otro Metang o Metagross tuyo está a 2 pasos o menos, puedes mover este Pokémon a un punto a 2 pasos en lugar de un movimiento PM. Si lo haces, tu turno termina.
+221|Truque do Balão|=|Truco del Globo
+222|Todos os ataques Roxos dos oponentes de batalha deste Pokémon viram Falhas.|=|Todos los ataques Morados de los rivales de combate de este Pokémon se vuelven Fallos.
+223|Alma Explosiva|=|Alma Explosiva
+224|Este Pokémon pode fazer movimento MP através de outros Pokémon em campo. Quando este Pokémon for nocauteado, você pode nocautear um Drifloon seu em campo e todos os Pokémon vizinhos a ele.|=|Este Pokémon puede hacer movimientos PM a través de otros Pokémon en el campo. Cuando este Pokémon sea derrotado, puedes derrotar a uno de tus Drifloon en el campo y a todos los Pokémon adyacentes a él.
+225|Construção de Túnel A|=|Construcción de Túnel A
+226|Quando este Pokémon sai do banco, pode ir para um ponto a 1 passo de um Ponto de Entrada. Se fizer isso, seu turno termina.|=|Cuando este Pokémon sale del banquillo, puede ir a un punto a 1 paso de un Punto de entrada. Si lo hace, tu turno termina.
+227|Superbloqueador|=|Superbloqueador
+228|Quando este Pokémon vai do banco para o campo, ou quando aparece como Evolução, os Pokémon adversários com marcador Rachado perdem as Habilidades enquanto estiverem em campo. Seus Pokémon Psíquicos e de Aço causam +10 de dano cada.|=|Cuando este Pokémon pasa del banquillo al campo, o aparece como Evolución, los Pokémon rivales con marcador Agrietado pierden sus Habilidades mientras estén en el campo. Tus Pokémon Psíquicos y de Acero hacen +10 de daño cada uno.
+229|Laço Familiar|=|Lazo Familiar
+230|Antes da batalha, os efeitos no oponente que o impedem de ser nocauteado são anulados, e ele perde os marcadores com esse efeito. Este Pokémon não pode ser nocauteado se não tiver condição especial e o oponente for um Pokémon Fantasma. Seus Pokémon Normais causam +20 de dano.|=|Antes del combate, se anulan los efectos del rival que le impiden ser derrotado, y pierde los marcadores con ese efecto. Este Pokémon no puede ser derrotado si no tiene un estado especial y su rival es un Pokémon Fantasma. Tus Pokémon Normales hacen +20 de daño.
+231|Vento Furioso|=|Viento Furioso
+232|Este Pokémon pode fazer movimento MP passando por outros Pokémon em campo. Enquanto ele estiver em campo, os ataques Dourados de Pokémon adversários queimados viram Falhas. Pokémon adversários vizinhos a ele não podem mudar de forma por Habilidade.|=|Este Pokémon puede hacer movimientos PM pasando por otros Pokémon del campo. Mientras esté en el campo, los ataques Dorados de los Pokémon rivales quemados se vuelven Fallos. Los Pokémon rivales adyacentes no pueden cambiar de forma con una Habilidad.
+233|Carga Elétrica|=|Carga Eléctrica
+234|Se este Pokémon estiver paralisado, ganha +1 MP e causa +30 de dano.|=|Si este Pokémon está paralizado, gana +1 PM y hace +30 de daño.
+235|Escudo de Gelo|=|Escudo de Hielo
+236|Pokémon Restaurado (se evoluído). No início do seu turno, em vez de um movimento MP, você pode congelar um Pokémon Restaurado seu excluído do duelo e colocá-lo num ponto a 1–2 passos deste Pokémon. Seu turno termina. Quando este Pokémon é excluído do duelo, volta à Evolução anterior, se possível.|=|Pokémon Restaurado (si evolucionó). Al inicio de tu turno, en lugar de un movimiento PM, puedes congelar a uno de tus Pokémon Restaurados excluidos del duelo y colocarlo en un punto a 1–2 pasos de este Pokémon. Tu turno termina. Cuando este Pokémon es excluido del duelo, vuelve a su Evolución anterior si es posible.
+237|Pokémon adversários de Planta e Fada a até 2 passos deste Pokémon ficam com MP −1.|=|Los Pokémon rivales de tipo Planta y Hada a 2 pasos o menos de este Pokémon tienen PM −1.
+238|Pânico|=|Pánico
+239|Paralisia|=|Parálisis
+240|Envenenamento grave|=|Envenenamiento grave
+241|Brilhante|=|Variocolor
+242|{0} Brilhante|=|{0} Variocolor
+243|=|{0}: Miss became {1}|{0}: el Fallo se volvió {1}
+244|=|{0} cancelled the defense|{0} anuló la defensa
+245|=|{0}: {1} spun again and got {2}|{0}: {1} giró de nuevo y salió {2}
+246|=|🔄 {0}: {1}'s attack backfired on {2}!|🔄 {0}: ¡el ataque de {1} se volvió contra {2}!
+247|=|{0} 🔄 {1}: {2}'s attack backfired on {3}!|{0} 🔄 {1}: ¡el ataque de {2} se volvió contra {3}!
+248|=|{0} cannot be knocked out.|{0} no puede ser derrotado.
+249|=|Not knocked out by Gold.|No es derrotado por Dorado.
+250|=|Cannot be moved.|No puede ser movido.
+251|=|Goes to the bench instead of being knocked out.|Va al banquillo en vez de ser derrotado.
+252|=|{0} changes form instead of going to the P.C.|{0} cambia de forma en vez de ir al P.C.
+253|=|Immune to that condition.|Inmune a ese estado.
+254|=|Doesn't get Wait.|No recibe Espera.
+255|=|✨ {0}: changed form through its Ability!|✨ {0}: ¡cambió de forma por su Habilidad!
+256|=|🔁 {0} forced a respin!|🔁 ¡{0} forzó un nuevo giro!
+257|=|{0} 🔁 {1} forced a respin!|{0} 🔁 ¡{1} forzó un nuevo giro!
+258|🎩 {0}: Truque de Mágica recuperou a Placa {1}!|🎩 {0}: Magic Trick recovered the Plate {1}!|🎩 {0}: ¡Truco de Magia recuperó la Placa {1}!
+259|=|{0} was not knocked out (Ability).|{0} no fue derrotado (Habilidad).
+260|{0}: Machado de Dois Gumes! Quem cai é {1}.|{0}: Double-Edged Axe! {1} is the one who falls.|{0}: ¡Hacha de Doble Filo! Quien cae es {1}.
+261|=|{0} used the marker and was not knocked out.|{0} usó el marcador y no fue derrotado.
+262|=|{0} evolves instead of going to the P.C.!|¡{0} evoluciona en vez de ir al P.C.!
+263|{0}: Deslize Espacial!|{0}: Space Slide!|{0}: ¡Deslizamiento Espacial!
+264|=|{0} is excluded from the duel.|{0} queda excluido del duelo.
+265|🔥 {0}: Luz Serena trouxe o P.C. de volta ao banco!|🔥 {0}: Serene Light brought the P.C. back to the bench!|🔥 {0}: ¡Luz Serena devolvió el P.C. al banquillo!
+266|♻️ {0}: Regenerador voltou ao banco!|♻️ {0}: Regenerator returned to the bench!|♻️ {0}: ¡Regeneración volvió al banquillo!
+267|Barreira de Lodo anulou a condição.|Slime Barrier cancelled the condition.|Barrera de Lodo anuló el estado.
+268|=|🔥 {0}: {1} became {2} when passed through!|🔥 {0}: ¡{1} quedó {2} al ser atravesado!
+269|=|🌙 {0}: {1} fainted when passed through!|🌙 {0}: ¡{1} se debilitó al ser atravesado!
+270|=|⚡ {0} was paralyzed passing by {1}!|⚡ ¡{0} quedó paralizado al pasar junto a {1}!
+271|=|🚫 {0} cannot attack (Ability).|🚫 {0} no puede atacar (Habilidad).
+272|💨 {0} fugiu para o banco (Fuga)!|💨 {0} fled to the bench (Run Away)!|💨 ¡{0} huyó al banquillo (Fuga)!
+273|=|🌀 {0} escaped under {1} (no battle)!|🌀 ¡{0} escapó por debajo de {1} (sin combate)!
+274|🔁 {0} trocou de lugar com {1} (Saída de Emergência)!|🔁 {0} swapped places with {1} (Emergency Exit)!|🔁 ¡{0} cambió de lugar con {1} (Retirada)!
+275|🔇 {0} impede o uso de Placas!|🔇 {0} prevents the use of Plates!|🔇 ¡{0} impide usar Placas!
+276|=|🛡️ {0} cannot be surrounded (Ability)!|🛡️ ¡{0} no puede ser rodeado (Habilidad)!
+277|😈 {0}: Pesadelos nocauteou {1}!|😈 {0}: Bad Dreams knocked out {1}!|😈 {0}: ¡Mal Sueño derrotó a {1}!
+278|🐍 {0}: Troca de Pele removeu as condições!|🐍 {0}: Shed Skin removed the conditions!|🐍 {0}: ¡Mudar removió los estados!
+279|Construção de Túnel|=|Construcción de Túnel
+280|=|Cancel|Cancelar
+281|=|Ability|Habilidad
+282|=|tap a highlighted space/piece.|toca una casilla/pieza resaltada.
+283|=|🔁 {0}: {1} — swapped places with {2}.|🔁 {0}: {1} — cambió de lugar con {2}.
+284|=|Now it must attack.|Ahora tiene que atacar.
+285|🔥 {0}: Fogueira queimou {1}!|🔥 {0}: Bonfire burned {1}!|🔥 {0}: ¡Hoguera quemó a {1}!
+286|=|🛡️ {0}: {1} — went to your Goal.|🛡️ {0}: {1} — fue a tu Meta.
+287|=|🏠 {0}: {1} — returned to the bench and can be used right away.|🏠 {0}: {1} — volvió al banquillo y ya puede usarse.
+288|=|🐞 {0}: {1} pulled {2} closer.|🐞 {0}: {1} acercó a {2}.
+289|=|🎯 {0}: {1} spun {2} and got Lock-On (Wait).|🎯 {0}: {1} sacó {2} y recibió Fijar Blanco (Espera).
+290|=|👅 {0}: {1} spun {2} — {3} worked!|👅 {0}: {1} sacó {2} — ¡{3} funcionó!
+291|=|{0}: {1} spun {2} ({3} had no effect).|{0}: {1} sacó {2} ({3} sin efecto).
+292|Chegou ao Gol! VITÓRIA!|=|¡Llegó a la Meta! ¡VICTORIA!
+293|O oponente chegou ao seu Gol!|=|¡El rival llegó a tu Meta!
+294|=|⚡ The opponent used an Ability.|⚡ El rival usó una Habilidad.
+295|=|Ability cancelled.|Habilidad cancelada.
+296|=|can attack 2 steps away (Range 2).|puede atacar a 2 pasos (Alcance 2).
+297|🔨 {0} recebeu um marcador Rachado!|🔨 {0} got a Cracked marker!|🔨 ¡{0} recibió un marcador Agrietado!
+298|=|🛡️ Cannot be excluded.|🛡️ No puede ser excluido.
+299|=|{0} 🛡️ Cannot be excluded.|{0} 🛡️ No puede ser excluido.
+300|↩️ {0}: Recuo Surpresa — recuou 2 passos sem batalhar!|↩️ {0}: Surprise Back — retreated 2 steps without battling!|↩️ {0}: Retroceso Sorpresa — ¡retrocedió 2 pasos sin combatir!
+301|📢 Ruído Faísca: {0} tirou {1} e ganhou Espera.|📢 Spark Noise: {0} spun {1} and got Wait.|📢 Ruido Chispa: {0} sacó {1} y recibió Espera.
+302|📦 {0}: Entrega devolveu a Placa Mega!|📦 {0}: Deliver returned the Mega Plate!|📦 {0}: ¡Entrega devolvió la Placa Mega!
+303|🦷 {0}: Instinto de Mordida — precisa atacar!|🦷 {0}: Bite Instinct — must attack!|🦷 {0}: Instinto de Mordisco — ¡tiene que atacar!
+304|🥚 {0}: Grande Ovoexplosão! {1} foi nocauteado.|🥚 {0}: Big Eggsplosion! {1} was knocked out.|🥚 {0}: ¡Gran Huevoexplosión! {1} fue derrotado.
+305|🍯 {0}: Gula! Voltou ao banco.|🍯 {0}: Gluttony! Returned to the bench.|🍯 {0}: ¡Gula! Volvió al banquillo.
+306|💥 {0}: Troca Explosiva explodiu {1}!|💥 {0}: Aftermath Switch blew up {1}!|💥 {0}: ¡Cambio Explosivo hizo estallar a {1}!
+307|🦊 {0}: Ilusão! Trocou de lugar com {1} antes da batalha.|🦊 {0}: Illusion! Swapped places with {1} before the battle.|🦊 {0}: ¡Ilusión! Cambió de lugar con {1} antes del combate.
+308|💧 {0}: Escorregadio! Escapou do cerco trocando com {1}.|💧 {0}: Slippery! Escaped the surround by swapping with {1}.|💧 {0}: ¡Escurridizo! Escapó del cerco cambiándose con {1}.
+309|📣 Venha Cá: {0} entrou no Ponto de Entrada.|📣 Come Here: {0} entered the Entry Point.|📣 Ven Aquí: {0} entró en el Punto de entrada.
+310|⚡ {0}: Troca Volt — trocou com {1}; rivais nos seus Pontos de Entrada ficaram paralisados.|⚡ {0}: Volt Swap — swapped with {1}; rivals on your Entry Points were paralyzed.|⚡ {0}: Voltiocambio — cambió con {1}; los rivales en tus Puntos de entrada quedaron paralizados.
+311|❄️ {0}: Correria de Gelo!|❄️ {0}: Ice Scramble!|❄️ {0}: ¡Carrera de Hielo!
+312|🥷 {0}: Ataque Surpresa!|🥷 {0}: Surprise Strike!|🥷 {0}: ¡Golpe Sorpresa!
+313|🟢 {0}: Toque de Lodo — {1} recebeu o marcador Lodo (Barreira de Lodo).|🟢 {0}: Slime Touch — {1} got the Slime marker (Slime Barrier).|🟢 {0}: Toque de Lodo — {1} recibió el marcador Lodo (Barrera de Lodo).
+314|=|and cured|y curó
+315|=|and cured {0}|y curó {0}
+316|💚 {0} fez Apoio em {1}{2}!|💚 {0} tagged {1}{2}!|💚 ¡{0} hizo Apoyo a {1}{2}!
+317|Toque no aliado vizinho para fazer Apoio (cura as condições).|Tap the neighbouring ally to Tag (cures conditions).|Toca al aliado adyacente para hacer Apoyo (cura los estados).
+318|Cancelar Apoio|Cancel Tag|Cancelar Apoyo
+319|💚 Apoio|💚 Tag|💚 Apoyo
+320|Apoio cancelado.|Tag cancelled.|Apoyo cancelado.
+321|Poder Chama|=|Poder Llama
+322|Poder Splash|=|Poder Chapoteo
+323|Poder Prado|=|Poder Pradera
+324|Poder Zap|=|Poder Chispa
+325|Poder Mente|=|Poder Mente
+326|Poder Tóxico|=|Poder Tóxico
+327|Poder Draco|=|Poder Draco
+328|Poder Argila|=|Poder Arcilla
+329|Poder Assombrado|=|Poder Espectral
