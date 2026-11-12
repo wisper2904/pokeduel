@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v700` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v702` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -94,7 +94,7 @@
 
 **Ordem de carga dos scripts (HTML, linhas ~1824–1836). Ela importa:**
 ```
-peerjs → i18n → sprites → figures → official_disks → bots → audio → board → battle → p2p_matchmaker → ui → juice → ai → app
+peerjs → i18n → sprites → figures → official_disks → bots → audio → board → battle → p2p_matchmaker → ui → juice → ai → abilities → app
 ```
 Tudo é **global** (sem ES modules, sem bundler). Cada arquivo enxerga as funções dos anteriores.
 
@@ -141,19 +141,32 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v700). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v702). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
 - [ ] **Dois deploys por push**: rodam o workflow `Deploy PokeDuel to GitHub Pages` (`.github/workflows/deploy-pages.yml`) e o automático `pages build and deployment`. Eles competem e às vezes um falha (76f3f3a: falha no passo Deploy; e8fc86d: startup_failure), o que gera e-mail de erro. Resolver em Settings → Pages → Source: escolher **GitHub Actions** (aí o automático para) — ou, se ficar "Deploy from a branch", apagar o workflow.
 - [ ] 42 figuras do `FIGURES_DB` sem arte nem roleta oficial porque nunca existiram no Pokémon Duel (Kabutops, Starmie, Staryu, Lopunny, Ditto, Jirachi, Togekiss, Porygon…): mantêm sprite e roleta antigos. Lapras, Popplio, Poliwrath e Tentacruel têm arte oficial, mas a roleta da Bulbapedia está incompleta (não soma 96) → roleta antiga mantida. Pré-existente: 6 roletas que não somam 96 (Lapras, Kabutops, Mega Starmie, Mega Lopunny, Palkia/Dialga Origin).
 - [ ] Efeito roxo `none` (40 fatias): efeitos especiais do jogo original ainda não implementados (marcadores, MP −2, mover a si mesmo etc.) — vencem o duelo sem nocautear. Texto original em `effectText`.
-- [ ] 42 figuras oficiais da Library ficaram de fora: 27 sem imagem correspondente na categoria e 15 com roleta incompleta na Bulbapedia. Figuras novas não têm habilidade implementada (só `officialAbilityText`) nem cadeia de evolução/Mega ligada.
-- [ ] Não há testes automatizados de regra (`evaluateCombat` é pura e fácil de testar com Node).
+- [ ] 42 figuras oficiais da Library ficaram de fora: 27 sem imagem correspondente na categoria e 15 com roleta incompleta na Bulbapedia.
+- [ ] Habilidades oficiais: das 448 com texto, só ~110 têm alguma mecânica simulada (`fx` em `js/engine/abilities.js`); o resto é texto (efeitos com marcadores, condições, Ultra Space, troca de posição etc.). Fatias Brancas/Douradas com efeito: 170 de 476 simuladas (`OFFICIAL_DUEL_SLICE_FX`). 40 fatias roxas com efeito `none`.
+- [ ] Travessia seletiva ("atravessa suas peças e as do tipo X") não simulada; só travessia total.
+- [ ] Não há testes automatizados de regra no repositório (os testes de v701 rodaram fora, via Playwright/Node em /home/claude/ux) (`evaluateCombat` é pura e fácil de testar com Node).
 
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Habilidades, efeitos de fatia e evoluções (v701–v702)
+- **O que:** novo `js/engine/abilities.js` (depois do `ai.js`, nos dois HTMLs e em `CORE_ASSETS`):
+  - `OFFICIAL_DUEL_ABILITIES` (448 textos oficiais, tipos preservados). Figuras sem descrição própria mostram o texto oficial em `FIGURE_ABILITIES_DB`. `fx` aplicados: `pass` (52), `dmg` (44: self / allies / alliesAdj / adjAll, com tipo e turno), `immune` (14), `oppBlueMiss` (7), `immovable` (5), `noWait` (4), `halveIn` (3), `noKoGold` (2), `koToBench`, `nullOpp`, `mp`, `lessIn`.
+  - Camadas novas mais externas: `getActiveWheel` (bônus de dano de habilidade, aparece no disco e a IA enxerga) e `evaluateCombat` (Azul→Miss, metade do dano, imunidades, não-move, etc.). Proteção contra aplicar 2× no Double Chance (`_abTweaked`/`_sliceDone`).
+  - `OFFICIAL_DUEL_SLICE_FX` (170 fatias Brancas/Douradas): `onLoseStatus` (90, ex.: Flamethrower queima quem nocauteou), `spinAgain` (19, Swords/Dragon Dance: re-gira com ×2 ou +N, usa `nextDeterministicRandom` só na batalha real), `reverseAtLeast` (14, Grass Knot/Counter), `vsType` (12), `selfWait` (10), `selfStatus` (9), `benchOpp` (7), `destinyBond` (5), `hex` (4). Efeitos pós-batalha via `state.__sliceFxPending` + `abilityAfterBattle()` (gancho novo no `battle.js`).
+  - `OFFICIAL_DUEL_EVO_FAMILIES`: 154 cadeias novas geradas com `@pkmn/dex` (só nomes existentes, inclui Alolan e Mega). Famílias são **limpas no carregamento**: nomes inexistentes saem (corrige bug antigo: Pidgeot→"Mega Pidgeot", Bellsprout→"Weepinbell" etc. evoluíam só no nome, com sprite/roleta antigos).
+  - Roletas antigas que somavam 100 (Lapras, Kabutops, Mega Starmie, Mega Lopunny) ajustadas para 96 na maior fatia.
+  - `battle.js`: chama `abilityAfterBattle()` e `abilityAfterEffect()` (remove Espera de quem tem `noWait`).
+- **CACHE_NAME:** v700 → v702
+- **Testes (fora do repo):** auditoria Node das 600 figuras (sobram só 34 fatias Brancas de dano 0 que são oficiais: Splash, Swords Dance etc.); 600 sprites carregados e conferidos (transparência e proporção) sem falha; 7.200 batalhas aleatórias (getActiveWheel + spinWheelForUnit + evaluateCombat) sem exceção nem resultado inválido; 245 evoluções testadas, 0 falhas; Assist (Audino) dá +30 ao vizinho; 8 partidas bot × bot com decks só de figuras novas, 0 erro de console (1 terminou no limite de 300 turnos).
 
 ### 2026-11-12 · Claude · Coleções novas: +328 figuras oficiais (v700)
 - **O que:** `js/data/official_disks.js` ganhou `OFFICIAL_DUEL_NEW_FIGURES` e `OFFICIAL_DUEL_NEW_SPRITES`: as figuras da Library do Pokémon Duel que não existiam no jogo entram no **final** do `FIGURES_DB` (índices 272–599). Cada uma: `id`/`spriteKey` = `duel<Nº oficial>`, nome oficial (repetido → sufixo "(NºN)"), raridade/tipo/MP/roleta oficiais, `canPassThrough` para Voador/Fantasma, cor pelo tipo (`WEEKLY_BUFF_TYPES`). Distribuição: 39 C, 114 UC, 67 R, 48 EX, 60 UX. Sprites com carregamento sob demanda (getter em `loadedFigImages`); o SW guarda em cache no primeiro uso.

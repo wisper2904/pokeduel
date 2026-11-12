@@ -1215,6 +1215,8 @@ function triggerCombat(atkUnit, defUnit, broadcast, forcedSpins) {
           evolveUnitInMatch(winUnit);
         }
       }
+      if (typeof abilityAfterBattle === "function") abilityAfterBattle();
+      if (typeof abilityAfterEffect === "function") { abilityAfterEffect(atkUnit); abilityAfterEffect(defUnit); }
       if (defWasFrozen && defUnit.location === "board") {
         defUnit.condition = PokemonCondition.Normal;
       }
