@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v714` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v715` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -156,6 +156,21 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Todas as 152 Plates do original + cartas no formato do jogo + sprites de moedas/materiais/raridade/MP (v715)
+- **Novo `js/engine/plates_all.js`** (depois de `slice_effects.js`; nos 2 HTMLs e no `sw.js`). Lista oficial do Serebii (152 plates): marca as 41 que já existiam com `off` (ID oficial), `color`, `ocost` e raridade oficial, e adiciona as **112 que faltavam** (`window.PDRPlatesAll.D`).
+  - Simples: Bright Powder, Clear Wait, Swap Spot (2 toques), No Guard, Quick Care, Priority Recovery, Ballast, 6 curas (Awakening, Paralyz/Confuse/Ice/Burn Heal, Antidote), Invisibility Cape, Power Battle, Switcheroo, Force Remove, Counter Attack.
+  - Genesect: 4 Drive EX (gira de novo + exclui tipos), Golden Module. Energy: Cosmo (troca Deoxys antes da batalha em `triggerCombat`), Land's (Land's Wrath gira pelos rivais), Mud (+1 Espera).
+  - Assinaturas: Overdrive, Long Barrel (`slice_effects.js` Rock Wrecker usa `PDRPlatesAll.rockRange`), Fertilizer, Sticky Grass, Poison Blade, Eon Flute, Metal Coat (evolui Onix/Scyther, anula Habilidades do rival na batalha), DNA Splicers, 5 Rotom (forma + tipo global 9 turnos via `abilityUnitTypes`), Gracidea, Meteoric Teachings, Blue/Red Orb, Soul Dew, Necroizer, Ultra Burst (4 turnos), Restorer, Reveal Glass (sem forma Therian no DB: +20 de dano).
+  - 32 Mega Stones (sem forma no DB: Kangaskhan/Metagross/Steelix → Poder Mega 7 turnos). 16 itens de tipo (+20 no campo). 16 Spheres (`u._paSph`, Frost Sphere anula a ≤3 passos, Sphere Trick copia).
+  - Estado: `state.__pa {turn, duel, rotom, eon, drivex, battle}` + marcas `_pa*` na peça. P2P: `P2P_PLATE3`. Giros extras com RNG semeado (determinístico).
+  - **Limite de custo 6 ◆** (regra do original): deck salvo acima do limite é cortado ao carregar (padrão vira Hurdle+Double+X Attack+Goal Block); modal bloqueia adicionar acima do custo.
+  - Bot: ganha 2 plates que combinam com o deck (Mega Stone da espécie, item do tipo mais comum, Clear Wait/curas) e usa por pontuação (`triggerPlayerAIMove`).
+- **Cartas no formato do original** (`window.PDRPlateCard`): carta preta recortada, ícone no canto, raridade ao lado, nome na cor da plate, barra de custo em 6 segmentos, ✓ no deck. Tela "Editar Plates" (`deck_screen.js`): 6 slots + "X/6 Custo", catálogo 5 colunas, filtro de custo 1–6/TODAS. Na partida (`#plates-tray.pk-tray`): fileira de cartas embaixo, carta escolhida aberta grande com a descrição, Usar / ✕.
+- **Novo `js/ui/icons.js`** (depois de `shop_screen.js`): troca 🪙 🔻/💎 🟦 🔷/🧱 🟣 🟩 e "MP n" por ícones; raridade (.ds-rar e #fcc/#fdet/#pcard/#pldet-rarity) com os ícones oficiais.
+- Assets: `assets/plates/plate{purple,gold,green,pink,red,blue}.png` + `c/uc/r/ex/ux.png` e `assets/ui/icons/` (coin, gem, raremetal, cube, ingot, tickets do Serebii; carmonite/material/mp em SVG próprio — **pendente trocar pelos oficiais do Bulbagarden**, que bloqueia download automático (Cloudflare 403)).
+- i18n: 248 linhas novas em `tools/i18n/tr/900_manual.txt` (nomes PT/ES, descrições EN/ES, mensagens).
+- Testes: efeitos (`/tmp/pa.py`, `/tmp/pb.py`), wheels 7.548 / 0 problemas, evo, 3 partidas bot × bot, sfx713/ext712/abt sem erro; telas PT/EN/ES conferidas.
 
 ### 2026-11-12 · Claude · Jogo inteiro em PT / EN / ES — tradutor central + dicionário de 3.731 entradas (v714)
 - **Novo `js/data/i18n_runtime.js`** (depois de `i18n.js` e do novo `js/data/i18n_dict.js`, nos 2 HTMLs e no `sw.js`).

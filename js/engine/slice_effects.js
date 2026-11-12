@@ -221,7 +221,8 @@
       }
       case "Cyclone Kick": sendPC(l); break;
       case "Rock Wrecker": {
-        const x = state.units.filter((y) => onB(y) && y.owner !== w.owner && dist(w.nodeId, y.nodeId) <= 2).sort((a, b) => (typeof abBest === "function" ? abBest(b) - abBest(a) : 0) || dist(a.nodeId, goalOf(a.owner)) - dist(b.nodeId, goalOf(b.owner)))[0];
+        const rr = (window.PDRPlatesAll && PDRPlatesAll.rockRange) ? PDRPlatesAll.rockRange(w) : 2;
+        const x = state.units.filter((y) => onB(y) && y.owner !== w.owner && dist(w.nodeId, y.nodeId) <= rr).sort((a, b) => (typeof abBest === "function" ? abBest(b) - abBest(a) : 0) || dist(a.nodeId, goalOf(a.owner)) - dist(b.nodeId, goalOf(b.owner)))[0];
         if (x) { log(tt("sfx.rock_wrecker", `🪨 ${W}: Rock Wrecker nocauteou ${x.name}!`, { name: W, opp: x.name })); sendPC(x); }
         break;
       }

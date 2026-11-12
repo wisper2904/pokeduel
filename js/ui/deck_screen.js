@@ -55,6 +55,23 @@
   .dk-pcard .nm{font-size:10px;font-weight:900;color:#fff}
   .dk-pcard .sub{font-size:8.5px;color:#c4b5fd;line-height:1.25;margin-top:2px;max-height:33px;overflow:hidden}
   .dk-pcard .cnt{position:absolute;top:4px;right:5px;font-size:9px;font-weight:900;color:#4ade80}
+  .pk-deck{background:#18181b;border:2px solid #3f3f46;border-radius:10px;padding:6px 6px 8px;margin-bottom:10px}
+  .pk-head{display:flex;align-items:baseline;gap:6px;color:#a1a1aa;font-weight:900;font-size:13px;margin:0 2px 6px}
+  .pk-head b{color:#fff;font-size:17px}.pk-head .pk-cost{font-size:10px}
+  .pk-hb{margin-left:auto;border:1.5px solid #71717a;background:linear-gradient(#3f3f46,#18181b);color:#e4e4e7;border-radius:6px;font-size:10px;font-weight:900;padding:3px 8px;cursor:pointer}
+  .pk-row,.pk-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+  .pk-grid{grid-template-columns:repeat(5,1fr);gap:7px 6px}
+  .pk-cf{display:flex;align-items:center;justify-content:center;gap:5px;margin:12px 0 4px;color:#fff;font-weight:900;font-size:12px}
+  .pk-cf>span{margin-right:4px}
+  .pk-cb{width:30px;height:30px;border-radius:50%;border:2px solid #0e7490;background:#083344;color:#67e8f9;font-weight:900;font-size:13px;cursor:pointer}
+  .pk-cb.on{background:radial-gradient(circle at 40% 35%,#67e8f9,#0891b2);color:#fff;border-color:#a5f3fc}
+  .pk-cb:disabled{opacity:.35;cursor:default}.pk-cb.all{width:auto;border-radius:99px;padding:0 9px;font-size:10px}
+  .dk-pfil{display:flex;gap:5px;margin:0 0 7px;flex-wrap:wrap}
+  .dk-pf{border:1.5px solid #4c1d95;background:#0b1220;color:#e9d5ff;border-radius:9px;padding:3px 8px;font-weight:900;font-size:10px;cursor:pointer;min-height:30px}
+  .dk-pf img{width:24px;height:24px;object-fit:contain;display:block}
+  .dk-pf.on{border-color:#facc15;box-shadow:0 0 8px rgba(250,204,21,.4)}
+  .ds-rimg{width:22px;height:22px;object-fit:contain}
+  .dk-pcard .pc{position:absolute;bottom:3px;right:5px;font-size:8px;font-weight:900;color:#fde047}
   .dk-pcard .rb{position:absolute;top:3px;left:3px;transform:scale(.78);transform-origin:left top}
   .dk-cmp{display:grid;grid-template-columns:1fr 26px 1fr;gap:4px;align-items:center;background:#020617;border:1px solid #1e293b;border-radius:11px;padding:7px}
   .dk-cmp .side{text-align:center}
@@ -115,6 +132,8 @@
     try { if (typeof getSavedEquippedPlateIds === "function") return getSavedEquippedPlateIds(); } catch (e) {}
     return (state.plates || []).filter((p) => !p.disabledInDeck).map((p) => p.id);
   }
+  const PF = [["all", "Todas"], ["purple"], ["gold"], ["green"], ["pink"], ["red"], ["blue"]];
+  const plateRar = (r) => { const src = window.PDR_PLATE_RARITY_ICON && PDR_PLATE_RARITY_ICON(r); return src ? `<img class="ds-rimg" src="${src}" alt="${esc(r)}">` : rarHtml(r); };
   function plateById(id) { return (typeof BASE_PLATE_CATALOG !== "undefined" && BASE_PLATE_CATALOG.find((p) => p.id === id)) || { id, name: id, rarity: "C", sub: "" }; }
 
   function render() {
@@ -364,29 +383,40 @@
   });
 
   // ------------------------------------------------------------ Plates
+  // Cartas no formato do Edit Plates original: carta preta, ícone no canto, raridade ao lado, nome embaixo na cor
+  // da plate, faixa colorida no rodapé, ✓ quando está no deck. Limite de custo 6 (◆) e filtro por custo 1–6.
+  const PCOL = { purple: "#e879f9", gold: "#facc15", green: "#4ade80", pink: "#f9a8d4", red: "#f87171", blue: "#22d3ee" };
+  function plateCard(p, opts) {
+    if (window.PDRPlateCard) return window.PDRPlateCard(p, opts);
+    const col = PCOL[p.color] || "#e2e8f0", g = p.glyph;
+    const num = g && /^\+?\d+$/.test(g);
+    const icon = g ? `<span class="pk-ic ${num ? "num" : ""}" style="--pc:${col}">${esc(g.replace(/^\+/, ""))}</span>` : `<img class="pk-img" src="${plateSprite(p.id)}" alt="">`;
+    return `<div class="pk-card ${opts.on ? "on" : ""} ${opts.dim ? "dim" : ""}" data-p="${esc(p.id)}" style="--pc:${col}"><div class="pk-in">${icon}
+      <span class="pk-r">${esc(p.rarity || "C")}</span><div class="pk-nm">${esc(tt("plate." + p.id + ".name", p.name))}</div>
+      <i class="pk-bar"></i>${opts.on ? `<span class="pk-ck">✓</span>` : ""}${opts.cnt > 1 ? `<span class="pk-n">x${opts.cnt}</span>` : ""}</div></div>`;
+  }
+  const costOf = (p) => (p && p.ocost != null ? p.ocost : 1);
   function renderPlates(root) {
     const eq = equippedPlates();
     const cat = (typeof BASE_PLATE_CATALOG !== "undefined") ? BASE_PLATE_CATALOG : [];
+    const used = eq.reduce((a, id) => a + costOf(plateById(id)), 0);
+    const lim = typeof MAX_DECK_PLATE_COST !== "undefined" ? MAX_DECK_PLATE_COST : 6;
+    V.pc = V.pc || "all";
+    const costs = new Set(cat.map(costOf));
+    const shown = cat.filter((p) => V.pc === "all" || costOf(p) === V.pc);
     root.innerHTML = `
-      <div class="ds-title"><button class="ds-back" id="dk-back">‹ Deck</button><span>Plates</span></div>
-      <div class="ds-sec" style="margin-top:0">${tt("dk.in_deck", "No deck")} <span style="color:#c084fc">${eq.length}/${typeof MAX_DECK_PLATES !== "undefined" ? MAX_DECK_PLATES : 6}</span></div>
-      <div class="dk-plates">${Array.from({ length: 6 }, (_, k) => {
-        const id = eq[k];
-        if (!id) return `<div class="dk-plate empty">＋</div>`;
-        const p = plateById(id);
-        return `<div class="dk-plate" data-p="${esc(id)}"><img src="${plateSprite(id)}" alt=""><div class="nm">${esc(tt("plate." + id + ".name", p.name))}</div></div>`;
-      }).join("")}</div>
-      <div class="ds-sec">${tt("dk.catalog", "Catálogo")}</div>
-      <div class="dk-pcat">${cat.map((p) => {
-        const n = eq.filter((x) => x === p.id).length;
-        return `<div class="dk-pcard ${n ? "on" : ""}" data-p="${esc(p.id)}"><span class="rb">${rarHtml(p.rarity)}</span>${n ? `<span class="cnt">✔x${n}</span>` : ""}
-          <img src="${plateSprite(p.id)}" alt=""><div class="nm">${esc(tt("plate." + p.id + ".name", p.name))}</div>
-          <div class="sub">${esc(tt("plate." + p.id + ".sub", p.sub || ""))}</div></div>`;
-      }).join("")}</div>
+      <div class="ds-title"><button class="ds-back" id="dk-back">‹ Deck</button><span>${tt("dk.edit_plates", "Editar Plates")}</span></div>
+      <div class="pk-deck"><div class="pk-head"><span>Plates</span><b>${used}/${lim}</b><span class="pk-cost">${tt("dk.cost", "Custo")}</span>
+        <button class="pk-hb" id="dk-pclear">${tt("dk.clear_plates", "Limpar todas")}</button></div>
+        <div class="pk-row">${Array.from({ length: 6 }, (_, k) => { const id = eq[k]; return id ? plateCard(plateById(id), {}) : `<div class="pk-card empty"><div class="pk-in"></div></div>`; }).join("")}</div></div>
+      <div class="pk-grid">${shown.map((p) => { const n = eq.filter((x) => x === p.id).length; return plateCard(p, { on: n > 0, cnt: n, dim: !n && used + costOf(p) > lim }); }).join("")}</div>
+      <div class="pk-cf"><span>${tt("dk.cost", "Custo")}</span>${[1, 2, 3, 4, 5, 6].map((c) => `<button class="pk-cb ${V.pc === c ? "on" : ""}" data-pc="${c}" ${costs.has(c) ? "" : "disabled"}>${c}</button>`).join("")}
+        <button class="pk-cb all ${V.pc === "all" ? "on" : ""}" data-pc="all">${tt("dk.all", "TODAS")}</button></div>
       <div class="ds-msg">${tt("dk.plate_hint", "Toque numa carta para ver detalhes, colocar ou tirar do deck.")}</div>
-      <div class="ds-btns"><button class="ds-btn" id="dk-pclear" style="border-color:#ef4444;color:#fecaca">${tt("dk.clear_plates", "Limpar todas")}</button><button class="ds-btn gold" id="dk-pdone" style="font-size:13px">OK</button></div>`;
+      <div class="ds-btns"><button class="ds-btn gold" id="dk-pdone" style="font-size:13px">OK</button></div>`;
     $("dk-back").onclick = () => { V.view = "deck"; sfx("back"); render(); };
     $("dk-pdone").onclick = () => { V.view = "deck"; sfx("tick"); render(); };
+    root.querySelectorAll("[data-pc]").forEach((b) => { b.onclick = () => { V.pc = b.dataset.pc === "all" ? "all" : Number(b.dataset.pc); sfx("tick"); render(); }; });
     $("dk-pclear").onclick = () => { try { clearAllDeckPlates(); } catch (e) {} render(); };
     root.querySelectorAll("[data-p]").forEach((c) => { c.onclick = () => { if (c.dataset.p && typeof openPlateDetailsModal === "function") openPlateDetailsModal(c.dataset.p); }; });
   }

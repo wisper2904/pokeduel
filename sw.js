@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokeduel-pwa-v714";
+const CACHE_NAME = "pokeduel-pwa-v715";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -269,9 +269,33 @@ const CORE_ASSETS = [
   "./js/engine/plates_extra.js",
   "./js/engine/duel_extras.js",
   "./js/engine/slice_effects.js",
+  "./js/engine/plates_all.js",
   "./js/ui/duel_screens.js",
   "./js/ui/deck_screen.js",
-  "./js/ui/shop_screen.js"
+  "./js/ui/shop_screen.js",
+  "./js/ui/icons.js",
+  "./assets/plates/c.png",
+  "./assets/plates/ex.png",
+  "./assets/plates/plateblue.png",
+  "./assets/plates/plategold.png",
+  "./assets/plates/plategreen.png",
+  "./assets/plates/platepink.png",
+  "./assets/plates/platepurple.png",
+  "./assets/plates/platered.png",
+  "./assets/plates/r.png",
+  "./assets/plates/uc.png",
+  "./assets/plates/ux.png",
+  "./assets/ui/icons/ai_ticket.png",
+  "./assets/ui/icons/booster_ticket.png",
+  "./assets/ui/icons/carmonite.svg",
+  "./assets/ui/icons/coin.png",
+  "./assets/ui/icons/cube.png",
+  "./assets/ui/icons/gem.png",
+  "./assets/ui/icons/ingot.png",
+  "./assets/ui/icons/material.svg",
+  "./assets/ui/icons/mp.svg",
+  "./assets/ui/icons/raremetal.png",
+  "./assets/ui/icons/raremetal_ex.png"
 ];
 
 self.addEventListener("install", (event) => {
