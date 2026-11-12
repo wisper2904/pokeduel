@@ -37,6 +37,7 @@
     282: { k: "chainHop", types: ["Grass"], ends: false, label: "Forest Leap" },
     357: { k: "chainHop", types: ["Electric"], ends: true, label: "Cosmic Surfer" },
     214: { k: "goal", ends: true, label: "Cut Off" },
+    469: { k: "toBench", ends: false, label: "Loyalty" }, 489: { k: "toBench", ends: false, label: "Loyalty" },
     85: { k: "summon", names: ["Ledyba", "Ledian"], ends: true, label: "Swarm" }, 175: { k: "summon", names: ["Ledyba", "Ledian"], ends: true, label: "Swarm" },
     295: { k: "spinAt", range: 2, exactRange: true, ifColor: "white", oppWait: 3, selfWait: 3, ends: false, label: "Long Lick" },
     467: { k: "spinAt", range: 2, exactRange: true, ifColor: "white", oppWait: 1, pull: true, selfWait: 3, needAlone: true, ends: false, label: "Entangle" },
@@ -45,7 +46,7 @@
     448: { k: "spinAt", range: 2, ifColor: "gold", lock: true, all: true, ends: true, label: "Lock On: Gold" }
   };
   // Alcance 2 (ataca quem está a 2 passos com uma peça no meio)
-  const RANGE2 = { 79: {}, 417: { first: true }, 331: {} };
+  const RANGE2 = { 79: {}, 417: { first: true }, 331: {}, 407: {} };
   // Passivas restantes
   const PASSIVE = {
     148: "armThrust", 173: "sandBlizzard", 343: "steelBreaker", 570: "roughSkin", 565: "kingHorn", 417: "paperSword",
@@ -111,6 +112,7 @@
       case "hop": return hopTargets(u, a);
       case "chainHop": return chainHopTargets(u, a.types);
       case "goal": { const g = goalNode(u); return freeNode(g) ? [g] : []; }
+      case "toBench": return [u.nodeId];
       case "summon": return state.units.filter((o) => o.owner === u.owner && o !== u && o.location === "board" && abNameMatch(o, a.names) && !abilityAdjacent(o, u)).map((o) => o.nodeId);
       case "spinAt": return state.units.filter((o) => o.owner !== u.owner && o.location === "board" && (a.exactRange ? abDist(o, u) === a.range : abDist(o, u) <= a.range)).map((o) => o.nodeId);
     }
@@ -207,6 +209,11 @@
       }
       case "chainHop": placeOn(u, node); log(`🌿 ${u.name}: ${a.label}!`); break;
       case "goal": placeOn(u, node); log(`🛡️ ${u.name}: ${a.label} — foi para o seu Goal.`); break;
+      case "toBench": {
+        const used = state.units.filter((x) => x.owner === u.owner && x.location === "bench").map((x) => x.benchSlot); let sl = 0; while (used.includes(sl)) sl++;
+        u.location = "bench"; u.nodeId = null; u.benchSlot = sl; u.waitTurns = 0; state.__abLastMoveTurn = -1;
+        log(`🏠 ${u.name}: ${a.label} — voltou ao banco e já pode ser usado.`); break;
+      }
       case "summon": {
         if (!o) return false;
         const free = (ADJ[u.nodeId] || []).find(freeNode); if (free == null) return false;

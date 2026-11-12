@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v710` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v711` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v710). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v711). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,14 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Habilidades, lote 4: complementos das parciais (v711)
+- **`abilities_ext.js`:** `OFFICIAL_DUEL_ABILITIES_SUPP` (gerado de `/home/claude/gen/abil_supp.py`) acrescenta cláusulas às habilidades que o parser pegou só em parte (25).
+  - Ocean's Gift (imune a queimadura), Nonstop (atravessa Espera/paralisados), Flame Acceleration (+MP por P.C.), Blaze Boogie (queima quem atravessa, kind novo `passStatus`), Earthen Rapids (aura MP), Scarlet Bladewings (KO ao atravessar), Disguise (markerShield), Proactive (+20 no seu turno), Cerebral Embrace (noPassOver), Intimidating Aura (bloqueia Plates), Darkness Crystal (kind novo `noKoDmg`), Billows of the Fell Dragon, Thankfulness, Breath of the Abyss, Poisonous Bunker, Carry Home, Greenhouse, Voltage Zone, Fearsome Frost Tree, Flawless Jewel, Victory Star (re-giro), Whims of the Wind, Stormbringer's Mischief, Fire Scales, Memories of the Past.
+- **`abilities_act.js`:** ação Loyalty (volta ao banco e pode ser usada no mesmo turno); Two-Sword Strike com alcance 2.
+- Conferido: todos os `koTransform` apontam para figuras que existem (Kyurem, Groudon, Kyogre, Necrozma). Um alvo inexistente deixaria a peça imortal.
+- **Testes:** os 3 scripts de habilidades; 7.548 batalhas 0 problemas; 251 evoluções; 3 partidas bot×bot 0 erros.
+- **CACHE_NAME:** v710 → v711
 
 ### 2026-11-12 · Claude · Habilidades, lote 3 (v710)
 - **Novo `js/engine/abilities_more.js`** (depois de `abilities_act.js`):
