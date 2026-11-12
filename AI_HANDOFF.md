@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v723` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v724` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -156,6 +156,9 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Ícones das abas de baixo limpos (v724)
+- Os `assets/ui/tab_*.png` (recortes de captura do original) traziam o fundo azul quadrado e pedaços do texto em inglês cortados embaixo. Versões limpas em `assets/ui/tabs/` (texto cortado, fundo transparente por preenchimento a partir da borda; engrenagem por saturação). `sprites.js HOME_V380_UI_ASSETS` aponta para elas. Originais mantidos.
 
 ### 2026-11-12 · Claude · Caixa preta também no botão "Prêmio Diário" do Início (v723)
 - `shop_screen.js`: o atalho do Início (Prêmio Diário) usa `assets/ui/boosters/black.png` no lugar do 🎁.

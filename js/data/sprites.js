@@ -7,12 +7,12 @@ const BANANA_WHEEL_B64 = "assets/ui/banana_wheel.jpg";
 const POKEDUEL_BANANA_LOGO_URI = "assets/ui/pokeduel_logo.webp";
 
 const HOME_V380_UI_ASSETS = {
-  "tab_back": "assets/ui/tab_back.png",
-  "tab_leagues": "assets/ui/tab_leagues.png",
-  "tab_decks": "assets/ui/tab_decks.png",
-  "tab_fusion": "assets/ui/tab_fusion.png",
-  "tab_shop": "assets/ui/tab_shop.png",
-  "tab_menu": "assets/ui/tab_menu.png",
+  "tab_back": "assets/ui/tabs/tab_back.png",
+  "tab_leagues": "assets/ui/tabs/tab_leagues.png",
+  "tab_decks": "assets/ui/tabs/tab_decks.png",
+  "tab_fusion": "assets/ui/tabs/tab_fusion.png",
+  "tab_shop": "assets/ui/tabs/tab_shop.png",
+  "tab_menu": "assets/ui/tabs/tab_menu.png",
   "booster_silver": "assets/ui/boosters/metallic.png",
   "booster_purple": "assets/ui/boosters/purple.png",
   "booster_plus1": "assets/ui/booster_plus1.png",
