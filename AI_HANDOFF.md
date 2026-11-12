@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v706` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v707` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v706). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v707). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,20 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Loja repaginada + Mercado Diário + prêmio diário no hub (v707)
+- **Novo `js/ui/shop_screen.js`:** a aba `#dtab-shop` é refeita em runtime. O DOM antigo fica em `#sh-legacy`; o card da Troca por Material foi movido e aparece pelo botão no fim.
+  - Carteira (🪙/🔻/🧱).
+  - Card grande de **Recompensa Diária** com contagem regressiva ao vivo; usa o `claimDailyGems` antigo.
+  - Caixas de Vitória (`openEarnedVictoryBox`).
+  - **Mercado Diário:** 10 Pokémon por dia.
+    - Sorteio com seed da data local, ponderado por raridade e com 1 EX/UX garantido; descontos de 0–50%.
+    - Preço: C 3k / UC 6k / R 14k moedas, EX 150 / UX 300 gemas.
+    - Compra única por item, salva em `localStorage pdr_daily_market_v707`; vira à meia-noite. Entrega via `unlockAndShowBoosterModal`.
+  - Caixas com a arte original (`assets/ui/boosters/*.png`) → `buyShopBooster(1|2|4|6)`; Caixa de Moedas e materiais → `buyWithCoins`.
+- **Hub:** botão "🎁 Prêmio Diário" embaixo do Buff da Semana, pulsando verde quando está pronto (abre a Loja).
+- **Testes:** resgatar diária (+50🔻 +1.500🪙), comprar no mercado (figura liberada, item marcado após reload), comprar caixa; partida bot×bot 0 erros.
+- **CACHE_NAME:** v706 → v707
 
 ### 2026-11-12 · Claude · Deck estilo Clash Royale, plates novas, Mega Plate real, sons mais leves (v706)
 - **Novo `js/ui/deck_screen.js`:** a aba `#dtab-deck` é refeita em runtime no visual da Fusão (o DOM antigo fica escondido em `#dk-legacy`).
