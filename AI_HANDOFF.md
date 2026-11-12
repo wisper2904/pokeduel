@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v711` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v712` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -141,7 +141,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 6. Dívida técnica / bugs abertos
 
-- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v711). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
+- [ ] Versões inconsistentes (README v5.6.0 · app.js v6.3.0 · ai v5.9.1 · cache v712). Definir uma fonte única (ex.: `const APP_VERSION` em `app.js`).
 - [ ] Cadeias de monkey-patch (§4) dificultam manutenção; consolidar aos poucos, uma função por vez, com teste manual.
 - [ ] `index.html` duplicado em `PokeDuel-Web-v5.6.0.html`: avaliar virar redirect para eliminar risco de dessincronia.
 - [ ] `initAITacticalPlates` passa do limite 6◆ quando libera Double Chance/Mega (4 plates = 6◆ + extras).
@@ -156,6 +156,33 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-12 · Claude · Últimas habilidades + plates do original + Tag + Charge + bot usa habilidades (v712)
+- **Novo `js/engine/duel_extras.js`** (depois de `plates_extra.js`).
+  - **Tag** (tagging do original, via Bulbapedia/pokemon.com): botão "💚 Tag" (`#tag-act-btn`), antes de mover ou no lugar do ataque depois de mover.
+    - Cura as condições de um aliado vizinho e termina o turno. P2P: `P2P_TAG`.
+    - Bloqueios: Barbed Horns (537), King Spike (561); Permafrost (447) segura o congelamento a até 2 passos.
+    - Soul-Heart (352) também remove marcadores.
+  - **Charge marker:** Thunder/Flame/Ice Charge dão `_charge`. Soar (269/271/274) com Charge: +1 MP e +30.
+    - Solta pelo botão ⚡ ("Charge"): vizinho adversário + o de trás ficam paralisados/queimados/congelados; turno acaba. P2P: `P2P_CHARGE`.
+  - **Plates novas (21):**
+    - Twisted Spoon (`_spoon`: ★+1; Psychic Amplifier 558/592 e Meditative Alchemy 535 ganham alcance 2 com ela, via `RANGE2.needSpoon`).
+    - Burn/Douse/Chill/Shock Drive (Genesect: Miss→ao lado neste turno; KO de certos tipos → excluído).
+    - 11 Power (+20 para o tipo até nocautear com ele; turno acaba).
+    - 8 Energy (Flame, Tropical, Dark, Phantom, Steel, Muscle, Electro, Molting).
+    - Estado em `state.__x712 {power, energy, drive}`; P2P `P2P_PLATE2`. Black Core (358) anula as Energy; White Noise (404) / Blackout (414) apagam e marcam como usadas. Hoverjet (235) devolve uma Drive.
+  - **Habilidades:** Spellbind (197), Open Sea Singer (350), Electromagnetic Barrier (355, não é alvo de spinAt), Rocket Ride (415, ação em 2 etapas → `banishToUltraSpace`), Ultra Stack (523, Azul de Aço não vira Miss).
+  - **Bot:** wrapper em `triggerPlayerAIMove`. Uma vez por turno, `botTry()` avalia ações do ⚡:
+    - warp/dash/hop/raid por ganho de distância ao Goal (vitória direta = máxima prioridade);
+    - Cut Off quando ameaçado; spinAt perto do próprio Goal; Charge; trocas úteis.
+    - Também Tag em aliado dormindo/congelado/paralisado. Depois de mover, faz Tag se não houver ataque.
+- **`abilities_act.js`:**
+  - ações que levam a peça ao Goal adversário agora dão vitória (antes só o movimento normal checava);
+  - `actOf` exposto e usado via `PUB()`;
+  - `canAct` aceita `state.aiExecutingNow` (o bot).
+- **Cobertura:** 433/433 com mecânica. Parciais por falta de base: King Spike (parte "marcador de −MP": o jogo não tem marcadores de MP) e Ultra Stack (multiplicar efeitos por X+1).
+- **Testes:** Tag, King Spike, Twisted Spoon (+alcance 2), Flame Power, Flame Energy, Charge do Zapdos, Rocket Ride, bot usando Tunnel Construction até o Goal (vitória); lotes anteriores; 7.548 batalhas 0 problemas; 251 evoluções; 4 partidas bot×bot 0 erros.
+- **CACHE_NAME:** v711 → v712
 
 ### 2026-11-12 · Claude · Habilidades, lote 4: complementos das parciais (v711)
 - **`abilities_ext.js`:** `OFFICIAL_DUEL_ABILITIES_SUPP` (gerado de `/home/claude/gen/abil_supp.py`) acrescenta cláusulas às habilidades que o parser pegou só em parte (25).

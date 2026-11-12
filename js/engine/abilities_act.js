@@ -46,7 +46,7 @@
     448: { k: "spinAt", range: 2, ifColor: "gold", lock: true, all: true, ends: true, label: "Lock On: Gold" }
   };
   // Alcance 2 (ataca quem está a 2 passos com uma peça no meio)
-  const RANGE2 = { 79: {}, 417: { first: true }, 331: {}, 407: {} };
+  const RANGE2 = { 79: {}, 417: { first: true }, 331: {}, 407: {}, 558: { needSpoon: true }, 592: { needSpoon: true }, 535: { needSpoon: true } };
   // Passivas restantes
   const PASSIVE = {
     148: "armThrust", 173: "sandBlizzard", 343: "steelBreaker", 570: "roughSkin", 565: "kingHorn", 417: "paperSword",
@@ -54,7 +54,7 @@
     339: "sparkNoise", 585: "powerConstruct", 134: "fleeBack", 272: "fleeBack", 386: "slippery", 354: "aftermath",
     180: "biteInstinct", 209: "biteInstinct", 238: "maxVital", 166: "divingEntry", 191: "divingEntry"
   };
-  const PUB = () => window.PDRAbilityActions || { canAct, targetsFor, perform };
+  const PUB = () => window.PDRAbilityActions || { canAct, targetsFor, perform, actOf };
   const idOf = (u) => { const f = u && FIGURES_DB[u.baseIdx]; return f ? f.officialDuelId : null; };
   const actOf = (u) => (u && !u._abNull ? A[idOf(u)] : null);
   const pas = (u, k) => !!(u && !u._abNull && PASSIVE[idOf(u)] === k);
@@ -120,11 +120,11 @@
   }
   function canAct(u) {
     if (!u || u.owner !== state.turn || (u.waitTurns || 0) > 0 || state.isAnimating) return false;
-    if (typeof canControlTurn === "function" && !canControlTurn()) return false;
+    if (typeof canControlTurn === "function" && !canControlTurn() && !state.aiExecutingNow) return false;
     if (movedThisTurn() || state.postMoveAttackMode) return false;
     if (stOf(u) === "sleep" || stOf(u) === "freeze") return false;
-    const a = actOf(u); if (!a) return false;
-    return targetsFor(u, a).length > 0;
+    const a = PUB().actOf(u); if (!a) return false;
+    return PUB().targetsFor(u, a).length > 0;
   }
 
   // ---------------------------------------------------------------- botão e modo de alvo
@@ -151,7 +151,7 @@
     const u = state && state.units && state.units.find((x) => x.uid === state.selectedUnitId);
     const show = !!(u && !(dr && dr.classList.contains("show")) && !(ov && ov.classList.contains("show")) && (state.__abMode && state.__abMode.uid === u.uid || PUB().canAct(u)));
     if (!show) { b.style.display = "none"; if (state && state.__abMode && (!u || state.__abMode.uid !== u.uid)) cancelMode(); return; }
-    const a = actOf(u);
+    const a = PUB().actOf(u) || { label: "?" };
     b.textContent = state.__abMode ? `✕ ${tt("ab.cancel", "Cancelar")} ${a.label}` : `⚡ ${tt("ab.use", "Habilidade")}: ${a.label}`;
     b.style.display = "block"; placeBtn(b);
   }
@@ -161,7 +161,7 @@
     const u = state.units.find((x) => x.uid === state.selectedUnitId);
     if (state.__abMode) { cancelMode(); try { selectUnit(u.uid); } catch (e) {} return; }
     if (!PUB().canAct(u)) return;
-    const a = actOf(u), tg = PUB().targetsFor(u, a);
+    const a = PUB().actOf(u), tg = PUB().targetsFor(u, a);
     state.__abMode = { uid: u.uid, targets: tg };
     state.reachableNodes = tg.slice(); state.reachablePaths = {}; state.attackTargets = [];
     snd("plate_sel");
@@ -240,6 +240,14 @@
     }
     fx(u.nodeId, "#c084fc"); snd("ab_pos");
     try { checkSurroundKOs(); } catch (e) {}
+    // chegar ao Goal adversário por habilidade também vence
+    if (u.location === "board" && ((u.owner === "p1" && u.nodeId === 3) || (u.owner === "p2" && u.nodeId === 10)) && !state.winCelebrationAnim) {
+      sendSync(changed, false);
+      log(u.owner === "p1" ? "Reached the Goal! WIN!" : "Opponent reached your Goal!");
+      try { spawnPortalParticles(176, u.owner === "p1" ? 185 : 343, "#facc15"); } catch (e) {}
+      state.winCelebrationAnim = { winner: u.owner, t0: performance.now() };
+      return true;
+    }
     sendSync(changed, endsTurn);
     if (endsTurn) { state.selectedUnitId = null; state.reachableNodes = []; state.attackTargets = []; endTurn(true); }
     else if (a.k !== "raid") { try { selectUnit(u.uid); } catch (e) {} }
@@ -270,7 +278,7 @@
       const m = state.__abMode;
       if (m) {
         const u = state.units.find((x) => x.uid === m.uid);
-        const a = actOf(u);
+        const a = PUB().actOf(u);
         state.__abMode = null; state.reachableNodes = [];
         if (u && a && m.targets.includes(nodeId)) { PUB().perform(u, a, nodeId); return; }
         log(tt("ab.cancelled", "Habilidade cancelada."));
@@ -291,6 +299,7 @@
   function range2Targets(u) {
     const spec = RANGE2[idOf(u)];
     if (!spec || u._abNull || u.location !== "board") return [];
+    if (spec.needSpoon && !u._spoon) return [];
     if (spec.first && u._abBattled) return [];
     const out = [];
     (ADJ[u.nodeId] || []).forEach((m) => {
@@ -439,5 +448,5 @@
     try { finishPostMoveWithoutAttack = f2; } catch (e) {}
     window.finishPostMoveWithoutAttack = f2;
   }
-  window.PDRAbilityActions = { A, RANGE2, PASSIVE, canAct, targetsFor, perform, range2Targets };
+  window.PDRAbilityActions = { A, RANGE2, PASSIVE, canAct, targetsFor, perform, range2Targets, actOf };
 })();

@@ -139,7 +139,7 @@
       const a = u && !u._abNull ? AA.A[(FIGURES_DB[u.baseIdx] || {}).officialDuelId] : null;
       if (a && ["benchSwapIn", "benchNextTo", "surpriseStrike"].includes(a.k)) {
         if (u.owner !== state.turn || (u.waitTurns || 0) > 0 || state.isAnimating || state.postMoveAttackMode || state.__abLastMoveTurn === state.turnCounter) return false;
-        if (typeof canControlTurn === "function" && !canControlTurn()) return false;
+        if (typeof canControlTurn === "function" && !canControlTurn() && !state.aiExecutingNow) return false;
         return AA.targetsFor(u, a).length > 0;
       }
       return _ca(u);
