@@ -228,7 +228,12 @@
     };
     $("sh-vb-btn").onclick = () => { try { openEarnedVictoryBox(); } catch (e) {} setTimeout(render, 300); };
     root.querySelectorAll("[data-k]").forEach((b) => { b.onclick = () => buyMarket(+b.dataset.k); });
-    root.querySelectorAll("[data-info]").forEach((im) => { im.onclick = () => { try { openFigureDetailsModal(+im.dataset.info); } catch (e) {} }; });
+    root.querySelectorAll("[data-info]").forEach((im) => { im.onclick = () => {
+      const idx = +im.dataset.info;
+      // v731: painel novo (igual ao do Deck); o antigo só se o novo não estiver disponível
+      try { if (window.pdrOpenFigureInfo && pdrOpenFigureInfo(idx, tt("sh.back_shop", "Loja"))) return; } catch (e) {}
+      try { openFigureDetailsModal(idx); } catch (e) {}
+    }; });
     root.querySelectorAll("[data-box]").forEach((b) => {
       b.onclick = () => {
         const box = BOXES.find((x) => x.n === +b.dataset.box);

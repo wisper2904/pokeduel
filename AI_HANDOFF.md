@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v730` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v731` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,11 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Loja abre o painel de informações novo (v731)
+- Bug: tocar num Pokémon da Loja abria o painel antigo (`openFigureDetailsModal` / `#figure-details-modal`). Agora abre o mesmo painel do Deck/partida.
+- `arena3d.js`: o overlay `#pd-unit-info` virou `window.pdrOpenFigureInfo(idx, backLabel)` (retorna `false` se `PDRDuelScreens` não carregou); `openUnitInfo` (segurar na partida) usa ela. `shop_screen.js` chama `pdrOpenFigureInfo(idx, "Loja")` e só cai no painel antigo se o novo não existir.
+- O painel antigo continua existindo (tem os botões de upgrade de roleta) e ainda é chamado pelo deck legado em `ui.js` (substituído pelo `deck_screen.js`).
 
 ### 2026-11-13 · Claude · Janela de perfil repaginada (v730)
 - `#player-profile-modal` (2 HTMLs) reescrito com classes `.pp-*` (fim de `css/style.css`), **mesmos ids** que `ui.js` preenche: topo com foto grande (`profile_avatar.png`), nome, título em pílula e ID com botão Copiar (`window.pdrCopyTrainerId`); faixa da liga com barra de progresso até a próxima liga (`#pp-tier-fill`, `#pp-tier-next`, limites 1500/1900/2300/2700 de `getTierForRating`); 6 quadros de estatística; chips de coleção e chaves; conquistas; "Editar perfil" recolhido (nome, título, pedestal, Pokémon em destaque, Zerar, Salvar); conta na nuvem compacta.

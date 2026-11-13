@@ -570,8 +570,13 @@
   canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
   function openUnitInfo(u) {
-    if (!window.PDRDuelScreens || !PDRDuelScreens.showDataReadOnly) return;
+    if (!u) return;
     try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) {}
+    openFigureInfo(u.baseIdx, (typeof t === "function" ? t("ar.back_match", "Partida") : "Partida"));
+  }
+  // v731: painel de informações novo (o mesmo do Deck) em tela cheia, para qualquer lugar do jogo (partida, loja…)
+  function openFigureInfo(idx, backLabel) {
+    if (!window.PDRDuelScreens || !PDRDuelScreens.showDataReadOnly) return false;
     try { if (window.PDRSound) PDRSound.play("select"); } catch (e) {}
     let ov = document.getElementById("pd-unit-info"); if (ov) ov.remove();
     ov = document.createElement("div"); ov.id = "pd-unit-info";
@@ -579,9 +584,11 @@
     if (!document.getElementById("pd-unit-info-css")) { const st = document.createElement("style"); st.id = "pd-unit-info-css"; st.textContent = "@keyframes pdInfoIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}"; document.head.appendChild(st); }
     const inner = document.createElement("div"); inner.style.cssText = "max-width:480px;margin:0 auto";
     ov.appendChild(inner); document.body.appendChild(ov);
-    PDRDuelScreens.showDataReadOnly(inner, u.baseIdx, { backLabel: (typeof t === "function" ? t("ar.back_match", "Partida") : "Partida"), onBack: () => ov.remove() });
+    PDRDuelScreens.showDataReadOnly(inner, idx, { backLabel: backLabel || "Voltar", onBack: () => ov.remove() });
+    return true;
   }
   window.PDRArena.openUnitInfo = openUnitInfo;
+  window.pdrOpenFigureInfo = openFigureInfo;
   if (typeof showCornerFigureCard === "function") {
     const off = function () { try { hideCornerFigureCard(); } catch (e) {} };
     try { showCornerFigureCard = off; } catch (e) {}
