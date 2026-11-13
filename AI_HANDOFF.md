@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v726` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v727` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -160,6 +160,9 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Acabamento das 7 figuras montadas (v727)
+- `assets/sprites/{oddish,gloom,persian,machoke,dodrio,cubone,porygon}.webp` refeitos para casar com as figuras originais: base de cobre limpa (aro real do `metapod.webp` + tampo redesenhado na cor medida em caterpie/weedle, sem os riscos brancos da base do ninjask), figura maior e apoiada no centro do tampo, sombra de contato com a forma da figura, luz de cima/esquerda com a parte de baixo mais escura e cores menos chapadas (cara de figura de plástico fotografada). 116×110, script fora do repo.
 
 ### 2026-11-13 · Claude · 7 sprites trocados corrigidos (v726)
 - `assets/sprites/{oddish,gloom,persian,machoke,dodrio,cubone,porygon}.webp` mostravam outros Pokémon desde o commit inicial (item do §6). Esses 7 nunca tiveram figura no Pokémon Duel: a categoria "Pokémon Duel figures" do Bulbagarden tem 652 arquivos e nenhum deles.
