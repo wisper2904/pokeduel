@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v732` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v733` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,11 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Vitória em Missão travava a partida (v733)
+- Bug relatado: vencer uma Missão cercando o Gol mostrava "VITÓRIA" e travava até o tempo acabar. Causa real: **toda vitória em Missão** quebrava — a recompensa fazia `userGems += …` (variável inexistente) em `p2p_matchmaker.js` (CASE C: QUEST) e a tela de resultado nunca abria. Derrota/tempo esgotado não passa pela recompensa, por isso "funcionava" quando o tempo acabava. Agora soma em `state.rareMetals` (as gemas).
+- `ai.js showWinResultScreen` (o envoltório mais externo das telas de resultado) agora marca `isMatchActive = false` e `matchFinished = true` para qualquer modo. Antes o `showWinResultScreen` do `ui.js` substituía o base por completo e ninguém marcava: o relógio continuava correndo atrás da tela de resultado e, ao zerar, a vitória "acontecia de novo".
+- `startLocalPassAndPlayMatch` (2P no mesmo celular) passa a marcar a partida como ativa e reinicia os relógios, como Liga/P2P (senão ficaria com relógio parado e Z bloqueado depois de uma partida encerrada).
 
 ### 2026-11-13 · Claude · Z-Move não liga mais ao tocar na carta da plate (v732)
 - Bug relatado: "na Double Chance às vezes ativa o Z-Move sem perguntar". Causa: com o Z em 100%, `renderPlatesTray` (board.js) colocava a faixa clicável "⚡ Z-MOVE 100%: TOQUE PARA ATIVAR" dentro da descrição da plate selecionada (a carta grande do `plates_all.js` copia esse HTML). Tocar na carta abria o seletor do Z por baixo do dedo e o 2º toque caía no "Sim".

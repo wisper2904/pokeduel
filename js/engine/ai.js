@@ -1640,6 +1640,10 @@ triggerPlayerAIMove = function() {
 // ============================================================================
 const _v580ShowWinResultScreen = showWinResultScreen;
 showWinResultScreen = function(winner) {
+  // v733: a partida acabou. Antes o showWinResultScreen do ui.js (que substitui o base) não marcava isso e o relógio
+  // continuava correndo atrás da tela de resultado; zerando, a vitória "acontecia de novo" (resultado contado 2×).
+  state.isMatchActive = false;
+  state.matchFinished = true;
   // v5.9.1: Tutorial, Treino e Quest usam a tela própria (sem ELO, sem caixa da Liga)
   if ((state.matchKind === "tutorial" || state.matchKind === "training" || state.matchKind === "quest") &&
       typeof window.__pdrSpecialResultScreen === "function") {

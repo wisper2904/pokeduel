@@ -164,6 +164,12 @@ function startLocalPassAndPlayMatch() {
   state.viewSeatOverride = null;
   state.turn = "p1";
   state.turnCounter = 300;
+  // v733: marca a partida como ativa (como Liga/P2P). Sem isso, depois de uma partida encerrada o relógio
+  // ficava parado e o Z-Move bloqueado no 2P local.
+  state.isMatchActive = true;
+  state.matchFinished = false;
+  state.clockMsP1 = 300000;
+  state.clockMsP2 = 300000;
 
   tutorialStepBusy = false;
   currentTutorialStep = 0;
@@ -1579,7 +1585,7 @@ showWinResultScreen = function(winner) {
       coinReward = 1500 + hIdx * 500;
       gemReward = (starsAchieved === 3 && prevStars < 3) ? 15 : 5;
       userCoins += coinReward;
-      userGems += gemReward;
+      state.rareMetals = (state.rareMetals || 0) + gemReward; // v733: era "userGems" (não existe) e travava toda vitória em Missão
       userRareMetalItems += 1;
       saveEconomyAndUpgrades();
       syncAllCurrencyLabels();
