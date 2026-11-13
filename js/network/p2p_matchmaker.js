@@ -13,6 +13,7 @@ let pendingSalaoSeed = null;
 let pendingSalaoRoomId = null;
 let pendingSalaoFirstWinner = null;
 const seenP2PPacketIds = new Set();
+let joinTimeoutTimer = null; // v728
 
 function getPlayerOwnDeckCopy() {
   try {
@@ -110,6 +111,7 @@ function sendP2PPacket(payload) {
 }
 
 function startP2PMatch(role, firstWinner) {
+  if (joinTimeoutTimer) { clearTimeout(joinTimeoutTimer); joinTimeoutTimer = null; }
   state.mode = "p2p";
   state.gameMode = "p2p";
   state.matchKind = "p2p";
@@ -389,6 +391,7 @@ function handleRemotePlatePacket(msg) {
 window.handleRemotePlatePacket = handleRemotePlatePacket;
 
 function cleanupActiveP2PSession(reason) {
+  if (joinTimeoutTimer) { clearTimeout(joinTimeoutTimer); joinTimeoutTimer = null; }
   if (p2pPingTimer) {
     clearInterval(p2pPingTimer);
     p2pPingTimer = null;
@@ -584,6 +587,16 @@ function joinIntuitiveP2PRoom() {
     broadcastChan.onmessage = e => handleP2PPacket(e.data);
   }
   sendP2PPacket(Object.assign({}, joinPayload));
+
+  // v728: sem P2P_START em 15 s a sala não existe (código errado ou anfitrião cancelou o convite)
+  if (joinTimeoutTimer) clearTimeout(joinTimeoutTimer);
+  joinTimeoutTimer = setTimeout(() => {
+    joinTimeoutTimer = null;
+    if (state.mode === "p2p" && state.myRole === "p2" && !state.isMatchActive) {
+      cleanupActiveP2PSession("Sala não encontrada");
+      updateP2PStatusUI(`⚠️ SALA [ ${code} ] NÃO ENCONTRADA`, "Confira o código ou peça para o Celular 1 abrir a sala de novo.", "SEM SALA", "#f87171");
+    }
+  }, 15000);
 
   // Retry once after 700ms in case MQTT WebSocket was still opening
   setTimeout(() => {

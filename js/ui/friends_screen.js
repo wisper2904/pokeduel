@@ -193,6 +193,102 @@
   }
   window.PDRFriendsNet = { basePacket, handle, sendRequest, sendAccept, sendDecline, sendRemove, acceptIncoming, declineIncoming, toast, openModal, closeModal, whoHtml, online, inMatch, me };
 
+  // ============================================================= 5. CONVITE PARA DUELAR
+  const INVITE_MS = 45000;
+  let pending = null;        // anfitrião: { trainerId, nickname, code, t0, timer }
+  let incomingInvite = null; // convidado: { trainerId, code }
+  let cancelling = false;
+  function fireInviteState() { try { document.dispatchEvent(new CustomEvent("pdr-friends-invite-state")); } catch (e) {} }
+  function status(title, sub, badge, col) { try { if (typeof updateP2PStatusUI === "function") updateP2PStatusUI(title, sub, badge, col); } catch (e) {} }
+  function clearPending() { if (pending && pending.timer) clearTimeout(pending.timer); pending = null; fireInviteState(); }
+  function invite(trainerId) {
+    if (pending) return false;
+    const f = getFriend(trainerId);
+    if (!f || !online(trainerId)) return false;
+    if (typeof createIntuitiveP2PRoom !== "function") return false;
+    try { createIntuitiveP2PRoom(); } catch (e) { return false; }
+    const el = document.getElementById("host-room-code-display");
+    const code = el ? String(el.textContent || "").trim() : "";
+    if (!/^\d{4,8}$/.test(code)) return false;
+    pending = { trainerId, nickname: f.nickname || trainerId, code, t0: Date.now(), timer: null };
+    pending.timer = setTimeout(() => {
+      toast(`⏳ ${pending ? pending.nickname : ""} ${tt("pf.inv_noanswer", "não respondeu ao convite.")}`);
+      cancelInvite(true);
+    }, INVITE_MS);
+    const pk = basePacket("FRIEND_INVITE", trainerId); pk.roomCode = code; send(pk);
+    status(`⚔️ ${tt("pf.inv_sent", "CONVITE ENVIADO A")} ${String(pending.nickname).toUpperCase()}`, tt("pf.inv_wait", "Aguardando a resposta do seu amigo..."), tt("pf.waiting", "AGUARDANDO"), "#facc15");
+    sfx("confirm"); fireInviteState();
+    return true;
+  }
+  function cancelInvite(notify) {
+    if (!pending || cancelling) return;
+    cancelling = true;
+    const to = pending.trainerId;
+    clearPending();
+    if (notify) { const pk = basePacket("FRIEND_INVITE_REPLY", to); pk.reply = "cancel"; send(pk); }
+    try { if (typeof cleanupActiveP2PSession === "function") cleanupActiveP2PSession(tt("pf.inv_cancelled", "Convite cancelado")); } catch (e) {}
+    cancelling = false;
+  }
+  function reply(to, r) { const pk = basePacket("FRIEND_INVITE_REPLY", to); pk.reply = r; send(pk); }
+  function showInviteModal(f, code) {
+    incomingInvite = { trainerId: f.trainerId, code };
+    const m = openModal("pdr-friend-invite-modal", `<h3>⚔️ ${tt("pf.inv_title", "Convite para duelar")}</h3>${whoHtml(f)}
+      <div class="pf-msg">${esc(f.nickname || f.trainerId)} ${tt("pf.inv_msg", "te convidou para um duelo online.")}</div>
+      <div class="pf-yn"><button id="pf-inv-yes">${tt("pf.accept", "Aceitar")}</button><button id="pf-inv-no" class="sec">${tt("pf.decline", "Recusar")}</button></div>`);
+    m.querySelector("#pf-inv-yes").onclick = () => {
+      const inv = incomingInvite; incomingInvite = null; closeModal("pdr-friend-invite-modal");
+      if (!inv) return;
+      reply(inv.trainerId, "accept");
+      const inp = document.getElementById("room-code-input");
+      if (inp) inp.value = inv.code;
+      try { if (typeof joinIntuitiveP2PRoom === "function") joinIntuitiveP2PRoom(); } catch (e) {}
+    };
+    m.querySelector("#pf-inv-no").onclick = () => {
+      const inv = incomingInvite; incomingInvite = null; closeModal("pdr-friend-invite-modal");
+      if (inv) reply(inv.trainerId, "decline");
+    };
+  }
+  function handleInvite(msg, isFriend) {
+    const from = msg.fromTrainerId;
+    if (msg.type === "FRIEND_INVITE") {
+      if (!isFriend) return;
+      const code = String(msg.roomCode || "");
+      if (!/^\d{4,8}$/.test(code)) return;
+      if (inMatch() || pending) { reply(from, "busy"); return; }
+      showInviteModal(fromInfo(msg), code);
+    } else if (msg.type === "FRIEND_INVITE_REPLY") {
+      const r = msg.reply;
+      if (r === "cancel") {
+        if (incomingInvite && incomingInvite.trainerId === from) { incomingInvite = null; closeModal("pdr-friend-invite-modal"); toast(`${msg.fromNick || from} ${tt("pf.inv_cancel_rx", "cancelou o convite.")}`); }
+        return;
+      }
+      if (!pending || pending.trainerId !== from) return;
+      if (r === "accept") {
+        status(`✅ ${String(msg.fromNick || from).toUpperCase()} ${tt("pf.inv_accepted", "ACEITOU! CONECTANDO...")}`, tt("pf.inv_connecting", "Sincronizando tabuleiro com seu amigo..."), tt("pf.connecting", "CONECTANDO"), "#4ade80");
+        if (pending.timer) clearTimeout(pending.timer);
+        pending.timer = setTimeout(() => cancelInvite(false), 20000);
+      } else if (r === "decline" || r === "busy") {
+        toast(r === "busy" ? `${msg.fromNick || from} ${tt("pf.inv_busy", "está em uma partida agora.")}` : `${msg.fromNick || from} ${tt("pf.inv_declined", "recusou o convite.")}`);
+        cancelInvite(false);
+      }
+    }
+  }
+  // Partida começou: o convite cumpriu o papel
+  if (typeof startP2PMatch === "function") {
+    const _st = startP2PMatch;
+    const st2 = function () { clearPending(); incomingInvite = null; closeModal("pdr-friend-invite-modal"); return _st.apply(this, arguments); };
+    try { startP2PMatch = st2; } catch (e) {}
+    window.startP2PMatch = st2;
+  }
+  // Sala fechada pelo usuário (botão vermelho) também encerra o convite
+  if (typeof cleanupActiveP2PSession === "function") {
+    const _cl = cleanupActiveP2PSession;
+    const cl2 = function () { if (pending && !cancelling) { const to = pending.trainerId; clearPending(); reply(to, "cancel"); } return _cl.apply(this, arguments); };
+    try { cleanupActiveP2PSession = cl2; } catch (e) {}
+    window.cleanupActiveP2PSession = cl2;
+  }
+  Object.assign(window.PDRFriendsNet, { invite, cancelInvite, pendingInvite: () => (pending ? { trainerId: pending.trainerId, nickname: pending.nickname, code: pending.code, t0: pending.t0, ms: INVITE_MS } : null), _handleInvite: handleInvite });
+
   if (typeof handleIncomingSalaoMessage === "function") {
     const _h = handleIncomingSalaoMessage;
     const h2 = function (msg) { try { if (handle(msg)) return; } catch (e) {} return _h.apply(this, arguments); };
