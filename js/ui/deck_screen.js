@@ -23,10 +23,14 @@
   const plateSprite = (id) => (typeof BANANA_PLATE_SPRITES !== "undefined" && BANANA_PLATE_SPRITES[id]) || "";
 
   const css = `
-  .dk-teams{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:6px}
-  .dk-team{flex:0 0 auto;background:#0f172a;border:1.5px solid #334155;color:#cbd5e1;border-radius:99px;font-size:11px;font-weight:900;padding:5px 11px;cursor:pointer;white-space:nowrap}
+  .dk-teams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:6px}
+  .dk-team{min-width:0;background:#0f172a;border:1.5px solid #334155;color:#cbd5e1;border-radius:10px;font-size:11px;font-weight:900;padding:7px 6px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .dk-team.on{background:linear-gradient(180deg,#facc15,#ca8a04);border-color:#fef08a;color:#1c1917}
-  .dk-team.act{background:#14532d;border-color:#4ade80;color:#dcfce7}
+  .dk-team.new{border-style:dashed;border-color:#38bdf8;color:#7dd3fc;background:transparent}
+  .dk-team.ghost{border-style:dashed;border-color:#1e293b;background:transparent;cursor:default}
+  .dk-tools{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+  .dk-tool{background:#0f172a;border:1.5px solid #334155;color:#cbd5e1;border-radius:10px;font-size:11px;font-weight:900;padding:6px;cursor:pointer;white-space:nowrap}
+  .dk-tool.act{background:#14532d;border-color:#4ade80;color:#dcfce7}
   .dk-limits{display:flex;gap:5px;justify-content:center;margin:2px 0 8px}
   .dk-limits span{font-size:10px;font-weight:900;border-radius:6px;padding:2px 8px;background:#0f172a;border:1px solid #334155;color:#cbd5e1}
   .dk-limits span.full{border-color:#facc15;color:#fde047}
@@ -201,10 +205,15 @@
     root.innerHTML = `
       <div class="dk-top">
         <div class="dk-teams">
-          ${ts.map((tm, i) => `<button class="dk-team ${i === at ? "on" : ""}" data-t="${i}">⚔️ ${esc(tm.name || "Time #" + (i + 1))}</button>`).join("")}
-          <button class="dk-team" id="dk-new" title="${tt("dk.new_team", "Novo time")}">＋</button>
-          <button class="dk-team" id="dk-ren" title="${tt("dk.rename", "Renomear")}">✏️</button>
-          <button class="dk-team act" id="dk-auto">⚡ Auto</button>
+          ${[0, 1, 2].map((i) => i < ts.length
+            ? `<button class="dk-team ${i === at ? "on" : ""}" data-t="${i}">⚔️ ${esc(ts[i].name || "Time #" + (i + 1))}</button>`
+            : (i === ts.length && ts.length < 3
+              ? `<button class="dk-team new" id="dk-new">＋ ${tt("dk.new_team", "Novo time")}</button>`
+              : `<span class="dk-team ghost"></span>`)).join("")}
+        </div>
+        <div class="dk-tools">
+          <button class="dk-tool" id="dk-ren">✏️ ${tt("dk.rename", "Renomear")}</button>
+          <button class="dk-tool act" id="dk-auto">⚡ Auto</button>
         </div>
         <div class="dk-limits">${lim(st.megas, typeof MAX_DECK_MEGAS !== "undefined" ? MAX_DECK_MEGAS : 1, "MEGA")}${lim(st.uxs, typeof MAX_DECK_UX !== "undefined" ? MAX_DECK_UX : 1, "UX")}${lim(st.exs, typeof MAX_DECK_EX !== "undefined" ? MAX_DECK_EX : 2, "EX")}</div>
         ${using != null ? `<div class="dk-using"><img src="${spriteOf(FIGURES_DB[using].spriteKey)}" alt=""><span>${tt("dk.tap_where", "Toque no slot para colocar")} <b>${esc(FIGURES_DB[using].name)}</b></span><button id="dk-cancel-use">✕</button></div>` : ""}
@@ -249,7 +258,7 @@
 
     root.querySelectorAll("[data-t]").forEach((b) => { b.onclick = () => { V.msg = ""; V.using = null; try { switchDeckPreset(+b.dataset.t); } catch (e) {} render(); }; });
     const call = (fn) => { try { if (typeof window[fn] === "function") window[fn](); } catch (e) { console.warn(e); } V.msg = legacyMsg(); render(); };
-    $("dk-new").onclick = () => call("createNewTeamSlot");
+    const nt = $("dk-new"); if (nt) nt.onclick = () => call("createNewTeamSlot");
     $("dk-ren").onclick = () => call("promptRenameActiveTeam");
     $("dk-auto").onclick = () => call("autoBuildBalancedTeamV540");
     const cu = $("dk-cancel-use"); if (cu) cu.onclick = () => { V.using = null; sfx("back"); render(); };

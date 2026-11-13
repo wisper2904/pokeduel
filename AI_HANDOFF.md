@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v739` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v740` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,13 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Barra de times da aba Deck arrumada (v740)
+- Antes: os times, o ＋, o ✏️ e o ⚡ Auto ficavam numa linha com rolagem horizontal, e o botão Auto ia para a lateral.
+- Agora: grade fixa de 3 posições (Time #1, #2, #3). Se houver menos de 3 times, aparece um botão tracejado "＋ Novo time" na próxima posição; o limite de 3 já era aplicado em `createNewTeamSlot` (ui.js). Renomear e Auto ficam numa linha de dois botões embaixo. Sem rolagem horizontal.
+- `js/ui/deck_screen.js`: CSS `.dk-teams` (grid), `.dk-team.new/.ghost`, `.dk-tools`, `.dk-tool`; handler do "Novo time" protegido com `if (nt)` (com 3 times o botão não existe e o erro quebrava a renderização dos botões seguintes).
+- Nenhum texto novo: reutiliza `dk.new_team` e `dk.rename`.
+- Testado em Playwright com 1, 2 e 3 times (sem erros de página).
 
 ### 2026-11-13 · Claude · Pesquisa do sistema ao segurar imagem/figura no celular (v739)
 - Sintoma: segurar uma figura ou imagem abria a tela de pesquisa do sistema (Pesquisar/Lente) como se fosse uma página.
