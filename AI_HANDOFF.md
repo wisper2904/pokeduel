@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v725` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v726` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -151,7 +151,7 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 - [ ] 42 figuras oficiais da Library ficaram de fora: 27 sem imagem correspondente na categoria e 15 com roleta incompleta na Bulbapedia.
 - [ ] Habilidades oficiais: das 448 com texto, só ~110 têm alguma mecânica simulada (`fx` em `js/engine/abilities.js`); o resto é texto (efeitos com marcadores, condições, Ultra Space, troca de posição etc.). Fatias Brancas/Douradas com efeito: 170 de 476 simuladas (`OFFICIAL_DUEL_SLICE_FX`). 40 fatias roxas com efeito `none`.
 - [ ] Travessia seletiva ("atravessa suas peças e as do tipo X") não simulada; só travessia total.
-- [ ] **Sprites trocadas em `assets/sprites/`** (achado no QA de 2026-11-12; o Gabriel vai mandar as certas): `oddish.webp`=Victini, `gloom.webp`=Serperior, `persian.webp`=Samurott, `machoke.webp`=Chandelure, `dodrio.webp`=Terrakion, `cubone.webp`=Virizion, `porygon.webp`=Kyurem.
+- [x] **Sprites trocadas em `assets/sprites/`** (achado no QA de 2026-11-12; o Gabriel vai mandar as certas): `oddish.webp`=Victini, `gloom.webp`=Serperior, `persian.webp`=Samurott, `machoke.webp`=Chandelure, `dodrio.webp`=Terrakion, `cubone.webp`=Virizion, `porygon.webp`=Kyurem. → **resolvido na v726**.
 - [ ] Arte de aura cortada na borda da imagem: Entei, Ho-Oh e Shiny Ho-Oh (`assets/figures_duel/`).
 - [ ] `tools/i18n/build.py`, citado no README de `tools/i18n/` e no handoff, **não existe no repo**. Até recriar, edite o `js/data/i18n_dict.js` à mão e o lote `tools/i18n/tr/*.txt` junto, para não divergirem.
 - [ ] O tabuleiro em celular deitado (modo mobile) estica na horizontal. O Hub foi corrigido na v725; a partida não.
@@ -160,6 +160,10 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · 7 sprites trocados corrigidos (v726)
+- `assets/sprites/{oddish,gloom,persian,machoke,dodrio,cubone,porygon}.webp` mostravam outros Pokémon desde o commit inicial (item do §6). Esses 7 nunca tiveram figura no Pokémon Duel: a categoria "Pokémon Duel figures" do Bulbagarden tem 652 arquivos e nenhum deles.
+- Montados novos: render oficial do Pokémon HOME (PokeAPI/sprites, `sprites/pokemon/other/home/{dex}.png`) em cima da base de cobre extraída de `ninjask.webp`, com sombra de contato, 116×110 como os demais. Script fora do repo.
 
 ### 2026-11-12 · Claude · Correções do QA (v725)
 - **Z-Move**: `#ds-z-modal` fecha ao reiniciar a partida (`demoFullMatchState`) e quando a tela de resultado aparece (wrapper de `showWinResultScreen` em `duel_screens.js`). Não abre durante o Double Chance, com o Evoluir aberto, com a roleta na tela nem depois do fim da partida (`zPickerBlocked`). O Evoluir fecha o Z antes de abrir. `window.pdrCloseMatchModals()` fecha os dois.
