@@ -62,4 +62,8 @@
     f.lastSeen = ts || Date.now(); save(d);
   }
   window.PDRFriends = { load, save, myId, isValidId, getFriend, upsertFriend, removeFriend, addIncoming, removeIncoming, addOutgoing, removeOutgoing, touchSeen, KEY };
+
+  // ============================================================= 2. PRESENÇA (Salão)
+  // O Salão já conecta 1 s depois de abrir o jogo (p2p_matchmaker.js, fim do arquivo); a presença e o canal local
+  // vêm de lá. Aqui não há nada a ligar.
 })();

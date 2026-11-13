@@ -855,7 +855,30 @@ function startSalaoPresenceHeartbeat() {
   salaoPresenceTimer = setInterval(sendSalaoPresencePing, 8000);
 }
 
+// v728: canal local entre abas do mesmo aparelho (e dos testes). Antes só nascia no matchmaking ranqueado.
+function ensureSalaoBroadcastChannel() {
+  if (rankedMatchmakerChannel || typeof BroadcastChannel === "undefined") return;
+  try {
+    rankedMatchmakerChannel = new BroadcastChannel("pokeduel_v600_salao");
+    rankedMatchmakerChannel.onmessage = ev => { if (ev && ev.data) handleIncomingSalaoMessage(ev.data); };
+  } catch (e) {}
+}
+// v728: treinador online no Salão (presença há menos de 28 s) pelo ID do perfil
+function pdrSalaoOnlineByTrainerId(trainerId) {
+  if (!trainerId) return null;
+  const now = Date.now();
+  for (const [clientId, data] of salaoKnownTrainers.entries()) {
+    if (data && data.trainerId === trainerId && now - (data.lastSeen || 0) < 28000) {
+      return { clientId, nickname: data.nickname, avatar: data.avatar, rating: data.rating, lastSeen: data.lastSeen };
+    }
+  }
+  return null;
+}
+window.ensureSalaoBroadcastChannel = ensureSalaoBroadcastChannel;
+window.pdrSalaoOnlineByTrainerId = pdrSalaoOnlineByTrainerId;
+
 function connectToGlobalSalao() {
+  ensureSalaoBroadcastChannel();
   updateSalaoCountUI();
   if (salaoWs && (salaoWs.readyState === WebSocket.OPEN || salaoWs.readyState === WebSocket.CONNECTING)) {
     return;
@@ -937,6 +960,7 @@ function handleIncomingSalaoMessage(msg) {
         nickname: msg.nickname,
         rating: msg.rating,
         avatar: msg.avatar,
+        trainerId: msg.trainerId || null, // v728: identidade para o sistema de amigos
         lastSeen: Date.now()
       });
       if (msg.publicProfile && typeof recordRealPlayerEncounter === "function") {
