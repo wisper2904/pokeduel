@@ -1677,8 +1677,9 @@ if (homeCarouselCanvas) {
     // 2. Check if user tapped the Centerpiece on the main pedestal / stage
     const cx = homeCarouselCanvas.width * 0.5;
     const cy = homeCarouselCanvas.height * 0.50;
-    const targetY = homeCenterpieceShowPedestal ? (cy - 45 * S) : (cy - 20 * S);
-    if (Math.hypot(tx - cx, ty - targetY) < 95 * S) {
+    const cr = window.__pdrHubCenterRect; // v737: área onde a peça foi desenhada
+    const hitCenter = cr ? (tx >= cr.x && tx <= cr.x + cr.w && ty >= cr.y && ty <= cr.y + cr.h) : (Math.hypot(tx - cx, ty - (cy - 20 * S)) < 95 * S);
+    if (hitCenter) {
       const centerFigIdx = state.deckP1[selectedCarouselSlot % 6];
       openFigureDetailsModal(centerFigIdx);
       playSfx("tick");
@@ -2115,7 +2116,28 @@ function cycleCenterpieceFigurine() {
   if (msg && f) msg.textContent = `★ Time em Destaque (Slot #${selectedCarouselSlot + 1}/6): [${f.rarity}] ${f.name} (MP ${f.mp})`;
 }
 
-let homeCenterpieceShowPedestal = (typeof localStorage !== "undefined" && localStorage.getItem("pokeduel_show_pedestal") === "false") ? false : true;
+// v737: o modo "Pedestal 3D" saiu; o Início mostra sempre só a peça (pedido do Gabriel)
+let homeCenterpieceShowPedestal = false;
+// Caixa da figura de verdade dentro da imagem (as imagens têm margens diferentes), para centralizar a peça
+const _pdrSpriteBoxCache = new WeakMap();
+function pdrSpriteContentBox(img) {
+  if (!img || !img.naturalWidth) return null;
+  let b = _pdrSpriteBoxCache.get(img);
+  if (b) return b;
+  try {
+    const w = img.naturalWidth, h = img.naturalHeight, c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const x = c.getContext("2d"); x.drawImage(img, 0, 0);
+    const d = x.getImageData(0, 0, w, h).data;
+    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
+      if (d[(yy * w + xx) * 4 + 3] > 40) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+    }
+    b = x1 < 0 ? { x: 0, y: 0, w, h } : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+  } catch (e) { b = { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight }; }
+  _pdrSpriteBoxCache.set(img, b);
+  return b;
+}
 
 function toggleHomePedestalMode() {
   homeCenterpieceShowPedestal = !homeCenterpieceShowPedestal;
@@ -2267,10 +2289,11 @@ function renderHomeCarouselLoop() {
         hcCtx.drawImage(cImg, figX, figY, cw, ch);
       }
     } else {
-      // Pedestal OFF: "Só a Peça" - Pokémon figure stands cleanly on the stadium floor with authentic glowing ring base
+      // v737: "Só a Peça" — figura centralizada pelo conteúdo real da imagem, com a base apoiada no anel do chão
+      const ringY = H * 0.66;
       hcCtx.fillStyle = "rgba(0, 0, 0, 0.65)";
       hcCtx.beginPath();
-      hcCtx.ellipse(cx, cy + 38 * S, 58 * S, 16 * S, 0, 0, Math.PI * 2);
+      hcCtx.ellipse(cx, ringY, 62 * S, 17 * S, 0, 0, Math.PI * 2);
       hcCtx.fill();
 
       hcCtx.save();
@@ -2279,17 +2302,18 @@ function renderHomeCarouselLoop() {
       hcCtx.shadowColor = "#38bdf8";
       hcCtx.shadowBlur = 14 * S;
       hcCtx.beginPath();
-      hcCtx.ellipse(cx, cy + 38 * S, 52 * S, 14 * S, 0, 0, Math.PI * 2);
+      hcCtx.ellipse(cx, ringY, 56 * S, 15 * S, 0, 0, Math.PI * 2);
       hcCtx.stroke();
       hcCtx.restore();
 
       const cImg = loadedFigImages[centerFig.spriteKey] || loadedFigImages[centerFig.id] || loadedFigImages["pikachu"];
-      if (cImg && cImg.complete) {
-        const cw = 175 * S;
-        const ch = cw * (cImg.naturalHeight / (cImg.naturalWidth || 1));
-        const figX = cx - cw / 2;
-        const figY = cy - ch + 40 * S;
-        hcCtx.drawImage(cImg, figX, figY, cw, ch);
+      if (cImg && cImg.complete && cImg.naturalWidth) {
+        const bx = pdrSpriteContentBox(cImg);
+        const k = Math.min((H * 0.42) / bx.h, (W * 0.46) / bx.w);
+        const dw = bx.w * k, dh = bx.h * k;
+        const dx = cx - dw / 2, dy = ringY + 4 * S - dh; // a base da peça encosta no anel (fica um pouco por dentro dele)
+        hcCtx.drawImage(cImg, bx.x, bx.y, bx.w, bx.h, dx, dy, dw, dh);
+        window.__pdrHubCenterRect = { x: dx, y: dy, w: dw, h: dh, ringY: ringY + 4 * S };
       }
     }
     hcCtx.restore();

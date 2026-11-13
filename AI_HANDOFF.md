@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v736` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v737` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,11 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Início: só a peça, centralizada (v737)
+- Pedido: tirar o modo "Pedestal 3D" e deixar só a peça, que estava alta e fora do centro.
+- Botão `#home-pedestal-toggle-btn` removido dos 2 HTMLs; `homeCenterpieceShowPedestal = false` fixo em `ui.js` (a preferência antiga `pokeduel_show_pedestal` é ignorada; `toggleHomePedestalMode` continua existindo, sem botão).
+- Peça do meio: `pdrSpriteContentBox(img)` mede a caixa da figura de verdade dentro da imagem (as imagens têm margens diferentes, cache em `WeakMap`). A figura é desenhada centrada nessa caixa, com altura até 42% e largura até 46% do canvas, e a base encosta no anel em `H*0.66` (no chão do palco; antes ficava no céu). O toque para abrir a info usa a área desenhada (`window.__pdrHubCenterRect`).
 
 ### 2026-11-13 · Claude · Vitrine do Início abre o painel de info novo (v736)
 - Bug: tocar no Pokémon do pedestal (vitrine do Início) abria o painel antigo `#figure-details-modal`. Também abriam o antigo: lista do buff da semana e listas legadas de `ui.js`.
