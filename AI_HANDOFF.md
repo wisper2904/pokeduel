@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v740` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v741` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,11 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Idioma inicial pelo aparelho (v741)
+- Antes: sem idioma salvo, o jogo sempre abria em português (`currentAppLanguage` fallback "pt").
+- Agora: na primeira abertura (sem `pokeduel_language` salvo), usa o primeiro idioma suportado de `navigator.languages` (pt/en/es). Se o aparelho não tiver nenhum deles, inglês. Depois que a pessoa escolhe, o valor fica salvo e a detecção não roda mais.
+- `js/data/i18n.js` (bloco `currentAppLanguage`). Sem texto novo.
 
 ### 2026-11-13 · Claude · Barra de times da aba Deck arrumada (v740)
 - Antes: os times, o ＋, o ✏️ e o ⚡ Auto ficavam numa linha com rolagem horizontal, e o botão Auto ia para a lateral.

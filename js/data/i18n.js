@@ -2648,7 +2648,13 @@ let currentAppLanguage = (function() {
     const saved = localStorage.getItem("pokeduel_language");
     if (saved && (saved === "pt" || saved === "en" || saved === "es")) return saved;
   } catch (e) {}
-  return "pt";
+  // Primeira abertura: usa o idioma do aparelho (o primeiro suportado da lista do navegador); se nenhum for suportado, inglês.
+  const sys = (typeof navigator !== "undefined" && (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language])) || [];
+  for (const tag of sys) {
+    const base = String(tag || "").slice(0, 2).toLowerCase();
+    if (base === "pt" || base === "en" || base === "es") return base;
+  }
+  return "en";
 })();
 
 function getAppLanguage() {
