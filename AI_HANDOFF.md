@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v729` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v730` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,12 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Janela de perfil repaginada (v730)
+- `#player-profile-modal` (2 HTMLs) reescrito com classes `.pp-*` (fim de `css/style.css`), **mesmos ids** que `ui.js` preenche: topo com foto grande (`profile_avatar.png`), nome, título em pílula e ID com botão Copiar (`window.pdrCopyTrainerId`); faixa da liga com barra de progresso até a próxima liga (`#pp-tier-fill`, `#pp-tier-next`, limites 1500/1900/2300/2700 de `getTierForRating`); 6 quadros de estatística; chips de coleção e chaves; conquistas; "Editar perfil" recolhido (nome, título, pedestal, Pokémon em destaque, Zerar, Salvar); conta na nuvem compacta.
+- Saiu o seletor "Visual do Avatar" (`#prof-hair-select`), que não mudava nada na tela (o código que lia já checava se existe).
+- IIFE no fim de `ui.js` envolve `syncIndividualProfileUI`/`openPlayerProfileModal` para pintar a barra. A frase "Faltam N pts…" é montada por idioma com `data-noi18n` (o tradutor genérico embaralhava "Leader League").
+- 20 textos novos em `900_manual.txt` e `i18n_dict.js`.
 
 ### 2026-11-13 · Claude · Foto do perfil no placar da partida (v729)
 - `arena3d.js avatar()`: os retratos ao lado do relógio usam `assets/ui/profile_avatar.png` (o mesmo boneco da tela de perfil), cortado para caber e com borda azul (você) / vermelha (rival, espelhado). O boneco desenhado por código só aparece se a imagem não carregar. Imagem adicionada ao `CORE_ASSETS`. Perfil não mudou (pedido do Gabriel).

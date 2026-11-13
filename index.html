@@ -561,119 +561,81 @@
 
   <!-- SECTION 1: CLEAN INDIVIDUAL TRAINER PROFILE MODAL (v4.8.0) -->
   <div id="player-profile-modal" style="display:none; position:fixed; inset:0; z-index:270; background:rgba(3,7,18,0.92); align-items:center; justify-content:center; padding:12px;">
-    <div style="width:100%; max-width:360px; max-height:90vh; overflow-y:auto; background:linear-gradient(180deg,#0f2347 0%,#061024 100%); border:2px solid #38bdf8; border-radius:12px; padding:14px; color:#f8fafc; box-shadow:0 10px 35px rgba(0,0,0,0.95);">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(56,189,248,0.35); padding-bottom:8px; margin-bottom:10px;">
-        <div style="display:flex; align-items:center; gap:9px;">
-          <img id="prof-modal-avatar" src="" style="width:42px; height:42px; border-radius:8px; border:1.5px solid #facc15; object-fit:contain; background:#091326;">
-          <div>
-            <div style="font-size:14px; font-weight:900; color:#facc15;" id="prof-header-nick">Treinador</div>
-            <div style="font-size:9.5px; color:#7dd3fc; font-weight:800;">ID: <span id="prof-id-lbl">---</span> · <span id="prof-title-badge" style="color:#fde047;">Treinador Iniciante</span></div>
-          </div>
+    <div class="pp-card">
+      <!-- v730: topo -->
+      <div class="pp-hero">
+        <button class="pp-close" onclick="closePlayerProfileModal()">✕</button>
+        <img id="prof-modal-avatar" class="pp-avatar" src="assets/ui/profile_avatar.png" alt="">
+        <div class="pp-who">
+          <div id="prof-header-nick" class="pp-nick">Treinador</div>
+          <div id="prof-title-badge" class="pp-title">Treinador Iniciante</div>
+          <div class="pp-idrow">ID <b id="prof-id-lbl">---</b><button class="pp-mini" onclick="pdrCopyTrainerId()">Copiar</button></div>
         </div>
-        <button onclick="closePlayerProfileModal()" style="background:#1e293b; border:1px solid #94a3b8; color:#fff; border-radius:6px; width:28px; height:28px; font-weight:900; cursor:pointer;">✕</button>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:8px; font-size:10.5px;">
-        <!-- Pontos da Liga & Recorde Pessoal -->
-        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; text-align:center;">
-          <div style="background:#071124; border:1px solid #38bdf8; border-radius:7px; padding:6px;">
-            <div style="font-size:8px; color:#94a3b8;">Pontos da Liga</div>
-            <div style="font-size:14px; font-weight:900; color:#38bdf8;" id="prof-rating-val">1000</div>
-            <div style="font-size:8px; color:#fde047; font-weight:800;" id="prof-tier-lbl">Beginner League</div>
-          </div>
-          <div style="background:#071124; border:1px solid #1e3a8a; border-radius:7px; padding:6px;">
-            <div style="font-size:8px; color:#94a3b8;">Recorde Pessoal</div>
-            <div style="font-size:14px; font-weight:900; color:#facc15;" id="prof-max-rating-val">1000</div>
-            <div style="font-size:8px; color:#94a3b8;" id="prof-collection-count-lbl">6/217 Pokémon</div>
-          </div>
-          <div style="background:#071124; border:1px solid #1e3a8a; border-radius:7px; padding:6px;">
-            <div style="font-size:8px; color:#94a3b8;">Chaves do Baú</div>
-            <div style="font-size:14px; font-weight:900; color:#4ade80;"><span id="prof-keys-val">0</span>/10 🔑</div>
-            <div style="font-size:8px; color:#94a3b8;">Locked Booster</div>
-          </div>
+      <!-- v730: liga -->
+      <div class="pp-league">
+        <div class="pp-league-top">
+          <div><div class="pp-lbl">Pontos da Liga</div><div id="prof-rating-val" class="pp-big">1000</div></div>
+          <div style="text-align:right"><div id="prof-tier-lbl" class="pp-tier">Beginner League</div><div class="pp-lbl">Recorde <b id="prof-max-rating-val">1000</b></div></div>
         </div>
+        <div class="pp-bar"><div id="pp-tier-fill" class="pp-bar-fill" style="width:0%"></div></div>
+        <div id="pp-tier-next" class="pp-lbl">—</div>
+      </div>
 
-        <!-- Estatísticas Individuais de Duelo -->
-        <div style="background:#071124; border:1px solid #1e3a8a; border-radius:7px; padding:8px 10px;">
-          <div style="font-size:9.5px; font-weight:900; color:#38bdf8; margin-bottom:5px;">📊 MINHAS ESTATÍSTICAS DE DUELO</div>
-          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; font-size:9.5px; text-align:center;">
-            <div>Partidas: <strong id="pstat-total" style="color:#fff;">0</strong></div>
-            <div>Vitórias: <strong id="pstat-wins" style="color:#4ade80;">0</strong></div>
-            <div>Derrotas: <strong id="pstat-losses" style="color:#f87171;">0</strong></div>
-            <div>Taxa Vitória: <strong id="pstat-wr" style="color:#fde047;">0.0%</strong></div>
-            <div>Sequência: <strong id="pstat-streak" style="color:#38bdf8;">0🔥</strong></div>
-            <div>Melhor Seq.: <strong id="pstat-maxstreak" style="color:#c084fc;">0🏆</strong></div>
-          </div>
-        </div>
+      <!-- estatísticas -->
+      <div class="pp-sec-t">📊 Estatísticas de duelo</div>
+      <div class="pp-stats">
+        <div class="pp-st"><b id="pstat-total">0</b><span>Partidas</span></div>
+        <div class="pp-st win"><b id="pstat-wins">0</b><span>Vitórias</span></div>
+        <div class="pp-st lose"><b id="pstat-losses">0</b><span>Derrotas</span></div>
+        <div class="pp-st gold"><b id="pstat-wr">0.0%</b><span>Taxa de vitória</span></div>
+        <div class="pp-st blue"><b id="pstat-streak">0🔥</b><span>Sequência</span></div>
+        <div class="pp-st purple"><b id="pstat-maxstreak">0🏆</b><span>Melhor sequência</span></div>
+      </div>
+      <div class="pp-chips">
+        <span class="pp-chip">🎴 <b id="prof-collection-count-lbl">6/629 Pokémon</b></span>
+        <span class="pp-chip">🔑 <b><span id="prof-keys-val">0</span>/10</b> chaves</span>
+      </div>
 
-        <!-- Conquistas e Troféus Reais do Jogador -->
-        <div style="background:#071124; border:1px solid #1e3a8a; border-radius:7px; padding:8px 10px;">
-          <div style="font-size:9.5px; font-weight:900; color:#facc15; margin-bottom:4px;">🏆 MINHAS CONQUISTAS & INSÍGNIAS</div>
-          <div id="prof-trophies-container" style="display:flex; gap:4px; flex-wrap:wrap;"></div>
-        </div>
+      <!-- conquistas -->
+      <div class="pp-sec-t">🏆 Conquistas e insígnias</div>
+      <div id="prof-trophies-container" class="pp-trophies"></div>
 
-        <!-- Personalização do Treinador -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
-          <div>
-            <label style="font-size:8.5px; color:#cbd5e1; font-weight:800;">Seu Nome / Apelido:</label>
-            <input id="prof-name-input" type="text" maxlength="16" placeholder="Seu Nome" style="width:100%; margin-top:3px; font-size:10.5px; font-weight:900; padding:5px; border-radius:5px; background:#050912; border:1px solid #38bdf8; color:#fff;">
-          </div>
-          <div>
-            <label style="font-size:8.5px; color:#cbd5e1; font-weight:800;">Título do Perfil:</label>
-            <select id="prof-title-select" style="width:100%; margin-top:3px; font-size:9.5px; font-weight:800; padding:5px; border-radius:5px; background:#050912; border:1px solid #38bdf8; color:#fff;">
+      <!-- editar perfil (recolhido) -->
+      <details class="pp-edit">
+        <summary>✏️ Editar perfil</summary>
+        <div class="pp-form">
+          <label>Seu nome / apelido<input id="prof-name-input" type="text" maxlength="16" placeholder="Seu nome"></label>
+          <label>Título do perfil
+            <select id="prof-title-select">
               <option value="Treinador Iniciante">Treinador Iniciante</option>
               <option value="Desafiante de Carmonte">Desafiante de Carmonte</option>
               <option value="Estrategista PFG">Estrategista PFG</option>
               <option value="Mestre das Roletas">Mestre das Roletas</option>
               <option value="Lenda da Arena">Lenda da Arena</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:8.5px; color:#cbd5e1; font-weight:800;">Visual do Avatar:</label>
-            <select id="prof-hair-select" style="width:100%; margin-top:3px; font-size:9.5px; font-weight:800; padding:5px; border-radius:5px; background:#050912; border:1px solid #38bdf8; color:#fff;">
-              <option value="Spiky_Gold">Visor Vermelho & Dourado</option>
-              <option value="Serebii_Brown">Óculos Táticos Clássicos</option>
-              <option value="Carmonte_Silver">Máscara Prateada</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:8.5px; color:#cbd5e1; font-weight:800;">Pedestal das Figuras:</label>
-            <select id="prof-pedestal-select" style="width:100%; margin-top:3px; font-size:9.5px; font-weight:800; padding:5px; border-radius:5px; background:#050912; border:1px solid #38bdf8; color:#fff;">
+            </select></label>
+          <label>Pedestal das figuras
+            <select id="prof-pedestal-select">
               <option value="Standard_Bronze">⚙️ Bronze Clássico</option>
               <option value="Royal_Crystal_Plate">💎 Cristal Azul Real</option>
               <option value="Polished_Gold_24K">👑 Ouro Polido 24K</option>
               <option value="Dark_Obsidian_Crystal">🔮 Obsidiana Roxa</option>
               <option value="Volcanic_Flames">🔥 Chamas Vulcânicas</option>
-            </select>
+            </select></label>
+          <label>Pokémon em destaque no Início<select id="prof-centerpiece-select"></select></label>
+          <div class="pp-form-btns">
+            <button onclick="confirmResetIndividualProfile()" class="btn secondary pp-reset">🔄 Zerar perfil</button>
+            <button onclick="savePlayerProfileSettings(); closePlayerProfileModal();" class="btn gold" style="flex:1">💾 Salvar</button>
           </div>
         </div>
+      </details>
 
-        <div>
-          <label style="font-size:8.5px; color:#cbd5e1; font-weight:800;">Pokémon em Destaque no Lobby:</label>
-          <select id="prof-centerpiece-select" style="width:100%; margin-top:3px; font-size:10px; font-weight:800; padding:5px; border-radius:5px; background:#050912; border:1px solid #38bdf8; color:#fff;"></select>
-        </div>
-
-        <!-- CONTA & SAVE NA NUVEM (LOGIN E SENHA) -->
-        <div style="background:linear-gradient(180deg,#0a192f 0%,#040a16 100%); border:1.5px solid #38bdf8; border-radius:9px; padding:9px 10px; margin-top:4px; box-shadow:inset 0 1px 2px rgba(0,0,0,0.5);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <div style="display:flex; align-items:center; gap:6px;">
-              <span style="font-size:14px;">☁️</span>
-              <strong style="color:#38bdf8; font-size:10.5px;">CONTA NA NUVEM (SAVE & SYNC)</strong>
-            </div>
-            <span id="prof-cloud-status-pill" style="font-size:8.5px; font-weight:900; padding:2px 7px; border-radius:99px; background:#0f172a; border:1px solid #38bdf8; color:#bae6fd;">☁️ Desconectado</span>
-          </div>
-          <div id="prof-cloud-desc-txt" style="font-size:9px; color:#94a3b8; line-height:1.35; margin-bottom:7px;">
-            Sincronize seu progresso, figuras Kaiyodo e gemas por Login e Senha para jogar no celular ou PC.
-          </div>
-          <button type="button" onclick="closePlayerProfileModal(); openCloudAccountModal();" class="btn green" style="width:100%; padding:7px; font-size:10.5px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
-            <span>☁️</span> <span id="prof-cloud-action-btn-lbl">Gerenciar Conta / Fazer Login</span>
-          </button>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:4px;">
-          <button onclick="confirmResetIndividualProfile()" class="btn secondary" style="font-size:9px; padding:7px 10px; color:#fca5a5; border-color:#ef4444;">🔄 Resetar Perfil</button>
-          <button onclick="savePlayerProfileSettings(); closePlayerProfileModal();" class="btn gold" style="flex:1; font-size:10.5px; padding:7px 14px;">💾 Salvar Meu Perfil</button>
-        </div>
+      <!-- conta na nuvem -->
+      <div class="pp-cloud">
+        <div class="pp-cloud-top"><strong>☁️ Conta na nuvem</strong><span id="prof-cloud-status-pill" class="pp-pill">☁️ Desconectado</span></div>
+        <div id="prof-cloud-desc-txt" class="pp-lbl" style="margin:4px 0 7px">Salve seu progresso com login e senha para jogar em outro aparelho.</div>
+        <button type="button" onclick="closePlayerProfileModal(); openCloudAccountModal();" class="btn green" style="width:100%; padding:7px; font-size:10.5px; font-weight:900;"><span id="prof-cloud-action-btn-lbl">Gerenciar conta / Entrar</span></button>
       </div>
     </div>
   </div>

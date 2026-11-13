@@ -10825,3 +10825,39 @@ renderPlatesTray();
     if (wm) wm.style.display = "flex";
   }, 450);
 })();
+
+// v730: perfil repaginado — barra de progresso da liga e botão de copiar o ID
+(function pdrProfileExtras() {
+  const STEPS = [["Beginner", 0], ["Leader", 1500], ["Champion", 1900], ["Master", 2300], ["Legend", 2700]];
+  function paintTier() {
+    const p = window.trainerProfileData; if (!p) return;
+    const pts = Number(p.rankRating) || 1000;
+    let i = 0; while (i < STEPS.length - 1 && pts >= STEPS[i + 1][1]) i++;
+    const fill = document.getElementById("pp-tier-fill"), next = document.getElementById("pp-tier-next");
+    if (i === STEPS.length - 1) {
+      if (fill) fill.style.width = "100%";
+      if (next) next.textContent = (typeof L === "function") ? L("Liga máxima alcançada!") : "Liga máxima alcançada!";
+      return;
+    }
+    const a = STEPS[i][1], b = STEPS[i + 1][1], pct = Math.max(0, Math.min(100, ((pts - a) / (b - a)) * 100));
+    if (fill) fill.style.width = pct.toFixed(1) + "%";
+    // frase montada por idioma (o tradutor genérico embaralhava "… Leader League")
+    const lang = (typeof getAppLanguage === "function") ? getAppLanguage() : "pt";
+    const NAMES = { pt: { Leader: "Liga Líder", Champion: "Liga Campeão", Master: "Liga Mestre", Legend: "Liga Lenda" },
+      en: { Leader: "Leader League", Champion: "Champion League", Master: "Master League", Legend: "Legend League" },
+      es: { Leader: "Liga Líder", Champion: "Liga Campeón", Master: "Liga Maestra", Legend: "Liga Leyenda" } };
+    const nm = (NAMES[lang] || NAMES.pt)[STEPS[i + 1][0]], n = b - pts;
+    const msg = lang === "en" ? `${n} pts to ${nm}` : lang === "es" ? `Faltan ${n} pts para la ${nm}` : `Faltam ${n} pts para a ${nm}`;
+    if (next) { next.textContent = msg; next.setAttribute("data-noi18n", "1"); }
+  }
+  window.pdrCopyTrainerId = function () {
+    const id = (window.trainerProfileData || {}).trainerId || "";
+    try { if (navigator.clipboard) navigator.clipboard.writeText(id).catch(() => {}); } catch (e) {}
+    try { if (window.PDRFriendsNet && PDRFriendsNet.toast) PDRFriendsNet.toast((typeof L === "function") ? L("ID copiado!") : "ID copiado!"); } catch (e) {}
+  };
+  const _sync = syncIndividualProfileUI;
+  syncIndividualProfileUI = function () { const r = _sync.apply(this, arguments); try { paintTier(); } catch (e) {} return r; };
+  const _open = openPlayerProfileModal;
+  openPlayerProfileModal = function () { const r = _open.apply(this, arguments); try { paintTier(); } catch (e) {} return r; };
+  window.openPlayerProfileModal = openPlayerProfileModal;
+})();
