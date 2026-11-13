@@ -66,4 +66,137 @@
   // ============================================================= 2. PRESENÇA (Salão)
   // O Salão já conecta 1 s depois de abrir o jogo (p2p_matchmaker.js, fim do arquivo); a presença e o canal local
   // vêm de lá. Aqui não há nada a ligar.
+  const tt = (k, fb) => (typeof t === "function" ? t(k, fb) : fb);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  function spriteOf(key) {
+    const k = String(key || "pikachu").toLowerCase();
+    const sp = (typeof AUTHENTIC_FIG_SPRITES !== "undefined") && (AUTHENTIC_FIG_SPRITES[k] || AUTHENTIC_FIG_SPRITES.pikachu);
+    return sp ? sp.uri : "";
+  }
+  function online(id) { try { return (typeof pdrSalaoOnlineByTrainerId === "function") ? pdrSalaoOnlineByTrainerId(id) : null; } catch (e) { return null; } }
+  function inMatch() {
+    if (typeof state !== "undefined" && state && state.isMatchActive) return true;
+    const ov = document.getElementById("wheel-overlay");
+    return !!(ov && ov.classList.contains("show"));
+  }
+  function sfx(n) { try { if (window.PDRSound) PDRSound.play(n); } catch (e) {} }
+  function log(msg) { try { if (typeof setLogText === "function") setLogText(msg); } catch (e) {} }
+
+  // ============================================================= 3. CSS dos pop-ups e da aba
+  const CSS = `
+  .pf-modal{position:fixed;inset:0;z-index:300;background:rgba(2,6,15,.78);display:flex;align-items:center;justify-content:center;padding:12px}
+  .pf-panel{width:100%;max-width:340px;background:#0b0f17;border:2px solid #38bdf8;border-radius:12px;padding:12px;color:#fff;box-shadow:0 0 40px rgba(0,0,0,.8)}
+  .pf-panel h3{margin:0 0 8px;font-size:14px;font-weight:900;color:#fde047;text-align:center;letter-spacing:.5px}
+  .pf-who{display:flex;align-items:center;gap:10px;background:#111827;border:1px solid #334155;border-radius:10px;padding:8px}
+  .pf-who img{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+  .pf-who b{font-size:14px;display:block}.pf-who small{color:#94a3b8;font-size:10px}
+  .pf-msg{font-size:11.5px;color:#cbd5e1;margin:10px 2px 4px;text-align:center}
+  .pf-yn{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .pf-yn button{height:40px;border-radius:7px;border:2px solid #fef9c3;background:linear-gradient(180deg,#fde047,#eab308);color:#1c1917;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 #854d0e}
+  .pf-yn button.sec{background:#1e293b;border-color:#475569;color:#e2e8f0;box-shadow:0 3px 0 #0f172a}
+  .pf-toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:301;background:#0b0f17;border:1.5px solid #4ade80;color:#e2e8f0;font-size:11px;font-weight:800;padding:8px 14px;border-radius:99px;box-shadow:0 6px 20px rgba(0,0,0,.6);pointer-events:none;animation:pfToast 2.6s forwards}
+  @keyframes pfToast{0%{opacity:0;transform:translate(-50%,-8px)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+  `;
+  function injectCss() { if (document.getElementById("pf-css")) return; const st = document.createElement("style"); st.id = "pf-css"; st.textContent = CSS; document.head.appendChild(st); }
+  function toast(msg) { injectCss(); const d = document.createElement("div"); d.className = "pf-toast"; d.textContent = msg; document.body.appendChild(d); setTimeout(() => d.remove(), 2700); }
+  function closeModal(id) { const m = document.getElementById(id); if (m) m.remove(); }
+  function openModal(id, html) {
+    injectCss(); closeModal(id);
+    const m = document.createElement("div"); m.id = id; m.className = "pf-modal"; m.innerHTML = `<div class="pf-panel">${html}</div>`;
+    document.body.appendChild(m); sfx("confirm"); return m;
+  }
+  const whoHtml = (f) => `<div class="pf-who"><img src="${esc(spriteOf(f.avatar))}" alt=""><div><b>${esc(f.nickname || f.trainerId)}</b><small>ID ${esc(f.trainerId)} · ★ ${esc(f.rating || 1000)}</small></div></div>`;
+
+  // ============================================================= 4. REDE (pacotes FRIEND_* pelo Salão)
+  const seenNonce = new Set();
+  const resentAccept = new Set();
+  function me() { const p = window.trainerProfileData || {}; return { id: myId(), nick: p.nickname || "Treinador", avatar: String(p.mainDisplayFigure || "pikachu").toLowerCase().replace(/\s+/g, "_"), rating: p.rankRating || 1000 }; }
+  function basePacket(type, toTrainerId) {
+    const m = me();
+    return { type, toTrainerId, fromTrainerId: m.id, fromNick: m.nick, fromAvatar: m.avatar, fromRating: m.rating, ts: Date.now(), nonce: Math.random().toString(36).slice(2, 10) };
+  }
+  function send(pk) { try { if (typeof publishSalaoPacket === "function") publishSalaoPacket(pk); } catch (e) {} }
+  function fromInfo(msg) { return { trainerId: msg.fromTrainerId, nickname: msg.fromNick, avatar: msg.fromAvatar, rating: msg.fromRating }; }
+
+  function sendRequest(toTrainerId, toNick) {
+    addOutgoing({ trainerId: toTrainerId, nickname: toNick });
+    send(basePacket("FRIEND_REQUEST", toTrainerId));
+  }
+  function sendAccept(toTrainerId) { send(basePacket("FRIEND_ACCEPT", toTrainerId)); }
+  function sendDecline(toTrainerId) { send(basePacket("FRIEND_DECLINE", toTrainerId)); }
+  function sendRemove(toTrainerId) { removeFriend(toTrainerId); send(basePacket("FRIEND_REMOVE", toTrainerId)); }
+  function acceptIncoming(trainerId) {
+    const r = load().incoming.find((x) => x.trainerId === trainerId);
+    upsertFriend(Object.assign({}, r || { trainerId }, { confirmed: false }));
+    removeIncoming(trainerId); removeOutgoing(trainerId);
+    sendAccept(trainerId); closeModal("pdr-friend-req-modal");
+  }
+  function declineIncoming(trainerId) { removeIncoming(trainerId); sendDecline(trainerId); closeModal("pdr-friend-req-modal"); }
+
+  function showRequestModal(f) {
+    if (inMatch()) return;
+    const m = openModal("pdr-friend-req-modal", `<h3>👥 ${tt("pf.req_title", "Pedido de amizade")}</h3>${whoHtml(f)}
+      <div class="pf-msg">${esc(f.nickname || f.trainerId)} ${tt("pf.req_msg", "quer ser seu amigo.")}</div>
+      <div class="pf-yn"><button id="pf-req-yes">${tt("pf.accept", "Aceitar")}</button><button id="pf-req-no" class="sec">${tt("pf.later", "Depois")}</button></div>`);
+    m.querySelector("#pf-req-yes").onclick = () => acceptIncoming(f.trainerId);
+    m.querySelector("#pf-req-no").onclick = () => closeModal("pdr-friend-req-modal");
+  }
+
+  // Retorna true quando o pacote era FRIEND_* (tratado ou descartado). SALAO_PRESENCE é só observado (retorna false).
+  function handle(msg) {
+    if (!msg || typeof msg !== "object" || typeof msg.type !== "string") return false;
+    const my = myId();
+    if (msg.type === "SALAO_PRESENCE") {
+      const id = msg.trainerId;
+      if (typeof id === "string" && id !== my) {
+        const f = getFriend(id);
+        if (f) {
+          touchSeen(id, Date.now());
+          if (f.confirmed === false && !resentAccept.has(id)) { resentAccept.add(id); sendAccept(id); }
+        }
+      }
+      return false;
+    }
+    if (msg.type.indexOf("FRIEND_") !== 0) return false;
+    const from = msg.fromTrainerId;
+    if (typeof from !== "string" || !ID_RE.test(from) || from === my || msg.toTrainerId !== my) return true;
+    const key = from + ":" + (msg.nonce || msg.ts || "");
+    if (seenNonce.has(key)) return true;
+    seenNonce.add(key); if (seenNonce.size > 500) seenNonce.clear();
+    const d = load();
+    const isFriend = d.friends.some((x) => x.trainerId === from);
+    const inOut = d.outgoing.some((x) => x.trainerId === from);
+    try {
+      if (msg.type === "FRIEND_REQUEST") {
+        if (isFriend) { upsertFriend(Object.assign(fromInfo(msg), { confirmed: true })); sendAccept(from); return true; }
+        if (inOut) { // os dois pediram ao mesmo tempo: vira amizade
+          upsertFriend(Object.assign(fromInfo(msg), { confirmed: true })); removeOutgoing(from); sendAccept(from); return true;
+        }
+        addIncoming(fromInfo(msg));
+        showRequestModal(fromInfo(msg));
+      } else if (msg.type === "FRIEND_ACCEPT") {
+        if (!isFriend && !inOut) return true;
+        const was = getFriend(from);
+        upsertFriend(Object.assign(fromInfo(msg), { confirmed: true }));
+        removeOutgoing(from); removeIncoming(from);
+        if (inOut || (was && was.confirmed === false)) { sendAccept(from); }
+        if (!was || was.confirmed === false) { toast(`🤝 ${msg.fromNick || from} ${tt("pf.now_friends", "agora é seu amigo!")}`); sfx("ab_pos"); }
+      } else if (msg.type === "FRIEND_DECLINE") {
+        if (inOut) { removeOutgoing(from); toast(`${msg.fromNick || from} ${tt("pf.declined", "recusou o pedido.")}`); }
+      } else if (msg.type === "FRIEND_REMOVE") {
+        if (isFriend) removeFriend(from);
+      } else if (window.PDRFriendsNet && typeof PDRFriendsNet._handleInvite === "function") {
+        PDRFriendsNet._handleInvite(msg, isFriend);
+      }
+    } catch (e) { try { console.warn("[friends] handle", e); } catch (x) {} }
+    return true;
+  }
+  window.PDRFriendsNet = { basePacket, handle, sendRequest, sendAccept, sendDecline, sendRemove, acceptIncoming, declineIncoming, toast, openModal, closeModal, whoHtml, online, inMatch, me };
+
+  if (typeof handleIncomingSalaoMessage === "function") {
+    const _h = handleIncomingSalaoMessage;
+    const h2 = function (msg) { try { if (handle(msg)) return; } catch (e) {} return _h.apply(this, arguments); };
+    try { handleIncomingSalaoMessage = h2; } catch (e) {}
+    window.handleIncomingSalaoMessage = h2;
+  }
 })();
