@@ -321,7 +321,7 @@
     const nOn = rows.filter((r) => r.on).length;
     const friendHtml = rows.map(({ f, on }) => {
       const nick = (on && on.nickname) || f.nickname || f.trainerId, av = (on && on.avatar) || f.avatar, rt = (on && on.rating) || f.rating || 1000;
-      const sub = on ? `★ ${esc(rt)} · ${tt("pf.online", "online")}` : esc(ago(f.lastSeen)) + (f.confirmed === false ? ` · ${tt("pf.unconfirmed", "aguardando confirmação")}` : "");
+      const sub = on ? `★ ${esc(rt)} · ${tt("pf.online", "online")}` : `<span>${esc(ago(f.lastSeen))}</span>` + (f.confirmed === false ? ` · <span>${tt("pf.unconfirmed", "aguardando confirmação")}</span>` : "");
       const btn = on ? `<button class="pf-invite" data-act="invite" data-id="${esc(f.trainerId)}" ${pend ? "disabled" : ""}>🎮 ${tt("pf.invite", "Convidar")}</button>` : "";
       return `<div class="pf-friend" data-id="${esc(f.trainerId)}"><img src="${esc(spriteOf(av))}" alt=""><div class="pf-info"><div class="pf-name"><span class="pf-dot ${on ? "on" : "off"}"></span>${esc(nick)}</div><div class="pf-sub">${sub}</div></div>${btn}<button class="pf-more" data-act="more" data-id="${esc(f.trainerId)}" title="${esc(tt("pf.remove", "Remover amigo"))}">⋯</button></div>`;
     }).join("");
@@ -377,7 +377,8 @@
     else if (act === "req") { const t = onlineStrangers(new Set()).find((x) => x.trainerId === id); sendRequest(id, t && t.nickname); toast(tt("pf.req_sent", "Pedido enviado para") + " " + ((t && t.nickname) || id) + "!"); render(); }
     else if (act === "more") {
       const f = getFriend(id); if (!f) return;
-      if (window.confirm(`${tt("pf.remove_q", "Remover")} ${f.nickname || id} ${tt("pf.remove_q2", "da sua lista de amigos?")}`)) sendRemove(id);
+      const q = (typeof L === "function") ? L(`Remover ${f.nickname || id} da sua lista de amigos?`) : `Remover ${f.nickname || id} da sua lista de amigos?`;
+      if (window.confirm(q)) sendRemove(id);
     }
   }
   document.addEventListener("click", onClick);

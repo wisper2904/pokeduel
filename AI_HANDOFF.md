@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v727` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v728` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -96,6 +96,7 @@
 ```
 peerjs → i18n → sprites → figures → official_disks → bots → audio → board → battle → p2p_matchmaker → ui → juice → ai → abilities → app
 ```
+Ordem completa hoje (fim da lista): `… duel_extras → slice_effects → plates_all → arena3d → duel_screens → deck_screen → shop_screen → icons → settings_screen → battle_scene → friends_screen` (v728).
 Tudo é **global** (sem ES modules, sem bundler). Cada arquivo enxerga as funções dos anteriores.
 
 **⚠️ Padrão de monkey-patch em camadas.** Versões antigas foram "estendidas" assim:
@@ -160,6 +161,18 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Amigos e convite no Multijogador P2P (v728)
+- Desenho e plano: `docs/superpowers/specs/2026-11-13-amigos-p2p-design.md` e `docs/superpowers/plans/2026-11-13-amigos-p2p.md`.
+- **Novo `js/ui/friends_screen.js`** (último script; também em `CORE_ASSETS`). Três partes:
+  - `window.PDRFriends`: lista em `localStorage` `pdr_friends_v728` = `{friends, outgoing, incoming}`; identidade = `trainerId` (`NNN-NNN-NNN`). `outgoing` expira em 24 h. Vai junto no save na nuvem (que copia o `localStorage` inteiro).
+  - `window.PDRFriendsNet`: pacotes pelo **Salão** (mesmo tópico MQTT + `BroadcastChannel("pokeduel_v600_salao")`): `FRIEND_REQUEST`, `FRIEND_ACCEPT`, `FRIEND_DECLINE`, `FRIEND_REMOVE`, `FRIEND_INVITE {roomCode}`, `FRIEND_INVITE_REPLY {accept|decline|busy|cancel}`. Ignora eco (`fromTrainerId` = meu), `toTrainerId` ≠ meu, IDs inválidos e `nonce` repetido. Aceite feito com o outro offline fica `confirmed:false` e é reenviado quando ele aparece online. Convite usa `createIntuitiveP2PRoom()` / `joinIntuitiveP2PRoom()` sem mudar o protocolo da sala; expira em 45 s; em partida responde `busy` sem pop-up.
+  - `window.PDRFriendsUI.render()`: seção Amigos em `#pdr-friends-root` (pedidos, amigos online primeiro com Convidar, offline com "visto há", painel Adicionar com campo de ID e "Online agora no Salão"). Botão "Adicionar X como amigo" na tela de resultado de partida online (`#win-add-friend-btn`).
+- **`p2p_matchmaker.js`**: `salaoKnownTrainers` guarda `trainerId`; `window.pdrSalaoOnlineByTrainerId(id)`; `ensureSalaoBroadcastChannel()` chamado em `connectToGlobalSalao`; `joinIntuitiveP2PRoom` desiste em 15 s sem `P2P_START` ("SALA [ código ] NÃO ENCONTRADA").
+- **Aba P2P (2 HTMLs)**: cabeçalho novo; faixa `#p2p-status-banner` só aparece quando o status não é OFFLINE; sala por código recolhida em `<details id="p2p-code-card">` (mesmos ids); 2P local compacto; saiu a linha de botões "Multiplayer P2P / Quests / HD" (o `#pixel-mode-btn` era id duplicado e continua em Configurações). CSS `.pf-*` no fim de `css/style.css`.
+- Textos: 55 entradas novas em `tools/i18n/tr/900_manual.txt` e no fim de `js/data/i18n_dict.js` (à mão; `build.py` não existe).
+- Limitações conhecidas: tudo exige os dois online ao mesmo tempo (sem servidor); o `trainerId` pode ser forjado por quem ler o tópico público (mesmo nível de confiança do matchmaking atual).
+- Testes Playwright fora do repo (scratchpad `qa/friends/t1…t6`): 13 + 7 + 18 + 19 + 32 + 10 verificações.
 
 ### 2026-11-13 · Claude · Acabamento das 7 figuras montadas (v727)
 - `assets/sprites/{oddish,gloom,persian,machoke,dodrio,cubone,porygon}.webp` refeitos para casar com as figuras originais: base de cobre limpa (aro real do `metapod.webp` + tampo redesenhado na cor medida em caterpie/weedle, sem os riscos brancos da base do ninjask), figura maior e apoiada no centro do tampo, sombra de contato com a forma da figura, luz de cima/esquerda com a parte de baixo mais escura e cores menos chapadas (cara de figura de plástico fotografada). 116×110, script fora do repo.
