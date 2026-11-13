@@ -1999,6 +1999,7 @@ function openLockedBooster() {
   }
   playSfx("portal");
   playerKeyFragments -= 10;
+  try { saveEconomyAndUpgrades(); } catch (e) {}
   const kEl = document.getElementById("prof-keys-val");
   if (kEl) kEl.textContent = playerKeyFragments;
   const kLbl = document.getElementById("key-frag-lbl");
@@ -3849,6 +3850,7 @@ showWinResultScreen = function(winner) {
   }
 
   playerKeyFragments = Math.min(10, playerKeyFragments + (didWin ? 3 : 1));
+  try { saveEconomyAndUpgrades(); } catch (e) {}
   const kLbl = document.getElementById("key-frag-lbl");
   const kWrap = document.getElementById("locked-key-badge-wrap");
   if (kLbl) kLbl.textContent = playerKeyFragments;
@@ -4816,6 +4818,11 @@ function loadEconomyAndUpgrades() {
         userIngots         = typeof data.ingots === "number" ? Math.max(0, data.ingots) : 1;
         lastDailyBonusTs   = typeof data.lastDailyBonusTs === "number" ? data.lastDailyBonusTs : 0;
         claimedMissionWinsCount = typeof data.claimedMissionWinsCount === "number" ? data.claimedMissionWinsCount : 0;
+        // v735: as chaves do Locked Booster não eram salvas e voltavam a 0 ao reabrir o jogo
+        if (typeof data.keyFragments === "number") {
+          playerKeyFragments = Math.max(0, Math.min(10, Math.floor(data.keyFragments)));
+          const kl = document.getElementById("key-frag-lbl"); if (kl) kl.textContent = playerKeyFragments;
+        }
 
         if (data.figureUpgrades && typeof data.figureUpgrades === "object") {
           Object.keys(data.figureUpgrades).forEach(fid => {
@@ -4880,6 +4887,7 @@ function saveEconomyAndUpgrades() {
       ingots: userIngots,
       lastDailyBonusTs,
       claimedMissionWinsCount,
+      keyFragments: (typeof playerKeyFragments === "number") ? playerKeyFragments : 0, // v735
       figureUpgrades
     };
     localStorage.setItem(ECONOMY_STORAGE_KEY, JSON.stringify(payload));

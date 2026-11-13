@@ -2735,6 +2735,7 @@ function showWinResultScreen(winner) {
   }
   // Award Key Fragments for Locked Booster (+3 on Win, +1 on Loss) & refill an empty Time Booster slot on Win!
   playerKeyFragments = Math.min(10, playerKeyFragments + (didWin ? 3 : 1));
+  try { if (typeof saveEconomyAndUpgrades === "function") saveEconomyAndUpgrades(); } catch (e) {}
   const kLbl = document.getElementById("key-frag-lbl");
   const kWrap = document.getElementById("locked-key-badge-wrap");
   if (kLbl) kLbl.textContent = playerKeyFragments;

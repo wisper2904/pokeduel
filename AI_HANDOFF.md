@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v734` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v735` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,10 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Chaves do Locked Booster salvas + painel de info com roleta/Voltar certos (v735)
+- **Chaves voltavam a 0 ao reabrir o jogo**: `playerKeyFragments` nunca era salvo. Agora vai em `pdr_economy_v470` como `keyFragments` (`saveEconomyAndUpgrades` / `loadEconomyAndUpgrades` em `ui.js`, atualiza `#key-frag-lbl`) e é salvo quando muda: vitória/derrota (`ui.js` e `board.js`), abrir o Locked Booster e a devolução ao desistir (`ai.js`).
+- **Painel de informações sem roleta e com Voltar quebrado**: `duel_screens.js renderData` usava estado global `F` e `getElementById("ds-wheel"/"ds-back")`. Com o painel aberto na aba Deck (escondido) e outro aberto por cima (Loja, segurar na partida), a roleta era desenhada no escondido e o Voltar do painel da frente não fazia nada. Agora cada painel só-leitura guarda o próprio estado em `root.__dsRO` (`showDataReadOnly`) e procura seus elementos dentro de `root`. A Fusão continua usando `F` (modo completo).
 
 ### 2026-11-13 · Claude · Deck sem arrastar e time não acompanha a rolagem (v734)
 - Bug relatado: no celular, segurar um Pokémon no Deck iniciava o arrasto e ao mesmo tempo abria o menu do navegador de salvar imagem; a figura "fantasma" ficava presa na tela. Pedido: tirar o arrastar.

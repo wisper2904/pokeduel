@@ -1736,6 +1736,7 @@ showWinResultScreen = function(winner) {
         playerKeyFragments = before.keys;
         const kLbl = document.getElementById("key-frag-lbl");
         if (kLbl) kLbl.textContent = playerKeyFragments;
+        try { if (typeof saveEconomyAndUpgrades === "function") saveEconomyAndUpgrades(); } catch (e) {}
       }
       state.rareMetals = before.gems;
       // Desistir na Liga custa no mínimo AI_FORFEIT_MIN_ELO_LOSS pontos. Pelo ELO puro, perder para um

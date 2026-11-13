@@ -296,9 +296,14 @@
   }
 
   function renderData(root) {
-    const f = FIGURES_DB[F.idx];
+    // v735: cada painel só-leitura (Deck, Loja, partida) tem o próprio estado em root.__dsRO e procura seus
+    // elementos dentro de root. Antes tudo era global (F + getElementById): com dois painéis abertos, a roleta era
+    // desenhada no painel escondido e o Voltar do painel da frente ficava sem função.
+    const C = root.__dsRO || F;
+    const q = (id) => root.querySelector("#" + id);
+    const f = FIGURES_DB[C.idx];
     ensureFigureUpgradeMetadata(f);
-    const i = F.idx;
+    const i = C.idx;
     const ab = f.officialAbility;
     const abName = ab ? ab.n : tt("ds.no_ability", "—");
     const abText = ab ? ab.t : ((typeof localizeAbility === "function") ? localizeAbility(f) : "");
@@ -310,7 +315,7 @@
     const mp = (typeof getFigureEffectiveMp === "function") ? getFigureEffectiveMp(f) : f.mp;
     const lvPct = Math.round(((f.level || 1) / 10) * 100), clvPct = Math.round(((f.clv || 0) / 10) * 100);
     root.innerHTML = `
-      <div class="ds-title"><button class="ds-back" id="ds-back">‹ ${F.ro ? (F.backLabel || "Deck") : tt("ds.back", "Voltar")}</button><span>Data</span></div>
+      <div class="ds-title"><button class="ds-back" id="ds-back">‹ ${C.ro ? (C.backLabel || "Deck") : tt("ds.back", "Voltar")}</button><span>Data</span></div>
       <div class="ds-data">
         <div class="ds-wheelbox"><canvas id="ds-wheel"></canvas>
           <div class="ds-badges">${rarHtml(f.rarity)}${mpHtml(mp)}</div>
@@ -345,7 +350,7 @@
           </div>`).join("")}
       </div>
       ${zs.length ? `<div class="ds-sec">Z-Move</div>${zs.map((z) => `<div class="ds-z"><b>⚡ ${esc(z.n)}</b> <span style="font-size:10px;color:#c4b5fd">${z.c === "purple" ? "★".repeat(z.s || 4) : (z.d != null ? z.d + " " + tt("ds.dmg", "dano") : "")}</span>${z.t ? `<p>${esc(z.t)}</p>` : ""}</div>`).join("")}` : ""}
-      ${F.ro ? (F.extraHtml || "") : `<div class="ds-btns">
+      ${C.ro ? (C.extraHtml || "") : `<div class="ds-btns">
         <button class="ds-btn" id="ds-go-xp">Disk Expansion</button>
         <button class="ds-btn" id="ds-go-dr">Damage Reallocation</button>
       </div>
@@ -358,14 +363,14 @@
       </div>
       <div class="ds-mat" id="ds-mat"></div>
       <div class="ds-msg" id="ds-msg"></div>`}`;
-    const cv = $("ds-wheel");
-    const draw = () => drawWheel(cv, segs, { hi: F.open, border: f.rarity === "UX" ? "#c084fc" : "#38bdf8" });
+    const cv = q("ds-wheel");
+    const draw = () => drawWheel(cv, segs, { hi: C.open, border: f.rarity === "UX" ? "#c084fc" : "#38bdf8" });
     requestAnimationFrame(draw);
-    cv.onclick = (ev) => { const k = sliceAtPoint(cv, segs, ev, 0); if (k >= 0) { F.open = F.open === k ? -1 : k; sfx("tick"); renderData(root); } };
-    $("ds-back").onclick = () => { if (F.ro) { sfx("back"); if (F.onBack) F.onBack(); return; } F.view = "grid"; sfx("tick"); renderFusion(); };
-    root.querySelectorAll(".ds-tr").forEach((r) => { r.onclick = () => { const k = +r.dataset.k; F.open = F.open === k ? -1 : k; sfx("tick"); renderData(root); }; });
-    root.querySelectorAll(".ds-ped").forEach((p) => { p.onclick = () => { const ni = +p.dataset.i; if (ni >= 0 && ni !== F.idx && (F.ro || unlocked(ni))) { if (F.ro) { F.idx = ni; F.open = -1; sfx("tick"); renderData(root); } else openData(ni); } }; });
-    if (F.ro) { if (F.onRendered) F.onRendered(root, F.idx); return; }
+    cv.onclick = (ev) => { const k = sliceAtPoint(cv, segs, ev, 0); if (k >= 0) { C.open = C.open === k ? -1 : k; sfx("tick"); renderData(root); } };
+    q("ds-back").onclick = () => { if (C.ro) { sfx("back"); if (C.onBack) C.onBack(); return; } F.view = "grid"; sfx("tick"); renderFusion(); };
+    root.querySelectorAll(".ds-tr").forEach((r) => { r.onclick = () => { const k = +r.dataset.k; C.open = C.open === k ? -1 : k; sfx("tick"); renderData(root); }; });
+    root.querySelectorAll(".ds-ped").forEach((p) => { p.onclick = () => { const ni = +p.dataset.i; if (ni >= 0 && ni !== C.idx && (C.ro || unlocked(ni))) { if (C.ro) { C.idx = ni; C.open = -1; sfx("tick"); renderData(root); } else openData(ni); } }; });
+    if (C.ro) { if (C.onRendered) C.onRendered(root, C.idx); return; }
     $("ds-go-xp").onclick = () => openExpansion("disk");
     $("ds-go-dr").onclick = () => openExpansion("dmg");
     root.querySelectorAll("[data-m]").forEach((b) => {
@@ -872,7 +877,7 @@
   function showDataReadOnly(root, idx, opts) {
     opts = opts || {};
     injectCss();
-    F.ro = true; F.idx = idx; F.open = -1; F.onBack = opts.onBack; F.backLabel = opts.backLabel; F.extraHtml = opts.extraHtml || ""; F.onRendered = opts.onRendered;
+    root.__dsRO = { ro: true, idx, open: -1, onBack: opts.onBack, backLabel: opts.backLabel, extraHtml: opts.extraHtml || "", onRendered: opts.onRendered };
     renderData(root);
   }
   window.PDRDuelScreens = { showDataReadOnly, openData, renderFusion, showEvolvePrompt, showZPicker, zMovesOf, drawWheel, injectCss, displaySegs };
