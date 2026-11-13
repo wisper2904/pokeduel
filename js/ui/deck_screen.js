@@ -84,16 +84,14 @@
   .ds-card .slotb{position:absolute;bottom:17px;right:3px;background:#facc15;color:#1c1917;font-size:8px;font-weight:900;border-radius:4px;padding:0 4px}
   .ds-card.lockd img{filter:grayscale(.9) brightness(.5)}
   .ds-card.pick{outline:2.5px solid #38bdf8;outline-offset:-2px}
-  .dk-top{position:sticky;top:-8px;z-index:5;background:linear-gradient(180deg,#060b16 85%,rgba(6,11,22,0));margin:-6px -6px 0;padding:6px 6px 4px}
+  .dk-top{position:relative;z-index:1;margin:-6px -6px 0;padding:6px 6px 4px}
+  .dk-c,.dk-slot,.dk-c img,.dk-slot img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
   .dk-slot,.dk-c{touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   .dk-slots.choosing .dk-slot{animation:dkWiggle .5s ease-in-out infinite alternate;border-color:#38bdf8}
-  .dk-slot.over{border-color:#facc15!important;box-shadow:0 0 16px rgba(250,204,21,.7);transform:scale(1.04)}
   .dk-slot.flash{animation:dkFlash .7s ease-out}
   @keyframes dkWiggle{from{transform:rotate(-1.4deg)}to{transform:rotate(1.4deg)}}
   @keyframes dkFlash{0%{box-shadow:0 0 0 0 rgba(250,204,21,.9);transform:scale(1.08)}100%{box-shadow:0 0 0 14px rgba(250,204,21,0);transform:scale(1)}}
   .dk-c.dragging,.dk-slot.dragging{opacity:.35}
-  .dk-ghost{position:fixed;z-index:400;width:92px;height:92px;margin:-70px 0 0 -46px;pointer-events:none;filter:drop-shadow(0 10px 10px rgba(0,0,0,.7));transform:scale(1.1)}
-  .dk-ghost img{width:100%;height:100%;object-fit:contain}
   .dk-menu{position:fixed;z-index:410;width:110px;display:flex;flex-direction:column;gap:4px;background:#0b1220;border:2px solid #334155;border-radius:10px;padding:5px;box-shadow:0 8px 20px rgba(0,0,0,.8)}
   .dk-menu button{border:none;border-radius:7px;padding:8px;font-weight:900;font-size:13px;cursor:pointer;background:#1e3a5f;color:#e0f2fe}
   .dk-menu button.use{background:linear-gradient(180deg,#4ade80,#16a34a);color:#052e16}
@@ -231,7 +229,7 @@
       }).join("")}</div>
       <div class="ds-sec" style="display:flex;justify-content:space-between;align-items:center">
         <span>${tt("dk.collection", "Coleção")} <span style="color:#38bdf8">${list.length}</span></span>
-        <span style="font-size:9.5px;color:#64748b;font-weight:800">${tt("dk.drag_hint", "Segure e arraste até um slot")}</span>
+        <span style="font-size:9.5px;color:#64748b;font-weight:800">${tt("dk.hold_hint", "Segure para ver as informações")}</span>
       </div>
       <input class="ds-search" id="dk-q" placeholder="🔎 ${tt("ds.search", "Buscar figura...")}" value="${esc(V.q)}">
       <div class="ds-chips">
@@ -266,9 +264,9 @@
     root.querySelectorAll("[data-r]").forEach((b) => { b.onclick = () => { V.rar = b.dataset.r; V.limit = 80; sfx("tick"); render(); }; });
     const more = $("dk-more"); if (more) more.onclick = () => { V.limit = (V.limit || 80) + 80; render(); };
 
-    // toques e arrastos
-    root.querySelectorAll(".dk-slot").forEach((el) => bindDrag(el, "slot"));
-    root.querySelectorAll(".dk-c").forEach((el) => bindDrag(el, "card"));
+    // toque = menu/equipar; segurar = informações (v734: sem arrastar)
+    root.querySelectorAll(".dk-slot").forEach((el) => bindPress(el, "slot"));
+    root.querySelectorAll(".dk-c").forEach((el) => bindPress(el, "card"));
   }
 
   // Menu de toque na carta (Info / Usar), como no Clash Royale
@@ -289,18 +287,25 @@
   function outside(e) { const m = $("dk-menu"); if (m && !m.contains(e.target)) closeMenu(); }
   function closeMenu() { const m = $("dk-menu"); if (m) m.remove(); document.removeEventListener("pointerdown", outside, true); }
 
-  // Arrastar: segurar ~220 ms (ou mover de lado) inicia; a rolagem vertical continua funcionando
-  let drag = null;
-  function bindDrag(el, kind) {
+  // v734: o arrastar para o deck saiu. No celular, segurar a imagem abria o menu do navegador (salvar imagem) junto
+  // com o arrasto e a figura ficava presa na tela. Agora: toque = menu Info/Usar (ou equipar no slot); segurar = Info.
+  const HOLD_MS = 480;
+  let press = null;
+  function bindPress(el, kind) {
     el.addEventListener("pointerdown", (e) => {
       if (e.button > 0) return;
-      const idx = +el.dataset.i, slot = kind === "slot" ? +el.dataset.s : -1;
-      const st = { el, kind, idx, slot, x0: e.clientX, y0: e.clientY, started: false, moved: false, id: e.pointerId };
-      st.timer = setTimeout(() => { if (!st.moved) startDrag(st, e.clientX, e.clientY); }, 220);
-      drag = st;
+      const idx = +el.dataset.i;
+      const st = { el, idx, x0: e.clientX, y0: e.clientY, held: false };
+      st.timer = setTimeout(() => {
+        if (press !== st) return;
+        st.held = true;
+        try { navigator.vibrate && navigator.vibrate(20); } catch (x) {}
+        closeMenu(); openInfo(idx);
+      }, HOLD_MS);
+      press = st;
     });
     el.addEventListener("click", (e) => {
-      if (drag && drag.dragged) { drag = null; return; }
+      if (press && press.el === el && press.held) { press = null; e.preventDefault(); return; }
       const idx = +el.dataset.i;
       if (kind === "slot") {
         const s = +el.dataset.s;
@@ -312,74 +317,17 @@
       }
     });
   }
-  function startDrag(st, x, y) {
-    if (st.kind === "card" && !unlocked(st.idx)) return;
-    st.started = true; st.dragged = true;
-    closeMenu();
-    const f = FIGURES_DB[st.idx];
-    const g = document.createElement("div"); g.className = "dk-ghost";
-    g.innerHTML = `<img src="${spriteOf(f.spriteKey)}" alt="">`;
-    document.body.appendChild(g); st.ghost = g;
-    st.el.classList.add("dragging");
-    document.querySelectorAll(".dk-slots").forEach((s) => s.classList.add("choosing"));
-    moveGhost(st, x, y);
-    try { navigator.vibrate && navigator.vibrate(12); } catch (e) {}
-    sfx("select");
-  }
-  function slotAt(x, y) {
-    const els = document.elementsFromPoint(x, y);
-    for (const el of els) { const s = el.closest && el.closest(".dk-slot"); if (s) return s; }
-    return null;
-  }
-  function moveGhost(st, x, y) {
-    if (!st.ghost) return;
-    st.ghost.style.left = x + "px"; st.ghost.style.top = y + "px";
-    const over = slotAt(x, y);
-    document.querySelectorAll(".dk-slot.over").forEach((s) => { if (s !== over) s.classList.remove("over"); });
-    if (over) over.classList.add("over");
-    // rola a aba para cima quando arrasta perto do topo
-    const tab = $("dtab-deck");
-    if (tab) { const r = tab.getBoundingClientRect(); if (y < r.top + 50) tab.scrollTop -= 14; else if (y > r.bottom - 40) tab.scrollTop += 14; }
-  }
-  function endDrag(x, y, cancel) {
-    const st = drag; if (!st) return;
-    clearTimeout(st.timer);
-    if (!st.started) { return; }
-    const over = cancel ? null : slotAt(x, y);
-    if (st.ghost) st.ghost.remove();
-    st.el.classList.remove("dragging");
-    document.querySelectorAll(".dk-slot.over").forEach((s) => s.classList.remove("over"));
-    document.querySelectorAll(".dk-slots").forEach((s) => s.classList.remove("choosing"));
-    if (over) {
-      const target = +over.dataset.s;
-      if (st.kind === "slot") swapSlots(st.slot, target);
-      else { V.using = null; equipInto(target, st.idx); try { renderHubAndCollection(); } catch (e) { render(); } }
-    } else sfx("back");
-    setTimeout(() => { if (drag === st) drag = null; }, 0);
-  }
+  function cancelPress() { if (press) { clearTimeout(press.timer); if (!press.held) press = null; } }
   window.addEventListener("pointermove", (e) => {
-    const st = drag; if (!st) return;
-    const dx = e.clientX - st.x0, dy = e.clientY - st.y0;
-    if (!st.started) {
-      if (Math.abs(dy) > 10) { st.moved = true; clearTimeout(st.timer); drag = null; return; } // rolagem
-      if (Math.abs(dx) > 12) { clearTimeout(st.timer); startDrag(st, e.clientX, e.clientY); }
-      return;
-    }
-    moveGhost(st, e.clientX, e.clientY);
+    if (!press || press.held) return;
+    if (Math.hypot(e.clientX - press.x0, e.clientY - press.y0) > 10) cancelPress(); // rolando: não é segurar
   }, { passive: true });
-  window.addEventListener("pointerup", (e) => endDrag(e.clientX, e.clientY, false));
-  window.addEventListener("pointercancel", (e) => {
-    // No celular o navegador cancela o ponteiro quando começa a rolar; se já estava arrastando, usa o touch
-    if (drag && drag.started) return;
-    if (drag) { clearTimeout(drag.timer); drag = null; }
-  });
-  // Touch: impede a rolagem enquanto arrasta e termina o arrasto se o pointer foi cancelado
-  window.addEventListener("touchmove", (e) => {
-    if (drag && drag.started) { e.preventDefault(); const tp = e.touches[0]; if (tp) moveGhost(drag, tp.clientX, tp.clientY); }
-  }, { passive: false });
-  window.addEventListener("touchend", (e) => {
-    if (drag && drag.started) { const tp = e.changedTouches[0]; endDrag(tp ? tp.clientX : 0, tp ? tp.clientY : 0, !tp); }
-  });
+  window.addEventListener("pointerup", () => { if (press && !press.held) { clearTimeout(press.timer); } });
+  window.addEventListener("pointercancel", cancelPress);
+  // Sem menu de imagem (salvar/abrir) e sem arrastar nativo nas figuras do Deck
+  const inDeckFig = (t) => t && t.closest && t.closest("#dtab-deck .dk-c, #dtab-deck .dk-slot");
+  document.addEventListener("contextmenu", (e) => { if (inDeckFig(e.target)) e.preventDefault(); });
+  document.addEventListener("dragstart", (e) => { if (inDeckFig(e.target)) e.preventDefault(); });
 
   // ------------------------------------------------------------ Plates
   // Cartas no formato do Edit Plates original: carta preta, ícone no canto, raridade ao lado, nome embaixo na cor

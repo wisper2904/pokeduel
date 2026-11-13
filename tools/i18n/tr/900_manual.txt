@@ -452,3 +452,4 @@
 @Liga máxima alcançada!|=|Top league reached!|¡Liga máxima alcanzada!
 @Gerenciar conta / Entrar|=|Manage account / Log in|Gestionar cuenta / Entrar
 @Salve seu progresso com login e senha para jogar em outro aparelho.|=|Save your progress with a login and password to play on another device.|Guarda tu progreso con usuario y contraseña para jugar en otro dispositivo.
+@Segure para ver as informações|=|Hold to see the details|Mantén pulsado para ver la información

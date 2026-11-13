@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v733` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v734` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,11 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Deck sem arrastar e time não acompanha a rolagem (v734)
+- Bug relatado: no celular, segurar um Pokémon no Deck iniciava o arrasto e ao mesmo tempo abria o menu do navegador de salvar imagem; a figura "fantasma" ficava presa na tela. Pedido: tirar o arrastar.
+- `deck_screen.js`: `bindDrag`/`startDrag`/`moveGhost`/`endDrag` saíram. `bindPress`: toque = menu Info/Usar (coleção) ou equipar/info (slot), como antes; **segurar 480 ms = abre as informações** (`openInfo`). Mover o dedo > 10 px cancela (é rolagem). `contextmenu`/`dragstart` bloqueados nas figuras do Deck e CSS `-webkit-touch-callout:none; user-select:none; -webkit-user-drag:none`. Dica "Segure para ver as informações". `swapSlots` continua exportado em `PDRDeckScreen`.
+- `.dk-top` (time + limites) deixou de ser `position:sticky`: rola junto com a página, fica lá em cima.
 
 ### 2026-11-13 · Claude · Vitória em Missão travava a partida (v733)
 - Bug relatado: vencer uma Missão cercando o Gol mostrava "VITÓRIA" e travava até o tempo acabar. Causa real: **toda vitória em Missão** quebrava — a recompensa fazia `userGems += …` (variável inexistente) em `p2p_matchmaker.js` (CASE C: QUEST) e a tela de resultado nunca abria. Derrota/tempo esgotado não passa pela recompensa, por isso "funcionava" quando o tempo acabava. Agora soma em `state.rareMetals` (as gemas).
