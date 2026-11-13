@@ -284,6 +284,7 @@ const CORE_ASSETS = [
 
   "./js/ui/settings_screen.js",
   "./js/ui/battle_scene.js",
+  "./js/ui/friends_screen.js",
   "./assets/plates/icons/battle20.png",
   "./assets/plates/icons/battle30.png",
   "./assets/plates/icons/battle50.png",
