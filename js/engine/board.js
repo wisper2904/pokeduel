@@ -565,7 +565,10 @@ function renderPlatesTray() {
         ? `<div style="margin-top:6px; padding:4px 6px; background:${state.zMoveArmed ? '#ca8a04' : '#1e1b4b'}; border:1px solid #facc15; border-radius:4px; color:${state.zMoveArmed ? '#090d16' : '#facc15'}; font-weight:900; font-size:8.5px; cursor:pointer;" onclick="toggleZMoveFromTray(); event.stopPropagation();">⚡ Z-MOVE 100%: ${state.zMoveArmed ? 'ARMADO (ROLETA TOTAL)!' : 'TOQUE PARA ATIVAR (1x)!'}</div>`
         : `<div style="margin-top:4px; font-size:7.5px; color:#94a3b8;">⚡ Z-Power Gauge: ${zPct}% / 100% (1x por duelo)</div>`;
     }
-    cDesc.innerHTML = `${curPlateDesc}${zNotice}`;
+    // v732: o aviso/atalho do Z-Move saiu da carta. Ele ficava dentro da descrição da plate selecionada
+    // (quase sempre a Chance Dupla) e um toque na carta abria o Z por baixo do dedo; o Z tem o botão "Poder Z" próprio.
+    void zNotice;
+    cDesc.textContent = curPlateDesc;
   }
   if (uBtn) {
     uBtn.style.opacity = curP.used ? "0.4" : "1.0";

@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v731` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v732` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,10 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Z-Move não liga mais ao tocar na carta da plate (v732)
+- Bug relatado: "na Double Chance às vezes ativa o Z-Move sem perguntar". Causa: com o Z em 100%, `renderPlatesTray` (board.js) colocava a faixa clicável "⚡ Z-MOVE 100%: TOQUE PARA ATIVAR" dentro da descrição da plate selecionada (a carta grande do `plates_all.js` copia esse HTML). Tocar na carta abria o seletor do Z por baixo do dedo e o 2º toque caía no "Sim".
+- Correção: a descrição da carta é só o texto da plate (`textContent`); o Z continua no botão "Poder Z" da partida. Testado: Double Chance com Re-Girar/Manter e Z carregado não dispara Z (8/8), e toques na carta não abrem o seletor.
 
 ### 2026-11-13 · Claude · Loja abre o painel de informações novo (v731)
 - Bug: tocar num Pokémon da Loja abria o painel antigo (`openFigureDetailsModal` / `#figure-details-modal`). Agora abre o mesmo painel do Deck/partida.
