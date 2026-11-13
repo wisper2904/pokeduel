@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v738` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v739` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,13 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Pesquisa do sistema ao segurar imagem/figura no celular (v739)
+- Sintoma: segurar uma figura ou imagem abria a tela de pesquisa do sistema (Pesquisar/Lente) como se fosse uma página.
+- Causa: o CSS só tinha `user-select:none`; faltavam `-webkit-touch-callout`, `-webkit-user-drag` e o bloqueio do menu de contexto/arrastar em imagens e canvas.
+- `css/style.css`: `-webkit-touch-callout:none` global, `-webkit-user-drag:none` em img/canvas/svg; campos de texto (input/textarea/contenteditable) continuam selecionáveis.
+- `js/ui/icons.js`: captura de `contextmenu`, `selectstart` e `dragstart` (em IMG) fora de campos editáveis. Não cria arquivo novo, então sem mudança no `CORE_ASSETS`.
+- Não testado em aparelho real; validar no celular (Android Chrome e iOS Safari).
 
 ### 2026-11-13 · Claude · Pokébola do canto do Início removida (v738)
 - A pokébola preta no canto inferior direito do palco (`cycleCenterpieceFigurine`, `#home-black-pokeball-img`) saiu dos 2 HTMLs. Para trocar o Pokémon do centro: tocar num Pokémon do time no palco (já funcionava). A função `cycleCenterpieceFigurine` continua em `ui.js`, sem botão.

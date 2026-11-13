@@ -101,5 +101,10 @@
     mo.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
+  /* Bloqueia o menu nativo (pesquisar/copiar imagem) e a seleção de texto fora de campos editáveis */
+  const EDITABLE = (el) => !!(el && el.closest && el.closest("input, textarea, [contenteditable='true']"));
+  document.addEventListener("contextmenu", (e) => { if (!EDITABLE(e.target)) e.preventDefault(); }, true);
+  document.addEventListener("selectstart", (e) => { if (!EDITABLE(e.target)) e.preventDefault(); }, true);
+  document.addEventListener("dragstart", (e) => { if (e.target && e.target.tagName === "IMG") e.preventDefault(); }, true);
   window.PDRIcons = { ICON, img, walk, src: (k) => ICON[k] || null };
 })();
