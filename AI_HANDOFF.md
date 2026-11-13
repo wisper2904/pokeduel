@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v735` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v736` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,10 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Vitrine do Início abre o painel de info novo (v736)
+- Bug: tocar no Pokémon do pedestal (vitrine do Início) abria o painel antigo `#figure-details-modal`. Também abriam o antigo: lista do buff da semana e listas legadas de `ui.js`.
+- `arena3d.js`: `openFigureDetailsModal` agora é redirecionado para `pdrOpenFigureInfo(idx, "Voltar")` (o painel novo, mesmo do Deck/Loja/partida). O antigo fica em `window.openLegacyFigureDetailsModal` e só é usado se o novo não carregar.
 
 ### 2026-11-13 · Claude · Chaves do Locked Booster salvas + painel de info com roleta/Voltar certos (v735)
 - **Chaves voltavam a 0 ao reabrir o jogo**: `playerKeyFragments` nunca era salvo. Agora vai em `pdr_economy_v470` como `keyFragments` (`saveEconomyAndUpgrades` / `loadEconomyAndUpgrades` em `ui.js`, atualiza `#key-frag-lbl`) e é salvo quando muda: vitória/derrota (`ui.js` e `board.js`), abrir o Locked Booster e a devolução ao desistir (`ai.js`).

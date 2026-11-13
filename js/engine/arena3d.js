@@ -589,6 +589,22 @@
   }
   window.PDRArena.openUnitInfo = openUnitInfo;
   window.pdrOpenFigureInfo = openFigureInfo;
+  // v736: o painel antigo (#figure-details-modal) ainda era aberto pela vitrine do Início, pelo buff da semana e por
+  // listas antigas. Todo pedido de "abrir info da figura" agora abre o painel novo; o antigo fica só de reserva.
+  if (typeof openFigureDetailsModal === "function") {
+    const legacy = openFigureDetailsModal;
+    window.openLegacyFigureDetailsModal = legacy;
+    const routed = function (figIdx) {
+      const n = Number(figIdx);
+      if (Number.isFinite(n) && FIGURES_DB[((n % FIGURES_DB.length) + FIGURES_DB.length) % FIGURES_DB.length]) {
+        const idx = ((n % FIGURES_DB.length) + FIGURES_DB.length) % FIGURES_DB.length;
+        try { if (openFigureInfo(idx, (typeof t === "function" ? t("ds.back", "Voltar") : "Voltar"))) return; } catch (e) {}
+      }
+      return legacy.apply(this, arguments);
+    };
+    try { openFigureDetailsModal = routed; } catch (e) {}
+    window.openFigureDetailsModal = routed;
+  }
   if (typeof showCornerFigureCard === "function") {
     const off = function () { try { hideCornerFigureCard(); } catch (e) {} };
     try { showCornerFigureCard = off; } catch (e) {}
