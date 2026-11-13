@@ -1567,21 +1567,16 @@
     </div>
 
     <!-- TAB 5: `ONLINE P2P` (DEDICATED, SUPER-INTUITIVE ROOM MATCH MULTIPLAYER TAB!) -->
-    <div id="dtab-p2p" class="dtab-content" style="display:none; padding:8px; overflow-y:auto; flex:1; height:100%;">
-      <!-- Top Navigation Header with Back / Close Buttons -->
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid rgba(56,189,248,0.28);">
-        <button class="btn secondary" style="padding:6px 10px; font-size:10px; font-weight:800;" onclick="switchDrawerTab('hub')">
-          ← Voltar ao Hub
-        </button>
-        <div style="font-size:12px; font-weight:900; color:#38bdf8; letter-spacing:0.5px;">🌐 MULTIPLAYER P2P & LOCAL</div>
-        <button class="btn gold" style="padding:6px 10px; font-size:10px; font-weight:900;" onclick="closeDrawer()">
-          ✕ Ver Tabuleiro
-        </button>
+    <div id="dtab-p2p" class="dtab-content" style="display:none; padding:8px; overflow-y:auto; overflow-x:hidden; flex:1; height:100%;">
+      <!-- v728: cabeçalho -->
+      <div class="pf-head">
+        <button class="btn secondary pf-head-btn" onclick="switchDrawerTab('hub')">← Hub</button>
+        <div class="pf-head-title">🌐 MULTIJOGADOR</div>
+        <button class="btn gold pf-head-btn" onclick="closeDrawer()">✕ Tabuleiro</button>
       </div>
 
-      <div style="display:flex; gap:4px; margin-bottom:6px;"><button class="btn gold" style="flex:1; padding:4px;" onclick="switchDrawerTab('p2p')">🌐 Multiplayer P2P</button><button class="btn secondary" style="flex:1; padding:4px;" onclick="switchDrawerTab('menu')">🏨 Quests / Arenas / Monaco</button><button class="btn secondary" id="pixel-mode-btn" style="padding:4px 6px;" onclick="cyclePixelArtMode()">✨ HD</button></div>
       <!-- Live Connection Status Banner -->
-      <div id="p2p-status-banner" style="background:linear-gradient(90deg,#0f172a,#1e293b); border:1.5px solid #38bdf8; border-radius:10px; padding:8px 10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+      <div id="p2p-status-banner" style="display:none; background:linear-gradient(90deg,#0f172a,#1e293b); border:1.5px solid #38bdf8; border-radius:10px; padding:8px 10px; margin-bottom:8px; justify-content:space-between; align-items:center;">
         <div>
           <div id="p2p-status-title" style="font-size:11.5px; font-weight:900; color:#38bdf8;">⚪ MULTIPLAYER P2P — PRONTO PARA CONECTAR</div>
           <div id="p2p-status-sub" style="font-size:9.5px; color:#cbd5e1; margin-top:2px;">Escolha abaixo: Criar Sala (Celular 1), Digitar Código (Celular 2) ou Jogar 2P Local</div>
@@ -1589,6 +1584,14 @@
         <span id="p2p-ping-badge" style="background:#090d16; border:1px solid #475569; border-radius:99px; padding:3px 8px; font-size:9px; font-weight:900; color:#94a3b8;">OFFLINE</span>
       </div>
 
+
+      <!-- v728: AMIGOS (desenhado por js/ui/friends_screen.js) -->
+      <div id="pdr-friends-root" class="pf-root"></div>
+
+      <!-- v728: SALA POR CÓDIGO (recolhida; mesmos ids de antes) -->
+      <details id="p2p-code-card" class="pf-sec">
+        <summary class="pf-sec-sum"><span>🔢 Sala por código</span><small>Celular 1 cria · Celular 2 digita</small></summary>
+        <div class="pf-sec-body">
       <!-- STEP-BY-STEP 2-PHONE ONLINE CARDS -->
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:8px;">
         <!-- CARD A: CELULAR 1 (CRIAR SALA - HOST P1 AZUL) -->
@@ -1630,15 +1633,16 @@
         </button>
       </div>
 
-      <!-- SAME-PHONE 2-PLAYER LOCAL MODE (PASS & PLAY) -->
-      <div class="card" style="background:linear-gradient(90deg,#1e1b4b,#0f172a); border-color:#c084fc; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-        <div>
-          <strong style="font-size:11px; color:#e9d5ff;">📱 Jogar 2 Pessoas no Mesmo Celular (Pass & Play)</strong>
-          <div class="small-muted">Sem internet: vocês revezam o turno na mesma tela com rotação 180°!</div>
         </div>
-        <button class="btn purple" style="white-space:nowrap; padding:8px 12px; font-weight:900;" onclick="startLocalPassAndPlayMatch()">
-          👥 Iniciar 2P Local
-        </button>
+      </details>
+
+      <!-- SAME-PHONE 2-PLAYER LOCAL MODE (PASS & PLAY) -->
+      <div class="pf-sec pf-local">
+        <div>
+          <strong>📱 2 jogadores no mesmo celular</strong>
+          <div class="small-muted">Sem internet: vocês revezam o turno na mesma tela.</div>
+        </div>
+        <button class="btn purple" style="white-space:nowrap; padding:8px 12px; font-weight:900;" onclick="startLocalPassAndPlayMatch()">👥 Iniciar 2P</button>
       </div>
 
       <!-- COLLAPSIBLE OFFLINE / MANUAL SDP MODE + PROTOCOL LOG -->

@@ -615,3 +615,51 @@ body.pdr-dev-mode .pdr-dev-only { display: block !important; }
   border-right: 2px solid rgba(56, 189, 248, 0.35) !important;
   border-radius: 14px !important;
 }
+
+/* v728: aba Multijogador repaginada + amigos (js/ui/friends_screen.js) */
+.pf-head { display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid rgba(56,189,248,0.28); }
+.pf-head-btn { padding:6px 10px !important; font-size:10px !important; font-weight:900; }
+.pf-head-title { font-size:12.5px; font-weight:900; color:#38bdf8; letter-spacing:0.6px; }
+.pf-root { margin-bottom:8px; }
+.pf-card { background:linear-gradient(180deg,#0c2540,#071120); border:1.5px solid #38bdf8; border-radius:12px; padding:9px; box-shadow:0 4px 14px rgba(0,0,0,0.45); }
+.pf-top { display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:7px; }
+.pf-title { font-size:12px; font-weight:900; color:#e0f2fe; letter-spacing:0.5px; }
+.pf-myid { display:flex; align-items:center; gap:4px; font-size:9px; color:#94a3b8; font-weight:800; }
+.pf-myid b { font-family:monospace; font-size:11px; color:#facc15; letter-spacing:1px; }
+.pf-mini { background:#0f172a; border:1px solid #334155; color:#cbd5e1; border-radius:6px; padding:3px 6px; font-size:9px; font-weight:800; cursor:pointer; }
+.pf-row2 { display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px; }
+.pf-add { flex:1; height:32px; border-radius:8px; border:1.5px solid #86efac; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; font-weight:900; font-size:11px; cursor:pointer; }
+.pf-count { font-size:9.5px; color:#86efac; font-weight:900; white-space:nowrap; }
+.pf-label { font-size:8.5px; font-weight:900; color:#7dd3fc; letter-spacing:1px; text-transform:uppercase; margin:8px 0 4px; display:flex; align-items:center; gap:6px; }
+.pf-label::after { content:""; flex:1; height:1px; background:rgba(125,211,252,0.25); }
+.pf-friend, .pf-req, .pf-on { display:flex; align-items:center; gap:7px; background:rgba(4,8,17,0.7); border:1px solid #1e3a5f; border-radius:9px; padding:5px 6px; margin-bottom:4px; min-width:0; }
+.pf-friend img, .pf-req img, .pf-on img { width:34px; height:34px; object-fit:contain; flex-shrink:0; }
+.pf-info { flex:1; min-width:0; }
+.pf-name { font-size:11px; font-weight:900; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px; }
+.pf-sub { font-size:8.5px; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pf-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; display:inline-block; }
+.pf-dot.on { background:#4ade80; box-shadow:0 0 6px #4ade80; }
+.pf-dot.off { background:#64748b; }
+.pf-invite { height:28px; padding:0 9px; border-radius:7px; border:1.5px solid #fef9c3; background:linear-gradient(180deg,#fde047,#eab308); color:#1c1917; font-weight:900; font-size:10px; cursor:pointer; white-space:nowrap; box-shadow:0 2px 0 #854d0e; }
+.pf-invite:disabled { opacity:0.45; cursor:default; }
+.pf-ok, .pf-no { height:26px; padding:0 8px; border-radius:6px; font-weight:900; font-size:9.5px; cursor:pointer; white-space:nowrap; }
+.pf-ok { border:1.5px solid #86efac; background:#15803d; color:#fff; }
+.pf-no { border:1px solid #475569; background:#1e293b; color:#cbd5e1; }
+.pf-more { background:none; border:none; color:#64748b; font-size:15px; font-weight:900; cursor:pointer; padding:0 3px; }
+.pf-empty { font-size:9.5px; color:#94a3b8; text-align:center; padding:8px 4px; line-height:1.4; }
+.pf-panel-add { background:#040811; border:1px dashed #38bdf8; border-radius:9px; padding:7px; margin-bottom:6px; }
+.pf-idrow { display:flex; gap:5px; }
+.pf-idrow input { flex:1; min-width:0; height:32px; background:#0b1220; border:1.5px solid #38bdf8; border-radius:7px; color:#fff; font-family:monospace; font-size:14px; font-weight:900; letter-spacing:1px; text-align:center; }
+.pf-idmsg { font-size:9px; color:#fca5a5; min-height:12px; margin:4px 2px 2px; }
+.pf-idmsg.good { color:#86efac; }
+.pf-pending { display:flex; align-items:center; gap:6px; background:rgba(250,204,21,0.1); border:1.5px solid #facc15; border-radius:9px; padding:6px 8px; margin-bottom:6px; font-size:10px; font-weight:900; color:#fde047; }
+.pf-pending span { flex:1; min-width:0; }
+.pf-sec { background:#080e1a; border:1px solid #334155; border-radius:10px; padding:7px 9px; margin-bottom:8px; }
+.pf-sec-sum { cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:11px; font-weight:900; color:#e2e8f0; list-style:none; }
+.pf-sec-sum::-webkit-details-marker { display:none; }
+.pf-sec-sum::after { content:"▸"; color:#7dd3fc; font-size:11px; }
+details[open] > .pf-sec-sum::after { content:"▾"; }
+.pf-sec-sum small { font-size:8.5px; color:#94a3b8; font-weight:700; flex:1; text-align:right; }
+.pf-sec-body { margin-top:8px; }
+.pf-local { display:flex; justify-content:space-between; align-items:center; gap:8px; border-color:#7c3aed; background:linear-gradient(90deg,#1e1b4b,#0f172a); }
+.pf-local strong { font-size:11px; color:#e9d5ff; }

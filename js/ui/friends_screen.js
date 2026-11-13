@@ -289,6 +289,156 @@
   }
   Object.assign(window.PDRFriendsNet, { invite, cancelInvite, pendingInvite: () => (pending ? { trainerId: pending.trainerId, nickname: pending.nickname, code: pending.code, t0: pending.t0, ms: INVITE_MS } : null), _handleInvite: handleInvite });
 
+  // ============================================================= 6. A ABA (seção Amigos dentro de #dtab-p2p)
+  let addOpen = false, idMsg = "", idMsgGood = false, idDraft = "";
+  function ago(ts) {
+    if (!ts) return tt("pf.never_seen", "ainda não visto online");
+    const s = Math.max(0, (Date.now() - ts) / 1000);
+    let v;
+    if (s < 3600) v = Math.max(1, Math.round(s / 60)) + " min";
+    else if (s < 86400) v = Math.round(s / 3600) + " h";
+    else v = Math.round(s / 86400) + " d";
+    return tt("pf.seen_ago", "visto há") + " " + v;
+  }
+  function onlineStrangers(friendIds) {
+    const out = [], now = Date.now(), seen = new Set(), my = myId();
+    if (typeof salaoKnownTrainers === "undefined") return out;
+    for (const [, v] of salaoKnownTrainers.entries()) {
+      if (!v || !v.trainerId || !ID_RE.test(v.trainerId) || v.trainerId === my || friendIds.has(v.trainerId) || seen.has(v.trainerId)) continue;
+      if (now - (v.lastSeen || 0) >= 28000) continue;
+      seen.add(v.trainerId); out.push({ trainerId: v.trainerId, nickname: v.nickname, avatar: v.avatar, rating: v.rating });
+    }
+    return out.slice(0, 8);
+  }
+  function render() {
+    const root = document.getElementById("pdr-friends-root");
+    if (!root) return;
+    const d = load(), my = myId(), pend = pending;
+    const ids = new Set(d.friends.map((f) => f.trainerId));
+    const outIds = new Set(d.outgoing.map((o) => o.trainerId));
+    const rows = d.friends.map((f) => { const on = online(f.trainerId); return { f, on, live: on || null }; });
+    rows.sort((a, b) => (b.on ? 1 : 0) - (a.on ? 1 : 0) || String(a.f.nickname || "").localeCompare(String(b.f.nickname || "")));
+    const nOn = rows.filter((r) => r.on).length;
+    const friendHtml = rows.map(({ f, on }) => {
+      const nick = (on && on.nickname) || f.nickname || f.trainerId, av = (on && on.avatar) || f.avatar, rt = (on && on.rating) || f.rating || 1000;
+      const sub = on ? `★ ${esc(rt)} · ${tt("pf.online", "online")}` : esc(ago(f.lastSeen)) + (f.confirmed === false ? ` · ${tt("pf.unconfirmed", "aguardando confirmação")}` : "");
+      const btn = on ? `<button class="pf-invite" data-act="invite" data-id="${esc(f.trainerId)}" ${pend ? "disabled" : ""}>🎮 ${tt("pf.invite", "Convidar")}</button>` : "";
+      return `<div class="pf-friend" data-id="${esc(f.trainerId)}"><img src="${esc(spriteOf(av))}" alt=""><div class="pf-info"><div class="pf-name"><span class="pf-dot ${on ? "on" : "off"}"></span>${esc(nick)}</div><div class="pf-sub">${sub}</div></div>${btn}<button class="pf-more" data-act="more" data-id="${esc(f.trainerId)}" title="${esc(tt("pf.remove", "Remover amigo"))}">⋯</button></div>`;
+    }).join("");
+    const reqHtml = d.incoming.map((r) => `<div class="pf-req" data-id="${esc(r.trainerId)}"><img src="${esc(spriteOf(r.avatar))}" alt=""><div class="pf-info"><div class="pf-name">${esc(r.nickname || r.trainerId)}</div><div class="pf-sub">ID ${esc(r.trainerId)} · ★ ${esc(r.rating || 1000)}</div></div><button class="pf-ok" data-act="acc" data-id="${esc(r.trainerId)}">${tt("pf.accept", "Aceitar")}</button><button class="pf-no" data-act="dec" data-id="${esc(r.trainerId)}">${tt("pf.decline", "Recusar")}</button></div>`).join("");
+    let addHtml = "";
+    if (addOpen) {
+      const st = onlineStrangers(ids);
+      const onHtml = st.length ? st.map((t) => `<div class="pf-on" data-id="${esc(t.trainerId)}"><img src="${esc(spriteOf(t.avatar))}" alt=""><div class="pf-info"><div class="pf-name">${esc(t.nickname || t.trainerId)}</div><div class="pf-sub">ID ${esc(t.trainerId)} · ★ ${esc(t.rating || 1000)}</div></div>${outIds.has(t.trainerId) ? `<span class="pf-sub">${tt("pf.sent", "enviado")}</span>` : `<button class="pf-ok" data-act="req" data-id="${esc(t.trainerId)}">+ ${tt("pf.add_short", "Adicionar")}</button>`}</div>`).join("")
+        : `<div class="pf-empty">${tt("pf.nobody_online", "Ninguém mais online no Salão agora.")}</div>`;
+      addHtml = `<div id="pf-add-panel" class="pf-panel-add">
+        <div class="pf-idrow"><input id="pf-id-input" inputmode="numeric" maxlength="11" placeholder="123-456-789" value="${esc(idDraft)}"><button id="pf-id-send" class="pf-ok" style="height:32px">${tt("pf.send", "Enviar pedido")}</button></div>
+        <div id="pf-id-msg" class="pf-idmsg ${idMsgGood ? "good" : ""}">${esc(idMsg)}</div>
+        <div class="pf-label">${tt("pf.online_now", "Online agora no Salão")}</div><div id="pf-online-list">${onHtml}</div></div>`;
+    }
+    const pendHtml = pend ? `<div id="pf-invite-pending" class="pf-pending"><span>⚔️ ${tt("pf.inv_waiting_for", "Aguardando")} ${esc(pend.nickname)}… ${Math.max(0, Math.ceil((pend.t0 + INVITE_MS - Date.now()) / 1000))}s</span><button class="pf-no" data-act="cancel">${tt("pf.cancel", "Cancelar")}</button></div>` : "";
+    const empty = !d.friends.length ? `<div class="pf-empty">${tt("pf.empty", "Você ainda não tem amigos. Toque em Adicionar e mande seu ID para quem vai jogar com você.")}</div>` : "";
+    const focused = document.activeElement && document.activeElement.id === "pf-id-input";
+    root.innerHTML = `<div class="pf-card">
+      <div class="pf-top"><div class="pf-title">👥 ${tt("pf.friends", "AMIGOS")}</div><div class="pf-myid">${tt("pf.my_id", "Seu ID")} <b id="pf-my-id">${esc(my)}</b><button class="pf-mini" data-act="copy">${tt("pf.copy", "Copiar")}</button></div></div>
+      <div class="pf-row2"><button id="pf-add-btn" class="pf-add" data-act="toggle-add">${addOpen ? "✕ " + tt("pf.close", "Fechar") : "+ " + tt("pf.add", "Adicionar amigo")}</button><span class="pf-count">● ${nOn} ${tt("pf.n_online", "online")}</span></div>
+      ${addHtml}${pendHtml}
+      ${d.incoming.length ? `<div class="pf-label">${tt("pf.requests", "Pedidos")} (${d.incoming.length})</div><div id="pf-incoming">${reqHtml}</div>` : `<div id="pf-incoming"></div>`}
+      ${d.friends.length ? `<div class="pf-label">${tt("pf.friends_lbl", "Amigos")}</div>` : ""}<div id="pf-list">${friendHtml}</div>${empty}
+    </div>`;
+    if (focused) { const inp = document.getElementById("pf-id-input"); if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } }
+  }
+  function setIdMsg(m, good) { idMsg = m; idMsgGood = !!good; render(); }
+  function submitId() {
+    const inp = document.getElementById("pf-id-input");
+    let v = String(inp ? inp.value : "").trim();
+    if (/^\d{9}$/.test(v)) v = v.slice(0, 3) + "-" + v.slice(3, 6) + "-" + v.slice(6);
+    idDraft = v;
+    if (!isValidId(v)) return setIdMsg(tt("pf.err_format", "Formato do ID: 123-456-789 (aparece em Configurações › Conta)."));
+    if (v === myId()) return setIdMsg(tt("pf.err_self", "Esse é o seu próprio ID."));
+    if (getFriend(v)) return setIdMsg(tt("pf.err_already", "Vocês já são amigos."));
+    const on = online(v);
+    if (!on) return setIdMsg(tt("pf.err_offline", "Esse treinador não está online agora. O pedido só chega com ele no jogo."));
+    sendRequest(v, on.nickname); idDraft = "";
+    setIdMsg(`${tt("pf.req_sent", "Pedido enviado para")} ${on.nickname || v}!`, true);
+  }
+  function onClick(e) {
+    const b = e.target.closest("[data-act], #pf-id-send");
+    if (!b || !b.closest("#pdr-friends-root")) return;
+    const act = b.id === "pf-id-send" ? "send-id" : b.dataset.act, id = b.dataset.id;
+    sfx("select");
+    if (act === "toggle-add") { addOpen = !addOpen; idMsg = ""; render(); }
+    else if (act === "send-id") submitId();
+    else if (act === "copy") { try { navigator.clipboard.writeText(myId()); } catch (x) {} toast(tt("pf.copied", "ID copiado!")); }
+    else if (act === "invite") { if (!invite(id)) toast(tt("pf.inv_fail", "Não deu para convidar agora. Tente de novo.")); render(); }
+    else if (act === "cancel") { cancelInvite(true); render(); }
+    else if (act === "acc") acceptIncoming(id);
+    else if (act === "dec") declineIncoming(id);
+    else if (act === "req") { const t = onlineStrangers(new Set()).find((x) => x.trainerId === id); sendRequest(id, t && t.nickname); toast(tt("pf.req_sent", "Pedido enviado para") + " " + ((t && t.nickname) || id) + "!"); render(); }
+    else if (act === "more") {
+      const f = getFriend(id); if (!f) return;
+      if (window.confirm(`${tt("pf.remove_q", "Remover")} ${f.nickname || id} ${tt("pf.remove_q2", "da sua lista de amigos?")}`)) sendRemove(id);
+    }
+  }
+  document.addEventListener("click", onClick);
+  document.addEventListener("input", (e) => { if (e.target && e.target.id === "pf-id-input") idDraft = e.target.value; });
+  document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target && e.target.id === "pf-id-input") submitId(); });
+  document.addEventListener("pdr-friends-changed", () => render());
+  document.addEventListener("pdr-friends-invite-state", () => render());
+  function tabVisible() { const el = document.getElementById("dtab-p2p"); return !!(el && el.offsetWidth && getComputedStyle(el).display !== "none"); }
+  setInterval(() => { if (tabVisible()) render(); }, pending ? 1000 : 3000);
+  setInterval(() => { if (pending && tabVisible()) render(); }, 1000);
+  if (typeof switchDrawerTab === "function") {
+    const _sw = switchDrawerTab;
+    const sw2 = function (tabId) { const r = _sw.apply(this, arguments); if (tabId === "p2p") { try { if (typeof connectToGlobalSalao === "function") connectToGlobalSalao(); } catch (e) {} render(); } return r; };
+    try { switchDrawerTab = sw2; } catch (e) {}
+    window.switchDrawerTab = sw2;
+  }
+  // A faixa de status só aparece quando há algo acontecendo (sala aberta, conectando, convite)
+  if (typeof updateP2PStatusUI === "function") {
+    const _up = updateP2PStatusUI;
+    const up2 = function (title, sub, badge) {
+      const r = _up.apply(this, arguments);
+      const bn = document.getElementById("p2p-status-banner");
+      if (bn) bn.style.display = (String(badge || "").toUpperCase() === "OFFLINE") ? "none" : "flex";
+      return r;
+    };
+    try { updateP2PStatusUI = up2; } catch (e) {}
+    window.updateP2PStatusUI = up2;
+  }
+  // Botão "Adicionar como amigo" na tela de resultado de partida online
+  if (typeof showWinResultScreen === "function") {
+    const _w = showWinResultScreen;
+    const w2 = function () {
+      const isP2P = typeof state !== "undefined" && (state.mode === "p2p" || state.matchKind === "p2p");
+      const opp = (typeof remoteOpponentProfile !== "undefined" && remoteOpponentProfile) ? Object.assign({}, remoteOpponentProfile) : null;
+      const r = _w.apply(this, arguments);
+      try {
+        const old = document.getElementById("win-add-friend-btn"); if (old) old.remove();
+        const oid = opp && String(opp.trainerId || "");
+        if (isP2P && oid && isValidId(oid) && oid !== myId() && !getFriend(oid)) {
+          const ov = document.getElementById("win-result-overlay");
+          const anchor = ov && ov.lastElementChild;
+          if (ov) {
+            const btn = document.createElement("button");
+            btn.id = "win-add-friend-btn"; btn.className = "pf-ok";
+            btn.style.cssText = "height:36px;padding:0 14px;font-size:12px;margin:6px auto 0;display:block";
+            const sentAlready = load().outgoing.some((o) => o.trainerId === oid);
+            btn.textContent = sentAlready ? `✓ ${tt("pf.req_sent_short", "Pedido enviado")}` : `👥 ${tt("pf.add_as_friend", "Adicionar")} ${opp.nickname || oid} ${tt("pf.as_friend", "como amigo")}`;
+            btn.disabled = sentAlready;
+            btn.onclick = () => { sendRequest(oid, opp.nickname); btn.textContent = `✓ ${tt("pf.req_sent_short", "Pedido enviado")}`; btn.disabled = true; };
+            if (anchor) ov.insertBefore(btn, anchor); else ov.appendChild(btn);
+          }
+        }
+      } catch (e) {}
+      return r;
+    };
+    try { showWinResultScreen = w2; } catch (e) {}
+    window.showWinResultScreen = w2;
+  }
+  window.PDRFriendsUI = { render };
+  setTimeout(render, 0);
+
   if (typeof handleIncomingSalaoMessage === "function") {
     const _h = handleIncomingSalaoMessage;
     const h2 = function (msg) { try { if (handle(msg)) return; } catch (e) {} return _h.apply(this, arguments); };
