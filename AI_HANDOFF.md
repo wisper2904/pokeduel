@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v728` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v729` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,9 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-13 · Claude · Foto do perfil no placar da partida (v729)
+- `arena3d.js avatar()`: os retratos ao lado do relógio usam `assets/ui/profile_avatar.png` (o mesmo boneco da tela de perfil), cortado para caber e com borda azul (você) / vermelha (rival, espelhado). O boneco desenhado por código só aparece se a imagem não carregar. Imagem adicionada ao `CORE_ASSETS`. Perfil não mudou (pedido do Gabriel).
 
 ### 2026-11-13 · Claude · Amigos e convite no Multijogador P2P (v728)
 - Desenho e plano: `docs/superpowers/specs/2026-11-13-amigos-p2p-design.md` e `docs/superpowers/plans/2026-11-13-amigos-p2p.md`.

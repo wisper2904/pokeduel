@@ -1,4 +1,4 @@
-const CACHE_NAME = "pokeduel-pwa-v728";
+const CACHE_NAME = "pokeduel-pwa-v729";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -285,6 +285,7 @@ const CORE_ASSETS = [
   "./js/ui/settings_screen.js",
   "./js/ui/battle_scene.js",
   "./js/ui/friends_screen.js",
+  "./assets/ui/profile_avatar.png",
   "./assets/plates/icons/battle20.png",
   "./assets/plates/icons/battle30.png",
   "./assets/plates/icons/battle50.png",

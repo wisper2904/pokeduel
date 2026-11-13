@@ -361,7 +361,22 @@
   }
 
   // ------------------------------------------------------------------ HUD do topo
+  // v729: retrato do placar = a mesma foto do perfil (assets/ui/profile_avatar.png); o boneco desenhado fica de reserva
+  const AVATAR_IMG = new Image(); AVATAR_IMG.src = "assets/ui/profile_avatar.png";
   function avatar(x, y, w, h, red) {
+    if (AVATAR_IMG.complete && AVATAR_IMG.naturalWidth) {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+      const iw = AVATAR_IMG.naturalWidth, ih = AVATAR_IMG.naturalHeight, sc = Math.max(w / iw, h / ih);
+      const dw = iw * sc, dh = ih * sc, dx = x + (w - dw) / 2, dy = y + (h - dh) * 0.25; // corta mais embaixo, mantém o rosto
+      if (red) { ctx.translate(x * 2 + w, 0); ctx.scale(-1, 1); } // rival olha para dentro
+      ctx.drawImage(AVATAR_IMG, dx, dy, dw, dh);
+      ctx.restore();
+      ctx.save();
+      ctx.strokeStyle = red ? "#f87171" : "#60a5fa"; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+      ctx.restore();
+      return;
+    }
     ctx.save();
     ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
     const bg = ctx.createLinearGradient(x, y, x, y + h); bg.addColorStop(0, red ? "#7f1d1d" : "#1e3a8a"); bg.addColorStop(1, red ? "#450a0a" : "#0b1a3e"); ctx.fillStyle = bg; ctx.fillRect(x, y, w, h);
