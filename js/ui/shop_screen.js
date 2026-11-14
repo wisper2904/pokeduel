@@ -272,7 +272,7 @@
 
   // relógios (recompensa diária e virada do mercado)
   setInterval(() => {
-    try { injectCss(); hubGift(); } catch (e) {}
+    try { injectCss(); const hg = $("sh-hub-gift"); if (hg) hg.remove(); } catch (e) {} // Recompensa Diária só na Loja (v743)
     const tab = $("dtab-shop"); if (!tab || tab.style.display === "none" || !$("sh-root")) return;
     const b = $("sh-daily-btn"), left = dailyLeft();
     if (b && left > 0) b.textContent = "⏳ " + hms(left);

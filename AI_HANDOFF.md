@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v742` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v743` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,11 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-14 · Claude · Botão do Discord no Feedback + Recompensa Diária só na Loja (v743)
+- `index.html` / `PokeDuel-Web-v5.6.0.html`: no cabeçalho do modal "Enviar Feedback" (botão Sugestões do Início), botão azul "Discord" ao lado do ✕, abrindo https://discord.gg/J9cWP4G4WY em nova aba. Texto é marca, sem i18n.
+- `js/ui/shop_screen.js`: o atalho "Prêmio Diário" do Início (`#sh-hub-gift`) não é mais criado; o timer remove o elemento se existir. A Recompensa Diária continua na Loja. `hubGift()` ficou definida mas sem chamada.
+- Testado no Playwright: atalho ausente no Início, botão de resgate presente na Loja, sem erros.
 
 ### 2026-11-14 · Claude · Link do Discord no README (sem mudança no jogo)
 - `README.md`: linha com o convite da comunidade (https://discord.gg/J9cWP4G4WY) logo abaixo do parágrafo de introdução.
