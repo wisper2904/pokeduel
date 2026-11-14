@@ -34,7 +34,7 @@
 | Campo | Valor |
 |---|---|
 | Último commit conhecido | ver `git log` — último registrado: "[Claude] IA v5.9.0" (2026-11-11) |
-| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v741` |
+| `CACHE_NAME` (sw.js) | `pokeduel-pwa-v742` |
 | Versão "de marketing" | inconsistente (ver §6): README diz v5.6.0, `app.js` loga v6.3.0, IA é v5.9.0 |
 | Sintaxe JS | ✅ todos os 12 arquivos + `sw.js` passam em `node --check` (2026-11-11) |
 | HTMLs sincronizados | ✅ `index.html` == `PokeDuel-Web-v5.6.0.html` (1.838 linhas) |
@@ -161,6 +161,12 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 ---
 
 ## 7. Log de alterações (mais recente no topo)
+
+### 2026-11-14 · Claude · Logo nova nos ícones do app (v742)
+- Logo "Pokémon DUEL" (imagem enviada pelo Gabriel) centralizada num quadrado com o fundo azul-escuro da própria imagem, em 80% da área (margem para ícone adaptativo/maskable).
+- `icon-512.png`, `icon-192.png`, `apple-touch-icon.png` (180) regenerados como RGB opaco (sem transparência).
+- `manifest.json` não mudou (mesmos caminhos de ícone).
+- Atenção: o APK (TWA do PWABuilder) grava o ícone no momento do build. O APK atual não muda; é preciso gerar um novo APK no PWABuilder com o mesmo keystore e Package ID, para não quebrar o `assetlinks.json`.
 
 ### 2026-11-13 · Claude · Idioma inicial pelo aparelho (v741)
 - Antes: sem idioma salvo, o jogo sempre abria em português (`currentAppLanguage` fallback "pt").
