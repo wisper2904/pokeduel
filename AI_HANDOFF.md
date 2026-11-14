@@ -162,6 +162,10 @@ Isso aparece em `ui.js`, `p2p_matchmaker.js` e `ai.js`. O wrapper **carregado po
 
 ## 7. Log de alterações (mais recente no topo)
 
+### 2026-11-14 · Claude · Link do Discord no README (sem mudança no jogo)
+- `README.md`: linha com o convite da comunidade (https://discord.gg/J9cWP4G4WY) logo abaixo do parágrafo de introdução.
+- Nenhum arquivo servido mudou, então `CACHE_NAME` continua em `pokeduel-pwa-v742`.
+
 ### 2026-11-14 · Claude · Logo nova nos ícones do app (v742)
 - Logo "Pokémon DUEL" (imagem enviada pelo Gabriel) centralizada num quadrado com o fundo azul-escuro da própria imagem, em 80% da área (margem para ícone adaptativo/maskable).
 - `icon-512.png`, `icon-192.png`, `apple-touch-icon.png` (180) regenerados como RGB opaco (sem transparência).

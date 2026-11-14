@@ -2,6 +2,8 @@
 
 Versão completa multiplataforma do **PokeDuel** (inspirado em *Pokémon Duel / Pokémon Trading Figure Game v7.0.16*), pronta para rodar direto no **GitHub Pages**, instalar como **PWA** no **iPhone/iPad (iOS)**, **Android** e **PC**, e jogar em **Cross-Play P2P** com o aplicativo `.apk`.
 
+💬 **Comunidade no Discord** (novidades, bugs e sugestões): https://discord.gg/J9cWP4G4WY
+
 ## ✨ Recursos Inclusos (`v5.6.0`)
 - **306 Miniaturas 3D Esculturais (Modelo Nano Banana)** com pedestais metálicos e roletas oficiais de 96 fatias (`Data Disk`).
 - **9 Cartas Táticas (Plates) com Arte 3D Nano Banana** e limite estrito de custo `6/6 ◆`.
